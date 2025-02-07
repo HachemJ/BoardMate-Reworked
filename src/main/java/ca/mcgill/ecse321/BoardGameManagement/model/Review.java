@@ -1,7 +1,10 @@
+package ca.mcgill.ecse321.BoardGameManagement.model;
+
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
 
+import java.sql.Date;
 
 // line 43 "model.ump"
 // line 98 "model.ump"
@@ -16,7 +19,7 @@ public class Review
   private String reviewID;
   private int rating;
   private String comment;
-  private date commentDate;
+  private Date commentDate;
 
   //Review Associations
   private Player author;
@@ -26,7 +29,7 @@ public class Review
   // CONSTRUCTOR
   //------------------------
 
-  public Review(String aReviewID, int aRating, String aComment, date aCommentDate, Player aAuthor, BoardGame aBoardGame)
+  public Review(String aReviewID, int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame)
   {
     reviewID = aReviewID;
     rating = aRating;
@@ -72,7 +75,7 @@ public class Review
     return wasSet;
   }
 
-  public boolean setCommentDate(date aCommentDate)
+  public boolean setCommentDate(Date aCommentDate)
   {
     boolean wasSet = false;
     commentDate = aCommentDate;
@@ -95,7 +98,7 @@ public class Review
     return comment;
   }
 
-  public date getCommentDate()
+  public Date getCommentDate()
   {
     return commentDate;
   }

@@ -1,8 +1,11 @@
+package ca.mcgill.ecse321.BoardGameManagement.model;
+
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
 
 import java.util.*;
+import java.sql.Date;
 
 // line 34 "model.ump"
 // line 76 "model.ump"
@@ -139,7 +142,7 @@ public class BoardGameCopy extends BoardGame
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public BorrowRequest addBorrowRequest(String aRequestID, date aStartOfLoan, date aEndOfLoan, BorrowRequest.RequestStatus aRequestStatus, Player aRequester)
+  public BorrowRequest addBorrowRequest(String aRequestID, Date aStartOfLoan, Date aEndOfLoan, BorrowRequest.RequestStatus aRequestStatus, Player aRequester)
   {
     return new BorrowRequest(aRequestID, aStartOfLoan, aEndOfLoan, aRequestStatus, aRequester, this);
   }

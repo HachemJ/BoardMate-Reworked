@@ -1,8 +1,10 @@
+package ca.mcgill.ecse321.BoardGameManagement.model;
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
 
 import java.util.*;
+import java.sql.Date;
 
 // line 23 "model.ump"
 // line 81 "model.ump"
@@ -205,7 +207,7 @@ public class BoardGame
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Review addReview(String aReviewID, int aRating, String aComment, date aCommentDate, Player aAuthor)
+  public Review addReview(String aReviewID, int aRating, String aComment, Date aCommentDate, Player aAuthor)
   {
     return new Review(aReviewID, aRating, aComment, aCommentDate, aAuthor, this);
   }

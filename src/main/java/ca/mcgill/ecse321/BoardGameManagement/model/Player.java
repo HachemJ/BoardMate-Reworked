@@ -1,3 +1,5 @@
+package ca.mcgill.ecse321.BoardGameManagement.model;
+
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
@@ -276,7 +278,7 @@ public class Player
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public Review addReview(String aReviewID, int aRating, String aComment, date aCommentDate, BoardGame aBoardGame)
+  public Review addReview(String aReviewID, int aRating, String aComment, Date aCommentDate, BoardGame aBoardGame)
   {
     return new Review(aReviewID, aRating, aComment, aCommentDate, this, aBoardGame);
   }
@@ -420,7 +422,7 @@ public class Player
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public BorrowRequest addBorrowRequest(String aRequestID, date aStartOfLoan, date aEndOfLoan, BorrowRequest.RequestStatus aRequestStatus, BoardGameCopy aBoardGameCopy)
+  public BorrowRequest addBorrowRequest(String aRequestID, Date aStartOfLoan, Date aEndOfLoan, BorrowRequest.RequestStatus aRequestStatus, BoardGameCopy aBoardGameCopy)
   {
     return new BorrowRequest(aRequestID, aStartOfLoan, aEndOfLoan, aRequestStatus, this, aBoardGameCopy);
   }

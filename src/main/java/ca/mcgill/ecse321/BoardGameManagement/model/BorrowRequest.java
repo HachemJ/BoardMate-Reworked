@@ -1,7 +1,10 @@
+package ca.mcgill.ecse321.BoardGameManagement.model;
+
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
 
+import java.sql.Date;
 
 // line 13 "model.ump"
 // line 93 "model.ump"
@@ -21,8 +24,8 @@ public class BorrowRequest
 
   //BorrowRequest Attributes
   private String requestID;
-  private date startOfLoan;
-  private date endOfLoan;
+  private Date startOfLoan;
+  private Date endOfLoan;
   private RequestStatus requestStatus;
 
   //BorrowRequest Associations
@@ -33,7 +36,7 @@ public class BorrowRequest
   // CONSTRUCTOR
   //------------------------
 
-  public BorrowRequest(String aRequestID, date aStartOfLoan, date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
+  public BorrowRequest(String aRequestID, Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
   {
     requestID = aRequestID;
     startOfLoan = aStartOfLoan;
@@ -63,7 +66,7 @@ public class BorrowRequest
     return wasSet;
   }
 
-  public boolean setStartOfLoan(date aStartOfLoan)
+  public boolean setStartOfLoan(Date aStartOfLoan)
   {
     boolean wasSet = false;
     startOfLoan = aStartOfLoan;
@@ -71,7 +74,7 @@ public class BorrowRequest
     return wasSet;
   }
 
-  public boolean setEndOfLoan(date aEndOfLoan)
+  public boolean setEndOfLoan(Date aEndOfLoan)
   {
     boolean wasSet = false;
     endOfLoan = aEndOfLoan;
@@ -92,12 +95,12 @@ public class BorrowRequest
     return requestID;
   }
 
-  public date getStartOfLoan()
+  public Date getStartOfLoan()
   {
     return startOfLoan;
   }
 
-  public date getEndOfLoan()
+  public Date getEndOfLoan()
   {
     return endOfLoan;
   }
