@@ -1,5 +1,4 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
-
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
@@ -7,8 +6,8 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 import java.sql.Date;
 import java.util.*;
 
-// line 50 "model.ump"
-// line 86 "model.ump"
+// line 49 "model.ump"
+// line 85 "model.ump"
 public class Event
 {
 

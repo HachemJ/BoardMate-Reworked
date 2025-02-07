@@ -1,5 +1,4 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
-
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
@@ -8,8 +7,8 @@ import java.util.*;
 import java.sql.Date;
 
 // line 34 "model.ump"
-// line 76 "model.ump"
-public class BoardGameCopy extends BoardGame
+// line 75 "model.ump"
+public class BoardGameCopy
 {
 
   //------------------------
@@ -30,9 +29,8 @@ public class BoardGameCopy extends BoardGame
   // CONSTRUCTOR
   //------------------------
 
-  public BoardGameCopy(String aGameID, int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription, String aSpecificGameID, String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
+  public BoardGameCopy(String aSpecificGameID, String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
   {
-    super(aGameID, aMinPlayers, aMaxPlayers, aGameName, aDescription);
     specificGameID = aSpecificGameID;
     specification = aSpecification;
     isAvailable = aIsAvailable;
@@ -277,7 +275,6 @@ public class BoardGameCopy extends BoardGame
     {
       placeholderBoardGame.removeBoardGameCopy(this);
     }
-    super.delete();
   }
 
 

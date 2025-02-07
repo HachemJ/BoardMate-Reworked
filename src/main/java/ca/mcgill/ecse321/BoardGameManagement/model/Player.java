@@ -1,5 +1,4 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
-
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
@@ -8,8 +7,8 @@ import java.util.*;
 import java.sql.Date;
 
 // line 2 "model.ump"
-// line 70 "model.ump"
-// line 103 "model.ump"
+// line 69 "model.ump"
+// line 102 "model.ump"
 public class Player
 {
 
@@ -350,9 +349,9 @@ public class Player
     return 0;
   }
   /* Code from template association_AddManyToOne */
-  public BoardGameCopy addBoardGameCopy(String aGameID, int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription, String aSpecificGameID, String aSpecification, boolean aIsAvailable, BoardGame aBoardGame)
+  public BoardGameCopy addBoardGameCopy(String aSpecificGameID, String aSpecification, boolean aIsAvailable, BoardGame aBoardGame)
   {
-    return new BoardGameCopy(aGameID, aMinPlayers, aMaxPlayers, aGameName, aDescription, aSpecificGameID, aSpecification, aIsAvailable, this, aBoardGame);
+    return new BoardGameCopy(aSpecificGameID, aSpecification, aIsAvailable, this, aBoardGame);
   }
 
   public boolean addBoardGameCopy(BoardGameCopy aBoardGameCopy)

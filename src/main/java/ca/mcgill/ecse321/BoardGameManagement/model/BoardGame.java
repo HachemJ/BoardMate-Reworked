@@ -7,7 +7,7 @@ import java.util.*;
 import java.sql.Date;
 
 // line 23 "model.ump"
-// line 81 "model.ump"
+// line 80 "model.ump"
 public class BoardGame
 {
 
@@ -285,9 +285,9 @@ public class BoardGame
     return 1;
   }
   /* Code from template association_AddMandatoryManyToOne */
-  public BoardGameCopy addBoardGameCopy(String aGameID, int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription, String aSpecificGameID, String aSpecification, boolean aIsAvailable, Player aPlayer)
+  public BoardGameCopy addBoardGameCopy(String aSpecificGameID, String aSpecification, boolean aIsAvailable, Player aPlayer)
   {
-    BoardGameCopy aNewBoardGameCopy = new BoardGameCopy(aGameID, aMinPlayers, aMaxPlayers, aGameName, aDescription, aSpecificGameID, aSpecification, aIsAvailable, aPlayer, this);
+    BoardGameCopy aNewBoardGameCopy = new BoardGameCopy(aSpecificGameID, aSpecification, aIsAvailable, aPlayer, this);
     return aNewBoardGameCopy;
   }
 
