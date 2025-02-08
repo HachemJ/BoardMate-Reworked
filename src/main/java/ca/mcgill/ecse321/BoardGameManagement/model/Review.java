@@ -1,12 +1,19 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
+
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 import java.sql.Date;
 
 // line 42 "model.ump"
 // line 97 "model.ump"
+@Entity
 public class Review
 {
 
@@ -15,34 +22,38 @@ public class Review
   //------------------------
 
   //Review Attributes
-  private String reviewID;
+  @Id
+  @GeneratedValue
+  private int reviewID;
   private int rating;
   private String comment;
   private Date commentDate;
 
   //Review Associations
+  @ManyToOne
+
   private Player author;
+  @ManyToOne
+
   private BoardGame boardGame;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public Review(String aReviewID, int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame)
+  public Review(int aReviewID, int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame)
   {
     reviewID = aReviewID;
     rating = aRating;
     comment = aComment;
     commentDate = aCommentDate;
-    boolean didAddAuthor = setAuthor(aAuthor);
-    if (!didAddAuthor)
+    if (!setAuthor(aAuthor))
     {
-      throw new RuntimeException("Unable to create review due to author. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create Review due to aAuthor. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    boolean didAddBoardGame = setBoardGame(aBoardGame);
-    if (!didAddBoardGame)
+    if (!setBoardGame(aBoardGame))
     {
-      throw new RuntimeException("Unable to create review due to boardGame. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create Review due to aBoardGame. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
@@ -50,7 +61,7 @@ public class Review
   // INTERFACE
   //------------------------
 
-  public boolean setReviewID(String aReviewID)
+  public boolean setReviewID(int aReviewID)
   {
     boolean wasSet = false;
     reviewID = aReviewID;
@@ -82,7 +93,7 @@ public class Review
     return wasSet;
   }
 
-  public String getReviewID()
+  public int getReviewID()
   {
     return reviewID;
   }
@@ -111,59 +122,33 @@ public class Review
   {
     return boardGame;
   }
-  /* Code from template association_SetOneToMany */
-  public boolean setAuthor(Player aAuthor)
+  /* Code from template association_SetUnidirectionalOne */
+  public boolean setAuthor(Player aNewAuthor)
   {
     boolean wasSet = false;
-    if (aAuthor == null)
+    if (aNewAuthor != null)
     {
-      return wasSet;
+      author = aNewAuthor;
+      wasSet = true;
     }
-
-    Player existingAuthor = author;
-    author = aAuthor;
-    if (existingAuthor != null && !existingAuthor.equals(aAuthor))
-    {
-      existingAuthor.removeReview(this);
-    }
-    author.addReview(this);
-    wasSet = true;
     return wasSet;
   }
-  /* Code from template association_SetOneToMany */
-  public boolean setBoardGame(BoardGame aBoardGame)
+  /* Code from template association_SetUnidirectionalOne */
+  public boolean setBoardGame(BoardGame aNewBoardGame)
   {
     boolean wasSet = false;
-    if (aBoardGame == null)
+    if (aNewBoardGame != null)
     {
-      return wasSet;
+      boardGame = aNewBoardGame;
+      wasSet = true;
     }
-
-    BoardGame existingBoardGame = boardGame;
-    boardGame = aBoardGame;
-    if (existingBoardGame != null && !existingBoardGame.equals(aBoardGame))
-    {
-      existingBoardGame.removeReview(this);
-    }
-    boardGame.addReview(this);
-    wasSet = true;
     return wasSet;
   }
 
   public void delete()
   {
-    Player placeholderAuthor = author;
-    this.author = null;
-    if(placeholderAuthor != null)
-    {
-      placeholderAuthor.removeReview(this);
-    }
-    BoardGame placeholderBoardGame = boardGame;
-    this.boardGame = null;
-    if(placeholderBoardGame != null)
-    {
-      placeholderBoardGame.removeReview(this);
-    }
+    author = null;
+    boardGame = null;
   }
 
 

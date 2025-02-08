@@ -3,11 +3,17 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+
 import java.sql.Date;
 
 // line 13 "model.ump"
 // line 92 "model.ump"
 // line 107 "model.ump"
+@Entity
 public class BorrowRequest
 {
 
@@ -22,34 +28,40 @@ public class BorrowRequest
   //------------------------
 
   //BorrowRequest Attributes
-  private String requestID;
+  @Id
+  @GeneratedValue
+  private int requestID;
   private Date startOfLoan;
   private Date endOfLoan;
   private RequestStatus requestStatus;
 
   //BorrowRequest Associations
+
+  @ManyToOne
+
   private Player requester;
+
+  @ManyToOne
+
   private BoardGameCopy boardGameCopy;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public BorrowRequest(String aRequestID, Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
+  public BorrowRequest(int aRequestID, Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
   {
     requestID = aRequestID;
     startOfLoan = aStartOfLoan;
     endOfLoan = aEndOfLoan;
     requestStatus = aRequestStatus;
-    boolean didAddRequester = setRequester(aRequester);
-    if (!didAddRequester)
+    if (!setRequester(aRequester))
     {
-      throw new RuntimeException("Unable to create borrowRequest due to requester. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create BorrowRequest due to aRequester. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    boolean didAddBoardGameCopy = setBoardGameCopy(aBoardGameCopy);
-    if (!didAddBoardGameCopy)
+    if (!setBoardGameCopy(aBoardGameCopy))
     {
-      throw new RuntimeException("Unable to create borrowRequest due to boardGameCopy. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create BorrowRequest due to aBoardGameCopy. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
   }
 
@@ -57,7 +69,7 @@ public class BorrowRequest
   // INTERFACE
   //------------------------
 
-  public boolean setRequestID(String aRequestID)
+  public boolean setRequestID(int aRequestID)
   {
     boolean wasSet = false;
     requestID = aRequestID;
@@ -89,7 +101,7 @@ public class BorrowRequest
     return wasSet;
   }
 
-  public String getRequestID()
+  public int getRequestID()
   {
     return requestID;
   }
@@ -118,59 +130,33 @@ public class BorrowRequest
   {
     return boardGameCopy;
   }
-  /* Code from template association_SetOneToMany */
-  public boolean setRequester(Player aRequester)
+  /* Code from template association_SetUnidirectionalOne */
+  public boolean setRequester(Player aNewRequester)
   {
     boolean wasSet = false;
-    if (aRequester == null)
+    if (aNewRequester != null)
     {
-      return wasSet;
+      requester = aNewRequester;
+      wasSet = true;
     }
-
-    Player existingRequester = requester;
-    requester = aRequester;
-    if (existingRequester != null && !existingRequester.equals(aRequester))
-    {
-      existingRequester.removeBorrowRequest(this);
-    }
-    requester.addBorrowRequest(this);
-    wasSet = true;
     return wasSet;
   }
-  /* Code from template association_SetOneToMany */
-  public boolean setBoardGameCopy(BoardGameCopy aBoardGameCopy)
+  /* Code from template association_SetUnidirectionalOne */
+  public boolean setBoardGameCopy(BoardGameCopy aNewBoardGameCopy)
   {
     boolean wasSet = false;
-    if (aBoardGameCopy == null)
+    if (aNewBoardGameCopy != null)
     {
-      return wasSet;
+      boardGameCopy = aNewBoardGameCopy;
+      wasSet = true;
     }
-
-    BoardGameCopy existingBoardGameCopy = boardGameCopy;
-    boardGameCopy = aBoardGameCopy;
-    if (existingBoardGameCopy != null && !existingBoardGameCopy.equals(aBoardGameCopy))
-    {
-      existingBoardGameCopy.removeBorrowRequest(this);
-    }
-    boardGameCopy.addBorrowRequest(this);
-    wasSet = true;
     return wasSet;
   }
 
   public void delete()
   {
-    Player placeholderRequester = requester;
-    this.requester = null;
-    if(placeholderRequester != null)
-    {
-      placeholderRequester.removeBorrowRequest(this);
-    }
-    BoardGameCopy placeholderBoardGameCopy = boardGameCopy;
-    this.boardGameCopy = null;
-    if(placeholderBoardGameCopy != null)
-    {
-      placeholderBoardGameCopy.removeBorrowRequest(this);
-    }
+    requester = null;
+    boardGameCopy = null;
   }
 
 

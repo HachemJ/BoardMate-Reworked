@@ -3,11 +3,16 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+
 import java.sql.Date;
-import java.util.*;
 
 // line 49 "model.ump"
 // line 85 "model.ump"
+@Entity
 public class Event
 {
 
@@ -16,7 +21,9 @@ public class Event
   //------------------------
 
   //Event Attributes
-  private String eventID;
+  @Id
+  @GeneratedValue
+  private int eventID;
   private String description;
   private String maxSpot;
   private Date startTime;
@@ -24,15 +31,18 @@ public class Event
   private String location;
 
   //Event Associations
-  private List<Player> participant;
+  @ManyToOne
+
   private Player owner;
-  private List<BoardGame> boardGames;
+  @ManyToOne
+
+  private BoardGame boardGame;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
 
-  public Event(String aEventID, String aDescription, String aMaxSpot, Date aStartTime, Date aEndTime, String aLocation, Player aOwner)
+  public Event(int aEventID, String aDescription, String aMaxSpot, Date aStartTime, Date aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
   {
     eventID = aEventID;
     description = aDescription;
@@ -40,20 +50,21 @@ public class Event
     startTime = aStartTime;
     endTime = aEndTime;
     location = aLocation;
-    participant = new ArrayList<Player>();
-    boolean didAddOwner = setOwner(aOwner);
-    if (!didAddOwner)
+    if (!setOwner(aOwner))
     {
-      throw new RuntimeException("Unable to create createdBy due to owner. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+      throw new RuntimeException("Unable to create Event due to aOwner. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
     }
-    boardGames = new ArrayList<BoardGame>();
+    if (!setBoardGame(aBoardGame))
+    {
+      throw new RuntimeException("Unable to create Event due to aBoardGame. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    }
   }
 
   //------------------------
   // INTERFACE
   //------------------------
 
-  public boolean setEventID(String aEventID)
+  public boolean setEventID(int aEventID)
   {
     boolean wasSet = false;
     eventID = aEventID;
@@ -101,7 +112,7 @@ public class Event
     return wasSet;
   }
 
-  public String getEventID()
+  public int getEventID()
   {
     return eventID;
   }
@@ -130,275 +141,43 @@ public class Event
   {
     return location;
   }
-  /* Code from template association_GetMany */
-  public Player getParticipant(int index)
-  {
-    Player aParticipant = participant.get(index);
-    return aParticipant;
-  }
-
-  public List<Player> getParticipant()
-  {
-    List<Player> newParticipant = Collections.unmodifiableList(participant);
-    return newParticipant;
-  }
-
-  public int numberOfParticipant()
-  {
-    int number = participant.size();
-    return number;
-  }
-
-  public boolean hasParticipant()
-  {
-    boolean has = participant.size() > 0;
-    return has;
-  }
-
-  public int indexOfParticipant(Player aParticipant)
-  {
-    int index = participant.indexOf(aParticipant);
-    return index;
-  }
   /* Code from template association_GetOne */
   public Player getOwner()
   {
     return owner;
   }
-  /* Code from template association_GetMany */
-  public BoardGame getBoardGame(int index)
+  /* Code from template association_GetOne */
+  public BoardGame getBoardGame()
   {
-    BoardGame aBoardGame = boardGames.get(index);
-    return aBoardGame;
+    return boardGame;
   }
-
-  public List<BoardGame> getBoardGames()
-  {
-    List<BoardGame> newBoardGames = Collections.unmodifiableList(boardGames);
-    return newBoardGames;
-  }
-
-  public int numberOfBoardGames()
-  {
-    int number = boardGames.size();
-    return number;
-  }
-
-  public boolean hasBoardGames()
-  {
-    boolean has = boardGames.size() > 0;
-    return has;
-  }
-
-  public int indexOfBoardGame(BoardGame aBoardGame)
-  {
-    int index = boardGames.indexOf(aBoardGame);
-    return index;
-  }
-  /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfParticipant()
-  {
-    return 0;
-  }
-  /* Code from template association_AddManyToManyMethod */
-  public boolean addParticipant(Player aParticipant)
-  {
-    boolean wasAdded = false;
-    if (participant.contains(aParticipant)) { return false; }
-    participant.add(aParticipant);
-    if (aParticipant.indexOfEvent(this) != -1)
-    {
-      wasAdded = true;
-    }
-    else
-    {
-      wasAdded = aParticipant.addEvent(this);
-      if (!wasAdded)
-      {
-        participant.remove(aParticipant);
-      }
-    }
-    return wasAdded;
-  }
-  /* Code from template association_RemoveMany */
-  public boolean removeParticipant(Player aParticipant)
-  {
-    boolean wasRemoved = false;
-    if (!participant.contains(aParticipant))
-    {
-      return wasRemoved;
-    }
-
-    int oldIndex = participant.indexOf(aParticipant);
-    participant.remove(oldIndex);
-    if (aParticipant.indexOfEvent(this) == -1)
-    {
-      wasRemoved = true;
-    }
-    else
-    {
-      wasRemoved = aParticipant.removeEvent(this);
-      if (!wasRemoved)
-      {
-        participant.add(oldIndex,aParticipant);
-      }
-    }
-    return wasRemoved;
-  }
-  /* Code from template association_AddIndexControlFunctions */
-  public boolean addParticipantAt(Player aParticipant, int index)
-  {  
-    boolean wasAdded = false;
-    if(addParticipant(aParticipant))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfParticipant()) { index = numberOfParticipant() - 1; }
-      participant.remove(aParticipant);
-      participant.add(index, aParticipant);
-      wasAdded = true;
-    }
-    return wasAdded;
-  }
-
-  public boolean addOrMoveParticipantAt(Player aParticipant, int index)
-  {
-    boolean wasAdded = false;
-    if(participant.contains(aParticipant))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfParticipant()) { index = numberOfParticipant() - 1; }
-      participant.remove(aParticipant);
-      participant.add(index, aParticipant);
-      wasAdded = true;
-    } 
-    else 
-    {
-      wasAdded = addParticipantAt(aParticipant, index);
-    }
-    return wasAdded;
-  }
-  /* Code from template association_SetOneToMany */
-  public boolean setOwner(Player aOwner)
+  /* Code from template association_SetUnidirectionalOne */
+  public boolean setOwner(Player aNewOwner)
   {
     boolean wasSet = false;
-    if (aOwner == null)
+    if (aNewOwner != null)
     {
-      return wasSet;
+      owner = aNewOwner;
+      wasSet = true;
     }
-
-    Player existingOwner = owner;
-    owner = aOwner;
-    if (existingOwner != null && !existingOwner.equals(aOwner))
-    {
-      existingOwner.removeCreatedBy(this);
-    }
-    owner.addCreatedBy(this);
-    wasSet = true;
     return wasSet;
   }
-  /* Code from template association_MinimumNumberOfMethod */
-  public static int minimumNumberOfBoardGames()
+  /* Code from template association_SetUnidirectionalOne */
+  public boolean setBoardGame(BoardGame aNewBoardGame)
   {
-    return 0;
-  }
-  /* Code from template association_AddManyToManyMethod */
-  public boolean addBoardGame(BoardGame aBoardGame)
-  {
-    boolean wasAdded = false;
-    if (boardGames.contains(aBoardGame)) { return false; }
-    boardGames.add(aBoardGame);
-    if (aBoardGame.indexOfEvent(this) != -1)
+    boolean wasSet = false;
+    if (aNewBoardGame != null)
     {
-      wasAdded = true;
+      boardGame = aNewBoardGame;
+      wasSet = true;
     }
-    else
-    {
-      wasAdded = aBoardGame.addEvent(this);
-      if (!wasAdded)
-      {
-        boardGames.remove(aBoardGame);
-      }
-    }
-    return wasAdded;
-  }
-  /* Code from template association_RemoveMany */
-  public boolean removeBoardGame(BoardGame aBoardGame)
-  {
-    boolean wasRemoved = false;
-    if (!boardGames.contains(aBoardGame))
-    {
-      return wasRemoved;
-    }
-
-    int oldIndex = boardGames.indexOf(aBoardGame);
-    boardGames.remove(oldIndex);
-    if (aBoardGame.indexOfEvent(this) == -1)
-    {
-      wasRemoved = true;
-    }
-    else
-    {
-      wasRemoved = aBoardGame.removeEvent(this);
-      if (!wasRemoved)
-      {
-        boardGames.add(oldIndex,aBoardGame);
-      }
-    }
-    return wasRemoved;
-  }
-  /* Code from template association_AddIndexControlFunctions */
-  public boolean addBoardGameAt(BoardGame aBoardGame, int index)
-  {  
-    boolean wasAdded = false;
-    if(addBoardGame(aBoardGame))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfBoardGames()) { index = numberOfBoardGames() - 1; }
-      boardGames.remove(aBoardGame);
-      boardGames.add(index, aBoardGame);
-      wasAdded = true;
-    }
-    return wasAdded;
-  }
-
-  public boolean addOrMoveBoardGameAt(BoardGame aBoardGame, int index)
-  {
-    boolean wasAdded = false;
-    if(boardGames.contains(aBoardGame))
-    {
-      if(index < 0 ) { index = 0; }
-      if(index > numberOfBoardGames()) { index = numberOfBoardGames() - 1; }
-      boardGames.remove(aBoardGame);
-      boardGames.add(index, aBoardGame);
-      wasAdded = true;
-    } 
-    else 
-    {
-      wasAdded = addBoardGameAt(aBoardGame, index);
-    }
-    return wasAdded;
+    return wasSet;
   }
 
   public void delete()
   {
-    ArrayList<Player> copyOfParticipant = new ArrayList<Player>(participant);
-    participant.clear();
-    for(Player aParticipant : copyOfParticipant)
-    {
-      aParticipant.removeEvent(this);
-    }
-    Player placeholderOwner = owner;
-    this.owner = null;
-    if(placeholderOwner != null)
-    {
-      placeholderOwner.removeCreatedBy(this);
-    }
-    ArrayList<BoardGame> copyOfBoardGames = new ArrayList<BoardGame>(boardGames);
-    boardGames.clear();
-    for(BoardGame aBoardGame : copyOfBoardGames)
-    {
-      aBoardGame.removeEvent(this);
-    }
+    owner = null;
+    boardGame = null;
   }
 
 
@@ -411,6 +190,7 @@ public class Event
             "location" + ":" + getLocation()+ "]" + System.getProperties().getProperty("line.separator") +
             "  " + "startTime" + "=" + (getStartTime() != null ? !getStartTime().equals(this)  ? getStartTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
             "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "owner = "+(getOwner()!=null?Integer.toHexString(System.identityHashCode(getOwner())):"null");
+            "  " + "owner = "+(getOwner()!=null?Integer.toHexString(System.identityHashCode(getOwner())):"null") + System.getProperties().getProperty("line.separator") +
+            "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
   }
 }
