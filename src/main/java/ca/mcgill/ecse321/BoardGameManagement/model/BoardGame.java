@@ -31,10 +31,11 @@ public class BoardGame
   //------------------------
   // CONSTRUCTOR
   //------------------------
+ public BoardGame(){
 
-  public BoardGame(int aGameID, int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription)
+ }
+  public BoardGame(int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription)
   {
-    gameID = aGameID;
     minPlayers = aMinPlayers;
     maxPlayers = aMaxPlayers;
     gameName = aGameName;
@@ -45,13 +46,6 @@ public class BoardGame
   // INTERFACE
   //------------------------
 
-  public boolean setGameID(int aGameID)
-  {
-    boolean wasSet = false;
-    gameID = aGameID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setMinPlayers(int aMinPlayers)
   {

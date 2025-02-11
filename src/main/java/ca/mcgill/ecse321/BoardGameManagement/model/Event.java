@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
 import java.sql.Date;
+import java.sql.Time;
 
 // line 49 "model.ump"
 // line 85 "model.ump"
@@ -26,8 +27,11 @@ public class Event
   private int eventID;
   private String description;
   private String maxSpot;
-  private Date startTime;
-  private Date endTime;
+
+  private Date eventDate;
+
+  private Time startTime;
+  private Time endTime;
   private String location;
 
   //Event Associations
@@ -41,12 +45,13 @@ public class Event
   //------------------------
   // CONSTRUCTOR
   //------------------------
-
-  public Event(int aEventID, String aDescription, String aMaxSpot, Date aStartTime, Date aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
+  public Event() {
+  }
+  public Event(String aDescription, String aMaxSpot, Date aEventDate, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
   {
-    eventID = aEventID;
     description = aDescription;
     maxSpot = aMaxSpot;
+    eventDate = aEventDate;
     startTime = aStartTime;
     endTime = aEndTime;
     location = aLocation;
@@ -64,13 +69,6 @@ public class Event
   // INTERFACE
   //------------------------
 
-  public boolean setEventID(int aEventID)
-  {
-    boolean wasSet = false;
-    eventID = aEventID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setDescription(String aDescription)
   {
@@ -88,7 +86,15 @@ public class Event
     return wasSet;
   }
 
-  public boolean setStartTime(Date aStartTime)
+  public boolean setEventDate(Date aEventDate)
+  {
+    boolean wasSet = false;
+    eventDate = aEventDate;
+    wasSet = true;
+    return wasSet;
+  }
+
+  public boolean setStartTime(Time aStartTime)
   {
     boolean wasSet = false;
     startTime = aStartTime;
@@ -96,7 +102,7 @@ public class Event
     return wasSet;
   }
 
-  public boolean setEndTime(Date aEndTime)
+  public boolean setEndTime(Time aEndTime)
   {
     boolean wasSet = false;
     endTime = aEndTime;
@@ -127,12 +133,16 @@ public class Event
     return maxSpot;
   }
 
-  public Date getStartTime()
+  public Date getEventDate() {
+    return eventDate;
+  }
+
+  public Time getStartTime()
   {
     return startTime;
   }
 
-  public Date getEndTime()
+  public Time getEndTime()
   {
     return endTime;
   }
@@ -181,16 +191,14 @@ public class Event
   }
 
 
-  public String toString()
-  {
-    return super.toString() + "["+
-            "eventID" + ":" + getEventID()+ "," +
-            "description" + ":" + getDescription()+ "," +
-            "maxSpot" + ":" + getMaxSpot()+ "," +
-            "location" + ":" + getLocation()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "startTime" + "=" + (getStartTime() != null ? !getStartTime().equals(this)  ? getStartTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "owner = "+(getOwner()!=null?Integer.toHexString(System.identityHashCode(getOwner())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
+  public String toString() {
+    return super.toString() + "[" +
+        "eventID=" + eventID + ", " +
+        "description=" + description + ", " +
+        "eventDate=" + (eventDate != null ? eventDate.toString() : "null") + ", " +
+        "maxSpot=" + maxSpot + ", " +
+        "location=" + location + "]" + System.lineSeparator() +
+        "  " + "startTime=" + (startTime != null ? startTime.toString() : "null") + System.lineSeparator() +
+        "  " + "endTime=" + (endTime != null ? endTime.toString() : "null");
   }
 }
