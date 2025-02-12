@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="ca.mcgill.ecse321.BoardGameManagement.BoardGameManagementApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-02-12T20:22:18" hostname="JH-LAPTOP" time="0.011">
-  <properties/>
-  <testcase name="contextLoads()" classname="ca.mcgill.ecse321.BoardGameManagement.BoardGameManagementApplicationTests" time="0.011"/>
-  <system-out><![CDATA[2025-02-12T15:22:18.343-05:00  INFO 18808 --- [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [ca.mcgill.ecse321.BoardGameManagement.BoardGameManagementApplicationTests]: BoardGameManagementApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2025-02-12T15:22:18.353-05:00  INFO 18808 --- [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration ca.mcgill.ecse321.BoardGameManagement.BoardGameManagementApplication for test class ca.mcgill.ecse321.BoardGameManagement.BoardGameManagementApplicationTests
-]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
