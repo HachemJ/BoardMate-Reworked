@@ -48,10 +48,12 @@ public class BorrowRequest
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public BorrowRequest() {
 
-  public BorrowRequest(int aRequestID, Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
+  }
+
+  public BorrowRequest(Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
   {
-    requestID = aRequestID;
     startOfLoan = aStartOfLoan;
     endOfLoan = aEndOfLoan;
     requestStatus = aRequestStatus;

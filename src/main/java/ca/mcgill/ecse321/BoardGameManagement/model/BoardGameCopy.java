@@ -40,10 +40,12 @@ public class BoardGameCopy
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public BoardGameCopy() {
 
-  public BoardGameCopy(int aSpecificGameID, String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
+  }
+
+  public BoardGameCopy(String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
   {
-    specificGameID = aSpecificGameID;
     specification = aSpecification;
     isAvailable = aIsAvailable;
     if (!setPlayer(aPlayer))

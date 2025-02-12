@@ -41,10 +41,12 @@ public class Event
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public Event() {
 
-  public Event(int aEventID, String aDescription, String aMaxSpot, Date aStartTime, Date aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
+  }
+
+  public Event(String aDescription, String aMaxSpot, Date aStartTime, Date aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
   {
-    eventID = aEventID;
     description = aDescription;
     maxSpot = aMaxSpot;
     startTime = aStartTime;

@@ -5,6 +5,7 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 
 
 
+import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameCopyRepository;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -31,10 +32,12 @@ public class BoardGame
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public BoardGame() {
 
-  public BoardGame(int aGameID, int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription)
+  }
+
+  public BoardGame(int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription)
   {
-    gameID = aGameID;
     minPlayers = aMinPlayers;
     maxPlayers = aMaxPlayers;
     gameName = aGameName;
