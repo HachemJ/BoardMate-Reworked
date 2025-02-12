@@ -61,6 +61,31 @@ public class BorrowRequestRepositoryTests {
     }
 
     @Test
+    public void createDuplicatedBorrowRequestTest() {
+        //create players
+        Player requester = new Player("PlayerName", "player@email.com", "aPassword", false);
+        requester = playerRepository.save(requester);
+        Player owner = new Player("Owner", "owner@email.com", "aPassword", true);
+        owner = playerRepository.save(owner);
+
+        //Create a board game
+        BoardGame boardGame = new BoardGame(2, 4, "TheGame", "A game description");
+        boardGame = boardGameRepository.save(boardGame);
+        BoardGameCopy boardGameCopy = new BoardGameCopy("Test game", true, owner, boardGame);
+        boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
+
+        Date startDate = Date.valueOf("2024-08-20");
+        Date endDate = Date.valueOf("2024-08-30");
+        BorrowRequest.RequestStatus status = BorrowRequest.RequestStatus.Pending;
+        BorrowRequest borrowRequest = new BorrowRequest(startDate, endDate, status, requester, boardGameCopy);
+        borrowRequest = borrowRequestRepository.save(borrowRequest);
+
+        BorrowRequest duplicatedRequest = borrowRequestRepository.save(borrowRequest);
+        assertEquals(1, borrowRequestRepository.count());
+
+    }
+
+    @Test
     public void findBorrowRequestTest() {
         //create players
         Player requester = new Player("PlayerName", "player@email.com", "aPassword", false);
@@ -90,6 +115,12 @@ public class BorrowRequestRepositoryTests {
         assertEquals(status, foundRequest.getRequestStatus());
         assertEquals(boardGameCopy.getSpecificGameID(), foundRequest.getBoardGameCopy().getSpecificGameID());
         assertEquals(requester.getPlayerID(), foundRequest.getRequester().getPlayerID());
+    }
+
+    @Test
+    public void findInexistentBorrowRequestTest() {
+        BorrowRequest request = borrowRequestRepository.findByRequestID(142);
+        assertNull(request);
     }
 
 
@@ -165,6 +196,33 @@ public class BorrowRequestRepositoryTests {
     }
 
     @Test
+    public void deleteInexistingBorrowRequestObjectTest() {
+        //create players
+        Player requester = new Player("PlayerName", "player@email.com", "aPassword", false);
+        requester = playerRepository.save(requester);
+        Player owner = new Player("Owner", "owner@email.com", "aPassword", true);
+        owner = playerRepository.save(owner);
+
+        //Create a board game
+        BoardGame boardGame = new BoardGame(2, 4, "TheGame", "A game description");
+        boardGame = boardGameRepository.save(boardGame);
+        BoardGameCopy boardGameCopy = new BoardGameCopy("Test game", true, owner, boardGame);
+        boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
+
+        //create borrow request
+        Date startDate = Date.valueOf("2024-08-20");
+        Date endDate = Date.valueOf("2024-08-30");
+        BorrowRequest.RequestStatus status = BorrowRequest.RequestStatus.Pending;
+        BorrowRequest borrowRequest = new BorrowRequest(startDate, endDate, status, requester, boardGameCopy);
+
+        borrowRequestRepository.delete(borrowRequest);
+        assertFalse(borrowRequestRepository.existsById(borrowRequest.getRequestID()));
+        assertEquals(0, borrowRequestRepository.count());
+
+    }
+
+
+    @Test
     public void findBorrowRequestByGameOwnerTest() {
 
         //create players
@@ -202,6 +260,14 @@ public class BorrowRequestRepositoryTests {
             assertEquals(owner.getPlayerID(), request.getBoardGameCopy().getPlayer().getPlayerID());
         }
 
+    }
+
+    @Test
+    public void findEmptyBorrowRequestByGameOwnerTest(){
+        Player owner = new Player("Owner", "owner@email.com", "aPassword", true);
+        playerRepository.save(owner);
+        ArrayList<BorrowRequest> requests = borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
+        assertEquals(0, requests.size());
     }
 
 }
