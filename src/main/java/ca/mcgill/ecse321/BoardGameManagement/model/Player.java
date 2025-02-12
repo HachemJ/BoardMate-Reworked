@@ -32,10 +32,10 @@ public class Player
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public Player() {}
 
-  public Player(int aPlayerID, String aName, String aEmail, String aPassword, boolean aIsAOwner)
+  public Player(String aName, String aEmail, String aPassword, boolean aIsAOwner)
   {
-    playerID = aPlayerID;
     name = aName;
     email = aEmail;
     password = aPassword;
@@ -45,14 +45,6 @@ public class Player
   //------------------------
   // INTERFACE
   //------------------------
-
-  public boolean setPlayerID(int aPlayerID)
-  {
-    boolean wasSet = false;
-    playerID = aPlayerID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setName(String aName)
   {
@@ -115,10 +107,6 @@ public class Player
   {
     return isAOwner;
   }
-
-  public void delete()
-  {}
-
 
   public String toString()
   {

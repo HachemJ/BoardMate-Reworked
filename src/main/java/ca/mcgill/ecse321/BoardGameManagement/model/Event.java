@@ -8,7 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
-import java.sql.Date;
+import java.sql.Time;
 
 // line 49 "model.ump"
 // line 85 "model.ump"
@@ -24,10 +24,14 @@ public class Event
   @Id
   @GeneratedValue
   private int eventID;
+
+  private String name;
+
+
   private String description;
   private String maxSpot;
-  private Date startTime;
-  private Date endTime;
+  private Time startTime;
+  private Time endTime;
   private String location;
 
   //Event Associations
@@ -41,10 +45,11 @@ public class Event
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public Event() {}
 
-  public Event(int aEventID, String aDescription, String aMaxSpot, Date aStartTime, Date aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
+  public Event(String name, String aDescription, String aMaxSpot, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
   {
-    eventID = aEventID;
+    name = name;
     description = aDescription;
     maxSpot = aMaxSpot;
     startTime = aStartTime;
@@ -88,7 +93,7 @@ public class Event
     return wasSet;
   }
 
-  public boolean setStartTime(Date aStartTime)
+  public boolean setStartTime(Time aStartTime)
   {
     boolean wasSet = false;
     startTime = aStartTime;
@@ -96,7 +101,7 @@ public class Event
     return wasSet;
   }
 
-  public boolean setEndTime(Date aEndTime)
+  public boolean setEndTime(Time aEndTime)
   {
     boolean wasSet = false;
     endTime = aEndTime;
@@ -117,6 +122,10 @@ public class Event
     return eventID;
   }
 
+  public String getName() {
+    return name;
+  }
+
   public String getDescription()
   {
     return description;
@@ -127,12 +136,12 @@ public class Event
     return maxSpot;
   }
 
-  public Date getStartTime()
+  public Time getStartTime()
   {
     return startTime;
   }
 
-  public Date getEndTime()
+  public Time getEndTime()
   {
     return endTime;
   }
@@ -185,6 +194,7 @@ public class Event
   {
     return super.toString() + "["+
             "eventID" + ":" + getEventID()+ "," +
+            "name" + ":" + getName()+ "," +
             "description" + ":" + getDescription()+ "," +
             "maxSpot" + ":" + getMaxSpot()+ "," +
             "location" + ":" + getLocation()+ "]" + System.getProperties().getProperty("line.separator") +

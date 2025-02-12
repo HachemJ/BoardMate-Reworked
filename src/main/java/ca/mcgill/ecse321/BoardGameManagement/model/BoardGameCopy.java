@@ -40,10 +40,10 @@ public class BoardGameCopy
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public BoardGameCopy() {}
 
-  public BoardGameCopy(int aSpecificGameID, String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
+  public BoardGameCopy(String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
   {
-    specificGameID = aSpecificGameID;
     specification = aSpecification;
     isAvailable = aIsAvailable;
     if (!setPlayer(aPlayer))
@@ -60,13 +60,6 @@ public class BoardGameCopy
   // INTERFACE
   //------------------------
 
-  public boolean setSpecificGameID(int aSpecificGameID)
-  {
-    boolean wasSet = false;
-    specificGameID = aSpecificGameID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setSpecification(String aSpecification)
   {
