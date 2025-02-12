@@ -82,7 +82,4 @@ public class Registration
   // INTERFACE
   //------------------------
 
-  public void delete()
-  {}
-
 }

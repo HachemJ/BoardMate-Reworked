@@ -48,7 +48,8 @@ public class BorrowRequest
   //------------------------
   // CONSTRUCTOR
   //------------------------
-  public BorrowRequest(){}
+  public BorrowRequest() {}
+
   public BorrowRequest(Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
   {
     startOfLoan = aStartOfLoan;

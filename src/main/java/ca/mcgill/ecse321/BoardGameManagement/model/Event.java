@@ -8,7 +8,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 
-import java.sql.Date;
 import java.sql.Time;
 
 // line 49 "model.ump"
@@ -25,11 +24,9 @@ public class Event
   @Id
   @GeneratedValue
   private int eventID;
+  private String name;
   private String description;
   private String maxSpot;
-
-  private Date eventDate;
-
   private Time startTime;
   private Time endTime;
   private String location;
@@ -45,13 +42,13 @@ public class Event
   //------------------------
   // CONSTRUCTOR
   //------------------------
-  public Event() {
-  }
-  public Event(String aDescription, String aMaxSpot, Date aEventDate, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
+  public Event() {}
+
+  public Event(String name, String aDescription, String aMaxSpot, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
   {
+    name = name;
     description = aDescription;
     maxSpot = aMaxSpot;
-    eventDate = aEventDate;
     startTime = aStartTime;
     endTime = aEndTime;
     location = aLocation;
@@ -86,14 +83,6 @@ public class Event
     return wasSet;
   }
 
-  public boolean setEventDate(Date aEventDate)
-  {
-    boolean wasSet = false;
-    eventDate = aEventDate;
-    wasSet = true;
-    return wasSet;
-  }
-
   public boolean setStartTime(Time aStartTime)
   {
     boolean wasSet = false;
@@ -123,6 +112,10 @@ public class Event
     return eventID;
   }
 
+  public String getName() {
+    return name;
+  }
+
   public String getDescription()
   {
     return description;
@@ -131,10 +124,6 @@ public class Event
   public String getMaxSpot()
   {
     return maxSpot;
-  }
-
-  public Date getEventDate() {
-    return eventDate;
   }
 
   public Time getStartTime()
@@ -191,14 +180,17 @@ public class Event
   }
 
 
-  public String toString() {
-    return super.toString() + "[" +
-        "eventID=" + eventID + ", " +
-        "description=" + description + ", " +
-        "eventDate=" + (eventDate != null ? eventDate.toString() : "null") + ", " +
-        "maxSpot=" + maxSpot + ", " +
-        "location=" + location + "]" + System.lineSeparator() +
-        "  " + "startTime=" + (startTime != null ? startTime.toString() : "null") + System.lineSeparator() +
-        "  " + "endTime=" + (endTime != null ? endTime.toString() : "null");
+  public String toString()
+  {
+    return super.toString() + "["+
+            "eventID" + ":" + getEventID()+ "," +
+            "name" + ":" + getName()+ "," +
+            "description" + ":" + getDescription()+ "," +
+            "maxSpot" + ":" + getMaxSpot()+ "," +
+            "location" + ":" + getLocation()+ "]" + System.getProperties().getProperty("line.separator") +
+            "  " + "startTime" + "=" + (getStartTime() != null ? !getStartTime().equals(this)  ? getStartTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+            "  " + "endTime" + "=" + (getEndTime() != null ? !getEndTime().equals(this)  ? getEndTime().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+            "  " + "owner = "+(getOwner()!=null?Integer.toHexString(System.identityHashCode(getOwner())):"null") + System.getProperties().getProperty("line.separator") +
+            "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
   }
 }

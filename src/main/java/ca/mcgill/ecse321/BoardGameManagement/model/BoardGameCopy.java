@@ -40,9 +40,8 @@ public class BoardGameCopy
   //------------------------
   // CONSTRUCTOR
   //------------------------
-  public BoardGameCopy(){
+  public BoardGameCopy() {}
 
-  }
   public BoardGameCopy(String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
   {
     specification = aSpecification;
@@ -60,6 +59,7 @@ public class BoardGameCopy
   //------------------------
   // INTERFACE
   //------------------------
+
 
   public boolean setSpecification(String aSpecification)
   {

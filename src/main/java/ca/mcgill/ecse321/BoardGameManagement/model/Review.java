@@ -41,10 +41,11 @@ public class Review
   // CONSTRUCTOR
   //------------------------
   public Review() {
+
   }
-  public Review(int aReviewID, int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame)
+
+  public Review(int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame)
   {
-    reviewID = aReviewID;
     rating = aRating;
     comment = aComment;
     commentDate = aCommentDate;
@@ -61,14 +62,6 @@ public class Review
   //------------------------
   // INTERFACE
   //------------------------
-
-  public boolean setReviewID(int aReviewID)
-  {
-    boolean wasSet = false;
-    reviewID = aReviewID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setRating(int aRating)
   {
