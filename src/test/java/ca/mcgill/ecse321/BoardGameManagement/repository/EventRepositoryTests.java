@@ -35,30 +35,30 @@ public class EventRepositoryTests {
 
   @Test
   public void testCreateAndReadEvent() {
-    Player player = new Player();
-    player.setName("Niz");
+    Player player = new Player("Niz", "niz@mcgill.ca", "123789", false);
     player = playerRepository.save(player);
 
 
-    BoardGame game = new BoardGame();
-    game.setGameName("Chess");
+    BoardGame game = new BoardGame(2, 4, "Chess", "Chess Description");
     game = boardGameRepository.save(game);
 
-
-    String nameAndDescription = "Chess Night";
+    String name = "Chess Night";
+    String description = "Chess Night Description";
     Date eventDate = Date.valueOf("2024-02-10");
     Time startTime = Time.valueOf("17:25:00");
     Time endTime = Time.valueOf("23:59:59");
     String maxLimit = "4";
     String location = "McGill";
-    Event chessEvent = new Event(nameAndDescription,maxLimit, eventDate, startTime, endTime, location, player, game);
+    Event chessEvent = new Event(name, description,maxLimit, eventDate, startTime, endTime, location, player, game);
 
     chessEvent = EventRepo.save(chessEvent);
 
     Event chessEventFromDb = EventRepo.findByEventID(chessEvent.getEventID());
 
     assertNotNull(chessEventFromDb);
-    assertEquals(nameAndDescription, chessEventFromDb.getDescription());
+    assertEquals(name, chessEventFromDb.getName());
+    assertEquals(description, chessEventFromDb.getDescription());
+    assertEquals(eventDate, chessEventFromDb.getEventDate());
     assertEquals(startTime, chessEventFromDb.getStartTime());
     assertEquals(endTime, chessEventFromDb.getEndTime());
     assertEquals(maxLimit, chessEventFromDb.getMaxSpot());

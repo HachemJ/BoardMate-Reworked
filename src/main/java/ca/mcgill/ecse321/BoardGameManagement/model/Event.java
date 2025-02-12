@@ -25,6 +25,9 @@ public class Event
   @Id
   @GeneratedValue
   private int eventID;
+
+  private String name;
+
   private String description;
   private String maxSpot;
 
@@ -39,7 +42,6 @@ public class Event
 
   private Player owner;
   @ManyToOne
-
   private BoardGame boardGame;
 
   //------------------------
@@ -47,8 +49,9 @@ public class Event
   //------------------------
   public Event() {
   }
-  public Event(String aDescription, String aMaxSpot, Date aEventDate, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
+  public Event(String aName, String aDescription, String aMaxSpot, Date aEventDate, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
   {
+    name = aName;
     description = aDescription;
     maxSpot = aMaxSpot;
     eventDate = aEventDate;
@@ -69,7 +72,13 @@ public class Event
   // INTERFACE
   //------------------------
 
-
+  public boolean setName(String aName)
+  {
+    boolean wasSet = false;
+    name = aName;
+    wasSet = true;
+    return wasSet;
+  }
   public boolean setDescription(String aDescription)
   {
     boolean wasSet = false;
@@ -122,7 +131,10 @@ public class Event
   {
     return eventID;
   }
-
+  public String getName()
+  {
+    return name;
+  }
   public String getDescription()
   {
     return description;
@@ -194,6 +206,7 @@ public class Event
   public String toString() {
     return super.toString() + "[" +
         "eventID=" + eventID + ", " +
+        "name=" + name + ", " +  // Added field
         "description=" + description + ", " +
         "eventDate=" + (eventDate != null ? eventDate.toString() : "null") + ", " +
         "maxSpot=" + maxSpot + ", " +
@@ -201,4 +214,5 @@ public class Event
         "  " + "startTime=" + (startTime != null ? startTime.toString() : "null") + System.lineSeparator() +
         "  " + "endTime=" + (endTime != null ? endTime.toString() : "null");
   }
+
 }
