@@ -40,12 +40,15 @@ public class BorrowRequestRepositoryTests {
         //create players
         Player requester = new Player("PlayerName", "player@email.com", "aPassword", false);
         requester = playerRepository.save(requester);
+
         Player owner = new Player("Owner", "owner@email.com", "aPassword", true);
         owner = playerRepository.save(owner);
 
         //Create a board game
         BoardGame boardGame = new BoardGame(2, 4, "TheGame", "A game description");
         boardGame = boardGameRepository.save(boardGame);
+
+        //create a board game copy
         BoardGameCopy boardGameCopy = new BoardGameCopy("Test game", true, owner, boardGame);
         boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
 
@@ -54,8 +57,11 @@ public class BorrowRequestRepositoryTests {
         Date endDate = Date.valueOf("2024-08-30");
         BorrowRequest.RequestStatus status = BorrowRequest.RequestStatus.Pending;
         BorrowRequest borrowRequest = new BorrowRequest(startDate, endDate, status, requester, boardGameCopy);
+
+        //action
         borrowRequest = borrowRequestRepository.save(borrowRequest);
 
+        //verification
         assertTrue(borrowRequestRepository.existsById(borrowRequest.getRequestID()));
 
     }
@@ -78,9 +84,12 @@ public class BorrowRequestRepositoryTests {
         Date endDate = Date.valueOf("2024-08-30");
         BorrowRequest.RequestStatus status = BorrowRequest.RequestStatus.Pending;
         BorrowRequest borrowRequest = new BorrowRequest(startDate, endDate, status, requester, boardGameCopy);
-        borrowRequest = borrowRequestRepository.save(borrowRequest);
 
+        //act
+        borrowRequest = borrowRequestRepository.save(borrowRequest);
         BorrowRequest duplicatedRequest = borrowRequestRepository.save(borrowRequest);
+
+        //save the same id should not be saved twice.
         assertEquals(1, borrowRequestRepository.count());
 
     }
@@ -104,8 +113,10 @@ public class BorrowRequestRepositoryTests {
         Date endDate = Date.valueOf("2024-08-30");
         BorrowRequest.RequestStatus status = BorrowRequest.RequestStatus.Pending;
         BorrowRequest borrowRequest = new BorrowRequest(startDate, endDate, status, requester, boardGameCopy);
+
         borrowRequest = borrowRequestRepository.save(borrowRequest);
 
+        //verification
         BorrowRequest foundRequest = borrowRequestRepository.findByRequestID(borrowRequest.getRequestID());
         assertNotNull(foundRequest);
 
@@ -119,8 +130,10 @@ public class BorrowRequestRepositoryTests {
 
     @Test
     public void findInexistentBorrowRequestTest() {
+        //database starts off empty
         BorrowRequest request = borrowRequestRepository.findByRequestID(142);
         assertNull(request);
+        assertEquals(0, borrowRequestRepository.count());
     }
 
 
@@ -185,8 +198,10 @@ public class BorrowRequestRepositoryTests {
         Date endDate = Date.valueOf("2024-08-30");
         BorrowRequest.RequestStatus status = BorrowRequest.RequestStatus.Pending;
         BorrowRequest borrowRequest = new BorrowRequest(startDate, endDate, status, requester, boardGameCopy);
+
         borrowRequest = borrowRequestRepository.save(borrowRequest);
 
+        //ensure the request has been successfully added
         assertTrue(borrowRequestRepository.existsById(borrowRequest.getRequestID()));
 
         borrowRequestRepository.delete(borrowRequest);
@@ -255,6 +270,7 @@ public class BorrowRequestRepositoryTests {
 
         ArrayList<BorrowRequest> requests = borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(boardGameCopy.getPlayer());
 
+        //verification
         assertEquals(1, requests.size());
         for (BorrowRequest request : requests) {
             assertEquals(owner.getPlayerID(), request.getBoardGameCopy().getPlayer().getPlayerID());
@@ -265,7 +281,9 @@ public class BorrowRequestRepositoryTests {
     @Test
     public void findEmptyBorrowRequestByGameOwnerTest(){
         Player owner = new Player("Owner", "owner@email.com", "aPassword", true);
+        //unsaved owner causes errors in database search
         playerRepository.save(owner);
+
         ArrayList<BorrowRequest> requests = borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
         assertEquals(0, requests.size());
     }
