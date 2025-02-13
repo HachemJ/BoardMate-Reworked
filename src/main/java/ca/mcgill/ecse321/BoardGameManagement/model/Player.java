@@ -32,9 +32,7 @@ public class Player
   //------------------------
   // CONSTRUCTOR
   //------------------------
-  public Player() {
-
-  }
+  public Player() {}
 
   public Player(String aName, String aEmail, String aPassword, boolean aIsAOwner)
   {
@@ -47,14 +45,6 @@ public class Player
   //------------------------
   // INTERFACE
   //------------------------
-
-  public boolean setPlayerID(int aPlayerID)
-  {
-    boolean wasSet = false;
-    playerID = aPlayerID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setName(String aName)
   {
@@ -118,17 +108,13 @@ public class Player
     return isAOwner;
   }
 
-  public void delete()
-  {}
-
-
   public String toString()
   {
     return super.toString() + "["+
-            "playerID" + ":" + getPlayerID()+ "," +
-            "name" + ":" + getName()+ "," +
-            "email" + ":" + getEmail()+ "," +
-            "password" + ":" + getPassword()+ "," +
-            "isAOwner" + ":" + getIsAOwner()+ "]";
+        "playerID" + ":" + getPlayerID()+ "," +
+        "name" + ":" + getName()+ "," +
+        "email" + ":" + getEmail()+ "," +
+        "password" + ":" + getPassword()+ "," +
+        "isAOwner" + ":" + getIsAOwner()+ "]";
   }
 }
