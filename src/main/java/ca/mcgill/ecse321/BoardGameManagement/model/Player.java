@@ -32,7 +32,9 @@ public class Player
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public Player() {
 
+  }
   public Player(int aPlayerID, String aName, String aEmail, String aPassword, boolean aIsAOwner)
   {
     playerID = aPlayerID;
