@@ -68,8 +68,26 @@ public class PlayerRepositoryTests {
 
  }
 
+@Test
+public void readNonexistantTest() {
+  //database starts off empty
+  Player p = pR.findByPlayerID(99);
+  assertNull(p);
+ }
+
  @Test
- public void
+ public void deletePlayerTest() {
+
+  Player player = new Player("PlayerName", "player@email.com", "aPassword", false);
+  player = pR.save(player);
+  assertTrue(pR.existsById(player.getPlayerID()));
+  pR.delete(player);
+  assertFalse(pR.existsById(player.getPlayerID()));
+ }
+
+
+
+
 
 
 
