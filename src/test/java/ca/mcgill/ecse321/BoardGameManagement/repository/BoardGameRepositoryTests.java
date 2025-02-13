@@ -2,7 +2,6 @@ package ca.mcgill.ecse321.BoardGameManagement.repository;
 
 
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +22,7 @@ public class BoardGameRepositoryTests {
 
   @Test
   public void testCreateAndReadBoardGame() {
+    // Arrange
     BoardGame boardGame = new BoardGame(2, 4, "Monopoly", "Monopoly is a property-trading game.");
 
     boardGame = BoardGameRepo.save(boardGame);
@@ -35,7 +35,26 @@ public class BoardGameRepositoryTests {
     assertEquals(boardGame.getGameID(), boardGameFromDb.getGameID());
     assertEquals(boardGame.getMinPlayers(), boardGameFromDb.getMinPlayers());
     assertEquals(boardGame.getMaxPlayers(), boardGameFromDb.getMaxPlayers());
-    assertEquals(boardGame.getGameName(), boardGameFromDb.getGameName());
+    assertEquals(boardGame.getName(), boardGameFromDb.getName());
     assertEquals(boardGame.getDescription(), boardGameFromDb.getDescription());
   }
+
+//  @Test
+//  public void testCreateAndReadBoardGame() {
+//    // Arrange
+//    BoardGame boardGame = new BoardGame(2, 4, "Monopoly", "Monopoly is a property-trading game.");
+//
+//    boardGame = BoardGameRepo.save(boardGame);
+//
+//    // Act
+//    BoardGame boardGameFromDb = BoardGameRepo.findByGameID(boardGame.getGameID());
+//
+//    // Assert
+//    assertNotNull(boardGameFromDb);
+//    assertEquals(boardGame.getGameID(), boardGameFromDb.getGameID());
+//    assertEquals(boardGame.getMinPlayers(), boardGameFromDb.getMinPlayers());
+//    assertEquals(boardGame.getMaxPlayers(), boardGameFromDb.getMaxPlayers());
+//    assertEquals(boardGame.getGameName(), boardGameFromDb.getGameName());
+//    assertEquals(boardGame.getDescription(), boardGameFromDb.getDescription());
+//  }
 }
