@@ -32,16 +32,10 @@ public class Player
   //------------------------
   // CONSTRUCTOR
   //------------------------
-<<<<<<< HEAD
-  public Player() {
 
-  }
-  public Player(int aPlayerID, String aName, String aEmail, String aPassword, boolean aIsAOwner)
-=======
   public Player() {}
 
   public Player(String aName, String aEmail, String aPassword, boolean aIsAOwner)
->>>>>>> 796f8525d595bc25e5a81cf1fcfe4a4d14a8e68d
   {
     name = aName;
     email = aEmail;
