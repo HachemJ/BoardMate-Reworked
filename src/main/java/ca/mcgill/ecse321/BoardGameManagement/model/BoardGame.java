@@ -25,19 +25,20 @@ public class BoardGame
   private int gameID;
   private int minPlayers;
   private int maxPlayers;
-  private String gameName;
+  private String name;
   private String description;
 
   //------------------------
   // CONSTRUCTOR
   //------------------------
+  public BoardGame() {}
 
-  public BoardGame(int aGameID, int aMinPlayers, int aMaxPlayers, String aGameName, String aDescription)
+  public BoardGame(int aGameID, int aMinPlayers, int aMaxPlayers, String aName, String aDescription)
   {
     gameID = aGameID;
     minPlayers = aMinPlayers;
     maxPlayers = aMaxPlayers;
-    gameName = aGameName;
+    name = aName;
     description = aDescription;
   }
 
@@ -45,13 +46,6 @@ public class BoardGame
   // INTERFACE
   //------------------------
 
-  public boolean setGameID(int aGameID)
-  {
-    boolean wasSet = false;
-    gameID = aGameID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setMinPlayers(int aMinPlayers)
   {
@@ -72,7 +66,7 @@ public class BoardGame
   public boolean setGameName(String aGameName)
   {
     boolean wasSet = false;
-    gameName = aGameName;
+    name = aGameName;
     wasSet = true;
     return wasSet;
   }
@@ -100,9 +94,9 @@ public class BoardGame
     return maxPlayers;
   }
 
-  public String getGameName()
+  public String getName()
   {
-    return gameName;
+    return name;
   }
 
   public String getDescription()
@@ -110,17 +104,13 @@ public class BoardGame
     return description;
   }
 
-  public void delete()
-  {}
-
-
   public String toString()
   {
     return super.toString() + "["+
             "gameID" + ":" + getGameID()+ "," +
             "minPlayers" + ":" + getMinPlayers()+ "," +
             "maxPlayers" + ":" + getMaxPlayers()+ "," +
-            "gameName" + ":" + getGameName()+ "," +
+            "gameName" + ":" + getName()+ "," +
             "description" + ":" + getDescription()+ "]";
   }
 }
