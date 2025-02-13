@@ -33,9 +33,8 @@ public class BoardGame
   //------------------------
   public BoardGame() {}
 
-  public BoardGame(int aGameID, int aMinPlayers, int aMaxPlayers, String aName, String aDescription)
+  public BoardGame(int aMinPlayers, int aMaxPlayers, String aName, String aDescription)
   {
-    gameID = aGameID;
     minPlayers = aMinPlayers;
     maxPlayers = aMaxPlayers;
     name = aName;
