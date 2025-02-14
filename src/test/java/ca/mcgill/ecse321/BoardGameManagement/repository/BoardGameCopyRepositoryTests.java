@@ -2,17 +2,29 @@ package ca.mcgill.ecse321.BoardGameManagement.repository;
 
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
-import ca.mcgill.ecse321.BoardGameManagement.model.BorrowRequest;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.sql.Date;
+import java.util.ArrayList;
 
 @SpringBootTest
 public class BoardGameCopyRepositoryTests {
+
+    // Default test data
+    static String playerName = "Tingyi";
+    static String playerEmail = "tinyi.chen@mail.mcgill.ca";
+    static String playerPassword = "1234321";
+    static boolean isAOwner = true;
+    static int minPlayers = 4;
+    static int maxPlayers = 8;
+    static String gameName = "Monopoly";
+    static String gameDescription = "A very fun game";
+    static String specification = "Canadian edition, brand new";
+    static boolean isAvailable = true;
+
 
     @Autowired
     private BoardGameCopyRepository boardGameCopyRepository;
@@ -28,24 +40,28 @@ public class BoardGameCopyRepositoryTests {
         playerRepository.deleteAll();
     }
 
+    private static void setUp(Player player, BoardGame boardGame, BoardGameCopy boardGameCopy) {
+        player.setName(playerName);
+        player.setEmail(playerEmail);
+        player.setPassword(playerPassword);
+        player.setIsAOwner(isAOwner);
+        boardGame.setMinPlayers(minPlayers);
+        boardGame.setMaxPlayers(maxPlayers);
+        boardGame.setGameName(gameName);
+        boardGame.setDescription(gameDescription);
+        boardGameCopy.setSpecification(specification);
+        boardGameCopy.setIsAvailable(isAvailable);
+        boardGameCopy.setPlayer(player);
+        boardGameCopy.setBoardGame(boardGame);
+    }
+
     @Test
     public void testCreateAndReadBoardGameCopy() {
 
-        String playerName = "Tingyi";
-        String playerEmail = "tingyi.chen@mail.mcgill.ca";
-        String playerPassword = "1234321";
-        boolean isAOwner = true;
-        Player player = new Player(playerName, playerEmail, playerPassword, isAOwner);
-
-        int minPlayers = 4;
-        int maxPlayers = 8;
-        String gameName = "Monopoly";
-        String gameDescription = "A very fun game";
-        BoardGame boardGame = new BoardGame(minPlayers, maxPlayers, gameName, gameDescription);
-
-        String specification = "Canadian edition, brand new";
-        boolean isAvailable = true;
-        BoardGameCopy boardGameCopy = new BoardGameCopy(specification, isAvailable, player, boardGame);
+        Player player = new Player();
+        BoardGame boardGame = new BoardGame();
+        BoardGameCopy boardGameCopy = new BoardGameCopy();
+        setUp(player, boardGame, boardGameCopy);
 
         player = playerRepository.save(player);
         boardGame = boardGameRepository.save(boardGame);
@@ -76,21 +92,10 @@ public class BoardGameCopyRepositoryTests {
     @Test
     public void testUpdateBoardGameCopy() {
 
-        String playerName = "Tingyi";
-        String playerEmail = "tingyi.chen@mail.mcgill.ca";
-        String playerPassword = "1234321";
-        boolean isAOwner = true;
-        Player player = new Player(playerName, playerEmail, playerPassword, isAOwner);
-
-        int minPlayers = 4;
-        int maxPlayers = 8;
-        String gameName = "Monopoly";
-        String gameDescription = "A very fun game";
-        BoardGame boardGame = new BoardGame(minPlayers, maxPlayers, gameName, gameDescription);
-
-        String specification = "Canadian edition, brand new";
-        boolean isAvailable = true;
-        BoardGameCopy boardGameCopy = new BoardGameCopy(specification, isAvailable, player, boardGame);
+        Player player = new Player();
+        BoardGame boardGame = new BoardGame();
+        BoardGameCopy boardGameCopy = new BoardGameCopy();
+        setUp(player, boardGame, boardGameCopy);
 
         player = playerRepository.save(player);
         boardGame = boardGameRepository.save(boardGame);
@@ -141,21 +146,10 @@ public class BoardGameCopyRepositoryTests {
     @Test
     public void testDeleteBoardGameCopy() {
 
-        String playerName = "Tingyi";
-        String playerEmail = "tingyi.chen@mail.mcgill.ca";
-        String playerPassword = "1234321";
-        boolean isAOwner = true;
-        Player player = new Player(playerName, playerEmail, playerPassword, isAOwner);
-
-        int minPlayers = 4;
-        int maxPlayers = 8;
-        String gameName = "Monopoly";
-        String gameDescription = "A very fun game";
-        BoardGame boardGame = new BoardGame(minPlayers, maxPlayers, gameName, gameDescription);
-
-        String specification = "Canadian edition, brand new";
-        boolean isAvailable = true;
-        BoardGameCopy boardGameCopy = new BoardGameCopy(specification, isAvailable, player, boardGame);
+        Player player = new Player();
+        BoardGame boardGame = new BoardGame();
+        BoardGameCopy boardGameCopy = new BoardGameCopy();
+        setUp(player, boardGame, boardGameCopy);
 
         player = playerRepository.save(player);
         boardGame = boardGameRepository.save(boardGame);
@@ -173,6 +167,109 @@ public class BoardGameCopyRepositoryTests {
         // After deleting
         assertFalse(boardGameCopyRepository.existsById(boardGameCopyFromDB.getSpecificGameID()));
         assertEquals(0, boardGameCopyRepository.count());
+    }
+
+    @Test
+    public void testFindBoardGameCopyByPlayer() {
+
+        Player player = new Player();
+        BoardGame boardGame = new BoardGame();
+        BoardGameCopy boardGameCopy = new BoardGameCopy();
+        setUp(player, boardGame, boardGameCopy);
+
+        player = playerRepository.save(player);
+        boardGame = boardGameRepository.save(boardGame);
+        boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
+
+        BoardGameCopy boardGameCopyFromDB = boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID());
+        BoardGameCopy boardGameCopyFromPlayer = new BoardGameCopy();
+
+        // Find boardGameCopy by player
+        ArrayList<BoardGameCopy> boardGameCopiesFromPlayer = boardGameCopyRepository.findByPlayer(player);
+        for (BoardGameCopy copy : boardGameCopiesFromPlayer) {
+            if (copy.getSpecificGameID() == boardGameCopy.getSpecificGameID()) {
+                boardGameCopyFromPlayer = copy;
+                break;
+            }
+        }
+
+        assertNotNull(boardGameCopyFromPlayer);
+        assertEquals(boardGameCopyFromPlayer.getSpecificGameID(), boardGameCopyFromDB.getSpecificGameID());
+    }
+
+    @Test
+    public void testFindBoardGameCopyByBoardGame() {
+
+        Player player = new Player();
+        BoardGame boardGame = new BoardGame();
+        BoardGameCopy boardGameCopy = new BoardGameCopy();
+        setUp(player, boardGame, boardGameCopy);
+
+        player = playerRepository.save(player);
+        boardGame = boardGameRepository.save(boardGame);
+        boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
+
+        BoardGameCopy boardGameCopyFromDB = boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID());
+        BoardGameCopy boardGameCopyFromBoardGame = new BoardGameCopy();
+
+        // Find boardGameCopy by boardGame
+        ArrayList<BoardGameCopy> boardGameCopiesFromBoardGame = boardGameCopyRepository.findByBoardGame(boardGame);
+        for (BoardGameCopy copy : boardGameCopiesFromBoardGame) {
+            if (copy.getSpecificGameID() == boardGameCopy.getSpecificGameID()) {
+                boardGameCopyFromBoardGame = copy;
+                break;
+            }
+        }
+
+        assertNotNull(boardGameCopyFromBoardGame);
+        assertEquals(boardGameCopyFromBoardGame.getSpecificGameID(), boardGameCopyFromDB.getSpecificGameID());
+    }
+
+    @Test
+    public void testFindInexistentBoardGameCopy() {
+
+        Player player = new Player();
+        BoardGame boardGame = new BoardGame();
+        BoardGameCopy boardGameCopy = new BoardGameCopy();
+        setUp(player, boardGame, boardGameCopy);
+
+        player = playerRepository.save(player);
+        boardGame = boardGameRepository.save(boardGame);
+        boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
+
+        BoardGameCopy boardGameCopyFromDB = boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID());
+
+        assertEquals(boardGameCopy.getSpecificGameID(), boardGameCopyFromDB.getSpecificGameID());
+        assertNull(boardGameCopyRepository.findBySpecificGameID(000000));
+    }
+
+    @Test
+    public void testFindCreateAndReadMultipleBoardGameCopies() {
+
+        Player player1 = new Player();
+        BoardGame boardGame1 = new BoardGame();
+        BoardGameCopy boardGameCopy1 = new BoardGameCopy();
+        setUp(player1, boardGame1, boardGameCopy1);
+
+        Player player2 = new Player("Chen", "chen@mail.mcgill.ca", "1234", false);
+        BoardGame boardGame2 = new BoardGame(1, 9, "A random game", "Interesting!");
+        BoardGameCopy boardGameCopy2 = new BoardGameCopy("American edition, used", true, player2, boardGame2);
+
+        player1 = playerRepository.save(player1);
+        boardGame1 = boardGameRepository.save(boardGame1);
+        boardGameCopy1 = boardGameCopyRepository.save(boardGameCopy1);
+        player2 = playerRepository.save(player2);
+        boardGame2 = boardGameRepository.save(boardGame2);
+        boardGameCopy2 = boardGameCopyRepository.save(boardGameCopy2);
+
+        BoardGameCopy boardGameCopyFromDB1 = boardGameCopyRepository.findBySpecificGameID(boardGameCopy1.getSpecificGameID());
+        BoardGameCopy boardGameCopyFromDB2 = boardGameCopyRepository.findBySpecificGameID(boardGameCopy2.getSpecificGameID());
+
+        assertNotNull(boardGameCopyFromDB1);
+        assertNotNull(boardGameCopyFromDB2);
+        assertEquals(2, boardGameCopyRepository.count());
+        assertEquals(boardGameCopy1.getSpecificGameID(), boardGameCopyFromDB1.getSpecificGameID());
+        assertEquals(boardGameCopy2.getSpecificGameID(), boardGameCopyFromDB2.getSpecificGameID());
     }
 
 }
