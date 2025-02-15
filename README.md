@@ -1,5 +1,8 @@
 # project-group-16
-Team Intro:
+
+
+**Team Intro:**
+  
 | Name | Major | Fun Fact
 | --- | --- | --- |
 | Kathelina | Computer Engineering | I don’t know..I’m boring…I play(ed) piano?
@@ -10,10 +13,17 @@ Team Intro:
 | Jad | Software Engineering | I love playing competitive games
 | HongYi | Computer Engineering | lefty
 
-Scope and Purpose of the Project:
-This project allows people to collect, borrow, and review board games, as well as to organize events between players.
+<br />
 
-For Deliverable 1:
+
+**Scope and Purpose of the Project:**
+<br />
+This project allows people to collect, borrow, and review board games and organize events between players.
+
+<br />
+  
+**For Deliverable 1:**
+
 | Name | Role & Responsibility | Hours
 | --- | --- | --- |
 | Kathelina | domain model + persistance testing | 11
