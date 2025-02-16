@@ -32,6 +32,7 @@ public class Player
   //------------------------
   // CONSTRUCTOR
   //------------------------
+
   public Player() {}
 
   public Player(String aName, String aEmail, String aPassword, boolean aIsAOwner)

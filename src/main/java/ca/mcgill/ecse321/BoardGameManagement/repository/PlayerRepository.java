@@ -1,4 +1,5 @@
 package ca.mcgill.ecse321.BoardGameManagement.repository;
+
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import org.springframework.data.repository.CrudRepository;
 
