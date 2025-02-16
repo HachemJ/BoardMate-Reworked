@@ -17,6 +17,8 @@ public class BoardGameRepositoryTests {
   @Autowired
   private BoardGameRepository BoardGameRepo;
 
+  @BeforeEach
+  @AfterEach
   public void clearDatabase() {
     BoardGameRepo.deleteAll();
   }
@@ -86,18 +88,18 @@ public class BoardGameRepositoryTests {
     assertEquals("An advanced strategy game.", updatedGame.getDescription());
   }
 
-//  @Test
-//  public void testDeleteBoardGame() {
-//    // Arrange
-//    BoardGame boardGame = new BoardGame(2, 4, "Scrabble", "A word game.");
-//    boardGame = BoardGameRepo.save(boardGame);
-//
-//    // Act
-//    BoardGameRepo.deleteById(boardGame.getGameID());
-//
-//    // Assert
-//    assertEquals(0, BoardGameRepo.count());
-//  }
+  @Test
+  public void testDeleteBoardGame() {
+    // Arrange
+    BoardGame boardGame = new BoardGame(2, 4, "Scrabble", "A word game.");
+    boardGame = BoardGameRepo.save(boardGame);
+
+    // Act
+    BoardGameRepo.deleteById(boardGame.getGameID());
+
+    // Assert
+    assertEquals(0, BoardGameRepo.count());
+  }
 
   @Test
   public void testFindBoardGamesByMinPlayers() {
