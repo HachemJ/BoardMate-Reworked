@@ -40,12 +40,10 @@ public class BoardGameCopy
   //------------------------
   // CONSTRUCTOR
   //------------------------
-  public BoardGameCopy(){
+  public BoardGameCopy() {}
 
-  }
-  public BoardGameCopy(int aSpecificGameID, String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
+  public BoardGameCopy(String aSpecification, boolean aIsAvailable, Player aPlayer, BoardGame aBoardGame)
   {
-    specificGameID = aSpecificGameID;
     specification = aSpecification;
     isAvailable = aIsAvailable;
     if (!setPlayer(aPlayer))
@@ -62,13 +60,6 @@ public class BoardGameCopy
   // INTERFACE
   //------------------------
 
-  public boolean setSpecificGameID(int aSpecificGameID)
-  {
-    boolean wasSet = false;
-    specificGameID = aSpecificGameID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setSpecification(String aSpecification)
   {
@@ -148,10 +139,10 @@ public class BoardGameCopy
   public String toString()
   {
     return super.toString() + "["+
-            "specificGameID" + ":" + getSpecificGameID()+ "," +
-            "specification" + ":" + getSpecification()+ "," +
-            "isAvailable" + ":" + getIsAvailable()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "player = "+(getPlayer()!=null?Integer.toHexString(System.identityHashCode(getPlayer())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
+        "specificGameID" + ":" + getSpecificGameID()+ "," +
+        "specification" + ":" + getSpecification()+ "," +
+        "isAvailable" + ":" + getIsAvailable()+ "]" + System.getProperties().getProperty("line.separator") +
+        "  " + "player = "+(getPlayer()!=null?Integer.toHexString(System.identityHashCode(getPlayer())):"null") + System.getProperties().getProperty("line.separator") +
+        "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
   }
 }

@@ -48,10 +48,10 @@ public class BorrowRequest
   //------------------------
   // CONSTRUCTOR
   //------------------------
-  public BorrowRequest(){}
-  public BorrowRequest(int aRequestID, Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
+  public BorrowRequest() {}
+
+  public BorrowRequest(Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy)
   {
-    requestID = aRequestID;
     startOfLoan = aStartOfLoan;
     endOfLoan = aEndOfLoan;
     requestStatus = aRequestStatus;
@@ -69,13 +69,6 @@ public class BorrowRequest
   // INTERFACE
   //------------------------
 
-  public boolean setRequestID(int aRequestID)
-  {
-    boolean wasSet = false;
-    requestID = aRequestID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setStartOfLoan(Date aStartOfLoan)
   {
@@ -163,11 +156,11 @@ public class BorrowRequest
   public String toString()
   {
     return super.toString() + "["+
-            "requestID" + ":" + getRequestID()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "startOfLoan" + "=" + (getStartOfLoan() != null ? !getStartOfLoan().equals(this)  ? getStartOfLoan().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "endOfLoan" + "=" + (getEndOfLoan() != null ? !getEndOfLoan().equals(this)  ? getEndOfLoan().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "requestStatus" + "=" + (getRequestStatus() != null ? !getRequestStatus().equals(this)  ? getRequestStatus().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "requester = "+(getRequester()!=null?Integer.toHexString(System.identityHashCode(getRequester())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "boardGameCopy = "+(getBoardGameCopy()!=null?Integer.toHexString(System.identityHashCode(getBoardGameCopy())):"null");
+        "requestID" + ":" + getRequestID()+ "]" + System.getProperties().getProperty("line.separator") +
+        "  " + "startOfLoan" + "=" + (getStartOfLoan() != null ? !getStartOfLoan().equals(this)  ? getStartOfLoan().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+        "  " + "endOfLoan" + "=" + (getEndOfLoan() != null ? !getEndOfLoan().equals(this)  ? getEndOfLoan().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+        "  " + "requestStatus" + "=" + (getRequestStatus() != null ? !getRequestStatus().equals(this)  ? getRequestStatus().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+        "  " + "requester = "+(getRequester()!=null?Integer.toHexString(System.identityHashCode(getRequester())):"null") + System.getProperties().getProperty("line.separator") +
+        "  " + "boardGameCopy = "+(getBoardGameCopy()!=null?Integer.toHexString(System.identityHashCode(getBoardGameCopy())):"null");
   }
 }

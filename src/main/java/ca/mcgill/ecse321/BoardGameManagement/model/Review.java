@@ -41,10 +41,11 @@ public class Review
   // CONSTRUCTOR
   //------------------------
   public Review() {
+
   }
-  public Review(int aReviewID, int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame)
+
+  public Review(int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame)
   {
-    reviewID = aReviewID;
     rating = aRating;
     comment = aComment;
     commentDate = aCommentDate;
@@ -61,14 +62,6 @@ public class Review
   //------------------------
   // INTERFACE
   //------------------------
-
-  public boolean setReviewID(int aReviewID)
-  {
-    boolean wasSet = false;
-    reviewID = aReviewID;
-    wasSet = true;
-    return wasSet;
-  }
 
   public boolean setRating(int aRating)
   {
@@ -156,11 +149,11 @@ public class Review
   public String toString()
   {
     return super.toString() + "["+
-            "reviewID" + ":" + getReviewID()+ "," +
-            "rating" + ":" + getRating()+ "," +
-            "comment" + ":" + getComment()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "commentDate" + "=" + (getCommentDate() != null ? !getCommentDate().equals(this)  ? getCommentDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "author = "+(getAuthor()!=null?Integer.toHexString(System.identityHashCode(getAuthor())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
+        "reviewID" + ":" + getReviewID()+ "," +
+        "rating" + ":" + getRating()+ "," +
+        "comment" + ":" + getComment()+ "]" + System.getProperties().getProperty("line.separator") +
+        "  " + "commentDate" + "=" + (getCommentDate() != null ? !getCommentDate().equals(this)  ? getCommentDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+        "  " + "author = "+(getAuthor()!=null?Integer.toHexString(System.identityHashCode(getAuthor())):"null") + System.getProperties().getProperty("line.separator") +
+        "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
   }
 }
