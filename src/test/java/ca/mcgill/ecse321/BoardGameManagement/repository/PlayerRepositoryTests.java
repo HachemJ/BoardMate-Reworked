@@ -12,31 +12,27 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 public class PlayerRepositoryTests {
+
  @Autowired
- private EventRepository eR;
- @Autowired
- private PlayerRepository pR;
- @Autowired
- private BorrowRequestRepository brR;
+ private PlayerRepository playerRepository;
+
 
  @BeforeEach
  @AfterEach
  public void clearDatabase() {
-  eR.deleteAll();
-  pR.deleteAll();
-  brR.deleteAll();
+  playerRepository.deleteAll();
  }
 
  @Test
  public void createAndReadPlayerTest() {
   //set up
   Player player = new Player("PlayerName", "player@email.com", "aPassword", false);
-  player = pR.save(player);
+  player = playerRepository.save(player);
   //act
-  Player dbPlayer = pR.findByPlayerID(player.getPlayerID());
+  Player dbPlayer = playerRepository.findByPlayerID(player.getPlayerID());
   //verify
   assertNotNull(dbPlayer);
-  //assertEquals(pR.existsById(player.getPlayerID()));
+  //assertEquals(playerRepository.existsById(player.getPlayerID()));
   assertEquals(player.getPlayerID(), dbPlayer.getPlayerID());
   assertEquals(player.getName(), dbPlayer.getName());
   assertEquals(player.getEmail(), dbPlayer.getEmail());
@@ -50,15 +46,15 @@ public class PlayerRepositoryTests {
  public void updatePlayerTest() {
   //set up
   Player player = new Player("PlayerName", "player@email.com", "aPassword", false);
-  player = pR.save(player);
+  player = playerRepository.save(player);
   //act
   player.setEmail("player1@email.com");
   player.setPassword("thePassword");
   player.setName("Player1Name");
   player.setIsAOwner(true);
 
-  Player updatedPlayerDB = pR.save(player);
-  Player updated = pR.findByPlayerID(updatedPlayerDB.getPlayerID());
+  Player updatedPlayerDB = playerRepository.save(player);
+  Player updated = playerRepository.findByPlayerID(updatedPlayerDB.getPlayerID());
   //verify
   assertNotNull(updated);
   assertEquals("player1@email.com", updated.getEmail());
@@ -71,7 +67,7 @@ public class PlayerRepositoryTests {
 @Test
 public void readNonexistantTest() {
   //database starts off empty
-  Player p = pR.findByPlayerID(99);
+  Player p = playerRepository.findByPlayerID(99);
   assertNull(p);
  }
 
@@ -79,18 +75,18 @@ public void readNonexistantTest() {
  public void deletePlayerTest() {
 
   Player player = new Player("PlayerName", "player@email.com", "aPassword", false);
-  player = pR.save(player);
-  assertTrue(pR.existsById(player.getPlayerID()));
-  pR.delete(player);
-  assertFalse(pR.existsById(player.getPlayerID()));
+  player = playerRepository.save(player);
+  assertTrue(playerRepository.existsById(player.getPlayerID()));
+  playerRepository.delete(player);
+  assertFalse(playerRepository.existsById(player.getPlayerID()));
  }
 
 @Test
  public void testSavingDuplicates() {
  Player player = new Player("PlayerName", "player@email.com", "aPassword", false);
- player = pR.save(player);
- Player duplicatedPlayer = pR.save(player);
- assertEquals(1, pR.count());
+ player = playerRepository.save(player);
+ Player duplicatedPlayer = playerRepository.save(player);
+ assertEquals(1, playerRepository.count());
 
  }
 
