@@ -85,7 +85,14 @@ public void readNonexistantTest() {
   assertFalse(pR.existsById(player.getPlayerID()));
  }
 
+@Test
+ public void testSavingDuplicates() {
+ Player player = new Player("PlayerName", "player@email.com", "aPassword", false);
+ player = pR.save(player);
+ Player duplicatedPlayer = pR.save(player);
+ assertEquals(1, pR.count());
 
+ }
 
 
 
