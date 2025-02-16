@@ -112,10 +112,10 @@ public class Player
   public String toString()
   {
     return super.toString() + "["+
-            "playerID" + ":" + getPlayerID()+ "," +
-            "name" + ":" + getName()+ "," +
-            "email" + ":" + getEmail()+ "," +
-            "password" + ":" + getPassword()+ "," +
-            "isAOwner" + ":" + getIsAOwner()+ "]";
+        "playerID" + ":" + getPlayerID()+ "," +
+        "name" + ":" + getName()+ "," +
+        "email" + ":" + getEmail()+ "," +
+        "password" + ":" + getPassword()+ "," +
+        "isAOwner" + ":" + getIsAOwner()+ "]";
   }
 }
