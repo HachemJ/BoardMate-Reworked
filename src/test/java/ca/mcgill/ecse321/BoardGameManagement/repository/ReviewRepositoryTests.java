@@ -37,7 +37,7 @@ public class ReviewRepositoryTests {
         playerRepository.save(player);
 
         //create game
-        BoardGame game = new BoardGame(0, 2, 2, "Chess", "Chess Description");
+        BoardGame game = new BoardGame(2, 2, "Chess", "Chess Description");
         boardGameRepository.save(game);
 
         //create other review information
@@ -63,7 +63,7 @@ public class ReviewRepositoryTests {
         playerRepository.save(player);
 
         //create game
-        BoardGame game = new BoardGame(0, 2, 2, "Chess", "Chess Description");
+        BoardGame game = new BoardGame(2, 2, "Chess", "Chess Description");
         boardGameRepository.save(game);
 
         //other review information
@@ -102,7 +102,7 @@ public class ReviewRepositoryTests {
         playerRepository.save(player);
 
         //create game
-        BoardGame game = new BoardGame(0, 2, 2, "Chess", "Chess Description");
+        BoardGame game = new BoardGame(2, 2, "Chess", "Chess Description");
         boardGameRepository.save(game);
 
         //other review information
@@ -131,7 +131,7 @@ public class ReviewRepositoryTests {
         playerRepository.save(player);
 
         //create game
-        BoardGame game = new BoardGame(0, 2, 2, "Chess", "Chess Description");
+        BoardGame game = new BoardGame(2, 2, "Chess", "Chess Description");
         boardGameRepository.save(game);
 
         //other review information
