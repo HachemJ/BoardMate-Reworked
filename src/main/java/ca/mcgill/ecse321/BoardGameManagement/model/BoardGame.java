@@ -106,10 +106,10 @@ public class BoardGame
   public String toString()
   {
     return super.toString() + "["+
-            "gameID" + ":" + getGameID()+ "," +
-            "minPlayers" + ":" + getMinPlayers()+ "," +
-            "maxPlayers" + ":" + getMaxPlayers()+ "," +
-            "gameName" + ":" + getName()+ "," +
-            "description" + ":" + getDescription()+ "]";
+        "gameID" + ":" + getGameID()+ "," +
+        "minPlayers" + ":" + getMinPlayers()+ "," +
+        "maxPlayers" + ":" + getMaxPlayers()+ "," +
+        "gameName" + ":" + getName()+ "," +
+        "description" + ":" + getDescription()+ "]";
   }
 }

@@ -139,10 +139,10 @@ public class BoardGameCopy
   public String toString()
   {
     return super.toString() + "["+
-            "specificGameID" + ":" + getSpecificGameID()+ "," +
-            "specification" + ":" + getSpecification()+ "," +
-            "isAvailable" + ":" + getIsAvailable()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "player = "+(getPlayer()!=null?Integer.toHexString(System.identityHashCode(getPlayer())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
+        "specificGameID" + ":" + getSpecificGameID()+ "," +
+        "specification" + ":" + getSpecification()+ "," +
+        "isAvailable" + ":" + getIsAvailable()+ "]" + System.getProperties().getProperty("line.separator") +
+        "  " + "player = "+(getPlayer()!=null?Integer.toHexString(System.identityHashCode(getPlayer())):"null") + System.getProperties().getProperty("line.separator") +
+        "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
   }
 }

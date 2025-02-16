@@ -149,11 +149,11 @@ public class Review
   public String toString()
   {
     return super.toString() + "["+
-            "reviewID" + ":" + getReviewID()+ "," +
-            "rating" + ":" + getRating()+ "," +
-            "comment" + ":" + getComment()+ "]" + System.getProperties().getProperty("line.separator") +
-            "  " + "commentDate" + "=" + (getCommentDate() != null ? !getCommentDate().equals(this)  ? getCommentDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
-            "  " + "author = "+(getAuthor()!=null?Integer.toHexString(System.identityHashCode(getAuthor())):"null") + System.getProperties().getProperty("line.separator") +
-            "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
+        "reviewID" + ":" + getReviewID()+ "," +
+        "rating" + ":" + getRating()+ "," +
+        "comment" + ":" + getComment()+ "]" + System.getProperties().getProperty("line.separator") +
+        "  " + "commentDate" + "=" + (getCommentDate() != null ? !getCommentDate().equals(this)  ? getCommentDate().toString().replaceAll("  ","    ") : "this" : "null") + System.getProperties().getProperty("line.separator") +
+        "  " + "author = "+(getAuthor()!=null?Integer.toHexString(System.identityHashCode(getAuthor())):"null") + System.getProperties().getProperty("line.separator") +
+        "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
   }
 }
