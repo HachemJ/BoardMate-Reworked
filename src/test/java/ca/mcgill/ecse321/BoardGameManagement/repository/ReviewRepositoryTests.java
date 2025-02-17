@@ -82,9 +82,9 @@ public class ReviewRepositoryTests {
         assertNotNull(savedReview);
         assertEquals(5, savedReview.getRating());
         assertEquals(description, savedReview.getComment());
-        assertEquals(date, savedReview.getCommentDate());
-        assertEquals(player, savedReview.getAuthor());
-        assertEquals(game, savedReview.getBoardGame());
+        assertEquals(Date.valueOf("2025-02-13"), savedReview.getCommentDate());
+        assertEquals(player.getPlayerID(), savedReview.getAuthor().getPlayerID());
+        assertEquals(game.getGameID(), savedReview.getBoardGame().getGameID());
     }
 
     @Test
@@ -153,9 +153,9 @@ public class ReviewRepositoryTests {
         assertNotNull(savedReview);
         assertEquals(rating, savedReview.getRating());
         assertEquals(description, savedReview.getComment());
-        assertEquals(date, savedReview.getCommentDate());
-        assertEquals(player, savedReview.getAuthor());
-        assertEquals(game, savedReview.getBoardGame());
+        assertEquals(Date.valueOf("2025-02-13"), savedReview.getCommentDate());
+        assertEquals(player.getPlayerID(), savedReview.getAuthor().getPlayerID());
+        assertEquals(game.getGameID(), savedReview.getBoardGame().getGameID());
 
         savedReview.setRating(newRating);
         savedReview.setComment(newDescription);
@@ -168,9 +168,9 @@ public class ReviewRepositoryTests {
         assertNotNull(updatedReview);
         assertEquals(newRating, updatedReview.getRating());
         assertEquals(newDescription, updatedReview.getComment());
-        assertEquals(newDate, updatedReview.getCommentDate());
-        assertEquals(player, updatedReview.getAuthor());
-        assertEquals(game, updatedReview.getBoardGame());
+        assertEquals(Date.valueOf("2033-09-04"), updatedReview.getCommentDate());
+        assertEquals(player.getPlayerID(), updatedReview.getAuthor().getPlayerID());
+        assertEquals(game.getGameID(), updatedReview.getBoardGame().getGameID());
 
     }
 }
