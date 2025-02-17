@@ -1,5 +1,10 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
 
+import java.util.List;
+import java.util.ArrayList;
+
+import jakarta.persistence.CascadeType;
+
 /*PLEASE DO NOT EDIT THIS CODE*/
 /*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
 
@@ -8,6 +13,7 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 // line 2 "model.ump"
 // line 69 "model.ump"
@@ -28,6 +34,10 @@ public class Player
   private String email;
   private String password;
   private boolean isAOwner;
+
+  //Player Association
+  @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
+  private List<Event> events = new ArrayList<>();
 
   //------------------------
   // CONSTRUCTOR
