@@ -66,7 +66,7 @@ The Board Game Management Application is designed to help board game enthusiasts
 The working application fulfilling all the abovementioned functionalities
 
 
-## Project roadmap and timelines
+## Project Roadmap and Timelines
 
 ### February 19: Deliverable 1 -- Backend Model and Database
 
@@ -81,7 +81,7 @@ The working application fulfilling all the abovementioned functionalities
 | HongYi | domain model + persistance testing + ReadMe | 10
 
 
-### March 16: Deliverable 2 -- Service logic and functionalities of the Application
+### March 16: Deliverable 2 -- Service Logic and Functionalities of the Application
 
-### April 6: Deliverable 3 -- front-end logic
+### April 6: Deliverable 3 -- Frontend Logic
 
