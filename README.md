@@ -44,8 +44,7 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ### 📅 Event Management
 
-- Users can create events. 
-- Players can register for events (if slots are available).
+- Users can create and register for events (if slots are available).
 - Users can track their past and upcoming events.
 
 ### 📩 Borrowing System
