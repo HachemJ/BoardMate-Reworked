@@ -1,7 +1,7 @@
 # project-group-16
 
 
-**Team Intro:**
+# Team Intro
   
 | Name | Major | Fun Fact
 | --- | --- | --- |
@@ -16,22 +16,59 @@
 <br />
 
 
-<p align="center"><b> Scope and Purpose of the Project: </b> </p> 
+# Scope and Purpose of the Project
 <br />
 
-<p><b>Project Goal </b></p>
-This project allows game enthusiasts to share their own games, borrow others', review board games, and organize events between players.
+## Overview
+The Board Game Management Application is designed to help board game enthusiasts connect, share their games, and organize gaming events. The platform allows users to lend, borrow, and play board games while fostering a gaming community.
 
-<br />
-<br />
-<p><b>Deliverables </b></p>
+## Main Objectives
+- Allow players to browse, borrow, and review board games.
+- Allow game owners to manage their collection and track lending.
+- Provide a platform for organizing board game events.
+- Enable players and game owners to connect and interact.
+
+## Core Features
+### 👤 User Management
+- Users must log in to access features.
+- Two user types:
+  - Players: Can borrow, review games, create events and register for events.
+  - Game Owners: Can do everything players can do plus lend games they own.
+- Each user has a profile page displaying their name, role, owned games, and event history.
+
+### 🎲 Board Game Management
+- Game Owners can add, update, or remove games from their collection.
+- Players can browse available games and see who owns each game.
+- Players can review and rate board games.
+- System tracks game lending history.
+
+### 📅 Event Management
+
+- Users can create events. 
+- Players can register for events (if slots are available).
+- Users can track their past and upcoming events.
+
+### 📩 Borrowing System
+
+- Players can send borrowing requests to Game Owners.
+- Game Owners can accept or decline borrowing requests.
+- System tracks borrowing history.
+
+## Tech Stack
+
+- 🌐 Backend: Java, Spring Boot, JPA, PostgreSQL
+- 💾 Database: PostgreSQL
+- 🖥️ Frontend: To be determined
+- 🛠️ Build Tools: Gradle
+
+
+# Deliverables
 The working application fulfilling all the abovementioned functionalities
-<br />
-<br />
 
-<p align= "center"><b> Project roadmap and timelines </b></p>
 
-<p><b> February 19: Deliverable 1 -- Backend Model and Database </b></p>
+## Project roadmap and timelines
+
+### February 19: Deliverable 1 -- Backend Model and Database
 
 | Name | Role & Responsibility | Hours
 | --- | --- | --- |
@@ -44,7 +81,7 @@ The working application fulfilling all the abovementioned functionalities
 | HongYi | domain model + persistance testing + ReadMe | 10
 
 
-<p><b> March 16: Deliverable 2 -- Service logic and functionalities of the Application  </b></p>
+### March 16: Deliverable 2 -- Service logic and functionalities of the Application
 
-<p><b> April 6: Deliverable 3 -- front-end logic  </b></p>
+### April 6: Deliverable 3 -- front-end logic
 
