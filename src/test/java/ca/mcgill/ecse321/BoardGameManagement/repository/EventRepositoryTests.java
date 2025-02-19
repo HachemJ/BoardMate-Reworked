@@ -2,6 +2,7 @@ package ca.mcgill.ecse321.BoardGameManagement.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Date;
 import java.sql.Time;
@@ -117,5 +118,27 @@ public class EventRepositoryTests {
     assertEquals(initialCount + 1, newCount);
   }
 
+  @Test
+  public void testManualCleanupBeforePlayerDeletion() {
+    Player player = new Player("Niz", "niz@mcgill.ca", "123789", false);
+    player = playerRepository.save(player);
 
+    BoardGame game = new BoardGame(2, 4, "Chess", "Chess Description");
+    game = boardGameRepository.save(game);
+
+    Event chessEvent = new Event("Chess Night", "Chess Night Description", "4",
+        Date.valueOf("2024-02-10"), Time.valueOf("17:25:00"), Time.valueOf("23:59:59"),
+        "McGill", player, game);
+
+    EventRepo.save(chessEvent);
+    
+     // Step 2: Manually delete related Events
+     EventRepo.deleteAllByOwner(player);
+
+     // Step 3: Delete the Player
+     playerRepository.delete(player);
+
+     assertTrue(EventRepo.findById(chessEvent.getEventID()).isEmpty());
+
+  }
 }

@@ -6,10 +6,14 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 import java.sql.Date;
 import java.sql.Time;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 // line 49 "model.ump"
 // line 85 "model.ump"
@@ -39,7 +43,8 @@ public class Event
 
   //Event Associations
   @ManyToOne
-
+  @JoinColumn(name = "owner", nullable = true)
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Player owner;
   @ManyToOne
   private BoardGame boardGame;
