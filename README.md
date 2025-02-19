@@ -71,13 +71,13 @@ The working application fulfilling all the abovementioned functionalities
 
 | Name | Role & Responsibility | Hours
 | --- | --- | --- |
-| Kathelina | domain model + persistance testing  | 11
-| Tingyi | domain model + persistance testing + Spring Boot | 11
-| Nizar | domain model + persistance layer and testing | 11
-| Alex | domain model + persistance testing + Report | 10
-| Maria | domain model + persistance testing | 10
-| Jad | domain model + persistance testing + set up build system | 11
-| HongYi | domain model + persistance testing + ReadMe | 10
+| Kathelina | domain model + persistance testing (Borrow Request) | 11
+| Tingyi | domain model + persistance testing (BoardGame Copy)+ Spring Boot | 11
+| Nizar | domain model + persistance layer and testing (Event) | 11
+| Alex | domain model + persistance testing (Review) + Wiki project Report | 10
+| Maria | domain model + persistance testing (Registration) + project Report| 11
+| Jad | domain model + persistance testing (BoardGame) + set up build system | 11
+| HongYi | domain model + persistance testing (Player) + ReadMe | 10
 
 
 ### March 16: Deliverable 2 -- Service Logic and Functionalities of the Application
