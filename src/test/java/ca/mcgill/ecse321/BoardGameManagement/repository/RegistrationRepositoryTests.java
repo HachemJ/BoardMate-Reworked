@@ -34,8 +34,8 @@ public class RegistrationRepositoryTests {
     @AfterEach
     public void clearDatabase() {
         registrationRepo.deleteAll();
-		playerRepo.deleteAll();
-		eventRepo.deleteAll();
+	playerRepo.deleteAll();
+	eventRepo.deleteAll();
         boardGameRepo.deleteAll();
     }
 
