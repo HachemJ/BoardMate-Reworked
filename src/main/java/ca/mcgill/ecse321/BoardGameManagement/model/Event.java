@@ -1,61 +1,41 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
-/*PLEASE DO NOT EDIT THIS CODE*/
-/*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
-
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-
 import java.sql.Date;
 import java.sql.Time;
-
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-// line 49 "model.ump"
-// line 85 "model.ump"
 @Entity
-public class Event
-{
+public class Event {
 
-  //------------------------
-  // MEMBER VARIABLES
-  //------------------------
-
-  //Event Attributes
   @Id
   @GeneratedValue
   private int eventID;
 
   private String name;
-
   private String description;
   private String maxSpot;
-
   private Date eventDate;
-
   private Time startTime;
   private Time endTime;
   private String location;
 
-  //Event Associations
   @ManyToOne
   @JoinColumn(name = "owner", nullable = true)
   @OnDelete(action = OnDeleteAction.CASCADE)
   private Player owner;
+
   @ManyToOne
   private BoardGame boardGame;
 
-  //------------------------
-  // CONSTRUCTOR
-  //------------------------
-  public Event() {
-  }
-  public Event(String aName, String aDescription, String aMaxSpot, Date aEventDate, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame)
-  {
+  public Event() {}
+
+  public Event(String aName, String aDescription, String aMaxSpot, Date aEventDate, Time aStartTime, Time aEndTime, String aLocation, Player aOwner, BoardGame aBoardGame) {
     name = aName;
     description = aDescription;
     maxSpot = aMaxSpot;
@@ -63,90 +43,62 @@ public class Event
     startTime = aStartTime;
     endTime = aEndTime;
     location = aLocation;
-    if (!setOwner(aOwner))
-    {
-      throw new RuntimeException("Unable to create Event due to aOwner. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    if (!setOwner(aOwner)) {
+      throw new RuntimeException("Unable to create Event due to aOwner.");
     }
-    if (!setBoardGame(aBoardGame))
-    {
-      throw new RuntimeException("Unable to create Event due to aBoardGame. See https://manual.umple.org?RE002ViolationofAssociationMultiplicity.html");
+    if (!setBoardGame(aBoardGame)) {
+      throw new RuntimeException("Unable to create Event due to aBoardGame.");
     }
   }
 
-  //------------------------
-  // INTERFACE
-  //------------------------
-
-  public boolean setName(String aName)
-  {
-    boolean wasSet = false;
+  public boolean setName(String aName) {
     name = aName;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
-  public boolean setDescription(String aDescription)
-  {
-    boolean wasSet = false;
+
+  public boolean setDescription(String aDescription) {
     description = aDescription;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setMaxSpot(String aMaxSpot)
-  {
-    boolean wasSet = false;
+  public boolean setMaxSpot(String aMaxSpot) {
     maxSpot = aMaxSpot;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setEventDate(Date aEventDate)
-  {
-    boolean wasSet = false;
+  public boolean setEventDate(Date aEventDate) {
     eventDate = aEventDate;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setStartTime(Time aStartTime)
-  {
-    boolean wasSet = false;
+  public boolean setStartTime(Time aStartTime) {
     startTime = aStartTime;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setEndTime(Time aEndTime)
-  {
-    boolean wasSet = false;
+  public boolean setEndTime(Time aEndTime) {
     endTime = aEndTime;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setLocation(String aLocation)
-  {
-    boolean wasSet = false;
+  public boolean setLocation(String aLocation) {
     location = aLocation;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public int getEventID()
-  {
+  public int getEventID() {
     return eventID;
   }
-  public String getName()
-  {
+
+  public String getName() {
     return name;
   }
-  public String getDescription()
-  {
+
+  public String getDescription() {
     return description;
   }
 
-  public String getMaxSpot()
-  {
+  public String getMaxSpot() {
     return maxSpot;
   }
 
@@ -154,64 +106,51 @@ public class Event
     return eventDate;
   }
 
-  public Time getStartTime()
-  {
+  public Time getStartTime() {
     return startTime;
   }
 
-  public Time getEndTime()
-  {
+  public Time getEndTime() {
     return endTime;
   }
 
-  public String getLocation()
-  {
+  public String getLocation() {
     return location;
   }
-  /* Code from template association_GetOne */
-  public Player getOwner()
-  {
+
+  public Player getOwner() {
     return owner;
   }
-  /* Code from template association_GetOne */
-  public BoardGame getBoardGame()
-  {
+
+  public BoardGame getBoardGame() {
     return boardGame;
   }
-  /* Code from template association_SetUnidirectionalOne */
-  public boolean setOwner(Player aNewOwner)
-  {
-    boolean wasSet = false;
-    if (aNewOwner != null)
-    {
+
+  public boolean setOwner(Player aNewOwner) {
+    if (aNewOwner != null) {
       owner = aNewOwner;
-      wasSet = true;
+      return true;
     }
-    return wasSet;
-  }
-  /* Code from template association_SetUnidirectionalOne */
-  public boolean setBoardGame(BoardGame aNewBoardGame)
-  {
-    boolean wasSet = false;
-    if (aNewBoardGame != null)
-    {
-      boardGame = aNewBoardGame;
-      wasSet = true;
-    }
-    return wasSet;
+    return false;
   }
 
-  public void delete()
-  {
+  public boolean setBoardGame(BoardGame aNewBoardGame) {
+    if (aNewBoardGame != null) {
+      boardGame = aNewBoardGame;
+      return true;
+    }
+    return false;
+  }
+
+  public void delete() {
     owner = null;
     boardGame = null;
   }
 
-
   public String toString() {
     return super.toString() + "[" +
         "eventID=" + eventID + ", " +
-        "name=" + name + ", " +  // Added field
+        "name=" + name + ", " +
         "description=" + description + ", " +
         "eventDate=" + (eventDate != null ? eventDate.toString() : "null") + ", " +
         "maxSpot=" + maxSpot + ", " +
@@ -219,5 +158,4 @@ public class Event
         "  " + "startTime=" + (startTime != null ? startTime.toString() : "null") + System.lineSeparator() +
         "  " + "endTime=" + (endTime != null ? endTime.toString() : "null");
   }
-
 }
