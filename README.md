@@ -84,3 +84,5 @@ The working application fulfilling all the abovementioned functionalities
 
 ### April 6: Deliverable 3 -- Frontend Logic
 
+
+## Project Report [🔗 Link](https://github.com/McGill-ECSE321-Winter2025/BoardGameManagement/wiki)
