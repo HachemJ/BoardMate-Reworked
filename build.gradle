@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
 	id 'io.spring.dependency-management' version '1.1.7'
+	id 'jacoco'
 }
 
 group = 'ca.mcgill.ecse321'
@@ -11,6 +12,10 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
+}
+
+jacoco {
+	toolVersion = "0.8.10" // Use latest version of JaCoCo
 }
 
 repositories {
@@ -23,12 +28,26 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	annotationProcessor 'com.github.therapi:therapi-runtime-javadoc-scribe:0.13.0'
+	implementation 'com.github.therapi:therapi-runtime-javadoc:0.13.0'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 
 	testLogging{
 		events "passed", "skipped", "failed"
+	}
+}
+
+jacocoTestReport {
+	dependsOn test // tests are required to run before generating the report
+	reports {
+		xml.required = true
+		csv.required = false
+		html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
 	}
 }
