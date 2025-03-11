@@ -27,7 +27,7 @@ public class BorrowRequestController {
 
     /// TO CORRECT -> NOT THE RIGHT SYNTAX
     @GetMapping("BorrowRequests/playerID?={ownerId}")
-    public ArrayList<BorrowRequestResponseDTO> getAllBorrowRequestsByOwner(@RequestBody int ownerId) {
+    public ArrayList<BorrowRequestResponseDTO> getAllBorrowRequestsByOwner(@PathVariable int ownerId) {
         ArrayList<BorrowRequest> requests = borrowRequestService.getBorrowRequestsByOwner(ownerId);
         ArrayList<BorrowRequestResponseDTO> requestDTOs = new ArrayList<>();
 
