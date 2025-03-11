@@ -2,31 +2,15 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 
 import java.util.List;
 import java.util.ArrayList;
-
 import jakarta.persistence.CascadeType;
-
-/*PLEASE DO NOT EDIT THIS CODE*/
-/*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
-
-
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 
-// line 2 "model.ump"
-// line 69 "model.ump"
-// line 102 "model.ump"
 @Entity
-public class Player
-{
+public class Player {
 
-  //------------------------
-  // MEMBER VARIABLES
-  //------------------------
-
-  //Player Attributes
   @Id
   @GeneratedValue
   private int playerID;
@@ -35,92 +19,63 @@ public class Player
   private String password;
   private boolean isAOwner;
 
-  //Player Association
   @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<Event> events = new ArrayList<>();
 
-  //------------------------
-  // CONSTRUCTOR
-  //------------------------
-
   public Player() {}
 
-  public Player(String aName, String aEmail, String aPassword, boolean aIsAOwner)
-  {
+  public Player(String aName, String aEmail, String aPassword, boolean aIsAOwner) {
     name = aName;
     email = aEmail;
     password = aPassword;
     isAOwner = aIsAOwner;
   }
 
-  //------------------------
-  // INTERFACE
-  //------------------------
-
-  public boolean setName(String aName)
-  {
-    boolean wasSet = false;
+  public boolean setName(String aName) {
     name = aName;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setEmail(String aEmail)
-  {
-    boolean wasSet = false;
+  public boolean setEmail(String aEmail) {
     email = aEmail;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setPassword(String aPassword)
-  {
-    boolean wasSet = false;
+  public boolean setPassword(String aPassword) {
     password = aPassword;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setIsAOwner(boolean aIsAOwner)
-  {
-    boolean wasSet = false;
+  public boolean setIsAOwner(boolean aIsAOwner) {
     isAOwner = aIsAOwner;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public int getPlayerID()
-  {
+  public int getPlayerID() {
     return playerID;
   }
 
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
-  public String getEmail()
-  {
+  public String getEmail() {
     return email;
   }
 
-  public String getPassword()
-  {
+  public String getPassword() {
     return password;
   }
 
-  public boolean getIsAOwner()
-  {
-    return isAOwner;
-  }
-  /* Code from template attribute_IsBoolean */
-  public boolean isIsAOwner()
-  {
+  public boolean getIsAOwner() {
     return isAOwner;
   }
 
-  public String toString()
-  {
+  public boolean isIsAOwner() {
+    return isAOwner;
+  }
+
+  public String toString() {
     return super.toString() + "["+
         "playerID" + ":" + getPlayerID()+ "," +
         "name" + ":" + getName()+ "," +
