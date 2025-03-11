@@ -7,8 +7,6 @@ public class BoardGameCopyCreationDto {
     private int playerId;
     private int boardGameId;
 
-    private BoardGameCopyCreationDto() {}
-
     public BoardGameCopyCreationDto(String specification, boolean isAvailable, int playerId, int boardGameId) {
         this.specification = specification;
         this.isAvailable = isAvailable;
