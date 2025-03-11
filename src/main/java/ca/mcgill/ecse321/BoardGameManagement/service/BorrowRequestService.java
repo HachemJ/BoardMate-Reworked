@@ -7,10 +7,8 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.BorrowRequestRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
 import java.util.ArrayList;
 
 @Service

@@ -26,7 +26,7 @@ public class BorrowRequestController {
     }
 
     /// TO CORRECT -> NOT THE RIGHT SYNTAX
-    @GetMapping("BorrowRequests/playerID?={id}")
+    @GetMapping("BorrowRequests/playerID?={ownerId}")
     public ArrayList<BorrowRequestResponseDTO> getAllBorrowRequestsByOwner(@RequestBody int ownerId) {
         ArrayList<BorrowRequest> requests = borrowRequestService.getBorrowRequestsByOwner(ownerId);
         ArrayList<BorrowRequestResponseDTO> requestDTOs = new ArrayList<>();
@@ -38,16 +38,17 @@ public class BorrowRequestController {
         return requestDTOs;
     }
 
-
-    public void acceptBorrowRequest(int requestID) {
-        borrowRequestService.acceptBorrowRequest(requestID);
+    @PutMapping("BorrowRequests/{requestId}")
+    public void acceptBorrowRequest(@PathVariable int requestId) {
+        borrowRequestService.acceptBorrowRequest(requestId);
+    }
+    @PutMapping("BorrowRequests/{requestId}")
+    public void declineBorrowRequest(@PathVariable int requestId) {
+        borrowRequestService.declineBorrowRequest(requestId);
     }
 
-    public void declineBorrowRequest(int requestID) {
-        borrowRequestService.declineBorrowRequest(requestID);
-    }
-
-    public void deleteBorrowRequest(int requestID) {
-        borrowRequestService.deleteBorrowRequest(requestID);
+    @DeleteMapping("BorrowRequests/{requestId}")
+    public void deleteBorrowRequest(@PathVariable int requestId) {
+        borrowRequestService.deleteBorrowRequest(requestId);
     }
 }
