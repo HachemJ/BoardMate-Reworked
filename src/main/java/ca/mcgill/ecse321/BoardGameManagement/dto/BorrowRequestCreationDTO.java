@@ -11,14 +11,14 @@ import java.sql.Date;
 public class BorrowRequestCreationDTO {
 
     @NotNull(message = "Date must not be null")
-    @FutureOrPresent(message = "date of end of loan must be in the future")
+    @FutureOrPresent(message = "date of start of loan must be in the future")
     private Date startOfLoan;
     @NotNull(message = "loan end date must not be null")
-    @Future(message = "date of end of loan must be in the future")
+    @Future(message = "date of end of loan cannot be in the past")
     private Date endOfLoan;
     @Positive(message =  "borrowerId must be a positive number")
     private int borrowerID;
-    @Positive(message = "the gameId must must be a positive number")
+    @Positive(message = "the gameId must be a positive number")
     private int specificGameID;
 
 

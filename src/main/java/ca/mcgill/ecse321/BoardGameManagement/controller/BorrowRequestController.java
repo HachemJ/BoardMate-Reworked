@@ -19,7 +19,7 @@ public class BorrowRequestController {
     @Autowired
     private BorrowRequestService borrowRequestService;
 
-    @PostMapping("BorrowRequests")
+    @PostMapping("/BorrowRequests")
     @ResponseStatus(HttpStatus.CREATED)
     public BorrowRequestResponseDTO createBorrowRequest(@RequestBody BorrowRequestCreationDTO newRequest) {
         BorrowRequest request = borrowRequestService.createBorrowRequest(newRequest);
@@ -28,7 +28,7 @@ public class BorrowRequestController {
 
     }
 
-    @GetMapping("BorrowRequests")
+    @GetMapping("/BorrowRequests")
     public ArrayList<BorrowRequestResponseDTO> getAllBorrowRequestsByOwner(@RequestParam int ownerId) {
         ArrayList<BorrowRequest> requests = borrowRequestService.getBorrowRequestsByOwner(ownerId);
         ArrayList<BorrowRequestResponseDTO> requestDTOs = new ArrayList<>();
@@ -40,32 +40,38 @@ public class BorrowRequestController {
         return requestDTOs;
     }
 
+    @GetMapping("/BorrowRequests/{requestId}")
+    public BorrowRequestResponseDTO getBorrowRequest(@PathVariable int requestId) {
+        BorrowRequest request = borrowRequestService.getBorrowRequest(requestId);
 
-    @PutMapping("BorrowRequests/{requestId}")
+        return new BorrowRequestResponseDTO(request);
+    }
+
+
+    @PutMapping("/BorrowRequests/{requestId}")
     public void manageBorrowRequest(@PathVariable int requestId, @RequestParam String action) {
         if (action == null) {
             throw new GlobalException(HttpStatus.BAD_REQUEST, "A borrow request can only be accepted or declined");
         }
 
-
         if (action.strip().equalsIgnoreCase("accept")) {
-            borrowRequestService.acceptBorrowRequest(requestId);
-        }else if (action.strip().equalsIgnoreCase("decline")) {
-            borrowRequestService.declineBorrowRequest(requestId);
-        }else {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST); /////WILL THIS WORK??
-            throw new InvalidParameterException("A borrow request can only be accepted or declined");
+            borrowRequestService.manageRequestReceived(requestId, BorrowRequest.RequestStatus.Accepted);
 
+        }else if (action.strip().equalsIgnoreCase("decline")) {
+            borrowRequestService.manageRequestReceived(requestId, BorrowRequest.RequestStatus.Denied);
+
+        }else {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "A borrow request can only be accepted or declined");
         }
 
     }
 
-    @DeleteMapping("BorrowRequests/{requestId}")
+    @DeleteMapping("/BorrowRequests/{requestId}")
     public void deleteBorrowRequest(@PathVariable int requestId) {
         borrowRequestService.deleteBorrowRequest(requestId);
     }
 
-    @PutMapping("BoardGameCopies/{copyId}")
+    @PutMapping("/BoardGameCopies/{copyId}")
     public void manageBorrowedGameStatus(@PathVariable int copyId, @RequestParam String action) {
         if (action == null) {
             throw new GlobalException(HttpStatus.BAD_REQUEST, "The game borrowing can only be confirmed or cancelled");

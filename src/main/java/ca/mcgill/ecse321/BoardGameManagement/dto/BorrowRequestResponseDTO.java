@@ -15,6 +15,8 @@ public class BorrowRequestResponseDTO {
     private String borrowerName;
     @NotBlank(message = "The game must not ne null")
     private String specificGameName;
+    @NotNull(message = "The request status must not be null")
+    private String requestStatus;
 
 
     public BorrowRequestResponseDTO() {}
@@ -24,6 +26,7 @@ public class BorrowRequestResponseDTO {
         this.endOfLoan = borrowRequest.getEndOfLoan();
         this.borrowerName = borrowRequest.getRequester().getName();
         this.specificGameName = borrowRequest.getBoardGameCopy().getBoardGame().getName();
+        this.requestStatus = borrowRequest.getRequestStatus().toString();
 
     }
 
@@ -42,4 +45,6 @@ public class BorrowRequestResponseDTO {
     public String getBorrowerName() {
         return borrowerName;
     }
+
+    public String getRequestStatus() {return requestStatus;}
 }
