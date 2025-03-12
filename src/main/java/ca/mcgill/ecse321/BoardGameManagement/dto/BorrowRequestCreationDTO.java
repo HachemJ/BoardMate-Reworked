@@ -1,14 +1,24 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import ca.mcgill.ecse321.BoardGameManagement.model.BorrowRequest;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 
 import java.sql.Date;
 
 public class BorrowRequestCreationDTO {
 
+    @NotNull(message = "Date must not be null")
+    @FutureOrPresent(message = "date of end of loan must be in the future")
     private Date startOfLoan;
+    @NotNull(message = "loan end date must not be null")
+    @Future(message = "date of end of loan must be in the future")
     private Date endOfLoan;
+    @Positive(message =  "borrowerId must be a positive number")
     private int borrowerID;
+    @Positive(message = "the gameId must must be a positive number")
     private int specificGameID;
 
 
