@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 public class BoardGameCopyService {
 
@@ -57,22 +59,56 @@ public class BoardGameCopyService {
     }
 
     @Transactional
-    public BoardGameCopy updateBoardGameCopy(int boardGameCopyId, BoardGameCopyCreationDto boardGameCopyToUpdate) {
+    public BoardGameCopy updateBoardGameCopy(int boardGameCopyId, BoardGameCopyCreationDto boardGameCopyToUpdate) { // should i use dto or just pass in a string
 
-        BoardGameCopy boardGameCopy = findBoardGameCopyById(boardGameCopyId);
-        Player player = playerRepository.findByPlayerID(boardGameCopyToUpdate.getPlayerId());
-        BoardGame boardGame = boardGameRepository.findByGameID(boardGameCopyToUpdate.getBoardGameId());
+        BoardGameCopy boardGameCopy = boardGameCopyRepository.findBySpecificGameID(boardGameCopyId);
+        BoardGame newBoardGame = boardGameRepository.findByGameID(boardGameCopyToUpdate.getBoardGameId());
+        Player newPlayer = playerRepository.findByPlayerID(boardGameCopyToUpdate.getPlayerId());
 
         if (boardGameCopy == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGameCopy not found with ID: " + boardGameCopyId);
         }
-        if (player == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + boardGameCopyToUpdate.getPlayerId());
-        }
-        if (boardGame == null) {
+        if (newBoardGame == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameCopyToUpdate.getBoardGameId());
         }
-        //todo
+        if (newPlayer == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + boardGameCopyToUpdate.getPlayerId());
+        }
+
+        boardGameCopy.setBoardGame(newBoardGame);
+        boardGameCopy.setPlayer(newPlayer);
+        boardGameCopy.setSpecification(boardGameCopyToUpdate.getSpecification());
+        boardGameCopy.setIsAvailable(boardGameCopyToUpdate.getIsAvailable());
+
         return boardGameCopyRepository.save(boardGameCopy);
+    }
+
+    @Transactional
+    public void deleteBoardGameCopy(int boardGameCopyId) {
+        BoardGameCopy boardGameCopy = boardGameCopyRepository.findBySpecificGameID(boardGameCopyId);
+        if (boardGameCopy == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGameCopy not found with ID: " + boardGameCopyId);
+        }
+        boardGameCopyRepository.delete(boardGameCopy);
+    }
+
+    public ArrayList<BoardGameCopy> findBoardGameCopiesByPlayerId(int playerId) {
+        Player player = playerRepository.findByPlayerID(playerId);
+        if (player == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerId);
+        }
+        return boardGameCopyRepository.findByPlayer(player);
+    }
+
+    public ArrayList<BoardGameCopy> findBoardGameCopiesByBoardGameId(int boardGameId) {
+        BoardGame boardGame = boardGameRepository.findByGameID(boardGameId);
+        if (boardGame == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameId);
+        }
+        return boardGameCopyRepository.findByBoardGame(boardGame);
+    }
+
+    public ArrayList<BoardGameCopy> findAllBoardGameCopies() {
+        return (ArrayList<BoardGameCopy>) boardGameCopyRepository.findAll();
     }
 }

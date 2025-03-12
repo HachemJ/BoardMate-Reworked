@@ -1,10 +1,21 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 public class BoardGameCopyCreationDto {
 
+    @NotBlank(message = "Specification is mandatory")
     private String specification;
+
+    @NotNull(message = "Availability is mandatory")
     private boolean isAvailable;
+
+    @Positive(message = "Player ID must be positive")
     private int playerId;
+
+    @Positive(message = "Board Game ID must be positive")
     private int boardGameId;
 
     public BoardGameCopyCreationDto(String specification, boolean isAvailable, int playerId, int boardGameId) {

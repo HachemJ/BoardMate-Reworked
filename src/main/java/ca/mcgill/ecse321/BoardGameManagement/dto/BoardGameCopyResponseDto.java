@@ -1,5 +1,7 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
+
 public class BoardGameCopyResponseDto {
 
     private String specification;
@@ -9,11 +11,11 @@ public class BoardGameCopyResponseDto {
 
     private BoardGameCopyResponseDto() {}
 
-    public BoardGameCopyResponseDto(String specification, boolean isAvailable, String playerName, String boardGameName) {
-        this.specification = specification;
-        this.isAvailable = isAvailable;
-        this.playerName = playerName;
-        this.boardGameName = boardGameName;
+    public BoardGameCopyResponseDto(BoardGameCopy boardGameCopy) {
+        this.boardGameName = boardGameCopy.getBoardGame().getName();
+        this.playerName = boardGameCopy.getPlayer().getName();
+        this.specification = boardGameCopy.getSpecification();
+        this.isAvailable = boardGameCopy.getIsAvailable();
     }
 
     public String getSpecification() {
