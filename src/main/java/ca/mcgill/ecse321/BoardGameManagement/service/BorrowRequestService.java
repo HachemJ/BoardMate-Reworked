@@ -13,8 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.sql.Date;
-import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Service
@@ -31,22 +29,10 @@ public class BorrowRequestService {
 
     public BorrowRequestService() {}
 
-    public ArrayList<BorrowRequest> getBorrowRequestsByOwner(int ownerId) {
-        Player owner = playerRepository.findById(ownerId).orElseThrow(() ->
-                new GlobalException(HttpStatus.BAD_REQUEST, String.format("The owner %d does not exist", ownerId)));
-        if (!owner.getIsAOwner()) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format(" %s is not an owner", owner.getName()));
-        }
-
-        return borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
-    }
-
     private void checkValidId(int Id, String type){
         if (Id <= 0){
-            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s is invalid", type));
+            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s %d is invalid", type, Id));
         }
-
-
     }
 
     private void checkNotNull(Object tested, String type){
@@ -54,6 +40,7 @@ public class BorrowRequestService {
             throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s is null", type));
         }
     }
+
 
 
 
@@ -72,6 +59,25 @@ public class BorrowRequestService {
                     String.format("The game %s does not exist", requestDTO.getSpecificGameID()));
         }
 
+        if (requestDTO.getStartOfLoan().after(requestDTO.getEndOfLoan())) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST,
+                    String.format("Borrow end time %s cannot be earlier than start time %s",
+                            requestDTO.getEndOfLoan(), requestDTO.getStartOfLoan()));
+
+        }
+
+        //check that the game you want to borrow does not have a request with overlapping time
+        Player owner = boardGameCopyRepository.findBySpecificGameID(requestDTO.getSpecificGameID()).getPlayer();
+        ArrayList<BorrowRequest> requests = borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
+
+        for (BorrowRequest request : requests) {
+            //there is an existing borrowRequest overlapping with the request time
+            if (!request.getStartOfLoan().after(requestDTO.getEndOfLoan()) &&
+                    !requestDTO.getStartOfLoan().after(request.getEndOfLoan())){
+                throw new GlobalException(HttpStatus.CONFLICT, "A request exists that uses this time");
+            }
+        }
+
         BorrowRequest borrowRequest = new BorrowRequest(requestDTO.getStartOfLoan(), requestDTO.getEndOfLoan(),
                 BorrowRequest.RequestStatus.Pending, borrower, boardToBorrow);
 
@@ -79,59 +85,134 @@ public class BorrowRequestService {
     }
 
 
-    public void acceptBorrowRequest(int requestId) {
-        checkValidId(requestId, "requestId");
+    public ArrayList<BorrowRequest> getBorrowRequestsByOwner(int ownerId) {
+        checkValidId(ownerId, "ownerId");
 
-        BorrowRequest request = borrowRequestRepository.findById(requestId).orElseThrow();
-        request.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
-        borrowRequestRepository.save(request);
+        Player owner = playerRepository.findByPlayerID(ownerId);
+        if (owner == null) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The owner %d does not exist", ownerId));
+        }
+
+        if (!owner.getIsAOwner()) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("Player %s is not an owner", owner.getName()));
+        }
+
+        return borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
     }
 
-    public void declineBorrowRequest(int requestId) {
+    public BorrowRequest getBorrowRequest(int requestId) {
         checkValidId(requestId, "requestId");
 
-        BorrowRequest request = borrowRequestRepository.findById(requestId).orElseThrow();
-        request.setRequestStatus(BorrowRequest.RequestStatus.Denied);
-        borrowRequestRepository.save(request);
+        BorrowRequest request = borrowRequestRepository.findByRequestID(requestId);
+        if (request == null) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The request %d does not exist", requestId));
+        }else{
+            return request;
+        }
     }
 
-    public void deleteBorrowRequest(int requestId) {
-        checkValidId(requestId, "requestId");
-
-        BorrowRequest request = borrowRequestRepository.findById(requestId).orElseThrow();
-        borrowRequestRepository.delete(request);
-
-    }
 
     /**
-     * Called by the REQUESTER when they no longer want to continue borrowing the game
-     * even if the deadline has not been reached
-     * @param requestId the borrow request to cancel
+     * should only be viewed by the GAME OWNER, to manage the received requests
+     *
+     * @param requestId the borrow request's identifier
+     * @param requestStatus the status to change to -> accept or decline
+     * @return BorrowRequest : the updated borrowRequest
      */
-    public void cancelBorrowing(int requestId) { /// called by the requester
-        checkValidId(requestId, "requestId");
+    public BorrowRequest manageRequestReceived(int requestId, BorrowRequest.RequestStatus requestStatus) {
 
-        BorrowRequest request = borrowRequestRepository.findById(requestId).orElseThrow();
+        BorrowRequest request = getBorrowRequest(requestId);
 
-        int gameCopyCancelled = request.getBoardGameCopy().getSpecificGameID();
-        BoardGameCopy gameNowAvailable =  boardGameCopyRepository.findBySpecificGameID(gameCopyCancelled);
-        gameNowAvailable.setIsAvailable(true);
-        boardGameCopyRepository.save(gameNowAvailable);
+        if (requestStatus == null) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "The request status cannot be null");
+        }
+
+        if (requestStatus.equals(BorrowRequest.RequestStatus.Pending) || requestStatus.equals(BorrowRequest.RequestStatus.Done)) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Cannot manage request to make it pending");
+        }
+
+        if (!request.getRequestStatus().equals(BorrowRequest.RequestStatus.Pending)) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The request %d has already been dealt with", requestId));
+        }
+
+        request.setRequestStatus(requestStatus);
+        return borrowRequestRepository.save(request);
     }
 
+
     /**
-     * Called by REQUESTER to confirm they did receive the game
+     * Called by REQUESTER to confirm they did receive the game when today = StartDay
      *
      * @param requestId the borrow request to confirm
      */
     public void confirmBorrowing(int requestId) {
-        checkValidId(requestId, "requestId");
-
-        BorrowRequest request = borrowRequestRepository.findById(requestId).orElseThrow();
-
+        BorrowRequest request = getBorrowRequest(requestId);
         int gameCopyConfirmed = request.getBoardGameCopy().getSpecificGameID();
+
         BoardGameCopy gameNowAvailable =  boardGameCopyRepository.findBySpecificGameID(gameCopyConfirmed);
+        if (gameNowAvailable == null){
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "The game to borrow cannot be null");
+        }
+
+        if (!gameNowAvailable.getIsAvailable()){
+            throw new GlobalException(HttpStatus.CONFLICT,
+                    String.format("The requested Board game %s of owner %s is not available",
+                            gameNowAvailable.getBoardGame().getName(),
+                            gameNowAvailable.getPlayer().getName()));
+        }
+
+        if(!request.getRequestStatus().equals(BorrowRequest.RequestStatus.Accepted)){
+            throw new GlobalException(HttpStatus.CONFLICT,
+                    String.format("Cannot confirm borrow since its request %d was never accepted", requestId));
+        }
+
+
         gameNowAvailable.setIsAvailable(false);
         boardGameCopyRepository.save(gameNowAvailable);
     }
+
+
+    /**
+     * Called by the REQUESTER when they no longer want to continue borrowing the game but the deadline has not been reached
+     * OR
+     * Called by GAME OWNER to confirm that they have received the game when the deadline has arrived
+     * @param requestId the borrow request to cancel
+     */
+    public void cancelBorrowing(int requestId) {
+        BorrowRequest request = getBorrowRequest(requestId);
+        int gameCopyConfirmed = request.getBoardGameCopy().getSpecificGameID();
+
+        BoardGameCopy gameToMakeAvailable =  boardGameCopyRepository.findBySpecificGameID(gameCopyConfirmed);
+
+        if (gameToMakeAvailable == null){
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "The game to borrow cannot be null");
+        }
+        if (gameToMakeAvailable.getIsAvailable()){
+            throw new GlobalException(HttpStatus.CONFLICT,
+                    String.format("The requested Board game %s of owner %s is already available",
+                            gameToMakeAvailable.getBoardGame().getName(),
+                            gameToMakeAvailable.getPlayer().getName()));
+        }
+
+        if(!request.getRequestStatus().equals(BorrowRequest.RequestStatus.Accepted)){
+            throw new GlobalException(HttpStatus.CONFLICT,
+                    String.format("The request %d is not in accepted state: cannot cancel its borrow", requestId));
+        }
+
+        gameToMakeAvailable.setIsAvailable(true);
+        boardGameCopyRepository.save(gameToMakeAvailable);
+        request.setRequestStatus(BorrowRequest.RequestStatus.Done);
+        borrowRequestRepository.save(request);
+
+    }
+
+
+
+    public void deleteBorrowRequest(int requestId) {
+        //this ensures that the Id is valid, and throws error if not
+        getBorrowRequest(requestId);
+
+        borrowRequestRepository.deleteById(requestId);
+    }
+
 }
