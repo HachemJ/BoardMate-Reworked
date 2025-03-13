@@ -24,8 +24,7 @@ public class ReviewCreationDto {
         this.boardGame = review.getBoardGame();
     }
 
-    public ReviewCreationDto(int reviewID, int rating, String comment, Date commentDate, Player author, BoardGame boardGame) {
-        this.reviewID = reviewID;
+    public ReviewCreationDto(int rating, String comment, Date commentDate, Player author, BoardGame boardGame) {
         this.rating = rating;
         this.comment = comment;
         this.commentDate = commentDate;
