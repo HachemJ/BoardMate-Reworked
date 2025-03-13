@@ -40,7 +40,7 @@ public class PlayerServiceTests {
     @Test
     public void testCreateValidPlayer() {
         // Arrange
-        PlayerCreationDto dto = new PlayerCreationDto(VALID_NAME, VALID_EMAIL, VALID_PASSWORD);
+        PlayerCreationDto dto = new PlayerCreationDto(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);
         when(playerRepository.save(any(Player.class))).thenAnswer(
             (InvocationOnMock invocation) -> invocation.getArgument(0));
 
@@ -91,7 +91,7 @@ public class PlayerServiceTests {
         // Arrange
         Player existingPlayer = new Player(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);
         PlayerCreationDto updatedDto =
-            new PlayerCreationDto("New Name", "new.email@mail.com", "newpassword");
+            new PlayerCreationDto("New Name", "new.email@mail.com", "newpassword", false);
 
         when(playerRepository.findByPlayerID(VALID_ID)).thenReturn(existingPlayer);
         when(playerRepository.save(any(Player.class))).thenAnswer(
@@ -114,7 +114,7 @@ public class PlayerServiceTests {
     public void testUpdateNonExistentPlayer() {
         // Arrange
         PlayerCreationDto dto =
-            new PlayerCreationDto("New Name", "new.email@mail.com", "newpassword");
+            new PlayerCreationDto("New Name", "new.email@mail.com", "newpassword", true);
         when(playerRepository.findByPlayerID(VALID_ID)).thenReturn(null);
 
         // Act + Assert
@@ -130,7 +130,7 @@ public class PlayerServiceTests {
         // Arrange
 
         PlayerCreationDto dto =
-            new PlayerCreationDto("Test Name", "test@example.com", "password123");
+            new PlayerCreationDto("Test Name", "test@example.com", "password123", true);
         // Simulate that no player exists for the given id
         when(playerRepository.findByPlayerID(invalidId)).thenReturn(null);
 
@@ -149,7 +149,7 @@ public class PlayerServiceTests {
 
         // Arrange: create an invalid DTO with a blank name (violating @NotBlank)
         PlayerCreationDto invalidDto =
-            new PlayerCreationDto("", "new.email@mail.com", "newpassword");
+            new PlayerCreationDto("", "new.email@mail.com", "newpassword", false);
 
         // Act & Assert: expect that calling updatePlayer with invalid input throws ConstraintViolationException
         ConstraintViolationException exception =

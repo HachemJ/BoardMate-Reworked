@@ -21,10 +21,11 @@ public class PlayerCreationDto {
     //isAOwner
     }
     
-    public PlayerCreationDto(String name, String email, String psw) {
+    public PlayerCreationDto(String name, String email, String psw, boolean isAOwner) {
         this.name = name;
         this.email=email;
         this.password=psw;
+        this.isAOwner=isAOwner;
     }
 
     public String getName(){
