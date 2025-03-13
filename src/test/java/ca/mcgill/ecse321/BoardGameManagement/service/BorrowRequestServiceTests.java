@@ -132,7 +132,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_inexistentRequester() {
+    public void createInvalidBorrowRequest_nonexistentRequester() {
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
                 startLoan, endLoan, 0, 333);
         GlobalException e = assertThrows(GlobalException.class,
@@ -345,7 +345,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getUnsuccessfulBorrowRequestByOwner_InexistentId() {
+    public void getUnsuccessfulBorrowRequestByOwner_nonexistentId() {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequestsByOwner(222));
 

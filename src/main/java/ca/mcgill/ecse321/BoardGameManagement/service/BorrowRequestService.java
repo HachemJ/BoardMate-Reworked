@@ -29,15 +29,16 @@ public class BorrowRequestService {
 
     public BorrowRequestService() {}
 
+
     private void checkValidId(int Id, String type){
         if (Id <= 0){
             throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s %d is invalid", type, Id));
         }
     }
 
-    private void checkNotNull(Object tested, String type){
+    private void checkNotNull(Object tested){
         if (tested == null){
-            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s is null", type));
+            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s is null", "requestDTO"));
         }
     }
 
@@ -46,7 +47,7 @@ public class BorrowRequestService {
 
     @Transactional
     public BorrowRequest createBorrowRequest(@Valid BorrowRequestCreationDTO requestDTO) {
-        checkNotNull(requestDTO, "requestDTO");
+        checkNotNull(requestDTO);
 
         Player borrower = playerRepository.findByPlayerID(requestDTO.getBorrowerID());
         if (borrower == null) {
@@ -209,7 +210,7 @@ public class BorrowRequestService {
 
 
     public void deleteBorrowRequest(int requestId) {
-        //this ensures that the Id is valid, and throws error if not
+        //this ensures that the id is valid, and throws error if not
         getBorrowRequest(requestId);
 
         borrowRequestRepository.deleteById(requestId);

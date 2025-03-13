@@ -1,6 +1,5 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import ca.mcgill.ecse321.BoardGameManagement.model.BorrowRequest;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;

@@ -11,7 +11,6 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameCopyRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BorrowRequestRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
-import com.sun.jdi.VoidType;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +22,6 @@ import org.springframework.http.ResponseEntity;
 import java.sql.Date;
 import java.time.LocalDate;
 
-import static org.antlr.v4.runtime.tree.xpath.XPath.findAll;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT) // make Spring listen to Http requests
@@ -47,9 +45,7 @@ public class BorrowRequestIntegrationTests {
     private static final Date endDate = Date.valueOf(LocalDate.now().plusDays(5));
 
     private Player requester1;
-    private Player requester2;
     private Player owner1;
-    private Player owner2;
     private BoardGame boardGame;
     private BoardGameCopy boardGameCopy;
     private BoardGameCopy boardGameCopy2;
@@ -68,12 +64,12 @@ public class BorrowRequestIntegrationTests {
 
 
         requester1 = new Player("requester1", "requester1@mail", "PPassword1", false);
-        requester2 = new Player("requester2", "requester2@mail", "PPassword2", false);
+        Player requester2 = new Player("requester2", "requester2@mail", "PPassword2", false);
         requester1 = playerRepository.save(requester1);
         requester2 = playerRepository.save(requester2);
 
         owner1 = new Player("Owner1", "Owner1@mail", "OPassword1", true);
-        owner2 = new Player("Owner2", "Owner2@mail", "OPassword2", true);
+        Player owner2 = new Player("Owner2", "Owner2@mail", "OPassword2", true);
         owner1 = playerRepository.save(owner1);
         owner2 = playerRepository.save(owner2);
 
@@ -94,6 +90,17 @@ public class BorrowRequestIntegrationTests {
                 Date.valueOf(LocalDate.now().plusDays(18)),
                 BorrowRequest.RequestStatus.Pending, requester1, boardGameCopy2);
         borrowRequest2 = borrowRequestRepository.save(borrowRequest2);
+    }
+
+    @AfterAll
+    public void teardown() {
+        borrowRequestRepository.deleteAll();
+
+        boardGameCopyRepository.deleteAll();
+        boardGameRepository.deleteAll();
+
+        playerRepository.deleteAll();
+
     }
 
 
@@ -199,9 +206,6 @@ public class BorrowRequestIntegrationTests {
     public void getInvalidBorrowRequestsByOwner_InvalidInputs() {
 
         String url = "/BorrowRequests?ownerId=999";
-        //ResponseEntity<String> response =  client.getForEntity(url, String.class);
-        //System.out.println("***?????___******");
-        //System.out.println(response.getBody());
         ResponseEntity<ErrorDto> response =  client.getForEntity(url, ErrorDto.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -278,6 +282,21 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(8)
+    public void doInvalidBorrowRequest_emptyAction() {
+        String url = "/BorrowRequests/" + borrowRequest.getRequestID() ;
+
+        ResponseEntity<ErrorDto> request = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, request.getStatusCode());
+        assertNotNull(request.getBody());
+
+        ErrorDto responseDTO = request.getBody();
+
+        assertTrue(responseDTO.getErrors().contains("A borrow request can only be accepted or declined, cannot be null"));
+    }
+
+    @Test
+    @Order(8)
     public void doInvalidBorrowRequest_InvalidAction() {
         String url = "/BorrowRequests/" + borrowRequest.getRequestID() + "?action=Done";
 
@@ -328,6 +347,21 @@ public class BorrowRequestIntegrationTests {
         assertNotNull(response.getBody());
         ErrorDto responseDTO = response.getBody();
         assertTrue(responseDTO.getErrors().contains("The game borrowing can only be confirmed or cancelled"));
+        assertTrue(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID()).getIsAvailable()) ;
+    }
+
+    @Test
+    @Order(11)
+    public void confirmInvalidBorrowing_emptyAction(){
+
+        String url = "/BorrowRequests/" + createdBorrowRequestId + "/boardGameCopy";
+
+        ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertNotNull(response.getBody());
+        ErrorDto responseDTO = response.getBody();
+        assertTrue(responseDTO.getErrors().contains("The game borrowing can only be confirmed or cancelled, not null"));
         assertTrue(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID()).getIsAvailable()) ;
     }
 

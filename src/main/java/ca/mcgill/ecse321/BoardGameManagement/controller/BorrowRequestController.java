@@ -7,10 +7,8 @@ import ca.mcgill.ecse321.BoardGameManagement.model.BorrowRequest;
 import ca.mcgill.ecse321.BoardGameManagement.service.BorrowRequestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,9 +46,10 @@ public class BorrowRequestController {
 
 
     @PutMapping("/BorrowRequests/{requestId}")
-    public BorrowRequestResponseDTO manageBorrowRequest(@PathVariable int requestId, @RequestParam String action) {
-        if (action == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "A borrow request can only be accepted or declined");
+    public BorrowRequestResponseDTO manageBorrowRequest(@PathVariable int requestId, @RequestParam(defaultValue = "") String action) {
+        if (action.isEmpty()) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST,
+                    "A borrow request can only be accepted or declined, cannot be null");
         }
 
         if (action.strip().equalsIgnoreCase("accept")) {
@@ -70,9 +69,9 @@ public class BorrowRequestController {
 
     @PutMapping("/BorrowRequests/{requestId}/boardGameCopy")
 
-    public void manageBorrowedGameAvailability(@PathVariable int requestId, @RequestParam String confirmOrCancel) {
-        if (confirmOrCancel == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "The game borrowing can only be confirmed or cancelled");
+    public void manageBorrowedGameAvailability(@PathVariable int requestId, @RequestParam(defaultValue ="") String confirmOrCancel) {
+        if (confirmOrCancel.isEmpty()) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "The game borrowing can only be confirmed or cancelled, not null");
         }
 
         if (confirmOrCancel.strip().equalsIgnoreCase("confirm")) {
