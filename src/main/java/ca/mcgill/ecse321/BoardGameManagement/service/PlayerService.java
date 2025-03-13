@@ -11,9 +11,11 @@ import org.springframework.http.HttpStatus;
 import jakarta.validation.Valid;
 //import java.time.LocalDate;
 import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
+import org.springframework.validation.annotation.Validated;
 
 
 @Service
+@Validated
 public class PlayerService {
     @Autowired
     private PlayerRepository playerRepository;
@@ -40,7 +42,7 @@ public class PlayerService {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + pid);
         }
 
-        
+
             p.setName(playerDto.getName());
         
 

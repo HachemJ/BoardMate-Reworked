@@ -1,15 +1,15 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 //import java.sql.Date;
 
 public class PlayerCreationDto {
-    @NotNull(message = "name must not be null")
+    @NotBlank(message = "name must not be null")
     private String name;
-    @NotNull(message = "email must not be null")
+    @NotBlank(message = "email must not be null")
     private String email;
-    @NotNull(message = "password must not be null")
+    @NotBlank(message = "password must not be null")
     private String password;
     private boolean isAOwner;
 
