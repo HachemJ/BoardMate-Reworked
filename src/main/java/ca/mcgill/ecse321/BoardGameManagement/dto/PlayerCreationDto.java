@@ -12,7 +12,8 @@ public class PlayerCreationDto {
     @NotBlank(message = "password must not be null")
     private String password;
     private boolean isAOwner;
-
+    public PlayerCreationDto() {
+    }
     public PlayerCreationDto(PlayerCreationDto player) {
     this.name = player.getName();
     this.email = player.getEmail();

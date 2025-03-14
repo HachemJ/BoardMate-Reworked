@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 //import java.time.LocalDate;
 import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
 import org.springframework.validation.annotation.Validated;
+import java.util.List;
+
 
 
 @Service
@@ -26,7 +28,7 @@ public class PlayerService {
         Player pl = new Player (playerToCreate.getName(), playerToCreate.getEmail(), playerToCreate.getPassword(), false);
         return playerRepository.save(pl);
     }
-
+    @Transactional
     public Player findPlayerById(int pid) {
         Player p = playerRepository.findByPlayerID(pid);
         if (p == null) {
@@ -35,6 +37,9 @@ public class PlayerService {
         return p;
     }
 
+    public List<Player> findAllPlayers() {
+        return (List<Player>) playerRepository.findAll();
+    }
     
     @Transactional
     public Player updatePlayer(int pid, @Valid PlayerCreationDto playerDto) {
@@ -42,20 +47,23 @@ public class PlayerService {
         if (p == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + pid);
         }
-
-
+//        if (p.getName() == "" || p.getName() == null) {
+//            throw new GlobalException(HttpStatus.BAD_REQUEST, "name cannot be null");
+//        }
             p.setName(playerDto.getName());
-        
-
-        
+//        if (p.getEmail() == "" || p.getEmail() == null) {
+//            throw new GlobalException(HttpStatus.BAD_REQUEST, "email cannot be null");
+//        }
             p.setEmail(playerDto.getEmail());
-        
+
+//        if (p.getPassword() == "" || p.getPassword() == null) {
+//            throw new GlobalException(HttpStatus.BAD_REQUEST, "email cannot be null");
+//        }
             p.setPassword(playerDto.getPassword());
         
 
-        if (playerDto.getIsAOwner() == true || playerDto.getIsAOwner() == false) {
             p.setIsAOwner(playerDto.getIsAOwner());
-        }
+
 
         return playerRepository.save(p);
     }

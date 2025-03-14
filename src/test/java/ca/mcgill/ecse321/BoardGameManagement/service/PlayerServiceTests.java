@@ -5,11 +5,15 @@ import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+//import org.mockito.InjectMocks;
+//import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+//import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
 import ca.mcgill.ecse321.BoardGameManagement.dto.*;
 import ca.mcgill.ecse321.BoardGameManagement.service.PlayerService;
 import jakarta.validation.ConstraintViolationException;
@@ -25,10 +29,10 @@ import static org.mockito.Mockito.*;
 //@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class PlayerServiceTests {
 
-    @Mock
+    @MockitoBean
     private PlayerRepository playerRepository;
 
-    @InjectMocks
+    @Autowired
     private PlayerService playerService;
 
     private static final String VALID_NAME = "John Doe";
@@ -57,6 +61,12 @@ public class PlayerServiceTests {
         verify(playerRepository, times(1)).save(any(Player.class));
     }
 
+    /*@Test
+    public void testFindAllPlayers() {
+        //A
+
+        //A
+    }*/
     @Test
     public void testFindPlayerByValidId() {
         // Arrange
@@ -157,6 +167,7 @@ public class PlayerServiceTests {
                 playerService.updatePlayer(VALID_ID, invalidDto);
             });
     }
+    //HOW SHOULD I test update with invalid input?
 
 }
 
