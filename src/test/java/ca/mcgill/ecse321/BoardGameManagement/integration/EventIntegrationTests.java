@@ -26,7 +26,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class EventIntegrationTests {
 
   @Autowired
@@ -59,7 +58,6 @@ public class EventIntegrationTests {
   }
 
   @Test
-  @Order(0)
   public void testCreateValidEvent() {
     // Create and Save a Player directly in the database
     Player player = new Player("John Doe", "john.doe@mail.com", "password123", false);
@@ -86,7 +84,6 @@ public class EventIntegrationTests {
 
 
   @Test
-  @Order(1)
   public void testCreateEventWithEmptyName() {
     // Arrange
     EventCreationDto body =
@@ -104,7 +101,6 @@ public class EventIntegrationTests {
 
 
   @Test
-  @Order(2)
   public void testCreateEventWithNegativeMaxSpots() {
     // Arrange
     EventCreationDto body =
@@ -124,7 +120,6 @@ public class EventIntegrationTests {
 
 
   @Test
-  @Order(3)
   public void testFindEventById() {
     // Arrange
     Player player = new Player("Test Player", "test@mcgill.ca", "password", false);
@@ -151,7 +146,6 @@ public class EventIntegrationTests {
 
 
   @Test
-  @Order(4)
   public void testFindEventThatDoesNotExist() {
     // Arrange
     String url = "/events/999999"; // Non-existent ID
@@ -167,7 +161,6 @@ public class EventIntegrationTests {
   }
 
   @Test
-  @Order(5)
   public void testGetAllEvents() {
     // Arrange: Ensure at least one event exists before fetching all events
     Player player = playerRepository.save(new Player("Temp User", "temp@mail.com", "pass", false));
@@ -190,7 +183,6 @@ public class EventIntegrationTests {
   }
 
   @Test
-  @Order(6)
   public void testDeleteEventSuccess() {
     // Ensure an event exists first
     Player player = new Player("Temp User", "temp@mail.com", "pass", false);
@@ -217,7 +209,6 @@ public class EventIntegrationTests {
 
 
   @Test
-  @Order(7)
   public void testDeleteEvent_NotFound() {
     // Arrange
     String url = "/events/999999"; // Non-existent ID
@@ -233,7 +224,6 @@ public class EventIntegrationTests {
   }
 
   @Test
-  @Order(8)
   public void testUpdateEvent_Success() {
     // Arrange: Create a valid event first
     Player player = playerRepository.save(new Player("Temp User", "temp@mail.com", "pass", false));
@@ -264,7 +254,6 @@ public class EventIntegrationTests {
   }
 
   @Test
-  @Order(9)
   public void testCreateEvent_NoOwner() {
     BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Chess", "Classic game"));
 
@@ -282,7 +271,6 @@ public class EventIntegrationTests {
   }
 
   @Test
-  @Order(10)
   public void testGetAllEvents_EmptyDatabase() {
     eventRepository.deleteAll();
 
@@ -294,7 +282,6 @@ public class EventIntegrationTests {
   }
 
   @Test
-  @Order(11)
   public void testUpdateEvent_NotFound() {
     EventCreationDto updateBody = new EventCreationDto(
         "Updated Event", "Updated Description", "25", validDate, validStartTime, validEndTime,
@@ -312,7 +299,6 @@ public class EventIntegrationTests {
 
 
   @Test
-  @Order(12)
   public void testUpdateEvent_InvalidData() {
     // Arrange: Create a valid event first
     Player player = playerRepository.save(new Player("User", "user@mail.com", "pass", false));
