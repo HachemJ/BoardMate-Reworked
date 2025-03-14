@@ -81,6 +81,15 @@ The working application fulfilling all the abovementioned functionalities
 
 
 ### March 16: Deliverable 2 -- Service Logic and Functionalities of the Application
+| Name | Role & Responsibility | Hours
+| --- | --- | --- |
+| Kathelina | placeholder | placeholder
+| Tingyi | placeholder | placeholder
+| Nizar | placeholder | placeholder
+| Alex | placeholder | placeholder
+| Maria | placeholder | placeholder
+| Jad | placeholder | placeholder
+| HongYi | placeholder | placeholder
 
 ### April 6: Deliverable 3 -- Frontend Logic
 
