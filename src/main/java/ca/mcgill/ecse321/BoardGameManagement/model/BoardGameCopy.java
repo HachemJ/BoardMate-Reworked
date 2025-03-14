@@ -1,9 +1,6 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class BoardGameCopy {
@@ -14,7 +11,7 @@ public class BoardGameCopy {
   private String specification;
   private boolean isAvailable;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   private Player player;
 
   @ManyToOne
