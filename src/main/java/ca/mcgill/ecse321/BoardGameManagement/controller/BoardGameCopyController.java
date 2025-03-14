@@ -21,6 +21,7 @@ public class BoardGameCopyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BoardGameCopyResponseDto createBoardGameCopy(@RequestBody BoardGameCopyCreationDto boardGameCopyCreationDto) {
+        System.out.println(boardGameCopyCreationDto.getBoardGameId() + "aaaa");
         BoardGameCopy createdBoardGameCopy = boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto);
         return new BoardGameCopyResponseDto(createdBoardGameCopy);
     }

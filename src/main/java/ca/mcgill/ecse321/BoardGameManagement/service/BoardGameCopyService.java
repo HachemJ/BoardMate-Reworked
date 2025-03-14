@@ -42,7 +42,7 @@ public class BoardGameCopyService {
 
         BoardGameCopy boardGameCopy = new BoardGameCopy(
                 boardGameCopyToCreate.getSpecification(),
-                boardGameCopyToCreate.getIsAvailable(),
+                boardGameCopyToCreate.isAvailable(),
                 player,
                 boardGame
         );
@@ -78,7 +78,7 @@ public class BoardGameCopyService {
         boardGameCopy.setBoardGame(newBoardGame);
         boardGameCopy.setPlayer(newPlayer);
         boardGameCopy.setSpecification(boardGameCopyToUpdate.getSpecification());
-        boardGameCopy.setIsAvailable(boardGameCopyToUpdate.getIsAvailable());
+        boardGameCopy.setIsAvailable(boardGameCopyToUpdate.isAvailable());
 
         return boardGameCopyRepository.save(boardGameCopy);
     }
