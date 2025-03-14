@@ -7,12 +7,10 @@ import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 import ca.mcgill.ecse321.BoardGameManagement.service.BoardGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class BoardGameController {
@@ -30,13 +28,9 @@ public class BoardGameController {
   @GetMapping("/BoardGames")
   public List<BoardGameResponseDto> getAllBoardGames() {
     List<BoardGame> boardGames = boardGameService.getAllBoardGames();
-    List<BoardGameResponseDto> boardGameDTOs = new ArrayList<>();
-
-    for (BoardGame game : boardGames) {
-      boardGameDTOs.add(new BoardGameResponseDto(game));
-    }
-
-    return boardGameDTOs;
+    return boardGames.stream()
+        .map(BoardGameResponseDto::new)
+        .collect(Collectors.toList());
   }
 
   @GetMapping("/BoardGames/{gameId}")
@@ -46,14 +40,16 @@ public class BoardGameController {
   }
 
   @PutMapping("/BoardGames/{gameId}")
-  public void updateBoardGame(@PathVariable int gameId, @RequestBody BoardGameCreationDto boardGameDto) {
+  public BoardGameResponseDto updateBoardGame(@PathVariable int gameId, @RequestBody BoardGameCreationDto boardGameDto) {
     if (boardGameDto == null) {
       throw new GlobalException(HttpStatus.BAD_REQUEST, "Invalid board game details provided");
     }
-    boardGameService.updateBoardGame(gameId, boardGameDto);
+    BoardGame updatedBoardGame = boardGameService.updateBoardGame(gameId, boardGameDto);
+    return new BoardGameResponseDto(updatedBoardGame);
   }
 
   @DeleteMapping("/BoardGames/{gameId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteBoardGame(@PathVariable int gameId) {
     boardGameService.deleteBoardGame(gameId);
   }
