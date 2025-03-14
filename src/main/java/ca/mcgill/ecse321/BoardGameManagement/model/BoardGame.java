@@ -1,25 +1,12 @@
-/*PLEASE DO NOT EDIT THIS CODE*/
 package ca.mcgill.ecse321.BoardGameManagement.model;
-
-/*This code was generated using the UMPLE 1.35.0.7523.c616a4dce modeling language!*/
-
-
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 
-// line 23 "model.ump"
-// line 80 "model.ump"
 @Entity
-public class BoardGame
-{
+public class BoardGame {
 
-  //------------------------
-  // MEMBER VARIABLES
-  //------------------------
-
-  //BoardGame Attributes
   @Id
   @GeneratedValue
   private int gameID;
@@ -28,83 +15,56 @@ public class BoardGame
   private String name;
   private String description;
 
-  //------------------------
-  // CONSTRUCTOR
-  //------------------------
   public BoardGame() {}
 
-  public BoardGame(int aMinPlayers, int aMaxPlayers, String aName, String aDescription)
-  {
+  public BoardGame(int aMinPlayers, int aMaxPlayers, String aName, String aDescription) {
     minPlayers = aMinPlayers;
     maxPlayers = aMaxPlayers;
     name = aName;
     description = aDescription;
   }
 
-  //------------------------
-  // INTERFACE
-  //------------------------
-
-
-  public boolean setMinPlayers(int aMinPlayers)
-  {
-    boolean wasSet = false;
+  public boolean setMinPlayers(int aMinPlayers) {
     minPlayers = aMinPlayers;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setMaxPlayers(int aMaxPlayers)
-  {
-    boolean wasSet = false;
+  public boolean setMaxPlayers(int aMaxPlayers) {
     maxPlayers = aMaxPlayers;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setGameName(String aGameName)
-  {
-    boolean wasSet = false;
+  public boolean setGameName(String aGameName) {
     name = aGameName;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public boolean setDescription(String aDescription)
-  {
-    boolean wasSet = false;
+  public boolean setDescription(String aDescription) {
     description = aDescription;
-    wasSet = true;
-    return wasSet;
+    return true;
   }
 
-  public int getGameID()
-  {
+  public int getGameID() {
     return gameID;
   }
 
-  public int getMinPlayers()
-  {
+  public int getMinPlayers() {
     return minPlayers;
   }
 
-  public int getMaxPlayers()
-  {
+  public int getMaxPlayers() {
     return maxPlayers;
   }
 
-  public String getName()
-  {
+  public String getName() {
     return name;
   }
 
-  public String getDescription()
-  {
+  public String getDescription() {
     return description;
   }
 
-  public String toString()
-  {
+  public String toString() {
     return super.toString() + "["+
         "gameID" + ":" + getGameID()+ "," +
         "minPlayers" + ":" + getMinPlayers()+ "," +
