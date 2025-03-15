@@ -9,15 +9,14 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameCopyRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -58,17 +57,16 @@ public class BoardGameCopyIntegrationTests {
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto(SPECIFICATION, IS_AVAILABLE, player.getPlayerID(),
                 boardGame.getGameID());
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonBody = objectMapper.writeValueAsString(body);
-        System.out.println("JSON Request Sent: " + jsonBody);
-
         //Act
-        ResponseEntity<String> response = client.postForEntity("/boardgamecopies", body,
-                String.class);
-
-        System.out.println(response);
+        ResponseEntity<BoardGameCopyResponseDto> response = client.postForEntity("/boardgamecopies", body,
+                BoardGameCopyResponseDto.class);
 
         //Assert
+        assertNotNull(response.getBody());
+        assertEquals(SPECIFICATION, response.getBody().getSpecification());
+        assertEquals(IS_AVAILABLE, response.getBody().getIsAvailable());
+        assertEquals(player.getName(), response.getBody().getPlayerName());
+        assertEquals(boardGame.getName(), response.getBody().getBoardGameName());
     }
 
     @Test
@@ -79,8 +77,8 @@ public class BoardGameCopyIntegrationTests {
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
         BoardGameCopy boardGameCopy = new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player, boardGame); //todo shouldn't do this
-        player = playerRepository.save(player);
-        boardGame = boardGameRepository.save(boardGame);
+        playerRepository.save(player);
+        boardGameRepository.save(boardGame);
         boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
 
         //Act
@@ -88,6 +86,6 @@ public class BoardGameCopyIntegrationTests {
         ResponseEntity<BoardGameCopyResponseDto> response = client.getForEntity(url, BoardGameCopyResponseDto.class);
 
         //Assert
-        Assertions.assertEquals(boardGameCopy.getSpecification(), response.getBody().getSpecification());
+        assertEquals(boardGameCopy.getSpecification(), response.getBody().getSpecification());
     }
 }

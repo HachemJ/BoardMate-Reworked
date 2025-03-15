@@ -4,7 +4,6 @@ import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCopyCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCopyResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.service.BoardGameCopyService;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +20,6 @@ public class BoardGameCopyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BoardGameCopyResponseDto createBoardGameCopy(@RequestBody BoardGameCopyCreationDto boardGameCopyCreationDto) {
-
-        System.out.println("🔍 Received DTO: " + boardGameCopyCreationDto);
-        System.out.println("🛠 Specification: " + boardGameCopyCreationDto.getSpecification());
-        System.out.println("🛠 Player ID: " + boardGameCopyCreationDto.getPlayerId());
-        System.out.println("🛠 BoardGame ID: " + boardGameCopyCreationDto.getBoardGameId());
-        System.out.println("🛠 Available: " + boardGameCopyCreationDto.isAvailable());
-
         BoardGameCopy createdBoardGameCopy = boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto);
         return new BoardGameCopyResponseDto(createdBoardGameCopy);
     }
