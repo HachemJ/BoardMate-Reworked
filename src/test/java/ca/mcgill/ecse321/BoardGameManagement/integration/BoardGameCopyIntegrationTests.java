@@ -3,14 +3,20 @@ package ca.mcgill.ecse321.BoardGameManagement.integration;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCopyCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCopyResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameCopyRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -42,23 +48,46 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(0)
-    public void testCreateBoardGameCopy() {
+    public void testCreateBoardGameCopy() throws JsonProcessingException {
 
         //Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
-        playerRepository.save(player);
-        boardGameRepository.save(boardGame);
+        player = playerRepository.save(player);
+        boardGame = boardGameRepository.save(boardGame);
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto(SPECIFICATION, IS_AVAILABLE, player.getPlayerID(),
                 boardGame.getGameID());
 
-        //Act
-        ResponseEntity<BoardGameCopyResponseDto> response = client.postForEntity("/boardgamecopies", body,
-                BoardGameCopyResponseDto.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonBody = objectMapper.writeValueAsString(body);
+        System.out.println("JSON Request Sent: " + jsonBody);
 
-        System.out.println(response.getStatusCode());
+        //Act
+        ResponseEntity<String> response = client.postForEntity("/boardgamecopies", body,
+                String.class);
+
+        System.out.println(response);
 
         //Assert
     }
 
+    @Test
+    @Order(1)
+    public void testFindBoardGameCopyById() {
+
+        //Arrange
+        Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
+        BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
+        BoardGameCopy boardGameCopy = new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player, boardGame); //todo shouldn't do this
+        player = playerRepository.save(player);
+        boardGame = boardGameRepository.save(boardGame);
+        boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
+
+        //Act
+        String url = "/boardgamecopies/" + boardGameCopy.getSpecificGameID();
+        ResponseEntity<BoardGameCopyResponseDto> response = client.getForEntity(url, BoardGameCopyResponseDto.class);
+
+        //Assert
+        Assertions.assertEquals(boardGameCopy.getSpecification(), response.getBody().getSpecification());
+    }
 }

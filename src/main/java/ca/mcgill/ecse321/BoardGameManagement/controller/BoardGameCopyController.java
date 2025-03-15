@@ -21,7 +21,13 @@ public class BoardGameCopyController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public BoardGameCopyResponseDto createBoardGameCopy(@RequestBody BoardGameCopyCreationDto boardGameCopyCreationDto) {
-        System.out.println(boardGameCopyCreationDto.getBoardGameId() + "aaaa");
+
+        System.out.println("🔍 Received DTO: " + boardGameCopyCreationDto);
+        System.out.println("🛠 Specification: " + boardGameCopyCreationDto.getSpecification());
+        System.out.println("🛠 Player ID: " + boardGameCopyCreationDto.getPlayerId());
+        System.out.println("🛠 BoardGame ID: " + boardGameCopyCreationDto.getBoardGameId());
+        System.out.println("🛠 Available: " + boardGameCopyCreationDto.isAvailable());
+
         BoardGameCopy createdBoardGameCopy = boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto);
         return new BoardGameCopyResponseDto(createdBoardGameCopy);
     }
@@ -47,7 +53,7 @@ public class BoardGameCopyController {
         boardGameCopyService.deleteBoardGameCopy(boardGameCopyId);
     }
 
-    @GetMapping("/{playerId}")
+    @GetMapping("/byplayer/{playerId}")
     @ResponseStatus(HttpStatus.OK)
     public ArrayList<BoardGameCopyResponseDto> findBoardGameCopiesByPlayerId(@PathVariable int playerId) {
         ArrayList<BoardGameCopyResponseDto> toReturn = new ArrayList<>();
@@ -57,7 +63,7 @@ public class BoardGameCopyController {
         return toReturn;
     }
 
-    @GetMapping("/{boardGameId}")
+    @GetMapping("/byboardgame/{boardGameId}")
     @ResponseStatus(HttpStatus.OK)
     public ArrayList<BoardGameCopyResponseDto> findBoardGameCopiesByBoardGameId(@PathVariable int boardGameId) {
         ArrayList<BoardGameCopyResponseDto> toReturn = new ArrayList<>();
