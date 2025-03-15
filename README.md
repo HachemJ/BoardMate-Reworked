@@ -69,27 +69,9 @@ The working application fulfilling all the abovementioned functionalities
 
 ### February 19: Deliverable 1 -- Backend Model and Database
 
-| Name | Role & Responsibility | Hours
-| --- | --- | --- |
-| Kathelina | domain model + persistance testing (Borrow Request) | 11
-| Tingyi | domain model + persistance testing (BoardGame Copy)+ Spring Boot | 11
-| Nizar | domain model + persistance layer and testing (Event) | 11
-| Alex | domain model + persistance testing (Review) + Wiki project Report | 10
-| Maria | domain model + persistance testing (Registration) + project Report| 11
-| Jad | domain model + persistance testing (BoardGame) + set up build system | 11
-| HongYi | domain model + persistance testing (Player) + ReadMe | 10
-
 
 ### March 16: Deliverable 2 -- Service Logic and Functionalities of the Application
-| Name | Role & Responsibility | Hours
-| --- | --- | --- |
-| Kathelina | placeholder | placeholder
-| Tingyi | placeholder | placeholder
-| Nizar | placeholder | placeholder
-| Alex | placeholder | placeholder
-| Maria | placeholder | placeholder
-| Jad | placeholder | placeholder
-| HongYi | placeholder | placeholder
+
 
 ### April 6: Deliverable 3 -- Frontend Logic
 
