@@ -133,7 +133,7 @@ public class BorrowRequestService {
         }
 
         if (!request.getRequestStatus().equals(BorrowRequest.RequestStatus.Pending)) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The request %d has already been dealt with", requestId));
+            throw new GlobalException(HttpStatus.CONFLICT, String.format("The request %d has already been dealt with", requestId));
         }
 
         request.setRequestStatus(requestStatus);
@@ -152,7 +152,7 @@ public class BorrowRequestService {
 
         BoardGameCopy gameNowAvailable =  boardGameCopyRepository.findBySpecificGameID(gameCopyConfirmed);
         if (gameNowAvailable == null){
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "The game to borrow cannot be null");
+            throw new GlobalException(HttpStatus.NOT_FOUND, "The game to borrow does not exist");
         }
 
         if (!gameNowAvailable.getIsAvailable()){
@@ -186,7 +186,7 @@ public class BorrowRequestService {
         BoardGameCopy gameToMakeAvailable =  boardGameCopyRepository.findBySpecificGameID(gameCopyConfirmed);
 
         if (gameToMakeAvailable == null){
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "The game to borrow cannot be null");
+            throw new GlobalException(HttpStatus.NOT_FOUND, "The game to borrow does not exist");
         }
         if (gameToMakeAvailable.getIsAvailable()){
             throw new GlobalException(HttpStatus.CONFLICT,
