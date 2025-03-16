@@ -3,7 +3,6 @@ import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 
 
 public class PlayerRespDto {
-    //private int id;//TA said dont
 
     private String name;
     private String email;
@@ -12,15 +11,15 @@ public class PlayerRespDto {
 
     @SuppressWarnings("unused")
 	private PlayerRespDto() {
-	} //wwc
+	}
 
     public PlayerRespDto(Player p) {
         this.name = p.getName();
         this.email = p.getEmail();
         this.isAOwner = p.getIsAOwner();
         this.playerID = p.getPlayerID();
-//no need to return psw
-//no need for PlayerID
+        //no need to return psw (security concern)
+        //no need for PlayerID
     }
 
 public boolean getIsAOwner() {
