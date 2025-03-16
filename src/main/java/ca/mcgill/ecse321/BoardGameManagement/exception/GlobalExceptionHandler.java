@@ -28,4 +28,6 @@ public class GlobalExceptionHandler {
     }
     return new ResponseEntity<ErrorDto>(new ErrorDto(errors), HttpStatus.BAD_REQUEST);
   }
+ 
 }
+ 
