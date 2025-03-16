@@ -37,10 +37,10 @@ public class BoardGameCopyService {
         BoardGame boardGame = boardGameRepository.findByGameID(boardGameCopyToCreate.getBoardGameId());
 
         if (player == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "Player not found with ID: " + boardGameCopyToCreate.getPlayerId());
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + boardGameCopyToCreate.getPlayerId());
         }
         if (boardGame == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "BoardGame not found with ID: " + boardGameCopyToCreate.getBoardGameId());
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameCopyToCreate.getBoardGameId());
         }
 
         BoardGameCopy boardGameCopy = new BoardGameCopy(
@@ -56,7 +56,7 @@ public class BoardGameCopyService {
     public BoardGameCopy findBoardGameCopyById(int boardGameCopyId) {
         BoardGameCopy boardGameCopy = boardGameCopyRepository.findBySpecificGameID(boardGameCopyId);
         if (boardGameCopy == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "BoardGameCopy not found with ID: " + boardGameCopyId);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGameCopy not found with ID: " + boardGameCopyId);
         }
         return boardGameCopy;
     }
@@ -69,13 +69,13 @@ public class BoardGameCopyService {
         Player newPlayer = playerRepository.findByPlayerID(boardGameCopyToUpdate.getPlayerId());
 
         if (boardGameCopy == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "BoardGameCopy not found with ID: " + boardGameCopyId);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGameCopy not found with ID: " + boardGameCopyId);
         }
         if (newBoardGame == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "BoardGame not found with ID: " + boardGameCopyToUpdate.getBoardGameId());
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameCopyToUpdate.getBoardGameId());
         }
         if (newPlayer == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "Player not found with ID: " + boardGameCopyToUpdate.getPlayerId());
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + boardGameCopyToUpdate.getPlayerId());
         }
 
         boardGameCopy.setBoardGame(newBoardGame);
@@ -90,7 +90,7 @@ public class BoardGameCopyService {
     public void deleteBoardGameCopy(int boardGameCopyId) {
         BoardGameCopy boardGameCopy = boardGameCopyRepository.findBySpecificGameID(boardGameCopyId);
         if (boardGameCopy == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "BoardGameCopy not found with ID: " + boardGameCopyId);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGameCopy not found with ID: " + boardGameCopyId);
         }
         boardGameCopyRepository.delete(boardGameCopy);
     }
@@ -98,7 +98,7 @@ public class BoardGameCopyService {
     public ArrayList<BoardGameCopy> findBoardGameCopiesByPlayerId(int playerId) {
         Player player = playerRepository.findByPlayerID(playerId);
         if (player == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "Player not found with ID: " + playerId);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerId);
         }
         return boardGameCopyRepository.findByPlayer(player);
     }
@@ -106,7 +106,7 @@ public class BoardGameCopyService {
     public ArrayList<BoardGameCopy> findBoardGameCopiesByBoardGameId(int boardGameId) {
         BoardGame boardGame = boardGameRepository.findByGameID(boardGameId);
         if (boardGame == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "BoardGame not found with ID: " + boardGameId);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameId);
         }
         return boardGameCopyRepository.findByBoardGame(boardGame);
     }
