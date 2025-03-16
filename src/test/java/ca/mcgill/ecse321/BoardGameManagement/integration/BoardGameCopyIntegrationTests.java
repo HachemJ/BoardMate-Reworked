@@ -116,8 +116,6 @@ public class BoardGameCopyIntegrationTests {
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
 
-        System.out.println(response.getBody().getErrors());
-
         //Assert
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -170,6 +168,7 @@ public class BoardGameCopyIntegrationTests {
         ResponseEntity<BoardGameCopyResponseDto> response = client.getForEntity(url, BoardGameCopyResponseDto.class);
 
         //Assert
+        assertNotNull(response.getBody());
         assertEquals(boardGameCopy1.getSpecification(), response.getBody().getSpecification());
         assertEquals(boardGameCopy1.isIsAvailable(), response.getBody().getIsAvailable());
         assertEquals(boardGameCopy1.getPlayer().getName(), response.getBody().getPlayerName());

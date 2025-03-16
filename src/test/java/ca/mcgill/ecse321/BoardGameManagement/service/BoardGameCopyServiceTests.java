@@ -154,10 +154,10 @@ public class BoardGameCopyServiceTests {
         // Assert
         assertNotNull(foundBoardGameCopies);
         assertEquals(2, foundBoardGameCopies.size());
-        assertEquals(SPECIFICATION, foundBoardGameCopies.get(0).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(0).getIsAvailable());
-        assertEquals(player1, foundBoardGameCopies.get(0).getPlayer());
-        assertEquals(boardGame, foundBoardGameCopies.get(0).getBoardGame());
+        assertEquals(SPECIFICATION, foundBoardGameCopies.getFirst().getSpecification());
+        assertEquals(IS_AVAILABLE, foundBoardGameCopies.getFirst().getIsAvailable());
+        assertEquals(player1, foundBoardGameCopies.getFirst().getPlayer());
+        assertEquals(boardGame, foundBoardGameCopies.getFirst().getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(1).getSpecification());
         assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(1).getIsAvailable());
         assertEquals(player2, foundBoardGameCopies.get(1).getPlayer());
@@ -198,10 +198,10 @@ public class BoardGameCopyServiceTests {
         // Assert
         assertNotNull(foundBoardGameCopies);
         assertEquals(3, foundBoardGameCopies.size());
-        assertEquals(SPECIFICATION, foundBoardGameCopies.get(0).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(0).getIsAvailable());
-        assertEquals(player, foundBoardGameCopies.get(0).getPlayer());
-        assertEquals(boardGame1, foundBoardGameCopies.get(0).getBoardGame());
+        assertEquals(SPECIFICATION, foundBoardGameCopies.getFirst().getSpecification());
+        assertEquals(IS_AVAILABLE, foundBoardGameCopies.getFirst().getIsAvailable());
+        assertEquals(player, foundBoardGameCopies.getFirst().getPlayer());
+        assertEquals(boardGame1, foundBoardGameCopies.getFirst().getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(1).getSpecification());
         assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(1).getIsAvailable());
         assertEquals(player, foundBoardGameCopies.get(1).getPlayer());
@@ -246,10 +246,10 @@ public class BoardGameCopyServiceTests {
         // Assert
         assertNotNull(foundBoardGameCopies);
         assertEquals(3, foundBoardGameCopies.size());
-        assertEquals(SPECIFICATION, foundBoardGameCopies.get(0).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(0).getIsAvailable());
-        assertEquals(player1, foundBoardGameCopies.get(0).getPlayer());
-        assertEquals(boardGame1, foundBoardGameCopies.get(0).getBoardGame());
+        assertEquals(SPECIFICATION, foundBoardGameCopies.getFirst().getSpecification());
+        assertEquals(IS_AVAILABLE, foundBoardGameCopies.getFirst().getIsAvailable());
+        assertEquals(player1, foundBoardGameCopies.getFirst().getPlayer());
+        assertEquals(boardGame1, foundBoardGameCopies.getFirst().getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(1).getSpecification());
         assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(1).getIsAvailable());
         assertEquals(player1, foundBoardGameCopies.get(1).getPlayer());
