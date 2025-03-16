@@ -1,7 +1,6 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.*;
-import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

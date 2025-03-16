@@ -22,17 +22,13 @@ public class PlayerService {
     @Autowired
     private PlayerRepository playerRepository;
     
-//    @Transactional
-//    public Player createPlayer(@Valid PlayerCreationDto playerToCreate) {
-//         Player pl = new Player (playerToCreate.getName(), playerToCreate.getEmail(), playerToCreate.getPassword(), false);
-//        return playerRepository.save(pl);
-//    }
-@Transactional
-public Player createPlayer(@Valid PlayerCreationDto playerToCreate) {
-    Player pl = new Player(playerToCreate.getName(), playerToCreate.getEmail(),
-        playerToCreate.getPassword(), playerToCreate.getIsAOwner()); // Fixed line
-    return playerRepository.save(pl);
-}
+
+    @Transactional
+    public Player createPlayer(@Valid PlayerCreationDto playerToCreate) {
+        Player pl = new Player(playerToCreate.getName(), playerToCreate.getEmail(),
+            playerToCreate.getPassword(), playerToCreate.getIsAOwner()); // Fixed line
+        return playerRepository.save(pl);
+    }
     @Transactional
     public Player findPlayerById(int pid) {
         Player p = playerRepository.findByPlayerID(pid);
