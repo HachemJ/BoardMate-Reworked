@@ -51,12 +51,12 @@ public class BorrowRequestService {
 
         Player borrower = playerRepository.findByPlayerID(requestDTO.getBorrowerID());
         if (borrower == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST,
+            throw new GlobalException(HttpStatus.NOT_FOUND,
                     String.format("The requester %d does not exist", requestDTO.getBorrowerID()));
         }
         BoardGameCopy boardToBorrow = boardGameCopyRepository.findBySpecificGameID(requestDTO.getSpecificGameID());
         if (boardToBorrow == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST,
+            throw new GlobalException(HttpStatus.NOT_FOUND,
                     String.format("The game %s does not exist", requestDTO.getSpecificGameID()));
         }
 
@@ -91,7 +91,7 @@ public class BorrowRequestService {
 
         Player owner = playerRepository.findByPlayerID(ownerId);
         if (owner == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The owner %d does not exist", ownerId));
+            throw new GlobalException(HttpStatus.NOT_FOUND, String.format("The owner %d does not exist", ownerId));
         }
 
         if (!owner.getIsAOwner()) {
@@ -106,7 +106,7 @@ public class BorrowRequestService {
 
         BorrowRequest request = borrowRequestRepository.findByRequestID(requestId);
         if (request == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The request %d does not exist", requestId));
+            throw new GlobalException(HttpStatus.NOT_FOUND, String.format("The request %d does not exist", requestId));
         }else{
             return request;
         }
