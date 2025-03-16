@@ -208,7 +208,7 @@ public class BorrowRequestIntegrationTests {
         String url = "/BorrowRequests?ownerId=999";
         ResponseEntity<ErrorDto> response =  client.getForEntity(url, ErrorDto.class);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
         ErrorDto responseDTO = response.getBody();
         assertEquals(1, responseDTO.getErrors().size());

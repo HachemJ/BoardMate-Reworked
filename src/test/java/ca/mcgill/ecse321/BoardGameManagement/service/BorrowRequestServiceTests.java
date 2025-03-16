@@ -138,7 +138,7 @@ public class BorrowRequestServiceTests {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.createBorrowRequest(requestDTO));
         assertEquals("The requester 0 does not exist", e.getMessage());
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         //check the returned event exception is the right one (status and message are the ones expected)
 
     }
@@ -154,7 +154,7 @@ public class BorrowRequestServiceTests {
                 () -> borrowRequestService.createBorrowRequest(requestDTO));
 
         assertEquals("The game 0 does not exist", e.getMessage());
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         //check the returned event exception is the right one (status and message are the ones expected)
     }
 
@@ -349,7 +349,7 @@ public class BorrowRequestServiceTests {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequestsByOwner(222));
 
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("The owner 222 does not exist", e.getMessage());
         //check the returned event exception is the right one (status and message are the ones expected)
 
@@ -403,7 +403,7 @@ public class BorrowRequestServiceTests {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequest(202));
 
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("The request 202 does not exist", e.getMessage());
 
 
@@ -483,7 +483,7 @@ public class BorrowRequestServiceTests {
         GlobalException e = assertThrows(GlobalException.class,
                 ()-> borrowRequestService.manageRequestReceived(222, BorrowRequest.RequestStatus.Denied));
 
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.CONFLICT, e.getStatus());
         assertEquals("The request 222 has already been dealt with", e.getMessage());
         assertEquals(BorrowRequest.RequestStatus.Accepted, borrowRequest.getRequestStatus()); // has not been denied
     }
@@ -512,8 +512,8 @@ public class BorrowRequestServiceTests {
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
 
         GlobalException e =  assertThrows(GlobalException.class, ()-> borrowRequestService.confirmBorrowing(222));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals("The game to borrow cannot be null", e.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("The game to borrow does not exist", e.getMessage());
         assertTrue(boardGameCopy.getIsAvailable());
     }
 
@@ -572,8 +572,8 @@ public class BorrowRequestServiceTests {
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
 
         GlobalException e =  assertThrows(GlobalException.class, ()-> borrowRequestService.cancelBorrowing(222));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-        assertEquals("The game to borrow cannot be null", e.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("The game to borrow does not exist", e.getMessage());
         assertFalse(boardGameCopy.getIsAvailable());
     }
 
