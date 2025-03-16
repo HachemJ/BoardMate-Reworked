@@ -41,9 +41,6 @@ public class BoardGameController {
 
   @PutMapping("/BoardGames/{gameId}")
   public BoardGameResponseDto updateBoardGame(@PathVariable int gameId, @RequestBody BoardGameCreationDto boardGameDto) {
-    if (boardGameDto == null) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Invalid board game details provided");
-    }
     BoardGame updatedBoardGame = boardGameService.updateBoardGame(gameId, boardGameDto);
     return new BoardGameResponseDto(updatedBoardGame);
   }
