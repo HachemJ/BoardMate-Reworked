@@ -71,10 +71,6 @@ public class Player {
     return isAOwner;
   }
 
-  public boolean isIsAOwner() {
-    return isAOwner;
-  }
-
   public String toString() {
     return super.toString() + "["+
         "playerID" + ":" + getPlayerID()+ "," +
