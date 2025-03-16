@@ -6,7 +6,6 @@ import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.service.BoardGameCopyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
