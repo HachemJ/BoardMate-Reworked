@@ -11,7 +11,6 @@ public class BoardGameCopyCreationDto {
     private String specification;
 
     @JsonProperty("isAvailable") // Forces the JSON property to be "isAvailable" instead of "available"
-    @NotNull(message = "Availability is mandatory")
     private boolean isAvailable;
 
     @Positive(message = "Player ID must be positive")

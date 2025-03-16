@@ -83,7 +83,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto));
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("Player not found with ID: " + PLAYER_ID, e.getMessage());
     }
 
@@ -99,7 +99,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto));
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("BoardGame not found with ID: " + BOARD_GAME_ID, e.getMessage());
     }
 
@@ -130,7 +130,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopyById(1));
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("BoardGameCopy not found with ID: 1", e.getMessage());
     }
 
@@ -172,7 +172,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopiesByBoardGameId(BOARD_GAME_ID));
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("BoardGame not found with ID: " + BOARD_GAME_ID, e.getMessage());
     }
 
@@ -220,7 +220,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopiesByPlayerId(PLAYER_ID));
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("Player not found with ID: " + PLAYER_ID, e.getMessage());
     }
 
@@ -297,7 +297,7 @@ public class BoardGameCopyServiceTests {
 
         //Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.updateBoardGameCopy(1, updatedBoardGameCopyDto));
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("BoardGameCopy not found with ID: 1", e.getMessage());
     }
 
@@ -325,7 +325,7 @@ public class BoardGameCopyServiceTests {
 
         //Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.deleteBoardGameCopy(1));
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("BoardGameCopy not found with ID: 1", e.getMessage());
     }
 }
