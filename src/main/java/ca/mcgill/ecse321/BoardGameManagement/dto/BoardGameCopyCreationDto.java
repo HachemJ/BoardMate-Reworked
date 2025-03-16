@@ -18,6 +18,7 @@ public class BoardGameCopyCreationDto {
     @Positive(message = "Board Game ID must be positive")
     private int boardGameId;
 
+    @SuppressWarnings("unused")
     public BoardGameCopyCreationDto() {}
 
     public BoardGameCopyCreationDto(String specification, boolean isAvailable, int playerId, int boardGameId) {
