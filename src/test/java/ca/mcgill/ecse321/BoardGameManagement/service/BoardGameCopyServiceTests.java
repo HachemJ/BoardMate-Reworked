@@ -72,7 +72,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testCreateBoardGameCopyInvalidPlayerId() {
+    public void testCreateInvalidBoardGameCopy_nonexistentPlayerId() {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
@@ -83,12 +83,12 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("Player not found with ID: " + PLAYER_ID, e.getMessage());
     }
 
     @Test
-    public void testCreateBoardGameCopyInvalidBoardGameId() {
+    public void testCreateInvalidBoardGameCopy_nonexistentBoardGameId() {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
@@ -99,7 +99,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("BoardGame not found with ID: " + BOARD_GAME_ID, e.getMessage());
     }
 
@@ -130,7 +130,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopyById(1));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("BoardGameCopy not found with ID: 1", e.getMessage());
     }
 
@@ -172,7 +172,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopiesByBoardGameId(BOARD_GAME_ID));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("BoardGame not found with ID: " + BOARD_GAME_ID, e.getMessage());
     }
 
@@ -220,7 +220,7 @@ public class BoardGameCopyServiceTests {
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopiesByPlayerId(PLAYER_ID));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("Player not found with ID: " + PLAYER_ID, e.getMessage());
     }
 
@@ -261,7 +261,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testUpdateBoardGameCopySuccess() {
+    public void testUpdateValidBoardGameCopy() {
 
         //Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
@@ -288,7 +288,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testUpdateBoardGameCopyInvalidBoardGameCopyId() {
+    public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
 
         //Arrange
         BoardGameCopyCreationDto updatedBoardGameCopyDto = new BoardGameCopyCreationDto("new specification",
@@ -297,12 +297,12 @@ public class BoardGameCopyServiceTests {
 
         //Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.updateBoardGameCopy(1, updatedBoardGameCopyDto));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("BoardGameCopy not found with ID: 1", e.getMessage());
     }
 
     @Test
-    public void testDeleteBoardGameCopySuccess() {
+    public void testDeleteValidBoardGameCopy() {
 
         //Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
@@ -318,14 +318,14 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testDeleteBoardGameCopyInvalidBoardGameCopyId() {
+    public void testDeleteInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
 
         //Arrange
         when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null);
 
         //Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.deleteBoardGameCopy(1));
-        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("BoardGameCopy not found with ID: 1", e.getMessage());
     }
 }

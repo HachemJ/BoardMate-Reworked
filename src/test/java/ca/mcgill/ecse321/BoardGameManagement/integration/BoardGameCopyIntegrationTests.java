@@ -120,7 +120,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertTrue(response.getBody().getErrors().contains("Player not found with ID: 666"));
     }
 
@@ -137,7 +137,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertTrue(response.getBody().getErrors().contains("BoardGame not found with ID: 55555"));
     }
 
@@ -186,7 +186,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(1, response.getBody().getErrors().size());
         assertTrue(response.getBody().getErrors().contains("BoardGameCopy not found with ID: 666"));
     }
@@ -243,7 +243,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(1, response.getBody().getErrors().size());
         assertTrue(response.getBody().getErrors().contains("Player not found with ID: 666"));
     }
@@ -280,7 +280,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(1, response.getBody().getErrors().size());
         assertTrue(response.getBody().getErrors().contains("BoardGame not found with ID: 666"));
     }
@@ -351,7 +351,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertTrue(response.getBody().getErrors().contains("Player not found with ID: 666"));
     }
 
@@ -370,7 +370,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertTrue(response.getBody().getErrors().contains("BoardGame not found with ID: 55555"));
     }
 
@@ -388,4 +388,18 @@ public class BoardGameCopyIntegrationTests {
         assertNull(boardGameCopyRepository.findBySpecificGameID(boardGameCopy1.getSpecificGameID()));
     }
 
+    @Test
+    @Order(16)
+    public void testDeleteInvalidBoardGameCopy_nonexistentId() {
+
+        //Act
+        String url = "/boardgamecopies/" + 666;
+        ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.DELETE, null, ErrorDto.class);
+
+        //Assert
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(1, response.getBody().getErrors().size());
+        assertTrue(response.getBody().getErrors().contains("BoardGameCopy not found with ID: 666"));
+    }
 }
