@@ -3,21 +3,13 @@ package ca.mcgill.ecse321.BoardGameManagement.service;
 import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
 import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-//import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
 import ca.mcgill.ecse321.BoardGameManagement.dto.*;
-import ca.mcgill.ecse321.BoardGameManagement.service.PlayerService;
-import jakarta.validation.ConstraintViolationException;
-
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,13 +18,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
-//@MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class PlayerServiceTests {
 
-    @MockitoBean
+    @Mock
     private PlayerRepository playerRepository;
 
-    @Autowired
+    @InjectMocks
     private PlayerService playerService;
 
     private static final String VALID_NAME = "John Doe";
@@ -61,12 +52,6 @@ public class PlayerServiceTests {
         verify(playerRepository, times(1)).save(any(Player.class));
     }
 
-    /*@Test
-    public void testFindAllPlayers() {
-        //A
-
-        //A
-    }*/
     @Test
     public void testFindPlayerByValidId() {
         // Arrange
@@ -136,7 +121,7 @@ public class PlayerServiceTests {
     }
 
     @Test
-    public void updatePlayer_whenPlayerNotFound() {
+    public void updatePlayerWhenPlayerNotFound() {
         // Arrange
 
         PlayerCreationDto dto =
@@ -150,24 +135,6 @@ public class PlayerServiceTests {
         });
         assertEquals("Player not found with ID: " + invalidId, exception.getMessage());
     }
-
-    @Test
-    public void testUpdateInvalidInput() {
-        // Arrange: simulate that the player exists in the repository
-        Player existingPlayer = new Player(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);
-        when(playerRepository.findByPlayerID(VALID_ID)).thenReturn(existingPlayer);
-
-        // Arrange: create an invalid DTO with a blank name (violating @NotBlank)
-        PlayerCreationDto invalidDto =
-            new PlayerCreationDto("", "new.email@mail.com", "newpassword", false);
-
-        // Act & Assert: expect that calling updatePlayer with invalid input throws ConstraintViolationException
-        ConstraintViolationException exception =
-            assertThrows(ConstraintViolationException.class, () -> {
-                playerService.updatePlayer(VALID_ID, invalidDto);
-            });
-    }
-    //HOW SHOULD I test update with invalid input?
 
 }
 

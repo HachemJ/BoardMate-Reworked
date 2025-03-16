@@ -4,17 +4,15 @@ import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerRespDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.service.PlayerService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 @RestController
-@RequestMapping("player")
+@RequestMapping("players")
 public class PlayerController {
 
     @Autowired
@@ -50,5 +48,16 @@ public class PlayerController {
         }
         return playerDTOs;
     }
+
+    @GetMapping("/owners")
+    @ResponseStatus(HttpStatus.OK)
+    public ArrayList<PlayerRespDto> getAllOwners() {
+        ArrayList<PlayerRespDto> ownerDTOs = new ArrayList<>();
+        for (Player p : playerService.findAllOwners()) {
+            ownerDTOs.add(new PlayerRespDto(p));
+        }
+        return ownerDTOs;
+    }
+
 
 }

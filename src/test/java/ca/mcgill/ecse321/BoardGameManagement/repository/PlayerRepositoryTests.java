@@ -36,7 +36,7 @@ public class PlayerRepositoryTests {
   assertEquals(player.getPlayerID(), dbPlayer.getPlayerID());
   assertEquals(player.getName(), dbPlayer.getName());
   assertEquals(player.getEmail(), dbPlayer.getEmail());
-  assertEquals(player.isIsAOwner(), dbPlayer.isIsAOwner());
+  assertEquals(player.getIsAOwner(), dbPlayer.getIsAOwner());
   assertEquals(player.getPassword(), dbPlayer.getPassword());
 
  }
