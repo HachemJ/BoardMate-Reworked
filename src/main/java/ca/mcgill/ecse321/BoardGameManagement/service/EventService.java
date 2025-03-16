@@ -130,4 +130,30 @@ public class EventService {
 
     eventRepository.deleteById(eventID);
   }
+
+  /**
+   * Retrieves all events created by a specific owner.
+   */
+  @Transactional
+  public List<Event> getEventsByOwner(int ownerId) {
+
+    List<Event> events = eventRepository.findByOwner_PlayerID(ownerId);
+    if (events.isEmpty()) {
+      throw new IllegalArgumentException("No events found for owner ID: " + ownerId);
+    }
+    return events;
+  }
+
+  /**
+   * Retrieves all events associated with a specific board game.
+   */
+  @Transactional
+  public List<Event> getEventsByGame(int gameId) {
+
+    List<Event> events = eventRepository.findByBoardGame_GameID(gameId);
+    if (events.isEmpty()) {
+      throw new IllegalArgumentException("No events found for game ID: " + gameId);
+    }
+    return events;
+  }
 }

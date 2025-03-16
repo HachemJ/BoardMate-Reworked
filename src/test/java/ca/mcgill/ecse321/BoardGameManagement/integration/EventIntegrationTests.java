@@ -337,4 +337,57 @@ public class EventIntegrationTests {
     assertTrue(response.getBody().getErrors().contains("Owner ID must be a positive number."));
   }
 
+  @Test
+  public void testGetEventsByOwner() {
+    // Arrange: Create an owner and an event associated with that owner
+    Player player = new Player("Event Owner", "owner@mail.com", "password123", true);
+    player = playerRepository.save(player);
+
+    BoardGame boardGame = new BoardGame(2, 4, "Chess", "A strategy game");
+    boardGame = boardGameRepository.save(boardGame);
+
+    EventCreationDto eventBody = new EventCreationDto(
+        validEventName, validEventDescription, validMaxSpots, validDate,
+        validStartTime, validEndTime, validLocation, player.getPlayerID(), boardGame.getGameID()
+    );
+
+    ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", eventBody, EventResponseDto.class);
+    assertEquals(HttpStatus.CREATED, createdEvent.getStatusCode());
+
+    // Act: Fetch all events belonging to the owner
+    ResponseEntity<EventResponseDto[]> response = client.getForEntity("/events/owner/" + player.getPlayerID(), EventResponseDto[].class);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().length > 0);
+    assertEquals(validEventName, response.getBody()[0].getName());
+  }
+
+  @Test
+  public void testGetEventsByGame() {
+    // Arrange: Create a board game and an event associated with that game
+    Player player = playerRepository.save(new Player("Game Owner", "game@mail.com", "password123", true));
+
+    BoardGame boardGame = new BoardGame(2, 4, "Monopoly", "A fun board game");
+    boardGame = boardGameRepository.save(boardGame);
+
+    EventCreationDto eventBody = new EventCreationDto(
+        validEventName, validEventDescription, validMaxSpots, validDate,
+        validStartTime, validEndTime, validLocation, player.getPlayerID(), boardGame.getGameID()
+    );
+
+    ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", eventBody, EventResponseDto.class);
+    assertEquals(HttpStatus.CREATED, createdEvent.getStatusCode());
+
+    // Act: Fetch all events associated with the board game
+    ResponseEntity<EventResponseDto[]> response = client.getForEntity("/events/game/" + boardGame.getGameID(), EventResponseDto[].class);
+
+    // Assert
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertNotNull(response.getBody());
+    assertTrue(response.getBody().length > 0);
+    assertEquals(validEventName, response.getBody()[0].getName());
+  }
+  
 }

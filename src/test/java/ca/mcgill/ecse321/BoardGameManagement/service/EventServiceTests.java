@@ -279,4 +279,52 @@ public class EventServiceTests {
     assertEquals("Event not found with ID: 999", e.getMessage());
   }
 
+  @Test
+  public void testGetEventsByOwner_Valid() {
+    // Arrange
+    Player owner = new Player("John Doe", "john@example.com", "password", true);
+    BoardGame boardGame = new BoardGame(2, 4, "Chess", "Chess Description");
+
+    Event event1 = new Event(validEventName, validEventDescription, validMaxSpots, validDate,
+        validStartTime, validEndTime, validLocation, owner, boardGame
+    );
+    Event event2 = new Event("Chess Battle", "Intense match", "8", validDate, validStartTime,
+        validEndTime, "Campus", owner, boardGame);
+    List<Event> events = List.of(event1, event2);
+
+    when(eventRepository.findByOwner_PlayerID(validPlayerId)).thenReturn(events);
+
+    // Act
+    List<Event> retrievedEvents = eventService.getEventsByOwner(validPlayerId);
+
+    // Assert
+    assertNotNull(retrievedEvents);
+    assertEquals(2, retrievedEvents.size());
+    verify(eventRepository, times(1)).findByOwner_PlayerID(validPlayerId);
+  }
+
+  @Test
+  public void testGetEventsByGame_Valid() {
+    // Arrange
+    Player owner = new Player("John Doe", "john@example.com", "password", false);
+    BoardGame boardGame = new BoardGame(2, 4, "Chess", "Chess Description");
+
+    Event event1 = new Event(validEventName, validEventDescription, validMaxSpots, validDate,
+        validStartTime, validEndTime, validLocation, owner, boardGame
+    );
+    Event event2 = new Event("Chess Battle", "Intense match", "8", validDate, validStartTime,
+        validEndTime, "Campus", owner, boardGame);
+    List<Event> events = List.of(event1, event2);
+
+    when(eventRepository.findByBoardGame_GameID(validBoardGameId)).thenReturn(events);
+
+    // Act
+    List<Event> retrievedEvents = eventService.getEventsByGame(validBoardGameId);
+
+    // Assert
+    assertNotNull(retrievedEvents);
+    assertEquals(2, retrievedEvents.size());
+    verify(eventRepository, times(1)).findByBoardGame_GameID(validBoardGameId);
+  }
+
 }

@@ -25,10 +25,10 @@ public class EventController {
     return EventResponseDto.create(createdEvent);
   }
 
-  @PutMapping("/{id}")
+  @PutMapping("/{eventId}")
   @ResponseStatus(HttpStatus.OK)
-  public EventResponseDto updateEvent(@PathVariable int id, @RequestBody EventCreationDto eventDto) {
-    Event updatedEvent = eventService.updateEvent(id, eventDto);
+  public EventResponseDto updateEvent(@PathVariable int eventId, @RequestBody EventCreationDto eventDto) {
+    Event updatedEvent = eventService.updateEvent(eventId, eventDto);
     return EventResponseDto.create(updatedEvent);
   }
 
@@ -40,17 +40,35 @@ public class EventController {
         .collect(Collectors.toList());
   }
 
-  @GetMapping("/{id}")
+  @GetMapping("/{eventId}")
   @ResponseStatus(HttpStatus.OK)
-  public EventResponseDto getEventById(@PathVariable int id) {
-    return EventResponseDto.create(eventService.getEventById(id));
+  public EventResponseDto getEventById(@PathVariable int eventId) {
+    return EventResponseDto.create(eventService.getEventById(eventId));
 
   }
 
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/{eventId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteEvent(@PathVariable int id) {
-    eventService.deleteEvent(id);
+  public void deleteEvent(@PathVariable int eventId) {
+    eventService.deleteEvent(eventId);
+  }
+
+  @GetMapping("/owner/{ownerId}")
+  @ResponseStatus(HttpStatus.OK)
+  public List<EventResponseDto> getEventsByOwner(@PathVariable int ownerId) {
+    return eventService.getEventsByOwner(ownerId)
+        .stream()
+        .map(EventResponseDto::create)
+        .collect(Collectors.toList());
+  }
+
+  @GetMapping("/game/{gameId}")
+  @ResponseStatus(HttpStatus.OK)
+  public List<EventResponseDto> getEventsByGame(@PathVariable int gameId) {
+    return eventService.getEventsByGame(gameId)
+        .stream()
+        .map(EventResponseDto::create)
+        .collect(Collectors.toList());
   }
 
 }
