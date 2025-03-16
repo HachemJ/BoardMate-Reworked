@@ -9,6 +9,7 @@ public class BoardGameCopyResponseDto {
     private String playerName;
     private String boardGameName;
 
+    @SuppressWarnings("unused")
     private BoardGameCopyResponseDto() {}
 
     public BoardGameCopyResponseDto(BoardGameCopy boardGameCopy) {
