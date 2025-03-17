@@ -8,12 +8,10 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationCreationDto;
-
 import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.EventRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.RegistrationRepository;
-
 import java.util.List;
 
 @Service
@@ -27,19 +25,6 @@ public class RegistrationService {
 
     @Autowired
     private RegistrationRepository registrationRepository;
-
-
-    /**
-   * Get a registration by its key.
-   */
-    @Transactional
-    public Registration getRegistrationByKey(Registration.Key key) {
-        Registration registration = registrationRepository.findRegistrationByKey(key);
-        if (registration == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "No registration has been found."); 
-        }
-        return registration;
-    }
     
     /**
    * Creates a new registration in database.
@@ -60,7 +45,29 @@ public class RegistrationService {
         return registrationRepository.save(registration);
     }
 
-     /**
+    /**
+   * Gets a registration by its key.
+   */
+    @Transactional
+    public Registration getRegistrationByKey(int playerID, int eventID) {
+        Player player = playerRepository.findByPlayerID(playerID);
+        if (player == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerID);
+        }
+
+        Event event = eventRepository.findByEventID(eventID);
+        if (event == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
+        }
+
+        Registration registration = registrationRepository.findRegistrationByKey(new Registration.Key(player,event));
+        if (registration == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "No registration has been found."); 
+        }
+        return registration;
+    }
+
+    /**
    * Gets all registrations from the database.
    */
     @Transactional
@@ -69,24 +76,46 @@ public class RegistrationService {
     }
 
     /**
-   * Deletes an registration by its key.
+   * Gets all registrations for a player from database.
    */
-  @Transactional
-  public void deleteRegistration(Registration.Key key) {
-
-    if (!registrationRepository.existsById(key)) {
-      throw new GlobalException(HttpStatus.NOT_FOUND, "Cannot delete: Registration" + key + "not found");
+    @Transactional
+    public List<Registration> getAllRegistrationsByPlayer(int playerID) {
+        Player player = playerRepository.findByPlayerID(playerID);
+        if (player == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerID);
+        }
+        return (List<Registration>) registrationRepository.findRegistrationByPlayer(player);
     }
 
-    registrationRepository.deleteById(key);
-  }
-    
+    /**
+   * Gets all registrations for an event from database.
+   */
+    @Transactional
+    public List<Registration> getAllRegistrationsByEvent(int eventID) {
+        Event event = eventRepository.findByEventID(eventID);
+        if (event == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
+        }
+        return (List<Registration>) registrationRepository.findRegistrationByEvent(event);
+    }
 
+    /**
+   * Deletes an registration by its key.
+   */
+    @Transactional
+    public void deleteRegistration(int playerID, int eventID) {
+        Player player = playerRepository.findByPlayerID(playerID);
+        if (player == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerID);
+        }
 
-
-
-
-
-
-
+        Event event = eventRepository.findByEventID(eventID);
+        if (event == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
+        }
+        if (!registrationRepository.existsById(new Registration.Key(player,event))) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Cannot delete: Registration not found");
+        }
+        registrationRepository.deleteById(new Registration.Key(player,event));
+    }
 }
