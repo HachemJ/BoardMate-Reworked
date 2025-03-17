@@ -361,4 +361,20 @@ public class BoardGameCopyIntegrationTests {
         assertEquals(1, response.getBody().getErrors().size());
         assertTrue(response.getBody().getErrors().contains("BoardGameCopy not found with ID: 666"));
     }
+
+    @Test
+    @Order(15)
+    public void testFindALlBoardGameCopies_empty() {
+
+        //Arrange
+        boardGameCopyRepository.deleteAll();
+
+        //Act
+        ResponseEntity<BoardGameCopyResponseDto[]> response = client.getForEntity("/boardgamecopies", BoardGameCopyResponseDto[].class);
+
+        //Assert
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().length);
+    }
 }
