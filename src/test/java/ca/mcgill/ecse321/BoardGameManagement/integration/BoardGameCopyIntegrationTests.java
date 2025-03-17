@@ -379,7 +379,7 @@ public class BoardGameCopyIntegrationTests {
     }
 
     @Test
-    @Order(6)
+    @Order(16)
     public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
 
         //Arrange
@@ -395,5 +395,39 @@ public class BoardGameCopyIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(1, response.getBody().getErrors().size());
         assertTrue(response.getBody().getErrors().contains("BoardGameCopy not found with ID: 666"));
+    }
+
+    @Test
+    @Order(17)
+    public void testFindBoardGameCopiesByValidPlayerId_empty() {
+
+        //Arrange
+        boardGameCopyRepository.deleteAll();
+
+        //Act
+        String url = "/boardgamecopies/byplayer/" + player1.getPlayerID();
+        ResponseEntity<BoardGameCopyResponseDto[]> response = client.getForEntity(url, BoardGameCopyResponseDto[].class);
+
+        //Assert
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().length);
+    }
+
+    @Test
+    @Order(18)
+    public void testFindBoardGameCopiesByValidBoardGameId_empty() {
+
+        //Arrange
+        boardGameCopyRepository.deleteAll();
+
+        //Act
+        String url = "/boardgamecopies/byboardgame/" + boardGame1.getGameID();
+        ResponseEntity<BoardGameCopyResponseDto[]> response = client.getForEntity(url, BoardGameCopyResponseDto[].class);
+
+        //Assert
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(0, response.getBody().length);
     }
 }
