@@ -45,7 +45,18 @@ public class ReviewService {
         }
 
         Player player = playerRepository.findByPlayerID(reviewDto.getPlayerID());
+        if (player == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + reviewDto.getPlayerID());
+        }
+
         BoardGame boardGame = boardGameRepository.findByGameID(reviewDto.getBoardGameID());
+        if (boardGame == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + reviewDto.getBoardGameID());
+        }
+
+        if (reviewDto.getRating() < 0 || reviewDto.getRating() > 5) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Rating must be between 0 and 5. Rating is: " + reviewDto.getRating());
+        }
 
         
         Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), reviewDto.getCommentDate(), player, boardGame);
