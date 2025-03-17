@@ -10,7 +10,7 @@ public class BoardGameCopyCreationDto {
     private String specification;
 
     @JsonProperty("isAvailable") // Forces the JSON property to be "isAvailable" instead of "available"
-    private boolean isAvailable;
+    private boolean isAvailable; // A newly created board game copy is available by default
 
     @Positive(message = "Player ID must be positive")
     private int playerId;
@@ -21,9 +21,9 @@ public class BoardGameCopyCreationDto {
     @SuppressWarnings("unused")
     public BoardGameCopyCreationDto() {}
 
-    public BoardGameCopyCreationDto(String specification, boolean isAvailable, int playerId, int boardGameId) {
+    public BoardGameCopyCreationDto(String specification, int playerId, int boardGameId) {
         this.specification = specification;
-        this.isAvailable = isAvailable;
+        this.isAvailable = true;
         this.playerId = playerId;
         this.boardGameId = boardGameId;
     }

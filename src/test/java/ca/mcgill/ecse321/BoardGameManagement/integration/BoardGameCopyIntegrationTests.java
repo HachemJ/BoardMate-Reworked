@@ -90,7 +90,7 @@ public class BoardGameCopyIntegrationTests {
 
         String specification = "A fun game";
         boolean isAvailable = true;
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto(specification, isAvailable, player.getPlayerID(),
+        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto(specification, player.getPlayerID(),
                 boardGame.getGameID());
 
         //Act
@@ -110,7 +110,7 @@ public class BoardGameCopyIntegrationTests {
     public void testCreateInvalidBoardGameCopy_nonexistentPlayer() {
 
         //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever", false,
+        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
                 666, boardGame1.getGameID());
 
         //Act
@@ -127,7 +127,7 @@ public class BoardGameCopyIntegrationTests {
     public void testCreateInvalidBoardGameCopy_nonexistentBoardGame() {
 
         //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever", false,
+        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
                 player1.getPlayerID(), 55555);
 
         //Act
@@ -144,8 +144,7 @@ public class BoardGameCopyIntegrationTests {
     public void testCreateInvalidBoardGameCopy_nullInput() {
 
         //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", false,
-                0, 0);
+        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", 0, 0);
 
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
@@ -195,8 +194,7 @@ public class BoardGameCopyIntegrationTests {
     public void testUpdateInvalidBoardGameCopy_emptySpecification() {
 
         //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", false, player1.getPlayerID(),
-                boardGame1.getGameID());
+        String body = "";
 
         //Act
         String url = "/boardgamecopies/" + boardGameCopy1.getSpecificGameID();
@@ -207,7 +205,7 @@ public class BoardGameCopyIntegrationTests {
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(1, response.getBody().getErrors().size());
-        assertTrue(response.getBody().getErrors().contains("Specification is mandatory"));
+        assertTrue(response.getBody().getErrors().contains("Field is missing"));
     }
 
     @Test
@@ -318,8 +316,7 @@ public class BoardGameCopyIntegrationTests {
     public void testUpdateValidBoardGameCopy() {
 
         //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("Updated", false, player1.getPlayerID(),
-                boardGame1.getGameID());
+        String body = "Updated specification aaa";
 
         //Act
         String url = "/boardgamecopies/" + boardGameCopy1.getSpecificGameID();
@@ -327,54 +324,17 @@ public class BoardGameCopyIntegrationTests {
                 BoardGameCopyResponseDto.class);
 
         //Assert
+        boolean isAvailable = boardGameCopy1.isIsAvailable();
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(body.getSpecification(), response.getBody().getSpecification());
-        assertEquals(body.isAvailable(), response.getBody().getIsAvailable());
+        assertEquals(body, response.getBody().getSpecification());
+        assertEquals(isAvailable, response.getBody().getIsAvailable());
         assertEquals(player1.getName(), response.getBody().getPlayerName());
         assertEquals(boardGame1.getName(), response.getBody().getBoardGameName());
     }
 
     @Test
     @Order(13)
-    public void testUpdateInvalidBoardGameCopy_nonexistentPlayer() {
-
-        //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever", false,
-                666, boardGame1.getGameID());
-
-        //Act
-        String url = "/boardgamecopies/" + boardGameCopy1.getSpecificGameID();
-        ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, new HttpEntity<>(body),
-                ErrorDto.class);
-
-        //Assert
-        assertNotNull(response.getBody());
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertTrue(response.getBody().getErrors().contains("Player not found with ID: 666"));
-    }
-
-    @Test
-    @Order(14)
-    public void testUpdateInvalidBoardGameCopy_nonexistentBoardGame() {
-
-        //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever", false,
-                player1.getPlayerID(), 55555);
-
-        //Act
-        String url = "/boardgamecopies/" + boardGameCopy1.getSpecificGameID();
-        ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, new HttpEntity<>(body),
-                ErrorDto.class);
-
-        //Assert
-        assertNotNull(response.getBody());
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertTrue(response.getBody().getErrors().contains("BoardGame not found with ID: 55555"));
-    }
-
-    @Test
-    @Order(15)
     public void testDeleteValidBoardGameCopy() {
 
         //Act
@@ -388,7 +348,7 @@ public class BoardGameCopyIntegrationTests {
     }
 
     @Test
-    @Order(16)
+    @Order(14)
     public void testDeleteInvalidBoardGameCopy_nonexistentId() {
 
         //Act
