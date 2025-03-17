@@ -71,28 +71,19 @@ public class EventService {
       throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
     }
 
-    // Update only if new values are provided
-    if (eventDto.getName() != null && !eventDto.getName().trim().isEmpty()) {
-      event.setName(eventDto.getName());
-    }
-    if (eventDto.getDescription() != null) {
-      event.setDescription(eventDto.getDescription());
-    }
-    if (eventDto.getMaxSpot() != null) {
-      event.setMaxSpot(eventDto.getMaxSpot());
-    }
-    if (eventDto.getEventDate() != null) {
-      event.setEventDate(eventDto.getEventDate());
-    }
-    if (eventDto.getStartTime() != null) {
-      event.setStartTime(eventDto.getStartTime());
-    }
-    if (eventDto.getEndTime() != null) {
-      event.setEndTime(eventDto.getEndTime());
-    }
-    if (eventDto.getLocation() != null) {
-      event.setLocation(eventDto.getLocation());
-    }
+    event.setName(eventDto.getName());
+
+    event.setDescription(eventDto.getDescription());
+
+    event.setMaxSpot(eventDto.getMaxSpot());
+
+    event.setEventDate(eventDto.getEventDate());
+
+    event.setStartTime(eventDto.getStartTime());
+
+    event.setEndTime(eventDto.getEndTime());
+
+    event.setLocation(eventDto.getLocation());
 
     return eventRepository.save(event);
   }

@@ -23,6 +23,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -89,6 +90,45 @@ public class EventServiceTests {
 
     verify(eventRepository, times(1)).save(any(Event.class));
   }
+
+  @Test
+  public void testCreateEvent_PlayerNotFound_ShouldThrowException() {
+    // Arrange
+    when(playerRepository.findByPlayerID(anyInt())).thenReturn(null);
+
+    EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
+        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, 1,
+        1
+    );
+    // Act & Assert
+    Exception exception = assertThrows(GlobalException.class, () -> {
+      eventService.createEvent(dto);
+    });
+
+    assertEquals(HttpStatus.NOT_FOUND, ((GlobalException) exception).getStatus());
+    assertTrue(exception.getMessage().contains("Owner not found"));
+  }
+
+  @Test
+  public void testCreateEvent_BoardGameNotFound_ShouldThrowException() {
+    // Arrange
+    when(playerRepository.findByPlayerID(anyInt())).thenReturn(new Player());
+    when(boardGameRepository.findByGameID(anyInt())).thenReturn(null);
+
+    EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
+        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, 1,
+        2
+    );
+    // Act & Assert
+    Exception exception = assertThrows(GlobalException.class, () -> {
+      eventService.createEvent(dto);
+    });
+
+    assertEquals(HttpStatus.NOT_FOUND, ((GlobalException) exception).getStatus());
+    assertTrue(exception.getMessage().contains("BoardGame not found"));
+  }
+
+
 
   /** Test getting event by valid ID** */
   @Test
@@ -302,6 +342,30 @@ public class EventServiceTests {
     assertEquals(2, retrievedEvents.size());
     verify(eventRepository, times(1)).findByOwner_PlayerID(validPlayerId);
   }
+
+  @Test
+  public void testGetEventsByOwner_NoEvents_ShouldThrowException() {
+    // Arrange
+    int ownerId = 999; // Non-existent owner
+    when(eventRepository.findByOwner_PlayerID(ownerId)).thenReturn(Collections.emptyList());
+
+    // Act & Assert
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> eventService.getEventsByOwner(ownerId));
+    assertTrue(exception.getMessage().contains("No events found for owner ID"));
+  }
+
+
+  @Test
+  public void testGetEventsByGame_NoEvents_ShouldThrowException() {
+    // Arrange
+    int gameId = 999; // Non-existent game
+    when(eventRepository.findByBoardGame_GameID(gameId)).thenReturn(Collections.emptyList());
+
+    // Act & Assert
+    Exception exception = assertThrows(IllegalArgumentException.class, () -> eventService.getEventsByGame(gameId));
+    assertTrue(exception.getMessage().contains("No events found for game ID"));
+  }
+
 
   @Test
   public void testGetEventsByGame_Valid() {
