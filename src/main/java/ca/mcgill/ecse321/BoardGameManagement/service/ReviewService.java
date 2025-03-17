@@ -40,8 +40,15 @@ public class ReviewService {
      */
     @Transactional
     public Review createReview(ReviewCreationDto reviewDto) {
+        if (reviewDto == null) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "review does not exist");
+        }
+
+        Player player = playerRepository.findByPlayerID(reviewDto.getPlayerID());
+        BoardGame boardGame = boardGameRepository.findByGameID(reviewDto.getBoardGameID());
+
         
-        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), reviewDto.getCommentDate(), reviewDto.getAuthor(), reviewDto.getBoardGame());
+        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), reviewDto.getCommentDate(), player, boardGame);
         return reviewRepository.save(review);
     }
 
@@ -57,8 +64,6 @@ public class ReviewService {
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
         review.setCommentDate(reviewDto.getCommentDate());
-        review.setAuthor(reviewDto.getAuthor());
-        review.setBoardGame(reviewDto.getBoardGame());
 
         return reviewRepository.save(review);
     }

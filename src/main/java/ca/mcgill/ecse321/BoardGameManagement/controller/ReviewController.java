@@ -2,7 +2,7 @@ package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewResponseDto;
-import ca.mcgill.ecse321.BoardGameManagement.model.*;
+import ca.mcgill.ecse321.BoardGameManagement.model.Review;
 import ca.mcgill.ecse321.BoardGameManagement.service.ReviewService;
 
 import org.springframework.beans.factory.annotation.Autowired;

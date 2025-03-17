@@ -76,6 +76,13 @@ public class ReviewServiceTests {
     @Test
     public void createValidReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, playerID, boardGameID);
+
+        assertNotNull(dto);
+        assertEquals(dto.getRating(), rating);
+        assertEquals(dto.getComment(), comment);
+        assertEquals(dto.getCommentDate(), date);
+        assertEquals(dto.getPlayerID(), playerID);
+        assertEquals(dto.getBoardGameID(), boardGameID);
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
 
@@ -104,7 +111,7 @@ public class ReviewServiceTests {
         assertEquals(player, createdReview.getAuthor());
         assertEquals(boardGame, createdReview.getBoardGame());
 
-        System.out.println(createdReview);
+        System.out.println("Created review: " + createdReview);
 
         verify(reviewRepository, times(1)).save(any(Review.class));
 

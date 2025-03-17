@@ -10,8 +10,8 @@ public class ReviewCreationDto {
     private int rating;
     private String comment;
     private Date commentDate;
-    private Player author;
-    private BoardGame boardGame;
+    private int playerID;
+    private int boardGameID;
 
     public ReviewCreationDto() {}
 
@@ -20,16 +20,8 @@ public class ReviewCreationDto {
         this.rating = review.getRating();
         this.comment = review.getComment();
         this.commentDate = review.getCommentDate();
-        this.author = review.getAuthor();
-        this.boardGame = review.getBoardGame();
-    }
-
-    public ReviewCreationDto(int rating, String comment, Date commentDate, Player author, BoardGame boardGame) {
-        this.rating = rating;
-        this.comment = comment;
-        this.commentDate = commentDate;
-        this.author = author;
-        this.boardGame = boardGame;
+        this.playerID = review.getPlayerID();
+        this.boardGameID = review.getBoardGameID();
     }
 
     public int getReviewID() {
@@ -48,12 +40,20 @@ public class ReviewCreationDto {
         return commentDate;
     }
 
-    public Player getAuthor() {
-        return author;
+    public int getPlayerID() {
+        return playerID;
     }
 
-    public BoardGame getBoardGame() {
-        return boardGame;
+    public int getBoardGameID() {
+        return boardGameID;
+    }
+
+    public ReviewCreationDto(int rating, String comment, Date commentDate, int playerID, int boardGameID) {
+        this.rating = rating;
+        this.comment = comment;
+        this.commentDate = commentDate;
+        this.playerID = playerID;
+        this.boardGameID = boardGameID;
     }
 
 }

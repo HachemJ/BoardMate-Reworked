@@ -33,15 +33,6 @@ public class ReviewResponseDto {
         this.boardGame = boardGame;
     }
 
-    public ReviewResponseDto(Review review) {
-        this.reviewID = review.getReviewID();
-        this.rating = review.getRating();
-        this.comment = review.getComment();
-        this.commentDate = review.getCommentDate();
-        this.author = review.getAuthor();
-        this.boardGame = review.getBoardGame();
-    }
-
     public int getReviewID() {
         return reviewID;
     }
@@ -65,4 +56,14 @@ public class ReviewResponseDto {
     public BoardGame getBoardGame() {
         return boardGame;
     }
+
+    public ReviewResponseDto(Review review) {
+        this.reviewID = review.getReviewID();
+        this.rating = review.getRating();
+        this.comment = review.getComment();
+        this.commentDate = review.getCommentDate();
+        this.author = review.getAuthor();
+        this.boardGame = review.getBoardGame();
+    }
+
 }

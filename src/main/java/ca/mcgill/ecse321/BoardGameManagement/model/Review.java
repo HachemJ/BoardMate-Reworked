@@ -1,16 +1,14 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import java.sql.Date;
 
 @Entity
 public class Review {
 
   @Id
-  @GeneratedValue
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int reviewID;
   private int rating;
   private String comment;
@@ -23,6 +21,30 @@ public class Review {
   private BoardGame boardGame;
 
   public Review() {}
+
+  public int getReviewID() {
+    return reviewID;
+  }
+
+  public int getRating() {
+    return rating;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public Date getCommentDate() {
+    return commentDate;
+  }
+
+  public Player getAuthor() {
+    return author;
+  }
+
+  public BoardGame getBoardGame() {
+    return boardGame;
+  }
 
   public Review(int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame) {
     rating = aRating;
@@ -51,28 +73,9 @@ public class Review {
     return true;
   }
 
-  public int getReviewID() {
-    return reviewID;
-  }
-
-  public int getRating() {
-    return rating;
-  }
-
-  public String getComment() {
-    return comment;
-  }
-
-  public Date getCommentDate() {
-    return commentDate;
-  }
-
-  public Player getAuthor() {
-    return author;
-  }
-
-  public BoardGame getBoardGame() {
-    return boardGame;
+  public boolean setReviewID(int aReviewID) {
+    reviewID = aReviewID;
+    return true;
   }
 
   public boolean setAuthor(Player aNewAuthor) {
