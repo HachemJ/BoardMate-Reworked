@@ -62,26 +62,18 @@ public class BoardGameCopyService {
     }
 
     @Transactional
-    public BoardGameCopy updateBoardGameCopy(int boardGameCopyId, @Valid BoardGameCopyCreationDto boardGameCopyToUpdate) {
+    public BoardGameCopy updateBoardGameCopy(int boardGameCopyId, String newSpecification) {
 
         BoardGameCopy boardGameCopy = boardGameCopyRepository.findBySpecificGameID(boardGameCopyId);
-        BoardGame newBoardGame = boardGameRepository.findByGameID(boardGameCopyToUpdate.getBoardGameId());
-        Player newPlayer = playerRepository.findByPlayerID(boardGameCopyToUpdate.getPlayerId());
 
         if (boardGameCopy == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGameCopy not found with ID: " + boardGameCopyId);
         }
-        if (newBoardGame == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameCopyToUpdate.getBoardGameId());
-        }
-        if (newPlayer == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + boardGameCopyToUpdate.getPlayerId());
+        if (newSpecification == null || newSpecification.isEmpty()) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Specification cannot be empty");
         }
 
-        boardGameCopy.setBoardGame(newBoardGame);
-        boardGameCopy.setPlayer(newPlayer);
-        boardGameCopy.setSpecification(boardGameCopyToUpdate.getSpecification());
-        boardGameCopy.setIsAvailable(boardGameCopyToUpdate.isAvailable());
+        boardGameCopy.setSpecification(newSpecification);
 
         return boardGameCopyRepository.save(boardGameCopy);
     }

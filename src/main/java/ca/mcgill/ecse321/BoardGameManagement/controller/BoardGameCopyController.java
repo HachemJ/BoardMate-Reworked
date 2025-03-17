@@ -34,8 +34,8 @@ public class BoardGameCopyController {
     @PutMapping("/{boardGameCopyId}")
     @ResponseStatus(HttpStatus.OK)
     public BoardGameCopyResponseDto updateBoardGameCopy(@PathVariable int boardGameCopyId,
-                                                        @RequestBody BoardGameCopyCreationDto boardGameCopyCreationDto) {
-        BoardGameCopy updatedBoardGameCopy = boardGameCopyService.updateBoardGameCopy(boardGameCopyId, boardGameCopyCreationDto);
+                                                        @RequestBody String newSpecification) {
+        BoardGameCopy updatedBoardGameCopy = boardGameCopyService.updateBoardGameCopy(boardGameCopyId, newSpecification);
         return new BoardGameCopyResponseDto(updatedBoardGameCopy);
     }
 

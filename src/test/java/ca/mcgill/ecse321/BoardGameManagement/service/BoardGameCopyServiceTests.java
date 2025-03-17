@@ -40,7 +40,6 @@ public class BoardGameCopyServiceTests {
     private BoardGameCopyService boardGameCopyService;
 
     private static final String SPECIFICATION = "The specification of this board game copy.";
-    private static final boolean IS_AVAILABLE = true;
     private static final int PLAYER_ID = 1;
     private static final int BOARD_GAME_ID = 2;
 
@@ -49,7 +48,7 @@ public class BoardGameCopyServiceTests {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
-                IS_AVAILABLE, PLAYER_ID, BOARD_GAME_ID);
+                PLAYER_ID, BOARD_GAME_ID);
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
 
@@ -64,7 +63,7 @@ public class BoardGameCopyServiceTests {
         // Assert
         assertNotNull(createdBoardGameCopy);
         assertEquals(SPECIFICATION, createdBoardGameCopy.getSpecification());
-        assertEquals(IS_AVAILABLE, createdBoardGameCopy.getIsAvailable());
+        assertTrue(createdBoardGameCopy.getIsAvailable());
         assertEquals(player, createdBoardGameCopy.getPlayer());
         assertEquals(boardGame, createdBoardGameCopy.getBoardGame());
 
@@ -76,7 +75,7 @@ public class BoardGameCopyServiceTests {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
-                IS_AVAILABLE, PLAYER_ID, BOARD_GAME_ID);
+                PLAYER_ID, BOARD_GAME_ID);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
         when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(null);
         when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(boardGame);
@@ -92,7 +91,7 @@ public class BoardGameCopyServiceTests {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
-                IS_AVAILABLE, PLAYER_ID, BOARD_GAME_ID);
+                PLAYER_ID, BOARD_GAME_ID);
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(player);
         when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(null);
@@ -109,7 +108,7 @@ public class BoardGameCopyServiceTests {
         // Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
-        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE,
+        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(new BoardGameCopy(SPECIFICATION, false,
                 player, boardGame));
 
         // Act
@@ -118,7 +117,7 @@ public class BoardGameCopyServiceTests {
         // Assert
         assertNotNull(foundBoardGameCopy);
         assertEquals(SPECIFICATION, foundBoardGameCopy.getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopy.getIsAvailable());
+        assertFalse(foundBoardGameCopy.getIsAvailable());
         assertEquals(player, foundBoardGameCopy.getPlayer());
     }
 
@@ -142,8 +141,8 @@ public class BoardGameCopyServiceTests {
         Player player2 = new Player("John", "john@hotmail.com", "112233", true);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
         ArrayList <BoardGameCopy> boardGameCopies = new ArrayList<>();
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player1, boardGame));
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player2, boardGame));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, true, player1, boardGame));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, false, player2, boardGame));
 
         when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(boardGame);
         when(boardGameCopyRepository.findByBoardGame(boardGame)).thenReturn(boardGameCopies);
@@ -155,11 +154,11 @@ public class BoardGameCopyServiceTests {
         assertNotNull(foundBoardGameCopies);
         assertEquals(2, foundBoardGameCopies.size());
         assertEquals(SPECIFICATION, foundBoardGameCopies.getFirst().getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.getFirst().getIsAvailable());
+        assertTrue(foundBoardGameCopies.getFirst().getIsAvailable());
         assertEquals(player1, foundBoardGameCopies.getFirst().getPlayer());
         assertEquals(boardGame, foundBoardGameCopies.getFirst().getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(1).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(1).getIsAvailable());
+        assertFalse(foundBoardGameCopies.get(1).getIsAvailable());
         assertEquals(player2, foundBoardGameCopies.get(1).getPlayer());
         assertEquals(boardGame, foundBoardGameCopies.get(1).getBoardGame());
     }
@@ -185,9 +184,9 @@ public class BoardGameCopyServiceTests {
         BoardGame boardGame2 = new BoardGame(2, 4, "A boring game", "This is a boring game");
         BoardGame boardGame3 = new BoardGame(1, 10, "One more game", "This is one more game");
         ArrayList<BoardGameCopy> boardGameCopies = new ArrayList<>();
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player, boardGame1));
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player, boardGame2));
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player, boardGame3));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, true, player, boardGame1));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, true, player, boardGame2));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, true, player, boardGame3));
 
         when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(player);
         when(boardGameCopyRepository.findByPlayer(player)).thenReturn(boardGameCopies);
@@ -199,15 +198,15 @@ public class BoardGameCopyServiceTests {
         assertNotNull(foundBoardGameCopies);
         assertEquals(3, foundBoardGameCopies.size());
         assertEquals(SPECIFICATION, foundBoardGameCopies.getFirst().getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.getFirst().getIsAvailable());
+        assertTrue(foundBoardGameCopies.getFirst().getIsAvailable());
         assertEquals(player, foundBoardGameCopies.getFirst().getPlayer());
         assertEquals(boardGame1, foundBoardGameCopies.getFirst().getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(1).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(1).getIsAvailable());
+        assertTrue(foundBoardGameCopies.get(1).getIsAvailable());
         assertEquals(player, foundBoardGameCopies.get(1).getPlayer());
         assertEquals(boardGame2, foundBoardGameCopies.get(1).getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(2).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(2).getIsAvailable());
+        assertTrue(foundBoardGameCopies.get(2).getIsAvailable());
         assertEquals(player, foundBoardGameCopies.get(2).getPlayer());
         assertEquals(boardGame3, foundBoardGameCopies.get(2).getBoardGame());
     }
@@ -234,9 +233,9 @@ public class BoardGameCopyServiceTests {
         BoardGame boardGame2 = new BoardGame(2, 4, "A boring game", "This is a boring game");
         BoardGame boardGame3 = new BoardGame(1, 10, "One more game", "This is one more game");
         ArrayList<BoardGameCopy> boardGameCopies = new ArrayList<>();
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player1, boardGame1));
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player1, boardGame2));
-        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player2, boardGame3));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, true, player1, boardGame1));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, false, player1, boardGame2));
+        boardGameCopies.add(new BoardGameCopy(SPECIFICATION, true, player2, boardGame3));
 
         when(boardGameCopyRepository.findAll()).thenReturn(boardGameCopies);
 
@@ -247,15 +246,15 @@ public class BoardGameCopyServiceTests {
         assertNotNull(foundBoardGameCopies);
         assertEquals(3, foundBoardGameCopies.size());
         assertEquals(SPECIFICATION, foundBoardGameCopies.getFirst().getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.getFirst().getIsAvailable());
+        assertTrue(foundBoardGameCopies.getFirst().getIsAvailable());
         assertEquals(player1, foundBoardGameCopies.getFirst().getPlayer());
         assertEquals(boardGame1, foundBoardGameCopies.getFirst().getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(1).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(1).getIsAvailable());
+        assertFalse(foundBoardGameCopies.get(1).getIsAvailable());
         assertEquals(player1, foundBoardGameCopies.get(1).getPlayer());
         assertEquals(boardGame2, foundBoardGameCopies.get(1).getBoardGame());
         assertEquals(SPECIFICATION, foundBoardGameCopies.get(2).getSpecification());
-        assertEquals(IS_AVAILABLE, foundBoardGameCopies.get(2).getIsAvailable());
+        assertTrue(foundBoardGameCopies.get(2).getIsAvailable());
         assertEquals(player2, foundBoardGameCopies.get(2).getPlayer());
         assertEquals(boardGame3, foundBoardGameCopies.get(2).getBoardGame());
     }
@@ -266,23 +265,19 @@ public class BoardGameCopyServiceTests {
         //Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
-        BoardGameCopy originalBoardGameCopy = new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player, boardGame);
+        BoardGameCopy originalBoardGameCopy = new BoardGameCopy(SPECIFICATION, true, player, boardGame);
 
-        BoardGameCopyCreationDto updatedBoardGameCopyDto = new BoardGameCopyCreationDto("new specification",
-                IS_AVAILABLE, PLAYER_ID, BOARD_GAME_ID);
-        when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(player);
-        when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(boardGame);
         when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(originalBoardGameCopy);
         when(boardGameCopyRepository.save(any(BoardGameCopy.class)))
                 .thenAnswer((InvocationOnMock iom) -> iom.getArgument(0));
 
         //Act
-        BoardGameCopy updatedBoardGameCopy = boardGameCopyService.updateBoardGameCopy(1, updatedBoardGameCopyDto);
+        BoardGameCopy updatedBoardGameCopy = boardGameCopyService.updateBoardGameCopy(1, "new specification");
 
         //Assert
         assertNotNull(updatedBoardGameCopy);
         assertEquals("new specification", updatedBoardGameCopy.getSpecification());
-        assertEquals(IS_AVAILABLE, updatedBoardGameCopy.getIsAvailable());
+        assertTrue(updatedBoardGameCopy.getIsAvailable());
         assertEquals(player, updatedBoardGameCopy.getPlayer());
         assertEquals(boardGame, updatedBoardGameCopy.getBoardGame());
     }
@@ -291,12 +286,10 @@ public class BoardGameCopyServiceTests {
     public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
 
         //Arrange
-        BoardGameCopyCreationDto updatedBoardGameCopyDto = new BoardGameCopyCreationDto("new specification",
-                IS_AVAILABLE, PLAYER_ID, BOARD_GAME_ID);
         when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null);
 
         //Act and Assert
-        GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.updateBoardGameCopy(1, updatedBoardGameCopyDto));
+        GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.updateBoardGameCopy(1, "new specification"));
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("BoardGameCopy not found with ID: 1", e.getMessage());
     }
@@ -307,7 +300,7 @@ public class BoardGameCopyServiceTests {
         //Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
-        BoardGameCopy boardGameCopy = new BoardGameCopy(SPECIFICATION, IS_AVAILABLE, player, boardGame);
+        BoardGameCopy boardGameCopy = new BoardGameCopy(SPECIFICATION, true, player, boardGame);
         when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(boardGameCopy);
 
         //Act
