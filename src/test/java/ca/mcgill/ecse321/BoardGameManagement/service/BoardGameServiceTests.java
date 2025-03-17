@@ -17,7 +17,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class BoardGameServiceTests {
@@ -50,14 +49,11 @@ public class BoardGameServiceTests {
   }
 
   @Test
-  void testCreateBoardGame_Success() {
-    // Arrange
+  void testCreatingValidBoardGame() {
     when(boardGameRepository.save(any(BoardGame.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    // Act
     BoardGame createdGame = boardGameService.createBoardGame(createDto);
 
-    // Assert
     assertNotNull(createdGame);
     assertEquals(VALID_NAME, createdGame.getName());
     assertEquals(VALID_DESCRIPTION, createdGame.getDescription());
@@ -67,75 +63,63 @@ public class BoardGameServiceTests {
   }
 
   @Test
-  void testCreateBoardGame_InvalidMinPlayers() {
-    // Arrange
+  void testCreatingBoardGameWithInvalidMinPlayers() {
     BoardGameCreationDto dto = new BoardGameCreationDto(0, 4, "Chess", "Strategy Game");
 
-    // Act & Assert
-    assertThrows(IllegalArgumentException.class, () -> boardGameService.createBoardGame(dto));
+    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.createBoardGame(dto));
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
   @Test
-  void testCreateBoardGame_InvalidMaxPlayers() {
-    // Arrange
+  void testCreatingBoardGameWithInvalidMaxPlayers() {
     BoardGameCreationDto dto = new BoardGameCreationDto(2, 0, "Chess", "Strategy Game");
 
-    // Act & Assert
-    assertThrows(IllegalArgumentException.class, () -> boardGameService.createBoardGame(dto));
+    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.createBoardGame(dto));
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
   @Test
-  void testCreateBoardGame_MaxPlayersLessThanMin() {
-    // Arrange
+  void testCreatingBoardGameWithMaxPlayersLessThanMin() {
     BoardGameCreationDto dto = new BoardGameCreationDto(4, 2, "Chess", "Strategy Game");
 
-    // Act & Assert
-    assertThrows(IllegalArgumentException.class, () -> boardGameService.createBoardGame(dto));
+    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.createBoardGame(dto));
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
   @Test
-  void testCreateBoardGame_EmptyName() {
-    // Arrange
+  void testCreatingBoardGameWithEmptyName() {
     BoardGameCreationDto dto = new BoardGameCreationDto(2, 4, "", "Strategy Game");
 
-    // Act & Assert
-    assertThrows(IllegalArgumentException.class, () -> boardGameService.createBoardGame(dto));
+    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.createBoardGame(dto));
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
   @Test
-  void testGetBoardGameById_Success() {
-    // Arrange
+  void testRetrievingValidBoardGameById() {
     when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
 
-    // Act
     BoardGame retrievedGame = boardGameService.getBoardGameById(VALID_ID);
 
-    // Assert
     assertNotNull(retrievedGame);
     assertEquals(VALID_NAME, retrievedGame.getName());
     assertEquals(VALID_DESCRIPTION, retrievedGame.getDescription());
   }
 
   @Test
-  void testGetBoardGameById_NotFound() {
-    // Arrange
+  void testRetrievingNonExistentBoardGameById() {
     when(boardGameRepository.findByGameID(INVALID_ID)).thenReturn(null);
 
-    // Act & Assert
     GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.getBoardGameById(INVALID_ID));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
 
   @Test
-  void testUpdateBoardGame_Success() {
-    // Arrange
+  void testUpdatingValidBoardGame() {
     when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
     when(boardGameRepository.save(any(BoardGame.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-    // Act
     BoardGame updatedGame = boardGameService.updateBoardGame(VALID_ID, updateDto);
 
-    // Assert
     assertNotNull(updatedGame);
     assertEquals(UPDATED_NAME, updatedGame.getName());
     assertEquals(UPDATED_DESCRIPTION, updatedGame.getDescription());
@@ -143,43 +127,35 @@ public class BoardGameServiceTests {
   }
 
   @Test
-  void testUpdateBoardGame_NotFound() {
-    // Arrange
+  void testUpdatingNonExistentBoardGame() {
     when(boardGameRepository.findByGameID(INVALID_ID)).thenReturn(null);
 
-    // Act & Assert
     GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.updateBoardGame(INVALID_ID, updateDto));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
 
   @Test
-  void testUpdateBoardGame_MaxPlayersLessThanMin() {
-    // Arrange
-    when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame); // Ensure board game exists
+  void testUpdatingBoardGameWithMaxPlayersLessThanMin() {
+    when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
 
     BoardGameCreationDto dto = new BoardGameCreationDto(4, 2, "Updated Chess", "Updated Description");
 
-    // Act & Assert
-    assertThrows(IllegalArgumentException.class, () -> boardGameService.updateBoardGame(VALID_ID, dto));
+    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.updateBoardGame(VALID_ID, dto));
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
-
   @Test
-  void testDeleteBoardGame_Success() {
-    // Arrange
+  void testDeletingValidBoardGame() {
     when(boardGameRepository.existsById(VALID_ID)).thenReturn(true);
 
-    // Act & Assert
     assertDoesNotThrow(() -> boardGameService.deleteBoardGame(VALID_ID));
     verify(boardGameRepository).deleteById(VALID_ID);
   }
 
   @Test
-  void testDeleteBoardGame_NotFound() {
-    // Arrange
+  void testDeletingNonExistentBoardGame() {
     when(boardGameRepository.existsById(INVALID_ID)).thenReturn(false);
 
-    // Act & Assert
     GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.deleteBoardGame(INVALID_ID));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
