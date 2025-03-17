@@ -35,3 +35,4 @@ public class GlobalExceptionHandler {
     return new ResponseEntity<>(new ErrorDto("Field is missing"), HttpStatus.BAD_REQUEST);
   }
 }
+ 

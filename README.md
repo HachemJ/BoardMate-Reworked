@@ -79,8 +79,18 @@ The working application fulfilling all the abovementioned functionalities
 | Jad | domain model + persistance testing (BoardGame) + set up build system | 11
 | HongYi | domain model + persistance testing (Player) + ReadMe | 10
 
-
 ### March 16: Deliverable 2 -- Service Logic and Functionalities of the Application
+
+| Name | Role & Responsibility | Hours
+| --- | --- | --- |
+| Kathelina | • Design and implement Dtos, service layer, controller later, service unit tests, and controller integration tests for borrowRequests <br> •  endpoint documentation for BorrowRequest related controllers <br> • contributed to the software quality assurance plan and report | 30 Hours
+| Tingyi | placeholder | placeholder
+| Nizar | • Designed and implemented the Event service, controller, and DTOs.<br> • Developed unit and integration tests for Event-related functionalities.<br> • Created and handled global exception management through the GlobalException class.<br> • Documented Event REST API endpoints.<br> • Contributed to the Software Quality Assurance Plan & Report| 25 Hours
+| Alex | placeholder | placeholder
+| Maria | placeholder | placeholder
+| Jad | placeholder | placeholder
+| HongYi | placeholder | placeholder
+
 
 ### April 6: Deliverable 3 -- Frontend Logic
 
