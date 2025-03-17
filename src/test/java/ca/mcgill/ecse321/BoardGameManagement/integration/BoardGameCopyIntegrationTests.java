@@ -377,4 +377,23 @@ public class BoardGameCopyIntegrationTests {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(0, response.getBody().length);
     }
+
+    @Test
+    @Order(6)
+    public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
+
+        //Arrange
+        String body = "Updated specification";
+
+        //Act
+        String url = "/boardgamecopies/" + 666;
+        ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, new HttpEntity<>(body),
+                ErrorDto.class);
+
+        //Assert
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(1, response.getBody().getErrors().size());
+        assertTrue(response.getBody().getErrors().contains("BoardGameCopy not found with ID: 666"));
+    }
 }
