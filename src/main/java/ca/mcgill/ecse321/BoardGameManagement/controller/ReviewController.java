@@ -17,7 +17,7 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    @PostMapping
+    @PostMapping("/Reviews")
     @ResponseStatus(HttpStatus.CREATED)
     public ReviewResponseDto createReview(@RequestBody ReviewCreationDto reviewDto) {
         Review review = reviewService.createReview(reviewDto);
@@ -25,7 +25,7 @@ public class ReviewController {
         return new ReviewResponseDto(review);
     }
 
-    @PutMapping("/{reviewId}")
+    @PutMapping("/Reviews/{reviewId}")
     @ResponseStatus(HttpStatus.OK)
     public ReviewResponseDto updateReview(@PathVariable int reviewId, @RequestBody ReviewCreationDto reviewDto) {
         Review review = reviewService.updateReview(reviewId, reviewDto);
@@ -33,9 +33,9 @@ public class ReviewController {
         return new ReviewResponseDto(review);
     }
 
-    @GetMapping
+    @GetMapping("/Reviews/")
     @ResponseStatus(HttpStatus.OK)
-    public ArrayList<ReviewResponseDto> getAllReview() {
+    public ArrayList<ReviewResponseDto> getAllReviews() {
         ArrayList<Review> reviews = reviewService.getAllReviews();
         ArrayList<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
 
@@ -46,7 +46,7 @@ public class ReviewController {
         return reviewResponseDtos;
     }
 
-    @GetMapping("/{reviewId}")
+    @GetMapping("/Reviews/{reviewId}")
     @ResponseStatus(HttpStatus.OK)
     public ReviewResponseDto getReviewById(@PathVariable int reviewId) {
         Review review = reviewService.getReviewById(reviewId);
@@ -54,7 +54,7 @@ public class ReviewController {
         return new ReviewResponseDto(review);
     }
 
-    @DeleteMapping("/{reviewId}")
+    @DeleteMapping("/Reviews/{reviewId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReview(@PathVariable int reviewId) {
         reviewService.deleteReview(reviewId);
