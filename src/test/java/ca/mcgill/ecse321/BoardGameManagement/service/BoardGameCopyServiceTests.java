@@ -295,6 +295,22 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
+    public void testUpdaeInvalidBoardGameCopy_emptySpecification() {
+
+        //Arrange
+        Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
+        BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
+        BoardGameCopy originalBoardGameCopy = new BoardGameCopy(SPECIFICATION, true, player, boardGame);
+
+        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(originalBoardGameCopy);
+
+        //Act and Assert
+        GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.updateBoardGameCopy(1, ""));
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals("Specification cannot be empty", e.getMessage());
+    }
+
+    @Test
     public void testDeleteValidBoardGameCopy() {
 
         //Arrange
