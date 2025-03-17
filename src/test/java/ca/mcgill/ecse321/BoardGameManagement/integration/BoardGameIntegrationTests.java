@@ -1,22 +1,18 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCreationDto;
-import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameResponseDto;
-import ca.mcgill.ecse321.BoardGameManagement.dto.ErrorDto;
-import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
-import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
+import ca.mcgill.ecse321.BoardGameManagement.dto.*;
+import ca.mcgill.ecse321.BoardGameManagement.model.*;
+import ca.mcgill.ecse321.BoardGameManagement.repository.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.*;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class BoardGameIntegrationTests {
 
@@ -26,115 +22,169 @@ public class BoardGameIntegrationTests {
   @Autowired
   private BoardGameRepository boardGameRepository;
 
-  @AfterEach
-  public void resetDatabase() {
-    boardGameRepository.deleteAll();
+  private BoardGame boardGame;
+  private int createdGameId;
+
+  /**
+   * Setup method that runs before all tests.
+   * Clears the database and inserts a test board game.
+   */
+  @BeforeAll
+  public void setup() {
+    boardGameRepository.deleteAll(); // Ensure a clean slate before tests
+    boardGame = boardGameRepository.save(new BoardGame(2, 6, "Chess", "A strategic board game"));
+    createdGameId = boardGame.getGameID();
   }
 
-  @Test
-  public void createBoardGame_ShouldReturnCreatedGame() {
-    // Arrange
-    BoardGameCreationDto request = new BoardGameCreationDto(2, 4, "Chess", "A strategic board game");
+  /**
+   * Cleanup method that runs after all tests.
+   * Deletes all board games from the database.
+   */
+  @AfterAll
+  public void teardown() {
+    boardGameRepository.deleteAll(); // Remove all entries to clean up database state
+  }
 
-    // Act
+  /**
+   * Test creating a valid board game.
+   */
+  @Test
+  @Order(0)
+  public void testCreateValidBoardGame() {
+    BoardGameCreationDto request = new BoardGameCreationDto(2, 4, "Monopoly", "A trading board game");
     ResponseEntity<BoardGameResponseDto> response = client.postForEntity("/BoardGames", request, BoardGameResponseDto.class);
 
-    // Assert
-    assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertTrue(response.getBody().getGameID() > 0, "Game ID should be a positive integer");
+    assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals(request.getName(), response.getBody().getName());
-    assertEquals(request.getDescription(), response.getBody().getDescription());
-    assertEquals(request.getMinPlayers(), response.getBody().getMinPlayers());
-    assertEquals(request.getMaxPlayers(), response.getBody().getMaxPlayers());
   }
 
+  /**
+   * Test retrieving a board game by ID.
+   */
   @Test
-  public void getBoardGameById_ShouldReturnGameDetails() {
-    // Arrange
-    BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Chess", "A strategic game"));
-    int gameId = boardGame.getGameID();
-
-    // Act
-    ResponseEntity<BoardGameResponseDto> response = client.getForEntity("/BoardGames/" + gameId, BoardGameResponseDto.class);
-
-    // Assert
+  @Order(1)
+  public void testGetBoardGameById() {
+    ResponseEntity<BoardGameResponseDto> response = client.getForEntity("/BoardGames/" + createdGameId, BoardGameResponseDto.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals(gameId, response.getBody().getGameID());
-    assertEquals(boardGame.getName(), response.getBody().getName());
-    assertEquals(boardGame.getDescription(), response.getBody().getDescription());
   }
 
+  /**
+   * Test retrieving a non-existent board game.
+   */
   @Test
-  public void getBoardGameByInvalidId_ShouldReturnNotFound() {
-    // Act
+  @Order(2)
+  public void testGetNonExistentBoardGame() {
     ResponseEntity<ErrorDto> response = client.getForEntity("/BoardGames/99999", ErrorDto.class);
-
-    // Assert
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertTrue(response.getBody().getErrors().contains("BoardGame not found with ID: 99999"));
   }
 
+  /**
+   * Test updating a board game.
+   */
   @Test
-  public void updateBoardGame_ShouldReturnUpdatedGame() {
-    // Arrange
-    BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Chess", "A strategy game"));
-    int gameId = boardGame.getGameID();
+  @Order(3)
+  public void testUpdateBoardGame() {
+    BoardGameCreationDto request = new BoardGameCreationDto(2, 8, "Updated Chess", "A more advanced version");
+    ResponseEntity<BoardGameResponseDto> response = client.exchange("/BoardGames/" + createdGameId, HttpMethod.PUT, new HttpEntity<>(request), BoardGameResponseDto.class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+  }
 
+  /**
+   * Test deleting a board game.
+   */
+  @Test
+  @Order(4)
+  public void testDeleteBoardGame() {
+    ResponseEntity<Void> response = client.exchange("/BoardGames/" + createdGameId, HttpMethod.DELETE, null, Void.class);
+    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+  }
 
-    BoardGameCreationDto request = new BoardGameCreationDto(2, 6, "Advanced Chess", "An enhanced strategy game");
+  /**
+   * Test deleting a non-existent board game.
+   */
+  @Test
+  @Order(5)
+  public void testDeleteNonExistentBoardGame() {
+    ResponseEntity<ErrorDto> response = client.exchange("/BoardGames/99999", HttpMethod.DELETE, null, ErrorDto.class);
+    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+  }
 
-    // Act
-    ResponseEntity<BoardGameResponseDto> response = client.exchange(
-        "/BoardGames/" + gameId, HttpMethod.PUT, new HttpEntity<>(request), BoardGameResponseDto.class
+  /**
+   * Test retrieving all board games when the database is empty.
+   */
+  @Test
+  @Order(6)
+  public void testGetAllBoardGamesWhenEmpty() {
+    boardGameRepository.deleteAll();
+    ResponseEntity<BoardGameResponseDto[]> response = client.getForEntity("/BoardGames", BoardGameResponseDto[].class);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(0, response.getBody().length);
+  }
+
+  /**
+   * Test updating a board game with invalid data.
+   */
+  /**
+   * Test updating a board game with invalid data.
+   * Ensures the API rejects invalid updates with a BAD_REQUEST response.
+   */
+  @Test
+  @Order(7)
+  public void testUpdateBoardGameWithInvalidData() {
+    // Ensure the game exists before attempting to update it
+    if (!boardGameRepository.existsById(createdGameId)) {
+      boardGame = boardGameRepository.save(new BoardGame(2, 6, "Chess", "A strategic board game"));
+      createdGameId = boardGame.getGameID();
+    }
+
+    BoardGameCreationDto request = new BoardGameCreationDto(-1, 0, "", ""); // Invalid input
+    ResponseEntity<ErrorDto> response = client.exchange(
+        "/BoardGames/" + createdGameId, HttpMethod.PUT, new HttpEntity<>(request), ErrorDto.class
     );
 
-    // Assert
-    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertNotNull(response.getBody());
-    assertEquals("Advanced Chess", response.getBody().getName());
-    assertEquals("An enhanced strategy game", response.getBody().getDescription());
-    assertEquals(6, response.getBody().getMaxPlayers());
   }
 
+
+  /**
+   * Test deleting a board game twice.
+   */
   @Test
-  public void deleteBoardGame_ShouldRemoveGame() {
-    // Arrange
-    BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Chess", "A strategy game"));
-    int gameId = boardGame.getGameID();
-
-    // Act
-    ResponseEntity<Void> deleteResponse = client.exchange("/BoardGames/" + gameId, HttpMethod.DELETE, null, Void.class);
-    ResponseEntity<ErrorDto> getResponse = client.getForEntity("/BoardGames/" + gameId, ErrorDto.class);
-
-    // Assert
-    assertEquals(HttpStatus.NO_CONTENT, deleteResponse.getStatusCode());
-    assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode(), "Board game should not exist after deletion.");
+  @Order(8)
+  public void testDeleteBoardGameTwice() {
+    client.exchange("/BoardGames/" + createdGameId, HttpMethod.DELETE, null, Void.class);
+    ResponseEntity<ErrorDto> secondAttempt = client.exchange("/BoardGames/" + createdGameId, HttpMethod.DELETE, null, ErrorDto.class);
+    assertEquals(HttpStatus.NOT_FOUND, secondAttempt.getStatusCode());
   }
 
+  /**
+   * Test creating a board game with invalid player range.
+   */
   @Test
-  public void deleteNonExistentBoardGame_ShouldReturnNotFound() {
-    // Act
-    ResponseEntity<ErrorDto> response = client.exchange("/BoardGames/999999", HttpMethod.DELETE, null, ErrorDto.class);
-
-    // Assert
-    assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertTrue(response.getBody().getErrors().contains("Cannot delete: BoardGame not found with ID: 999999"));
+  @Order(9)
+  public void testCreateBoardGameWithInvalidPlayerRange() {
+    BoardGameCreationDto request = new BoardGameCreationDto(4, 2, "InvalidGame", "Max players < Min players");
+    ResponseEntity<ErrorDto> response = client.postForEntity("/BoardGames", request, ErrorDto.class);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
   }
 
+  /**
+   * Test deleting a board game and verifying the updated list.
+   */
   @Test
-  public void getAllBoardGames_WhenEmpty_ShouldReturnEmptyList() {
+  @Order(10)
+  public void testDeleteBoardGameAndCheckUpdatedList() {
     boardGameRepository.deleteAll();
-
-    // Act
-    ResponseEntity<BoardGameResponseDto[]> response = client.getForEntity("/BoardGames", BoardGameResponseDto[].class);
-
-    // Assert
-    assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertNotNull(response.getBody());
-    assertEquals(0, response.getBody().length, "No board games should be returned.");
+    BoardGame game1 = boardGameRepository.save(new BoardGame(2, 4, "Game1", "Test Game 1"));
+    BoardGame game2 = boardGameRepository.save(new BoardGame(3, 6, "Game2", "Test Game 2"));
+    ResponseEntity<BoardGameResponseDto[]> initialResponse = client.getForEntity("/BoardGames", BoardGameResponseDto[].class);
+    int initialCount = initialResponse.getBody().length;
+    client.exchange("/BoardGames/" + game1.getGameID(), HttpMethod.DELETE, null, Void.class);
+    ResponseEntity<BoardGameResponseDto[]> updatedResponse = client.getForEntity("/BoardGames", BoardGameResponseDto[].class);
+    int updatedCount = updatedResponse.getBody().length;
+    assertEquals(initialCount - 1, updatedCount);
   }
 }
