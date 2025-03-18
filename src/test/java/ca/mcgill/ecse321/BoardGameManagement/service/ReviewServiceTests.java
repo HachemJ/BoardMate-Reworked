@@ -166,8 +166,27 @@ public class ReviewServiceTests {
 
     @Test
     @Order(2)
-    public void createInvalidReviewBadRating() {
-        ReviewCreationDto dto = new ReviewCreationDto(99999, comment, date, 100, 99);
+    public void createInvalidReviewLowRating() {
+        ReviewCreationDto dto = new ReviewCreationDto(-999999, comment, date, 100, 99);
+
+        player = new Player(name, email, password, false);
+        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+
+        when (playerRepository.findByPlayerID(100)).thenReturn(player);
+        when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
+
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            reviewService.createReview(dto);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertTrue(exception.getMessage().contains("Rating must be between 0 and 5. Rating is:"));
+    }
+
+    @Test
+    @Order(3)
+    public void createInvalidReviewHighRating() {
+        ReviewCreationDto dto = new ReviewCreationDto(999999, comment, date, 100, 99);
 
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -187,7 +206,7 @@ public class ReviewServiceTests {
      * Test the creation of a review with no player. This should fail.
      */
     @Test
-    @Order(3)
+    @Order(4)
     public void createInvalidReviewNoPlayer() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
@@ -209,7 +228,7 @@ public class ReviewServiceTests {
      * Test the creation of a review of no board game. This should fail.
      */
     @Test
-    @Order(4)
+    @Order(5)
     public void createInvalidReviewNoBoardGame() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
@@ -228,7 +247,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(5)
+    @Order(6)
     public void findExistingReviewById() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -246,7 +265,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(6)
+    @Order(7)
     public void findNonExistentReviewById() {
         when (reviewRepository.findByReviewID(id)).thenReturn(null);
 
@@ -257,7 +276,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(7)
+    @Order(8)
     public void updateExistingReview() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -283,7 +302,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(8)
+    @Order(9)
     public void updateNonExistentReview() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -297,7 +316,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     public void updateReview_InvalidInput() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -316,7 +335,7 @@ public class ReviewServiceTests {
 
 
     @Test
-    @Order(10)
+    @Order(11)
     public void deleteExistingReview() {
         when(reviewRepository.existsById(id)).thenReturn(true);
 
@@ -326,7 +345,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(11)
+    @Order(12)
     public void deleteNonExistentReview() {
         Player player1 = new Player(name, email, password, false);
         BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -342,7 +361,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(12)
+    @Order(13)
     public void getAllReviews() {
         Player player1 = new Player(name, email, password, false);
         BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
