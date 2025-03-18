@@ -64,8 +64,8 @@ public class ReviewIntegrationTests {
         playerID = player.getPlayerID();
         boardGameID = boardGame.getGameID();
 
-        System.out.println("Player id is: " + playerID); //1152?
-        System.out.println("BoardGame id is: " + boardGameID); //1152
+        System.out.println("Player id is: " + playerID);
+        System.out.println("BoardGame id is: " + boardGameID);
 
     }
 
@@ -84,9 +84,11 @@ public class ReviewIntegrationTests {
     public void createValidReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, playerID, boardGameID);
 
+        System.out.println("Dto: " + dto.toString());
+
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
 
-        System.out.println(response.getBody());
+        System.out.println("Response: " + response.getBody());
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
