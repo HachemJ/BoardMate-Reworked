@@ -4,6 +4,7 @@ import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 
 
 public class BoardGameResponseDto {
+
   private int gameID;
 
   private int minPlayers;
