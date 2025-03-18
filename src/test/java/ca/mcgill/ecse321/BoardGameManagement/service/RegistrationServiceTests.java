@@ -212,14 +212,14 @@ public class RegistrationServiceTests {
         
         //Act
         List<Registration> retrievedRegistrations =registrationService.getAllRegistrationsByEvent(validEventId);
-    
+        
+        //Assert
         assertNotNull(retrievedRegistrations);
         assertEquals(2, retrievedRegistrations.size());
         // Assertions for Registration 1
         assertEquals(registration1, retrievedRegistrations.get(0));
         assertEquals(player1, retrievedRegistrations.get(0).getKey().getRegistrant());
         assertEquals(event, retrievedRegistrations.get(0).getKey().getEvent());
-
         // Assertions for Registration 2
         assertEquals(registration2, retrievedRegistrations.get(1));
         assertEquals(player2, retrievedRegistrations.get(1).getKey().getRegistrant());

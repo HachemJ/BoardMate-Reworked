@@ -11,7 +11,6 @@ import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.EventRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
-import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.RegistrationRepository;
 import java.util.List;
 
@@ -23,9 +22,6 @@ public class RegistrationService {
   
     @Autowired
     private PlayerRepository playerRepository;
-
-    @Autowired
-    private BoardGameRepository boardGameRepository;
 
     @Autowired
     private RegistrationRepository registrationRepository;

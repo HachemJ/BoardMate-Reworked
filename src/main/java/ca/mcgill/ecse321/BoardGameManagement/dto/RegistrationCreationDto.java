@@ -3,11 +3,11 @@ package ca.mcgill.ecse321.BoardGameManagement.dto;
 import jakarta.validation.constraints.*;
 
 public class RegistrationCreationDto {
-    @NotNull(message = "Player ID cannot be null")
+    @NotNull(message = "Player ID cannot be empty")
     @Positive(message = "Player ID must be a positive number.")
     private int playerID;
 
-    @NotNull(message = "Event ID cannot be null")
+    @NotNull(message = "Event ID cannot be empty")
     @Positive(message = "Event ID must be a positive number.")
     private int eventID;
 

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import ca.mcgill.ecse321.BoardGameManagement.dto.EventResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.Registration;
@@ -42,6 +44,7 @@ public class RegistrationController {
     @ResponseStatus(HttpStatus.OK)
     public RegistrationResponseDto getRegistrationByKey(@PathVariable int playerID,@PathVariable int eventID) {
         return RegistrationResponseDto.create(registrationService.getRegistrationByKey(playerID, eventID));
+        //return new RegistrationResponseDto((registrationService.getRegistrationByKey(playerID, eventID)));
     }
 
     /**
