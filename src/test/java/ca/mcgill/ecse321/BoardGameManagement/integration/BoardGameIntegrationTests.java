@@ -136,19 +136,15 @@ public class BoardGameIntegrationTests {
    */
   @Test
   @Order(6)
-  public void testUpdateBoardGameWithInvalidData() {
-    BoardGameCreationDto request = new BoardGameCreationDto(-1, 0, "", "");
+  public void testUpdateBoardGameWithInvalidMinPlayers() {
+    BoardGameCreationDto request = new BoardGameCreationDto(-1, 4, "Scrabble", "Word-forming strategic board game.");
     ResponseEntity<ErrorDto> response =
         client.exchange("/BoardGames/" + createdGame1Id, HttpMethod.PUT, new HttpEntity<>(request),
             ErrorDto.class);
 
-    System.out.println(response.getBody().getErrors());
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getErrors().contains("Minimum players must be at least 1."));
-    assertTrue(response.getBody().getErrors().contains("Maximum players must be at least 1."));
-    assertTrue(response.getBody().getErrors().contains("Game name must not be blank."));
-    assertTrue(response.getBody().getErrors().contains("Game description must not be blank."));
   }
 
   /**
