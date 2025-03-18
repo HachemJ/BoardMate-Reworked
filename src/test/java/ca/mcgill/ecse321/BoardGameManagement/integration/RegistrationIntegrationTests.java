@@ -140,12 +140,12 @@ public class RegistrationIntegrationTests {
     }
 
     /**
-   * Tests creation of a registration with an invalid eventID.
+   * Tests creation of a registration with an invalid eventId.
    */
     @SuppressWarnings("null")
     @Test
     @Order(2)
-    public void testCreateRegistartionWithInvalidEvent() {
+    public void testCreateRegistartionWithInvalidEventId() {
         //Arrange
         RegistrationCreationDto registrationBody = new RegistrationCreationDto(player2.getPlayerID(),99999999 );
     
