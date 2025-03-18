@@ -1,6 +1,7 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
@@ -9,7 +10,7 @@ public class ReviewCreationDto {
     private int reviewID;
     private int rating;
     private String comment;
-    private Date commentDate;
+    private LocalDate commentDate;
     private int playerID;
     private int boardGameID;
 
@@ -36,7 +37,7 @@ public class ReviewCreationDto {
         return comment;
     }
 
-    public Date getCommentDate() {
+    public LocalDate getCommentDate() {
         return commentDate;
     }
 
@@ -48,7 +49,7 @@ public class ReviewCreationDto {
         return boardGameID;
     }
 
-    public ReviewCreationDto(int rating, String comment, Date commentDate, int playerID, int boardGameID) {
+    public ReviewCreationDto(int rating, String comment, LocalDate commentDate, int playerID, int boardGameID) {
         this.rating = rating;
         this.comment = comment;
         this.commentDate = commentDate;

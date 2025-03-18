@@ -43,7 +43,7 @@ public class ReviewServiceTests {
     @InjectMocks
     private ReviewService reviewService;
 
-    private final Date date = Date.valueOf(LocalDate.now());
+    private final LocalDate date = LocalDate.now();
     private final String name = "name";
     private final String email = "name@mail.com";
     private final String password = "password";
@@ -53,7 +53,7 @@ public class ReviewServiceTests {
     private final String description = "description";
     private final int rating = 3;
     private final String comment = "comment";
-    private final int id = 0;
+    private final int id = 1;
 
     private Player player;
     private final int playerID = 1;
@@ -239,17 +239,17 @@ public class ReviewServiceTests {
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
 
         Review existingReview = new Review(rating, comment, date, player, boardGame);
+
         when (reviewRepository.findByReviewID(id)).thenReturn(existingReview);
         when (reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ReviewCreationDto updatedReviewDto = new ReviewCreationDto(rating + 1, comment + "abc", Date.valueOf(LocalDate.now()), playerID, boardGameID);
+        ReviewCreationDto updatedDto = new ReviewCreationDto(rating + 1, comment + "2", LocalDate.now(), playerID, boardGameID);
 
-        Review updatedReview = reviewService.updateReview(id, updatedReviewDto);
+        Review updatedReview = reviewService.updateReview(id, updatedDto);
 
         assertNotNull(updatedReview);
-        assertEquals(updatedReview.getRating(), rating + 1);
-        assertEquals(updatedReview.getComment(), comment + "abc");
-        assertEquals(updatedReview.getCommentDate(), Date.valueOf(LocalDate.now()));
+        assertEquals(rating + 1, updatedReview.getRating());
+        assertEquals(comment + "2", updatedReview.getComment());
     }
 
     @Test

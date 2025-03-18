@@ -2,17 +2,17 @@ package ca.mcgill.ecse321.BoardGameManagement.model;
 
 import jakarta.persistence.*;
 
-import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 public class Review {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue
   private int reviewID;
   private int rating;
   private String comment;
-  private Date commentDate;
+  private LocalDate commentDate;
 
   @ManyToOne
   private Player author;
@@ -34,7 +34,7 @@ public class Review {
     return comment;
   }
 
-  public Date getCommentDate() {
+  public LocalDate getCommentDate() {
     return commentDate;
   }
 
@@ -46,7 +46,7 @@ public class Review {
     return boardGame;
   }
 
-  public Review(int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame) {
+  public Review(int aRating, String aComment, LocalDate aCommentDate, Player aAuthor, BoardGame aBoardGame) {
     rating = aRating;
     comment = aComment;
     commentDate = aCommentDate;
@@ -68,7 +68,7 @@ public class Review {
     return true;
   }
 
-  public boolean setCommentDate(Date aCommentDate) {
+  public boolean setCommentDate(LocalDate aCommentDate) {
     commentDate = aCommentDate;
     return true;
   }

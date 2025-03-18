@@ -11,8 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
-
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Service
@@ -29,11 +28,6 @@ public class ReviewService {
 
     public ReviewService() {}
 
-    /*
-    public ArrayList<Review> getReviewsForGame(int gameId) {
-        BoardGame boardGame = boardGameRepository.findById(gameId).orElseThrow();
-    }
-    */
 
     /**
      * Creates a review in the database
@@ -42,6 +36,10 @@ public class ReviewService {
     public Review createReview(ReviewCreationDto reviewDto) {
         if (reviewDto == null) {
             throw new GlobalException(HttpStatus.BAD_REQUEST, "review does not exist");
+        }
+
+        if (reviewDto.getRating() < 0 || reviewDto.getRating() > 5) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Rating must be between 0 and 5. Rating is: " + reviewDto.getRating());
         }
 
         Player player = playerRepository.findByPlayerID(reviewDto.getPlayerID());
@@ -54,12 +52,8 @@ public class ReviewService {
             throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + reviewDto.getBoardGameID());
         }
 
-        if (reviewDto.getRating() < 0 || reviewDto.getRating() > 5) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "Rating must be between 0 and 5. Rating is: " + reviewDto.getRating());
-        }
-
         
-        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), reviewDto.getCommentDate(), player, boardGame);
+        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), LocalDate.now(), player, boardGame);
         return reviewRepository.save(review);
     }
 
