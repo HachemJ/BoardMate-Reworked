@@ -270,6 +270,40 @@ public class RegistrationServiceTests {
     }
 
     /**
+    * Tests creating a registration for an invalid player.
+   */
+    @Test
+    public void testCreateRegistrationForInvalidPlayer() {
+        //Arrange
+        when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(null);
+        
+        //Act
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getRegistrationByKey(validPlayerId, validEventId));
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Player not found with ID: " + validPlayerId, e.getMessage());
+    }
+
+    /**
+    * Tests creating a registration for an invalid event.
+   */
+    @Test
+    public void testCreateRegistrationForInvalidEvent() {
+        //Arrange
+        Player player = new Player("Maya", "maya@gmail.com", "12345678", false);
+        when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(player);
+        when(eventRepository.findByEventID(validEventId)).thenReturn(null);
+      
+        //Act
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getRegistrationByKey(validPlayerId, validEventId));
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Event not found with ID: " + validEventId, e.getMessage());
+    }
+
+    /**
     * Tests finding a registration list that is empty.
    */
     @Test
