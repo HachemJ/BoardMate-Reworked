@@ -87,7 +87,7 @@ The working application fulfilling all the abovementioned functionalities
 | Tingyi | placeholder | placeholder
 | Nizar | • Designed and implemented the Event service, controller, and DTOs.<br> • Developed unit and integration tests for Event-related functionalities.<br> • Created and handled global exception management through the GlobalException class.<br> • Documented Event REST API endpoints.<br> • Contributed to the Software Quality Assurance Plan & Report| 25 Hours
 | Alex | placeholder | placeholder
-| Maria | placeholder | 30
+| Maria | placeholder | 30 Hours
 | Jad | placeholder | placeholder
 | HongYi | placeholder | placeholder
 
