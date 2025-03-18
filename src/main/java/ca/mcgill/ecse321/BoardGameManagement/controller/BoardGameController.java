@@ -2,12 +2,10 @@ package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameResponseDto;
-import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 import ca.mcgill.ecse321.BoardGameManagement.service.BoardGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

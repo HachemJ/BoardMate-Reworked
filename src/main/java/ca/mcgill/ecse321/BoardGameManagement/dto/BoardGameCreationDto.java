@@ -1,10 +1,7 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-
-import java.nio.charset.MalformedInputException;
 
 public class BoardGameCreationDto {
 
