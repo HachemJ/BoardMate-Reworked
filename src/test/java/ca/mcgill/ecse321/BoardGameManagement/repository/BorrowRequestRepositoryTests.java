@@ -87,7 +87,7 @@ public class BorrowRequestRepositoryTests {
 
         //act
         borrowRequest = borrowRequestRepository.save(borrowRequest);
-        BorrowRequest duplicatedRequest = borrowRequestRepository.save(borrowRequest);
+        borrowRequestRepository.save(borrowRequest);
 
         //save the same id should not be saved twice.
         assertEquals(1, borrowRequestRepository.count());
@@ -129,7 +129,7 @@ public class BorrowRequestRepositoryTests {
     }
 
     @Test
-    public void findInexistentBorrowRequestTest() {
+    public void findNonexistentBorrowRequestTest() {
         //database starts off empty
         BorrowRequest request = borrowRequestRepository.findByRequestID(142);
         assertNull(request);
@@ -211,7 +211,7 @@ public class BorrowRequestRepositoryTests {
     }
 
     @Test
-    public void deleteInexistingBorrowRequestObjectTest() {
+    public void deleteNonexistentBorrowRequestObjectTest() {
         //create players
         Player requester = new Player("PlayerName", "player@email.com", "aPassword", false);
         requester = playerRepository.save(requester);
