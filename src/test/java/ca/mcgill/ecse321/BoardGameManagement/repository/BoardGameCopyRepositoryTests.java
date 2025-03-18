@@ -20,7 +20,7 @@ public class BoardGameCopyRepositoryTests {
     static boolean isAOwner = true;
     static int minPlayers = 4;
     static int maxPlayers = 8;
-    static String gameName = "Monopoly";
+    static String name = "Monopoly";
     static String gameDescription = "A very fun game";
     static String specification = "Canadian edition, brand new";
     static boolean isAvailable = true;
@@ -47,7 +47,7 @@ public class BoardGameCopyRepositoryTests {
         player.setIsAOwner(isAOwner);
         boardGame.setMinPlayers(minPlayers);
         boardGame.setMaxPlayers(maxPlayers);
-        boardGame.setGameName(gameName);
+        boardGame.setName(name);
         boardGame.setDescription(gameDescription);
         boardGameCopy.setSpecification(specification);
         boardGameCopy.setIsAvailable(isAvailable);
@@ -84,7 +84,7 @@ public class BoardGameCopyRepositoryTests {
         assertEquals(boardGame.getGameID(), boardGameCopyFromDB.getBoardGame().getGameID());
         assertEquals(minPlayers, boardGameCopyFromDB.getBoardGame().getMinPlayers());
         assertEquals(maxPlayers, boardGameCopyFromDB.getBoardGame().getMaxPlayers());
-        assertEquals(gameName, boardGameCopyFromDB.getBoardGame().getName());
+        assertEquals(name, boardGameCopyFromDB.getBoardGame().getName());
         assertEquals(gameDescription, boardGameCopyFromDB.getBoardGame().getDescription());
         assertEquals(boardGame.getGameID(), boardGameCopyFromDB.getBoardGame().getGameID());
     }
