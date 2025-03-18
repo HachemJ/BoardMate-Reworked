@@ -35,36 +35,43 @@ public class BoardGameService {
 
   @Transactional
   public BoardGame updateBoardGame(int boardGameID, BoardGameCreationDto boardGameDto) {
+    // Fetch the existing board game from the repository
     BoardGame boardGame = boardGameRepository.findByGameID(boardGameID);
+
+    // If the board game does not exist, return 404 Not Found
     if (boardGame == null) {
       throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameID);
     }
 
-    // Apply updates only if values are valid
+    // Validate input values before applying updates
     if (boardGameDto.getMinPlayers() > 0) {
-      if (boardGame.getMaxPlayers() < boardGameDto.getMinPlayers()) {
-        throw new GlobalException(HttpStatus.BAD_REQUEST, "Max players cannot be less than min players.");
+      if (boardGameDto.getMinPlayers() > boardGame.getMaxPlayers()) {
+        throw new GlobalException(HttpStatus.BAD_REQUEST, "Minimum players must be at least 1 and cannot exceed maximum players.");
       }
       boardGame.setMinPlayers(boardGameDto.getMinPlayers());
+    } else {
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Minimum players must be at least 1.");
     }
 
     if (boardGameDto.getMaxPlayers() > 0) {
       if (boardGameDto.getMaxPlayers() < boardGame.getMinPlayers()) {
-        throw new GlobalException(HttpStatus.BAD_REQUEST, "Max players cannot be less than min players.");
+        throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be at least 1 and cannot be less than minimum players.");
       }
       boardGame.setMaxPlayers(boardGameDto.getMaxPlayers());
+    } else {
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be at least 1.");
     }
 
     if (boardGameDto.getName() != null) {
       if (boardGameDto.getName().trim().isEmpty()) {
-        throw new GlobalException(HttpStatus.BAD_REQUEST, "Board game name cannot be empty.");
+        throw new GlobalException(HttpStatus.BAD_REQUEST, "Game name must not be blank.");
       }
       boardGame.setName(boardGameDto.getName());
     }
 
     if (boardGameDto.getDescription() != null) {
       if (boardGameDto.getDescription().trim().isEmpty()) {
-        throw new GlobalException(HttpStatus.BAD_REQUEST, "Board game description cannot be empty.");
+        throw new GlobalException(HttpStatus.BAD_REQUEST, "Game description must not be blank.");
       }
       boardGame.setDescription(boardGameDto.getDescription());
     }
@@ -103,7 +110,7 @@ public class BoardGameService {
       throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be greater than zero.");
     }
     if (boardGameDto.getMaxPlayers() < boardGameDto.getMinPlayers()) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Max players cannot be less than min players.");
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be greater than or equal to minimum players.");
     }
     if (!isValidString(boardGameDto.getName())) {
       throw new GlobalException(HttpStatus.BAD_REQUEST, "Board game name cannot be empty.");

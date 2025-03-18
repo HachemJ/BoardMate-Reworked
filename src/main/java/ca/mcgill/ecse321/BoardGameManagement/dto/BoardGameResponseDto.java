@@ -2,17 +2,29 @@ package ca.mcgill.ecse321.BoardGameManagement.dto;
 
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 
+
 public class BoardGameResponseDto {
   private int gameID;
+
   private int minPlayers;
+
+
   private int maxPlayers;
+
+
   private String name;
+
   private String description;
 
-  // Default constructor required for JSON deserialization
+  /**
+   * Default constructor required for JSON deserialization
+   */
   public BoardGameResponseDto() {}
 
-  // Constructor to map from BoardGame model
+  /**
+   * Constructor to map from BoardGame model
+   * @param game The BoardGame model entity
+   */
   public BoardGameResponseDto(BoardGame game) {
     this.gameID = game.getGameID();
     this.minPlayers = game.getMinPlayers();

@@ -193,24 +193,6 @@ public class BoardGameServiceTests {
   }
 
   @Test
-  void testUpdatingBoardGameWithNullValues() {
-    when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
-    when(boardGameRepository.save(any(BoardGame.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // Create a DTO where some values are null
-    BoardGameCreationDto dto = new BoardGameCreationDto(0, 0, null, null);
-
-    BoardGame updatedGame = boardGameService.updateBoardGame(VALID_ID, dto);
-
-    assertNotNull(updatedGame);
-    assertEquals(VALID_NAME, updatedGame.getName()); // Name should remain the same
-    assertEquals(VALID_DESCRIPTION, updatedGame.getDescription()); // Description should remain the same
-    assertEquals(VALID_MIN_PLAYERS, updatedGame.getMinPlayers()); // Min players should remain the same
-    assertEquals(VALID_MAX_PLAYERS, updatedGame.getMaxPlayers()); // Max players should remain the same
-  }
-
-
-  @Test
   void testUpdatingBoardGameWithEmptyDescription() {
     when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
 
