@@ -3,29 +3,17 @@ package ca.mcgill.ecse321.BoardGameManagement.integration;
 import java.sql.Date;
 import java.time.LocalDate;
 
-import org.junit.jupiter.api.AfterAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewCreationDto;
-import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewResponseDto;
-import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
-import ca.mcgill.ecse321.BoardGameManagement.model.Player;
-import ca.mcgill.ecse321.BoardGameManagement.repository.ReviewRepository;
+import ca.mcgill.ecse321.BoardGameManagement.dto.*;
+import ca.mcgill.ecse321.BoardGameManagement.model.*;
+import ca.mcgill.ecse321.BoardGameManagement.repository.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,6 +26,11 @@ public class ReviewIntegrationTests {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private PlayerRepository playerRepository;
+
+    @Autowired
+    private BoardGameRepository boardGameRepository;
 
     private final Date date = Date.valueOf(LocalDate.now());
     private final String name = "name";
@@ -47,46 +40,64 @@ public class ReviewIntegrationTests {
     private final int maxPlayers = 2;
     private final String gameName = "gameName";
     private final String description = "description";
-    private final int rating = 5;
+    private final int rating = 3;
     private final String comment = "comment";
-    private final int id = 1;
-
+    private final int id = 0;
 
     private Player player;
+    private int playerID = 0; //placeholder
     private BoardGame boardGame;
+    private int boardGameID = 0; //placeholder
 
     @BeforeAll
     public void setup() {
         reviewRepository.deleteAll();
+        playerRepository.deleteAll();
+        boardGameRepository.deleteAll();
 
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+
+        boardGame = boardGameRepository.save(boardGame);
+        player = playerRepository.save(player);
+
+        playerID = player.getPlayerID();
+        boardGameID = boardGame.getGameID();
+
+        System.out.println("Player id is: " + playerID); //1152?
+        System.out.println("BoardGame id is: " + boardGameID); //1152
+
     }
 
     @AfterAll
     public void teardown() {
         reviewRepository.deleteAll();
+        playerRepository.deleteAll();
+        boardGameRepository.deleteAll();
     }
 
+    /**
+     * Test the creation of a valid review.
+     */
     @Test
     @Order(0)
     public void createValidReview() {
-//
-//        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, player, boardGame);
-//
-//        //TODO: double check if "reviews" or "review"
-//        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
-//
-//        assertNotNull(response.getBody());
-//        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-//
-//        ReviewResponseDto createdReview = response.getBody();
-//        assertTrue(createdReview.getReviewID() > 0);
-//        assertEquals(rating, createdReview.getRating());
-//        assertEquals(comment, createdReview.getComment());
-//        assertEquals(date, createdReview.getCommentDate());
-//        assertEquals(player, createdReview.getAuthor());
-//        assertEquals(boardGame, createdReview.getBoardGame());
+        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, playerID, boardGameID);
+
+        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+
+        System.out.println(response.getBody());
+
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        ReviewResponseDto createdReview = response.getBody();
+        assertTrue(createdReview.getReviewID() > 0);
+        assertEquals(rating, createdReview.getRating());
+        assertEquals(comment, createdReview.getComment());
+        assertEquals(date, createdReview.getCommentDate());
+        assertEquals(player, createdReview.getAuthor());
+        assertEquals(boardGame, createdReview.getBoardGame());
     }
 
     @Test

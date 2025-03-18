@@ -2,6 +2,7 @@ package ca.mcgill.ecse321.BoardGameManagement.service;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -155,11 +156,11 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(null);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
 
-        Exception exception = assertThrows(GlobalException.class, () -> {
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
             reviewService.createReview(dto);
         });
 
-        assertEquals(HttpStatus.NOT_FOUND, ((GlobalException) exception).getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertTrue(exception.getMessage().contains("Player not found with ID:"));
     }
 
@@ -176,11 +177,11 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(null);
 
-        Exception exception = assertThrows(GlobalException.class, () -> {
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
             reviewService.createReview(dto);
         });
 
-        assertEquals(HttpStatus.NOT_FOUND, ((GlobalException) exception).getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertTrue(exception.getMessage().contains("BoardGame not found with ID:"));
     }
 
@@ -197,11 +198,11 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
 
-        Exception exception = assertThrows(GlobalException.class, () -> {
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
             reviewService.createReview(dto);
         });
 
-        assertEquals(HttpStatus.BAD_REQUEST, ((GlobalException) exception).getStatus());
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertTrue(exception.getMessage().contains("Rating must be between 0 and 5. Rating is:"));
     }
 
@@ -223,7 +224,7 @@ public class ReviewServiceTests {
     }
 
     @Test
-    public void findNonExistingReviewById() {
+    public void findNonExistentReviewById() {
         when (reviewRepository.findByReviewID(id)).thenReturn(null);
 
         GlobalException exception = assertThrows(GlobalException.class, () -> reviewService.getReviewById(id));
@@ -238,45 +239,103 @@ public class ReviewServiceTests {
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
 
         Review existingReview = new Review(rating, comment, date, player, boardGame);
-        ReviewCreationDto updatedDto = new ReviewCreationDto(rating + 1, "newComment", Date.valueOf(LocalDate.now().plusDays(1)), 100, 99);
-
         when (reviewRepository.findByReviewID(id)).thenReturn(existingReview);
-        when (reviewRepository.save(any(Review.class))).thenAnswer(
-                (InvocationOnMock invocation) -> invocation.getArgument(0));
+        when (reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Review updatedReview = reviewService.updateReview(id, updatedDto);
+        ReviewCreationDto updatedReviewDto = new ReviewCreationDto(rating + 1, comment + "abc", Date.valueOf(LocalDate.now()), playerID, boardGameID);
+
+        Review updatedReview = reviewService.updateReview(id, updatedReviewDto);
 
         assertNotNull(updatedReview);
-        assertEquals(rating + 1, updatedReview.getRating());
-        assertEquals("newComment", updatedReview.getComment());
-        assertEquals(Date.valueOf(LocalDate.now().plusDays(1)), updatedReview.getCommentDate());
-
-        verify(reviewRepository, times(1)).save(existingReview);
+        assertEquals(updatedReview.getRating(), rating + 1);
+        assertEquals(updatedReview.getComment(), comment + "abc");
+        assertEquals(updatedReview.getCommentDate(), Date.valueOf(LocalDate.now()));
     }
 
     @Test
-    public void updateNonExistingReview() {
-//        ReviewCreationDto updatedDto = new ReviewCreationDto(rating + 1, "newComment", Date.valueOf(LocalDate.now().plusDays(1)), player, boardGame);
-//
-//        when (reviewRepository.findByReviewID(999)).thenReturn(null);
-//        try {
-//            reviewService.updateReview(999, updatedDto);
-//        } catch (GlobalException e) {
-//            verify(reviewRepository, times(0)).save(any(Review.class));
-//        }
+    public void updateNonExistentReview() {
+        player = new Player(name, email, password, false);
+        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, player.getPlayerID(), boardGame.getGameID());
+        when(reviewRepository.findByReviewID(id)).thenReturn(null);
+
+        GlobalException exception = assertThrows(GlobalException.class, () -> reviewService.updateReview(id, dto));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertTrue(exception.getMessage().contains("Review not found with ID: "));
     }
 
     @Test
-    public void updateReviewWithInvalidInputs() {
-//        Review existingReview = new Review(rating, comment, date, player, boardGame);
-//        when (reviewRepository.findByReviewID(id)).thenReturn(existingReview);
-//
-//        ReviewCreationDto invalidDto = new ReviewCreationDto(999, comment, date, player, boardGame);
-//
-//        try {
-//            reviewService.updateReview(id, invalidDto);
-//        } catch (GlobalException e) {
-//            verify(reviewRepository, times(0)).save(any(Review.class));
-//        }
+    public void updateReview_InvalidInput() {
+        player = new Player(name, email, password, false);
+        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        Review existingReview = new Review(rating, comment, date, player, boardGame);
+        when (reviewRepository.findByReviewID(id)).thenReturn(existingReview);
+
+        ReviewCreationDto invalidDto = new ReviewCreationDto(999, comment, date, player.getPlayerID(), boardGame.getGameID());
+
+        try {
+            reviewService.updateReview(id, invalidDto);
+        } catch (GlobalException e) {
+            verify(reviewRepository, times(0)).save(any(Review.class));
+        }
+    }
+
+
+
+    @Test
+    public void deleteExistingReview() {
+        Player player1 = new Player(name, email, password, false);
+        BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
+
+        Review review1 = new Review(rating, comment, date, player1, boardGame1);
+
+        when(playerRepository.findByPlayerID(playerID)).thenReturn(player1);
+        when(boardGameRepository.findByGameID(boardGameID)).thenReturn(boardGame1);
+        when(reviewRepository.findByReviewID(id)).thenReturn(review1);
+
+        reviewService.deleteReview(id);
+
+        verify(reviewRepository, times(1)).deleteById(any());
+    }
+
+    @Test
+    public void deleteNonExistentReview() {
+        Player player1 = new Player(name, email, password, false);
+        BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
+
+        when(playerRepository.findByPlayerID(playerID)).thenReturn(player1);
+        when(boardGameRepository.findByGameID(boardGameID)).thenReturn(boardGame1);
+        when(reviewRepository.findByReviewID(999)).thenReturn(null);
+
+        GlobalException exception = assertThrows(GlobalException.class, () -> reviewService.deleteReview(999));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertTrue(exception.getMessage().contains("Review not found with ID: "));
+    }
+
+    @Test
+    public void getAllReviews() {
+        Player player1 = new Player(name, email, password, false);
+        BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
+
+        Player player2 = new Player(name + "2", email, password, false);
+        BoardGame boardGame2 = new BoardGame(minPlayers, maxPlayers, gameName + "2", description);
+
+        Review review1 = new Review(rating, comment, date, player1, boardGame1);
+        Review review2 = new Review(rating + 1, comment + "abc", date, player2, boardGame2);
+
+        ArrayList<Review> reviews = new ArrayList<>();
+        reviews.add(review1);
+        reviews.add(review2);
+
+        when (reviewRepository.findAll()).thenReturn(reviews);
+
+        ArrayList<Review> retrievedReviews = reviewService.getAllReviews();
+
+        assertNotNull(retrievedReviews);
+        assertEquals(2, retrievedReviews.size());
+        assertEquals(review1, retrievedReviews.get(0));
+        assertEquals(review2, retrievedReviews.get(1));
     }
 }
