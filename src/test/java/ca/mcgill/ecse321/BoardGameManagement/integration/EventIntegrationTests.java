@@ -389,5 +389,5 @@ public class EventIntegrationTests {
     assertTrue(response.getBody().length > 0);
     assertEquals(validEventName, response.getBody()[0].getName());
   }
-  
+
 }
