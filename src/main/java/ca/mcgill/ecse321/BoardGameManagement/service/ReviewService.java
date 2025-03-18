@@ -35,7 +35,7 @@ public class ReviewService {
     @Transactional
     public Review createReview(ReviewCreationDto reviewDto) {
         if (reviewDto == null) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "review does not exist");
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Review is null.");
         }
 
         if (reviewDto.getRating() < 0 || reviewDto.getRating() > 5) {
@@ -62,10 +62,10 @@ public class ReviewService {
      */
     @Transactional
     public Review updateReview(int reviewId, ReviewCreationDto reviewDto) {
-        Review review = reviewRepository.findById(reviewId).orElse(null);
-        if (review == null) {
+        if (!reviewRepository.existsById(reviewId)) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Review not found with ID: " + reviewId);
         }
+        Review review = reviewRepository.findByReviewID(reviewId);
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
         review.setCommentDate(reviewDto.getCommentDate());
@@ -86,12 +86,10 @@ public class ReviewService {
      */
     @Transactional
     public Review getReviewById(int reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElse(null);
-        if (review == null) {
+        if (!reviewRepository.existsById(reviewId)) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Review not found with ID: " + reviewId);
         }
-
-        return review;
+        return reviewRepository.findByReviewID(reviewId);
     }
     
     /**
@@ -99,10 +97,9 @@ public class ReviewService {
      */
     @Transactional
     public void deleteReview(int reviewId) {
-        Review review = reviewRepository.findById(reviewId).orElse(null);
-        if (review == null) {
+        if (!reviewRepository.existsById(reviewId)) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Review not found with ID: " + reviewId);
         }
-        reviewRepository.delete(review);
+        reviewRepository.deleteById(reviewId);
     }
 }

@@ -1,15 +1,13 @@
 package ca.mcgill.ecse321.BoardGameManagement.service;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.times;
@@ -17,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.invocation.InvocationOnMock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewCreationDto;
@@ -29,6 +28,7 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.ReviewRepository;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class) // to make the tests run in a specific order
 public class ReviewServiceTests {
 
     @Mock
@@ -77,6 +77,7 @@ public class ReviewServiceTests {
      * Test the creation of two valid reviews.
      */
     @Test
+    @Order(0)
     public void createValidReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
@@ -143,11 +144,51 @@ public class ReviewServiceTests {
         verify(reviewRepository, times(2)).save(any(Review.class));
     }
 
+    @Test
+    @Order(1)
+    public void createInvalidReviewNullDto() {
+        ReviewCreationDto dto = null;
+
+        player = new Player(name, email, password, false);
+        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+
+        when (playerRepository.findByPlayerID(100)).thenReturn(player);
+        when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
+
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            reviewService.createReview(dto);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertTrue(exception.getMessage().contains("Review is null."));
+
+    }
+
+    @Test
+    @Order(2)
+    public void createInvalidReviewBadRating() {
+        ReviewCreationDto dto = new ReviewCreationDto(99999, comment, date, 100, 99);
+
+        player = new Player(name, email, password, false);
+        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+
+        when (playerRepository.findByPlayerID(100)).thenReturn(player);
+        when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
+
+        GlobalException exception = assertThrows(GlobalException.class, () -> {
+            reviewService.createReview(dto);
+        });
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertTrue(exception.getMessage().contains("Rating must be between 0 and 5. Rating is:"));
+    }
+
     /**
      * Test the creation of a review with no player. This should fail.
      */
     @Test
-    public void createInvalidReview_NoPlayer() {
+    @Order(3)
+    public void createInvalidReviewNoPlayer() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
         player = new Player(name, email, password, false);
@@ -168,7 +209,8 @@ public class ReviewServiceTests {
      * Test the creation of a review of no board game. This should fail.
      */
     @Test
-    public void createInvalidReview_NoBoardGame() {
+    @Order(4)
+    public void createInvalidReviewNoBoardGame() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
         player = new Player(name, email, password, false);
@@ -185,28 +227,8 @@ public class ReviewServiceTests {
         assertTrue(exception.getMessage().contains("BoardGame not found with ID:"));
     }
 
-    /**
-     * Test the creation of a review with a bad rating. This should fail.
-     */
     @Test
-    public void createInvalidReview_BadRating() {
-        ReviewCreationDto dto = new ReviewCreationDto(99999, comment, date, 100, 99);
-
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
-
-        when (playerRepository.findByPlayerID(100)).thenReturn(player);
-        when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
-
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            reviewService.createReview(dto);
-        });
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertTrue(exception.getMessage().contains("Rating must be between 0 and 5. Rating is:"));
-    }
-
-    @Test
+    @Order(5)
     public void findExistingReviewById() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -224,6 +246,7 @@ public class ReviewServiceTests {
     }
 
     @Test
+    @Order(6)
     public void findNonExistentReviewById() {
         when (reviewRepository.findByReviewID(id)).thenReturn(null);
 
@@ -234,25 +257,33 @@ public class ReviewServiceTests {
     }
 
     @Test
+    @Order(7)
     public void updateExistingReview() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
 
-        Review existingReview = new Review(rating, comment, date, player, boardGame);
+        int validID = 100;
 
-        when (reviewRepository.findByReviewID(id)).thenReturn(existingReview);
-        when (reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Review review = new Review(rating, comment, date, player, boardGame);
 
-        ReviewCreationDto updatedDto = new ReviewCreationDto(rating + 1, comment + "2", LocalDate.now(), playerID, boardGameID);
+        when(reviewRepository.existsById(validID)).thenReturn(true);  // Mock existsById to return true
+        when(reviewRepository.findByReviewID(validID)).thenReturn(review);
+        when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Review updatedReview = reviewService.updateReview(id, updatedDto);
+        ReviewCreationDto dto = new ReviewCreationDto(rating + 1, comment + "2", date, player.getPlayerID(), boardGame.getGameID());
+
+        Review updatedReview = reviewService.updateReview(validID, dto);
 
         assertNotNull(updatedReview);
         assertEquals(rating + 1, updatedReview.getRating());
         assertEquals(comment + "2", updatedReview.getComment());
+        assertEquals(date, updatedReview.getCommentDate());
+        assertEquals(player.getPlayerID(), updatedReview.getAuthor().getPlayerID());
+        assertEquals(boardGame.getGameID(), updatedReview.getBoardGame().getGameID());
     }
 
     @Test
+    @Order(8)
     public void updateNonExistentReview() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -266,6 +297,7 @@ public class ReviewServiceTests {
     }
 
     @Test
+    @Order(9)
     public void updateReview_InvalidInput() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -284,22 +316,17 @@ public class ReviewServiceTests {
 
 
     @Test
+    @Order(10)
     public void deleteExistingReview() {
-        Player player1 = new Player(name, email, password, false);
-        BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
-
-        Review review1 = new Review(rating, comment, date, player1, boardGame1);
-
-        when(playerRepository.findByPlayerID(playerID)).thenReturn(player1);
-        when(boardGameRepository.findByGameID(boardGameID)).thenReturn(boardGame1);
-        when(reviewRepository.findByReviewID(id)).thenReturn(review1);
+        when(reviewRepository.existsById(id)).thenReturn(true);
 
         reviewService.deleteReview(id);
 
-        verify(reviewRepository, times(1)).deleteById(any());
+        verify(reviewRepository, times(1)).deleteById(id);
     }
 
     @Test
+    @Order(11)
     public void deleteNonExistentReview() {
         Player player1 = new Player(name, email, password, false);
         BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -315,6 +342,7 @@ public class ReviewServiceTests {
     }
 
     @Test
+    @Order(12)
     public void getAllReviews() {
         Player player1 = new Player(name, email, password, false);
         BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
