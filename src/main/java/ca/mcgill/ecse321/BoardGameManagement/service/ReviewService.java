@@ -38,7 +38,7 @@ public class ReviewService {
             throw new GlobalException(HttpStatus.BAD_REQUEST, "Review is null.");
         }
 
-        if (reviewDto.getRating() < 0 || reviewDto.getRating() > 5) {
+        if (reviewDto.getRating() < 1 || reviewDto.getRating() > 5) {
             throw new GlobalException(HttpStatus.BAD_REQUEST, "Rating must be between 0 and 5. Rating is: " + reviewDto.getRating());
         }
 
