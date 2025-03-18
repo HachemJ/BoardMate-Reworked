@@ -56,4 +56,15 @@ public class ReviewCreationDto {
         this.boardGameID = boardGameID;
     }
 
+    @Override
+    public String toString() {
+        return "ReviewCreationDto{" +
+                "reviewID=" + reviewID +
+                ", rating=" + rating +
+                ", comment='" + comment + '\'' +
+                ", commentDate=" + commentDate +
+                ", playerID=" + playerID +
+                ", boardGameID=" + boardGameID +
+                '}';
+    }
 }

@@ -66,4 +66,15 @@ public class ReviewResponseDto {
         this.boardGame = review.getBoardGame();
     }
 
+    @Override
+    public String toString() {
+        return "ReviewResponseDto{" +
+                "reviewID=" + reviewID +
+                ", rating=" + rating +
+                ", comment='" + comment + '\'' +
+                ", commentDate=" + commentDate +
+                ", author=" + author +
+                ", boardGame=" + boardGame +
+                '}';
+    }
 }
