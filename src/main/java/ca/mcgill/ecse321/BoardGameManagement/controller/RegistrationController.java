@@ -34,8 +34,8 @@ public class RegistrationController {
     /**
      * Return the registration with the given key.
      *
-     * @param playerID The playerID of the registration to find.
-     * @param eventID The eventID of the registration to find.
+     * @param playerId The playerID of the registration to find.
+     * @param eventId The eventID of the registration to find.
      * @return The registration with the given key.
      */
     @GetMapping("registrations/{playerId}/{eventId}")
@@ -60,7 +60,7 @@ public class RegistrationController {
     /**
      * Return the registrations for a given player.
      *
-     * @param playerID The playerID of the registration to find.
+     * @param playerId The playerID of the registration to find.
      * @return The registrations of the player.
      */
     @GetMapping("registrations/players/{playerId}")
@@ -74,7 +74,7 @@ public class RegistrationController {
     /**
      * Return the registrations for a given event.
      *
-     * @param eventID The eventID of the registration to find.
+     * @param eventId The eventID of the registration to find.
      * @return The registrations of the event.
      */
     @GetMapping("registrations/events/{eventId}")
@@ -88,8 +88,8 @@ public class RegistrationController {
     /**
      * Delete the registration for a specific key
      *
-     * @param playerID The playerID of the registration to delete.
-     * @param eventID The eventID of the registration to delete.
+     * @param playerId The playerID of the registration to delete.
+     * @param eventId The eventID of the registration to delete.
      */
     @DeleteMapping("registrations/{playerId}/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

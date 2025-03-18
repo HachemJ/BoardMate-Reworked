@@ -68,7 +68,7 @@ public class RegistrationServiceTests {
    * Tests creation of a new registration.
    */
     @Test
-    public void testCreateValidRegistation() {
+    public void testCreateValidRegistration() {
     // Arrange
     RegistrationCreationDto dto = new RegistrationCreationDto(validPlayerId, validEventId);
 
