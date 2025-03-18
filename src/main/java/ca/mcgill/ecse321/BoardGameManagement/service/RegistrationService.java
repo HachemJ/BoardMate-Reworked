@@ -12,6 +12,9 @@ import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.EventRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.RegistrationRepository;
+
+
+
 import java.util.List;
 
 @Service
@@ -37,7 +40,7 @@ public class RegistrationService {
         }
 
         Event event = eventRepository.findByEventID(registrationDto.getEventID());
-        if (event == null) {
+        if (event == null ) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + registrationDto.getEventID());
         }
 
@@ -49,17 +52,17 @@ public class RegistrationService {
    * Gets a registration by its key.
    */
     @Transactional
-    public Registration getRegistrationByKey(int playerID, int eventID) {
-        Player player = playerRepository.findByPlayerID(playerID);
+    public Registration getRegistrationByKey(int playerId, int eventId) {
+        Player player = playerRepository.findByPlayerID(playerId);
         if (player == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerID);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerId);
         }
 
-        Event event = eventRepository.findByEventID(eventID);
+        Event event = eventRepository.findByEventID(eventId);
         if (event == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventId);
         }
-
+        
         Registration registration = registrationRepository.findRegistrationByKey(new Registration.Key(player,event));
         if (registration == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "No registration has been found."); 
@@ -79,10 +82,10 @@ public class RegistrationService {
    * Gets all registrations for a player from database.
    */
     @Transactional
-    public List<Registration> getAllRegistrationsByPlayer(int playerID) {
-        Player player = playerRepository.findByPlayerID(playerID);
+    public List<Registration> getAllRegistrationsByPlayer(int playerId) {
+        Player player = playerRepository.findByPlayerID(playerId);
         if (player == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerID);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerId);
         }
         return (List<Registration>) registrationRepository.findRegistrationByPlayer(player);
     }
@@ -91,10 +94,10 @@ public class RegistrationService {
    * Gets all registrations for an event from database.
    */
     @Transactional
-    public List<Registration> getAllRegistrationsByEvent(int eventID) {
-        Event event = eventRepository.findByEventID(eventID);
+    public List<Registration> getAllRegistrationsByEvent(int eventId) {
+        Event event = eventRepository.findByEventID(eventId);
         if (event == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventId);
         }
         return (List<Registration>) registrationRepository.findRegistrationByEvent(event);
     }
