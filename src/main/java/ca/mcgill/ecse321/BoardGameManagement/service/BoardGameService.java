@@ -23,10 +23,8 @@ public class BoardGameService {
   @Transactional
   public BoardGame createBoardGame(@Valid BoardGameCreationDto boardGameDto) {
 
-    //this check can't be done through bean validation
-    if (boardGameDto.getMinPlayers() > boardGameDto.getMaxPlayers()) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be greater than or equal to minimum players.");
-    }
+    validateBoardGameDto(boardGameDto);
+
     BoardGame boardGame = new BoardGame(
         boardGameDto.getMinPlayers(),
         boardGameDto.getMaxPlayers(),
@@ -48,21 +46,8 @@ public class BoardGameService {
       throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameID);
     }
 
-    if (boardGameDto.getMinPlayers() <= 0) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Minimum players must be at least 1.");
-    }
-    if (boardGameDto.getMaxPlayers() <= 0) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be at least 1.");
-    }
-    if (boardGameDto.getMaxPlayers() < boardGameDto.getMinPlayers()) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be greater than or equal to minimum players.");
-    }
-    if (boardGameDto.getName() == null || boardGameDto.getName().trim().isEmpty()) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Game name must not be blank.");
-    }
-    if (boardGameDto.getDescription() == null || boardGameDto.getDescription().trim().isEmpty()) {
-      throw new GlobalException(HttpStatus.BAD_REQUEST, "Game description must not be blank.");
-    }
+    validateBoardGameDto(boardGameDto);
+
 
     // Apply the updates after validation
     boardGame.setMinPlayers(boardGameDto.getMinPlayers());
@@ -97,5 +82,22 @@ public class BoardGameService {
     boardGameRepository.deleteById(boardGameID);
   }
 
+  private void validateBoardGameDto(BoardGameCreationDto boardGameDto) {
+    if (boardGameDto.getMinPlayers() <= 0) {
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Minimum players must be at least 1.");
+    }
+    if (boardGameDto.getMaxPlayers() <= 0) {
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be at least 1.");
+    }
+    if (boardGameDto.getMaxPlayers() < boardGameDto.getMinPlayers()) {
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Maximum players must be greater than or equal to minimum players.");
+    }
+    if (boardGameDto.getName() == null || boardGameDto.getName().trim().isEmpty()) {
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Board game name must not be empty or contain only spaces.");
+    }
+    if (boardGameDto.getDescription() == null || boardGameDto.getDescription().trim().isEmpty()) {
+      throw new GlobalException(HttpStatus.BAD_REQUEST, "Board game description must not be empty or contain only spaces.");
+    }
+  }
 
 }

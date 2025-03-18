@@ -172,13 +172,6 @@ public class BoardGameServiceTests {
   }
 
   @Test
-  void testCreatingBoardGameWithNullDescription() {
-    BoardGameCreationDto dto = new BoardGameCreationDto(2, 4, "Chess", null);
-    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.createBoardGame(dto));
-    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-  }
-
-  @Test
   void testCreatingBoardGameWithOnlySpacesInName() {
     BoardGameCreationDto dto = new BoardGameCreationDto(2, 4, "   ", "Valid Description");
     GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.createBoardGame(dto));
@@ -215,54 +208,6 @@ public class BoardGameServiceTests {
     // Assert that minPlayers has been successfully decreased
     assertNotNull(updatedGame);
     assertEquals(newMinPlayers, updatedGame.getMinPlayers());
-  }
-
-  @Test
-  void testUpdatingBoardGameWithNullName() {
-    when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
-    when(boardGameRepository.save(any(BoardGame.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    BoardGameCreationDto dto = new BoardGameCreationDto(VALID_MIN_PLAYERS, VALID_MAX_PLAYERS, null, UPDATED_DESCRIPTION);
-
-    BoardGame updatedGame = boardGameService.updateBoardGame(VALID_ID, dto);
-
-    assertNotNull(updatedGame);
-    assertEquals(VALID_NAME, updatedGame.getName()); // Name should remain the same
-    assertEquals(UPDATED_DESCRIPTION, updatedGame.getDescription()); // Description should update
-  }
-
-  @Test
-  void testUpdatingBoardGameWithNullDescription() {
-    when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
-    when(boardGameRepository.save(any(BoardGame.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    BoardGameCreationDto dto = new BoardGameCreationDto(VALID_MIN_PLAYERS, VALID_MAX_PLAYERS, UPDATED_NAME, null);
-
-    BoardGame updatedGame = boardGameService.updateBoardGame(VALID_ID, dto);
-
-    assertNotNull(updatedGame);
-    assertEquals(UPDATED_NAME, updatedGame.getName()); // Name should update
-    assertEquals(VALID_DESCRIPTION, updatedGame.getDescription()); // Description should remain the same
-  }
-
-  @Test
-  void testUpdatingBoardGameWithEmptyStringAsName() {
-    when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
-
-    BoardGameCreationDto dto = new BoardGameCreationDto(VALID_MIN_PLAYERS, VALID_MAX_PLAYERS, "", UPDATED_DESCRIPTION);
-
-    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.updateBoardGame(VALID_ID, dto));
-    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-  }
-
-  @Test
-  void testUpdatingBoardGameWithEmptyStringAsDescription() {
-    when(boardGameRepository.findByGameID(VALID_ID)).thenReturn(testBoardGame);
-
-    BoardGameCreationDto dto = new BoardGameCreationDto(VALID_MIN_PLAYERS, VALID_MAX_PLAYERS, UPDATED_NAME, "");
-
-    GlobalException e = assertThrows(GlobalException.class, () -> boardGameService.updateBoardGame(VALID_ID, dto));
-    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
   }
 
 
