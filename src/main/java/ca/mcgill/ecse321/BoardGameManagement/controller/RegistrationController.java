@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.EventResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.Registration;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/registrations")
 public class RegistrationController {
     @Autowired
 	private RegistrationService registrationService;
@@ -26,7 +24,7 @@ public class RegistrationController {
      * @param registrationDto The registration to create.
      * @return The created registration.
      */
-    @PostMapping
+    @PostMapping("/registrations")
     @ResponseStatus(HttpStatus.CREATED)
     public RegistrationResponseDto createRegistration(@RequestBody RegistrationCreationDto registrationDto) {
         Registration createdRegistration = registrationService.createRegistration(registrationDto);
@@ -40,11 +38,10 @@ public class RegistrationController {
      * @param eventID The eventID of the registration to find.
      * @return The registration with the given key.
      */
-    @GetMapping("/{playerID}/{eventID}")
+    @GetMapping("registrations/{playerId}/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public RegistrationResponseDto getRegistrationByKey(@PathVariable int playerID,@PathVariable int eventID) {
-        return RegistrationResponseDto.create(registrationService.getRegistrationByKey(playerID, eventID));
-        //return new RegistrationResponseDto((registrationService.getRegistrationByKey(playerID, eventID)));
+    public RegistrationResponseDto getRegistrationByKey(@PathVariable(name = "playerId") int playerId,@PathVariable(name = "eventId") int eventId) {
+        return RegistrationResponseDto.create(registrationService.getRegistrationByKey(playerId, eventId));
     }
 
     /**
@@ -52,7 +49,7 @@ public class RegistrationController {
      *
      * @return List of all registrations.
      */
-    @GetMapping
+    @GetMapping("/registrations")
     @ResponseStatus(HttpStatus.OK)
     public List<RegistrationResponseDto> getAllRegistrations() {
         return registrationService.getAllRegistrations().stream()
@@ -66,10 +63,10 @@ public class RegistrationController {
      * @param playerID The playerID of the registration to find.
      * @return The registrations of the player.
      */
-    @GetMapping("/player/{playerID}")
+    @GetMapping("registrations/players/{playerId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RegistrationResponseDto> getAllRegistrationsByPlayer(@PathVariable int playerID) {
-        return registrationService.getAllRegistrationsByPlayer(playerID).stream()
+    public List<RegistrationResponseDto> getAllRegistrationsByPlayer(@PathVariable(name = "playerId") int playerId) {
+        return registrationService.getAllRegistrationsByPlayer(playerId).stream()
         .map(RegistrationResponseDto::create)
         .collect(Collectors.toList());
     }
@@ -80,10 +77,10 @@ public class RegistrationController {
      * @param eventID The eventID of the registration to find.
      * @return The registrations of the event.
      */
-    @GetMapping("/event/{eventID}")
+    @GetMapping("registrations/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public List<RegistrationResponseDto> getAllRegistrationsByEvent(@PathVariable int eventID) {
-        return registrationService.getAllRegistrationsByEvent(eventID).stream()
+    public List<RegistrationResponseDto> getAllRegistrationsByEvent(@PathVariable(name = "eventId") int eventId) {
+        return registrationService.getAllRegistrationsByEvent(eventId).stream()
         .map(RegistrationResponseDto::create)
         .collect(Collectors.toList());
     }
@@ -94,9 +91,9 @@ public class RegistrationController {
      * @param playerID The playerID of the registration to delete.
      * @param eventID The eventID of the registration to delete.
      */
-    @DeleteMapping("/{playerID}/{eventID}")
+    @DeleteMapping("registrations/{playerId}/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteRegistration(@PathVariable int playerID, @PathVariable int eventID) {
-        registrationService.deleteRegistration(playerID, eventID);
+    public void deleteRegistration(@PathVariable(name = "playerId") int playerId, @PathVariable(name = "eventId") int eventId) {
+        registrationService.deleteRegistration(playerId, eventId);
     }
 }

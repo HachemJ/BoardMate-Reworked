@@ -11,7 +11,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 public interface RegistrationRepository extends CrudRepository<Registration, Registration.Key> {
- //public Registration findRegistrationByKey(Registration.Key key);
   @Query("SELECT r FROM Registration r WHERE r.key.registrant = :#{#key.registrant} AND r.key.event = :#{#key.event}")
   public Registration findRegistrationByKey(@Param("key") Registration.Key key);
 
