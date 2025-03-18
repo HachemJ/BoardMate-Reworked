@@ -17,6 +17,7 @@ public class EventResponseDto {
   private String ownerName;
   private String boardGameName;
 
+  @SuppressWarnings("unused")
   private EventResponseDto() {
   }
 
