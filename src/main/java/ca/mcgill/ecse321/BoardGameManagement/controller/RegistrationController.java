@@ -63,7 +63,7 @@ public class RegistrationController {
      * @param playerId The playerID of the registration to find.
      * @return The registrations of the player.
      */
-    @GetMapping("/registrations/player/{playerId}")
+    @GetMapping("/registrations/players/{playerId}")
     @ResponseStatus(HttpStatus.OK)
     public List<RegistrationResponseDto> getAllRegistrationsByPlayer(@PathVariable(name = "playerId") int playerId) {
         return registrationService.getAllRegistrationsByPlayer(playerId).stream()
@@ -77,7 +77,7 @@ public class RegistrationController {
      * @param eventId The eventID of the registration to find.
      * @return The registrations of the event.
      */
-    @GetMapping("/registrations/event/{eventId}")
+    @GetMapping("/registrations/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public List<RegistrationResponseDto> getAllRegistrationsByEvent(@PathVariable(name = "eventId") int eventId) {
         return registrationService.getAllRegistrationsByEvent(eventId).stream()
