@@ -36,15 +36,10 @@ public class RegistrationIntegrationTests {
     @Autowired
     private RegistrationRepository registrationRepository;
 
-    private int createdEventId;
-    private int createdPlayerId;
     private Player player;
     private Player player2;
-    private BoardGame game;
     private Event event;
     private Event event2;
-    private Registration registration2;
-    private Registration registration3;
     private static final String eventName = "Clue Event";
     private static final String eventDescription = "Clue Event Description";
     private static final Date eventDate = Date.valueOf("2025-02-16");
@@ -64,19 +59,19 @@ public class RegistrationIntegrationTests {
         player = new Player("Alice", "alice@mail.com", "password123", true);
         playerRepository.save(player); 
         player2 = new Player("John", "john@mail.com", "password456", true);
-        playerRepository.save(player2); 
+        playerRepository.save(player2);
 
-        game = new BoardGame(2, 6, "Clue", "A strategy game");
+        BoardGame game = new BoardGame(2, 6, "Clue", "A strategy game");
         boardGameRepository.save(game);
 
         event = new Event(eventName, eventDescription, maxLimit, eventDate, startTime, endTime, location, player, game);
         eventRepository.save(event);
         event2 = new Event(eventName, eventDescription, maxLimit, eventDate2, startTime, endTime, location, player, game);
         eventRepository.save(event2);
-        
-        registration2 = new Registration(new Registration.Key(player, event2));
+
+        Registration registration2 = new Registration(new Registration.Key(player, event2));
         registrationRepository.save(registration2);
-        registration3 = new Registration(new Registration.Key(player2, event2));
+        Registration registration3 = new Registration(new Registration.Key(player2, event2));
         registrationRepository.save(registration3);
     }
 
@@ -115,8 +110,8 @@ public class RegistrationIntegrationTests {
         assertEquals(player.getPlayerID(), retrievedRegistration.getKey().getRegistrant().getPlayerID());
         assertEquals(event.getEventID(), retrievedRegistration.getKey().getEvent().getEventID());
 
-        createdEventId = response.getBody().geteventID();
-        createdPlayerId = response.getBody().getplayerID();
+        response.getBody().geteventID();
+        response.getBody().getplayerID();
     }
 
      /**
@@ -133,7 +128,7 @@ public class RegistrationIntegrationTests {
         ResponseEntity<ErrorDto> response = client.postForEntity("/registrations", registrationBody, ErrorDto.class);
 
         // Assert
-        assertTrue(response.getStatusCode() == HttpStatus.NOT_FOUND); 
+        assertSame(response.getStatusCode(), HttpStatus.NOT_FOUND);
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getErrors().contains("Player not found with ID: 99999999"));
         assertEquals(3, registrationRepository.count()); //Validate registration in database 
@@ -153,7 +148,7 @@ public class RegistrationIntegrationTests {
         ResponseEntity<ErrorDto> response = client.postForEntity("/registrations", registrationBody, ErrorDto.class);
     
         // Assert
-        assertTrue(response.getStatusCode() == HttpStatus.NOT_FOUND);
+        assertSame(response.getStatusCode(), HttpStatus.NOT_FOUND);
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getErrors().contains("Event not found with ID: 99999999"));
         assertEquals(3, registrationRepository.count()); //Validate registration in database 
