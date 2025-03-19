@@ -43,6 +43,25 @@ public class PlayerRepositoryTests {
 
 
  @Test
+ public void findPlayerByEmailTest() {
+  //set up
+  Player player = new Player("PlayerName", "player@email.com", "aPassword", false);
+  player = playerRepository.save(player);
+  //act
+  Player foundPlayer = playerRepository.findByEmail("player@email.com");
+  //verify
+  assertNotNull(foundPlayer);
+  //assertEquals(playerRepository.existsById(player.getPlayerID()));
+  assertEquals(player.getPlayerID(), foundPlayer.getPlayerID());
+  assertEquals(player.getName(), foundPlayer.getName());
+  assertEquals(player.getEmail(), foundPlayer.getEmail());
+  assertEquals(player.getIsAOwner(), foundPlayer.getIsAOwner());
+  assertEquals(player.getPassword(), foundPlayer.getPassword());
+
+ }
+
+
+ @Test
  public void updatePlayerTest() {
   //set up
   Player player = new Player("PlayerName", "player@email.com", "aPassword", false);

@@ -5,4 +5,6 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface PlayerRepository extends CrudRepository<Player, Integer> {
   public Player findByPlayerID(int playerID);
+  public Player findByEmail(String email);
+
 }

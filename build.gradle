@@ -24,10 +24,12 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 	annotationProcessor 'com.github.therapi:therapi-runtime-javadoc-scribe:0.13.0'
 	implementation 'com.github.therapi:therapi-runtime-javadoc:0.13.0'
+
 }
 
 tasks.named('test') {
