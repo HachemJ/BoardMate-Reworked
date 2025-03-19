@@ -14,4 +14,5 @@ public class GlobalException extends RuntimeException {
   public HttpStatus getStatus() {
     return status;
   }
+ 
 }
