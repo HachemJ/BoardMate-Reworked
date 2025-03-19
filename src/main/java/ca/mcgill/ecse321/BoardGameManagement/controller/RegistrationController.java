@@ -38,7 +38,7 @@ public class RegistrationController {
      * @param eventId The eventID of the registration to find.
      * @return The registration with the given key.
      */
-    @GetMapping("registrations/{playerId}/{eventId}")
+    @GetMapping("/registrations/{playerId}/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public RegistrationResponseDto getRegistrationByKey(@PathVariable(name = "playerId") int playerId,@PathVariable(name = "eventId") int eventId) {
         return RegistrationResponseDto.create(registrationService.getRegistrationByKey(playerId, eventId));
@@ -63,7 +63,7 @@ public class RegistrationController {
      * @param playerId The playerID of the registration to find.
      * @return The registrations of the player.
      */
-    @GetMapping("registrations/players/{playerId}")
+    @GetMapping("/registrations/player/{playerId}")
     @ResponseStatus(HttpStatus.OK)
     public List<RegistrationResponseDto> getAllRegistrationsByPlayer(@PathVariable(name = "playerId") int playerId) {
         return registrationService.getAllRegistrationsByPlayer(playerId).stream()
@@ -77,7 +77,7 @@ public class RegistrationController {
      * @param eventId The eventID of the registration to find.
      * @return The registrations of the event.
      */
-    @GetMapping("registrations/events/{eventId}")
+    @GetMapping("/registrations/event/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public List<RegistrationResponseDto> getAllRegistrationsByEvent(@PathVariable(name = "eventId") int eventId) {
         return registrationService.getAllRegistrationsByEvent(eventId).stream()
@@ -91,7 +91,7 @@ public class RegistrationController {
      * @param playerId The playerID of the registration to delete.
      * @param eventId The eventID of the registration to delete.
      */
-    @DeleteMapping("registrations/{playerId}/{eventId}")
+    @DeleteMapping("/registrations/{playerId}/{eventId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteRegistration(@PathVariable(name = "playerId") int playerId, @PathVariable(name = "eventId") int eventId) {
         registrationService.deleteRegistration(playerId, eventId);
