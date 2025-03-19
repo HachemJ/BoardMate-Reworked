@@ -28,7 +28,6 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.ReviewRepository;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class) // to make the tests run in a specific order
 public class ReviewServiceTests {
 
     @Mock
@@ -77,7 +76,6 @@ public class ReviewServiceTests {
      * Test the creation of two valid reviews.
      */
     @Test
-    @Order(0)
     public void createValidReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
@@ -98,8 +96,6 @@ public class ReviewServiceTests {
                 (InvocationOnMock invocation) -> invocation.getArgument(0));
             
         Review createdReview = reviewService.createReview(dto);
-
-        System.out.println(createdReview);
 
         assertNotNull(createdReview);
         assertEquals(rating, createdReview.getRating());
@@ -132,8 +128,6 @@ public class ReviewServiceTests {
 
         Review createdReview2 = reviewService.createReview(dto2);
 
-        System.out.println(createdReview2);
-
         assertNotNull(createdReview2);
         assertEquals(rating, createdReview2.getRating());
         assertEquals(comment, createdReview2.getComment());
@@ -145,7 +139,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(1)
     public void createInvalidReviewNullDto() {
         ReviewCreationDto dto = null;
 
@@ -165,7 +158,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(2)
     public void createInvalidReviewLowRating() {
         ReviewCreationDto dto = new ReviewCreationDto(-999999, comment, date, 100, 99);
 
@@ -184,7 +176,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(3)
     public void createInvalidReviewHighRating() {
         ReviewCreationDto dto = new ReviewCreationDto(999999, comment, date, 100, 99);
 
@@ -206,7 +197,6 @@ public class ReviewServiceTests {
      * Test the creation of a review with no player. This should fail.
      */
     @Test
-    @Order(4)
     public void createInvalidReviewNoPlayer() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
@@ -228,7 +218,6 @@ public class ReviewServiceTests {
      * Test the creation of a review of no board game. This should fail.
      */
     @Test
-    @Order(5)
     public void createInvalidReviewNoBoardGame() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
 
@@ -247,7 +236,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(6)
     public void findExistingReviewById() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -265,7 +253,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(7)
     public void findNonExistentReviewById() {
         when (reviewRepository.findByReviewID(id)).thenReturn(null);
 
@@ -276,7 +263,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(8)
     public void updateExistingReview() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -302,7 +288,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(9)
     public void updateNonExistentReview() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -316,7 +301,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(10)
     public void updateReview_InvalidInput() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -335,7 +319,6 @@ public class ReviewServiceTests {
 
 
     @Test
-    @Order(11)
     public void deleteExistingReview() {
         when(reviewRepository.existsById(id)).thenReturn(true);
 
@@ -345,7 +328,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(12)
     public void deleteNonExistentReview() {
         Player player1 = new Player(name, email, password, false);
         BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -361,7 +343,6 @@ public class ReviewServiceTests {
     }
 
     @Test
-    @Order(13)
     public void getAllReviews() {
         Player player1 = new Player(name, email, password, false);
         BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
