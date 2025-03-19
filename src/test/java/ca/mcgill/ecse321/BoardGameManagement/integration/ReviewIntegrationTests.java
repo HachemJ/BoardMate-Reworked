@@ -1,10 +1,8 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 
-import ca.mcgill.ecse321.BoardGameManagement.model.Review;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

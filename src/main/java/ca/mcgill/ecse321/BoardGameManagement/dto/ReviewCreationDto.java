@@ -1,10 +1,6 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import java.sql.Date;
 import java.time.LocalDate;
-
-import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
-import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 
 public class ReviewCreationDto {
     private int reviewID;
