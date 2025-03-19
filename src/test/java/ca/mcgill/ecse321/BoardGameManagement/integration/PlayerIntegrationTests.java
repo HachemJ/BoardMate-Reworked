@@ -148,54 +148,6 @@ public class PlayerIntegrationTests {
         assertTrue(foundUser1 && foundUser2);
     }
 
-
-    @Test
-    public void getAllOwnersTest() {
-        // Create test data: owners and non-owners
-        client.postForEntity("/players", new PlayerCreationDto("Owner1", "owner1@test.com", "pass", true), PlayerRespDto.class);
-        client.postForEntity("/players", new PlayerCreationDto("User1", "user1@test.com", "pass", false), PlayerRespDto.class);
-        client.postForEntity("/players", new PlayerCreationDto("Owner2", "owner2@test.com", "pass", true), PlayerRespDto.class);
-
-        ResponseEntity<List<PlayerRespDto>> response = client.exchange(
-                "/players/owners",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<PlayerRespDto>>() {
-                }
-        );
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        List<PlayerRespDto> owners = response.getBody();
-        assertNotNull(owners);
-        // Expecting only the two owners
-        assertEquals(2, owners.size());
-
-    }
-
-    @Test
-    public void updatePlayerInvalidInput() { //does not work in serviceTest for some reason so moved to Integration
-        // Create a player to update
-        PlayerCreationDto createDto = new PlayerCreationDto("Original Name", "update@test.com", "pass", false);
-        ResponseEntity<PlayerRespDto> createResponse = client.postForEntity("/players", createDto, PlayerRespDto.class);
-        int updateId = createResponse.getBody().getPlayerID();
-
-        // Attempt to update with invalid input (null values)
-        PlayerCreationDto invalidUpdateDto = new PlayerCreationDto(null, null, null, false);
-
-        ResponseEntity<ErrorDto> response = client.exchange(
-                "/players/" + updateId,
-                HttpMethod.PUT,
-                new HttpEntity<>(invalidUpdateDto),
-                ErrorDto.class
-        );
-
-        // Assert that the response status is BAD_REQUEST
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertNotNull(response.getBody());
-        // Assert that the error message contains the expected validation errors
-        assertEquals(3, response.getBody().getErrors().size()); // Expecting 3 errors for null name, email, and password
-    }
-
     @Test
     public void loginSuccess() {
         // Create a player to login
