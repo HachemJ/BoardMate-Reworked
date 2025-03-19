@@ -7,6 +7,7 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.*;
 
 import jakarta.transaction.Transactional;
 
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class ReviewService {
      * Creates a review in the database
      */
     @Transactional
-    public Review createReview(ReviewCreationDto reviewDto) {
+    public Review createReview(@Valid ReviewCreationDto reviewDto) {
         if (reviewDto == null) {
             throw new GlobalException(HttpStatus.BAD_REQUEST, "Review is null.");
         }
@@ -67,7 +68,7 @@ public class ReviewService {
      * Updates a review in the database, based on its ID
      */
     @Transactional
-    public Review updateReview(int reviewId, ReviewCreationDto reviewDto) {
+    public Review updateReview(int reviewId, @Valid ReviewCreationDto reviewDto) {
         if (!reviewRepository.existsById(reviewId)) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Review not found with ID: " + reviewId);
         }
