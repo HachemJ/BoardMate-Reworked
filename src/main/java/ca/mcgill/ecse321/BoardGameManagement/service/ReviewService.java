@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -62,7 +63,7 @@ public class ReviewService {
         }
 
 
-        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), LocalDate.now(), player, boardGame);
+        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), Date.valueOf(LocalDate.now()), player, boardGame);
         return reviewRepository.save(review);
     }
 
@@ -80,7 +81,7 @@ public class ReviewService {
         Review review = reviewRepository.findByReviewID(reviewId);
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
-        review.setCommentDate(reviewDto.getCommentDate());
+        review.setCommentDate(Date.valueOf(reviewDto.getCommentDate()));
 
         return reviewRepository.save(review);
     }
