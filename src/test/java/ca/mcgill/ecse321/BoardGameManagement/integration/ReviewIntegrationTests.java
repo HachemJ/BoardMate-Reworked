@@ -79,9 +79,6 @@ public class ReviewIntegrationTests {
         playerID = player.getPlayerID();
         boardGameID = boardGame.getGameID();
 
-        System.out.println("Player id is: " + playerID);
-        System.out.println("BoardGame id is: " + boardGameID);
-
     }
 
     @AfterEach
@@ -99,11 +96,7 @@ public class ReviewIntegrationTests {
     public void createValidReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
 
-        System.out.println("Dto: " + dto.toString());
-
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
-
-        System.out.println("Response: " + response.getBody());
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -123,7 +116,6 @@ public class ReviewIntegrationTests {
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
 
-        System.out.println("Response: " + response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
@@ -136,7 +128,6 @@ public class ReviewIntegrationTests {
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
 
-        System.out.println("Response: " + response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -150,7 +141,6 @@ public class ReviewIntegrationTests {
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
 
-        System.out.println("Response: " + response);
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -167,8 +157,6 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
 
         int reviewID = createResponse.getBody().getReviewID();
-
-        System.out.println(reviewID);
 
         ResponseEntity<ReviewResponseDto> response = client.getForEntity("/Reviews/" + reviewID, ReviewResponseDto.class);
 

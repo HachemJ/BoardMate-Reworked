@@ -83,7 +83,6 @@ public class ReviewService {
     /**
      * Returns all reviews from the database
      */
-    @Transactional
     public ArrayList<Review> getAllReviews() {
         return (ArrayList<Review>) reviewRepository.findAll();
     }
@@ -91,7 +90,6 @@ public class ReviewService {
     /**
      * Returns a review from the database, based on its ID
      */
-    @Transactional
     public Review getReviewById(int reviewId) {
         if (!reviewRepository.existsById(reviewId)) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Review not found with ID: " + reviewId);
