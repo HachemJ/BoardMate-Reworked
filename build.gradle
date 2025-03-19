@@ -14,10 +14,6 @@ java {
 	}
 }
 
-jacoco {
-	toolVersion = "0.8.10" // Use latest version of JaCoCo
-}
-
 repositories {
 	mavenCentral()
 }
@@ -29,16 +25,13 @@ dependencies {
 	runtimeOnly 'org.postgresql:postgresql'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 	annotationProcessor 'com.github.therapi:therapi-runtime-javadoc-scribe:0.13.0'
 	implementation 'com.github.therapi:therapi-runtime-javadoc:0.13.0'
-
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
-	finalizedBy jacocoTestReport
 
 	testLogging{
 		exceptionFormat "full"
@@ -49,13 +42,4 @@ tasks.named('test') {
 
 tasks.named('jacocoTestReport'){
 	dependsOn test
-}
-
-jacocoTestReport {
-	dependsOn test // tests are required to run before generating the report
-	reports {
-		xml.required = true
-		csv.required = false
-		html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
-	}
 }

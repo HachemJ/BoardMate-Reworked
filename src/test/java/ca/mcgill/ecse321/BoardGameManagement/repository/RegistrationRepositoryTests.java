@@ -45,7 +45,7 @@ public class RegistrationRepositoryTests {
 
         String eventName = "Clue Event";
         String eventDescription = "Clue Event Description";
-        Date eventDate = Date.valueOf("2025-02-16");
+        Date eventDate = Date.valueOf("2025-12-16");
         Time startTime = Time.valueOf("17:00:00");
         Time endTime = Time.valueOf("20:00:00");
         String maxLimit = "6";
@@ -82,7 +82,7 @@ public class RegistrationRepositoryTests {
 
         String eventName = "Monopoly Night";
         String eventDescription = "Clue Monopoly Description";
-        Date eventDate = Date.valueOf("2025-02-16");
+        Date eventDate = Date.valueOf("2025-12-16");
         Time startTime = Time.valueOf("17:00:00");
         Time endTime = Time.valueOf("20:00:00");
         String maxLimit = "8";
@@ -111,7 +111,7 @@ public class RegistrationRepositoryTests {
         
         String eventName = "Puzzle Night";
         String eventDescription = "Puzzle Night Description";
-        Date eventDate = Date.valueOf("2025-02-20");
+        Date eventDate = Date.valueOf("2025-12-20");
         Time startTime = Time.valueOf("18:00:00");
         Time endTime = Time.valueOf("19:00:00");
         String maxLimit = "6";
@@ -143,7 +143,7 @@ public class RegistrationRepositoryTests {
         
         String eventName = "Puzzle Night";
         String eventDescription = "Puzzle Night Description";
-        Date eventDate = Date.valueOf("2025-02-20");
+        Date eventDate = Date.valueOf("2025-12-20");
         Time startTime = Time.valueOf("18:00:00");
         Time endTime = Time.valueOf("19:00:00");
         String maxLimit = "6";
