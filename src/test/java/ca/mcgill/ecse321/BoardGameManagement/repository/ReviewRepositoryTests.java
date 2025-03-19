@@ -4,7 +4,8 @@ import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.model.Review;
 
-import java.time.LocalDate;
+import java.sql.Date;
+import java.sql.Time;
 
 import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,7 +43,7 @@ public class ReviewRepositoryTests {
         //create other review information
         int rating = 5;
         String description = "Test Comment 123";
-        LocalDate date = LocalDate.now(); //magic value, current time (in millis) for February 13, 2025, 6:05PM
+        Date date = new Date(1739487884258L); //magic value, current time (in millis) for February 13, 2025, 6:05PM
 
         Review review = new Review(rating, description, date, player, game);
 
@@ -68,7 +69,7 @@ public class ReviewRepositoryTests {
         //other review information
         int rating = 5;
         String description = "Test Comment 123";
-        LocalDate date = LocalDate.now(); //magic value, current time (in millis) for February 13, 2025, 6:05PM
+        Date date = new Date(1739487884258L); //magic value, current time (in millis) for February 13, 2025, 6:05PM
 
         Review review = new Review(rating, description, date, player, game);
 
@@ -81,7 +82,7 @@ public class ReviewRepositoryTests {
         assertNotNull(savedReview);
         assertEquals(5, savedReview.getRating());
         assertEquals(description, savedReview.getComment());
-        assertEquals(LocalDate.now(), savedReview.getCommentDate());
+        assertEquals(Date.valueOf("2025-02-13"), savedReview.getCommentDate());
         assertEquals(player.getPlayerID(), savedReview.getAuthor().getPlayerID());
         assertEquals(game.getGameID(), savedReview.getBoardGame().getGameID());
     }
@@ -107,7 +108,7 @@ public class ReviewRepositoryTests {
         //other review information
         int rating = 5;
         String description = "Test Comment 123";
-        LocalDate date = LocalDate.now(); //magic value, current time (in millis) for February 13, 2025, 6:05PM
+        Date date = new Date(1739487884258L); //magic value, current time (in millis) for February 13, 2025, 6:05PM
 
         Review review = new Review(rating, description, date, player, game);
 
@@ -138,8 +139,8 @@ public class ReviewRepositoryTests {
         int newRating = 3;
         String description = "Test Comment 123";
         String newDescription = "Test Comment 321";
-        LocalDate date = LocalDate.now().minusDays(1);
-        LocalDate newDate = LocalDate.now();
+        Date date = new Date(1739487884258L); //magic value, current time (in millis) for February 13, 2025, 6:05PM
+        Date newDate = new Date(2009487884258L); //some later value
 
         Review review = new Review(rating, description, date, player, game);
 
@@ -152,7 +153,7 @@ public class ReviewRepositoryTests {
         assertNotNull(savedReview);
         assertEquals(rating, savedReview.getRating());
         assertEquals(description, savedReview.getComment());
-        assertEquals(LocalDate.now().minusDays(1), savedReview.getCommentDate());
+        assertEquals(Date.valueOf("2025-02-13"), savedReview.getCommentDate());
         assertEquals(player.getPlayerID(), savedReview.getAuthor().getPlayerID());
         assertEquals(game.getGameID(), savedReview.getBoardGame().getGameID());
 
@@ -167,7 +168,7 @@ public class ReviewRepositoryTests {
         assertNotNull(updatedReview);
         assertEquals(newRating, updatedReview.getRating());
         assertEquals(newDescription, updatedReview.getComment());
-        assertEquals(LocalDate.now(), updatedReview.getCommentDate());
+        assertEquals(Date.valueOf("2033-09-04"), updatedReview.getCommentDate());
         assertEquals(player.getPlayerID(), updatedReview.getAuthor().getPlayerID());
         assertEquals(game.getGameID(), updatedReview.getBoardGame().getGameID());
 

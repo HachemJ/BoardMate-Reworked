@@ -1,8 +1,10 @@
 package ca.mcgill.ecse321.BoardGameManagement.model;
 
-import jakarta.persistence.*;
-
-import java.time.LocalDate;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import java.sql.Date;
 
 @Entity
 public class Review {
@@ -12,7 +14,7 @@ public class Review {
   private int reviewID;
   private int rating;
   private String comment;
-  private LocalDate commentDate;
+  private Date commentDate;
 
   @ManyToOne
   private Player author;
@@ -22,31 +24,7 @@ public class Review {
 
   public Review() {}
 
-  public int getReviewID() {
-    return reviewID;
-  }
-
-  public int getRating() {
-    return rating;
-  }
-
-  public String getComment() {
-    return comment;
-  }
-
-  public LocalDate getCommentDate() {
-    return commentDate;
-  }
-
-  public Player getAuthor() {
-    return author;
-  }
-
-  public BoardGame getBoardGame() {
-    return boardGame;
-  }
-
-  public Review(int aRating, String aComment, LocalDate aCommentDate, Player aAuthor, BoardGame aBoardGame) {
+  public Review(int aRating, String aComment, Date aCommentDate, Player aAuthor, BoardGame aBoardGame) {
     rating = aRating;
     comment = aComment;
     commentDate = aCommentDate;
@@ -68,14 +46,33 @@ public class Review {
     return true;
   }
 
-  public boolean setCommentDate(LocalDate aCommentDate) {
+  public boolean setCommentDate(Date aCommentDate) {
     commentDate = aCommentDate;
     return true;
   }
 
-  public boolean setReviewID(int aReviewID) {
-    reviewID = aReviewID;
-    return true;
+  public int getReviewID() {
+    return reviewID;
+  }
+
+  public int getRating() {
+    return rating;
+  }
+
+  public String getComment() {
+    return comment;
+  }
+
+  public Date getCommentDate() {
+    return commentDate;
+  }
+
+  public Player getAuthor() {
+    return author;
+  }
+
+  public BoardGame getBoardGame() {
+    return boardGame;
   }
 
   public boolean setAuthor(Player aNewAuthor) {
@@ -108,5 +105,4 @@ public class Review {
         "  " + "author = "+(getAuthor()!=null?Integer.toHexString(System.identityHashCode(getAuthor())):"null") + System.lineSeparator() +
         "  " + "boardGame = "+(getBoardGame()!=null?Integer.toHexString(System.identityHashCode(getBoardGame())):"null");
   }
-
 }
