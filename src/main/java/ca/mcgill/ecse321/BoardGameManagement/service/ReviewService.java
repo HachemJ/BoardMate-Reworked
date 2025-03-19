@@ -10,11 +10,13 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
 @Service
+@Validated
 public class ReviewService {
 
     @Autowired
@@ -56,7 +58,7 @@ public class ReviewService {
             throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + reviewDto.getBoardGameID());
         }
 
-        
+
         Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), LocalDate.now(), player, boardGame);
         return reviewRepository.save(review);
     }

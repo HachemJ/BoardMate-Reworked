@@ -1,10 +1,11 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.*;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 public class ReviewCreationDto {
 
     @Positive(message = "Review ID must be a positive number.")
