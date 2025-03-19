@@ -13,8 +13,9 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.EventRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.RegistrationRepository;
 
-
-
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -40,8 +41,24 @@ public class RegistrationService {
         }
 
         Event event = eventRepository.findByEventID(registrationDto.getEventID());
-        if (event == null ) {
+        if (event == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + registrationDto.getEventID());
+        }
+
+        // Get all registrations for the event
+        List<Registration> registeredPlayers = registrationRepository.findRegistrationByEvent(event);
+    
+        // Check if the player is already registered
+        boolean isPlayerAlreadyRegistered = registeredPlayers.stream()
+            .anyMatch(registration -> registration.getKey().getRegistrant().equals(player));
+    
+        if (isPlayerAlreadyRegistered) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Player is already registered for this event");
+        }
+
+        int currentNumberRegistered = registeredPlayers.size();
+        if (currentNumberRegistered == Integer.parseInt(event.getMaxSpot())) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Can't register: Event is full");
         }
 
         Registration registration = new Registration(new Registration.Key(player,event));
@@ -111,7 +128,6 @@ public class RegistrationService {
         if (player == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerID);
         }
-
         Event event = eventRepository.findByEventID(eventID);
         if (event == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
@@ -119,6 +135,21 @@ public class RegistrationService {
         if (!registrationRepository.existsById(new Registration.Key(player,event))) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Cannot delete: Registration not found");
         }
+        
+        // Convert Date and Time fields into LocalDateTime
+        LocalDate eventDate = event.getEventDate().toLocalDate();
+        LocalTime startTime = event.getStartTime().toLocalTime();
+        LocalTime endTime = event.getEndTime().toLocalTime();
+
+        LocalDateTime eventStart = LocalDateTime.of(eventDate, startTime);
+        LocalDateTime eventEnd = LocalDateTime.of(eventDate, endTime);
+        LocalDateTime now = LocalDateTime.now();
+
+        // Check if the event has already started or ended
+        if (eventStart.isBefore(now) || eventEnd.isBefore(now)) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Cannot delete: Event has already started or ended.");
+        }
+        
         registrationRepository.deleteById(new Registration.Key(player,event));
     }
 }

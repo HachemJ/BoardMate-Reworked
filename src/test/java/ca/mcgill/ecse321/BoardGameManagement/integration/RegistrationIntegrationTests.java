@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,6 +37,7 @@ public class RegistrationIntegrationTests {
     @Autowired
     private RegistrationRepository registrationRepository;
 
+    
     private int createdEventId;
     private int createdPlayerId;
     private Player player;
@@ -47,8 +49,8 @@ public class RegistrationIntegrationTests {
     private Registration registration3;
     private static final String eventName = "Clue Event";
     private static final String eventDescription = "Clue Event Description";
-    private static final Date eventDate = Date.valueOf("2025-02-16");
-    private static final Date eventDate2 = Date.valueOf("2025-03-16");
+    private static final Date eventDate = Date.valueOf(LocalDate.now().plusDays(7));
+    private static final Date eventDate2 = Date.valueOf(LocalDate.now().plusDays(10));
     private static final Time startTime = Time.valueOf("17:00:00");
     private static final Time endTime = Time.valueOf("20:00:00");
     private static final String maxLimit = "6";

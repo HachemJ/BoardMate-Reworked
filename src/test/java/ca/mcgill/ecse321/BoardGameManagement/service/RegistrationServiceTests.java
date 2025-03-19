@@ -21,6 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,8 +50,8 @@ public class RegistrationServiceTests {
     private static final int validPlayerId = 566;
     private static final String eventName = "Clue Event";
     private static final String eventDescription = "Clue Event Description";
-    private static final Date eventDate = Date.valueOf("2025-02-16");
-    private static final Date eventDate2 = Date.valueOf("2025-03-16");
+    private static final Date eventDate = Date.valueOf(LocalDate.now().plusDays(7));
+    private static final Date eventDate2 = Date.valueOf(LocalDate.now().plusDays(10));
     private static final Time startTime = Time.valueOf("17:00:00");
     private static final Time endTime = Time.valueOf("20:00:00");
     private static final String maxLimit = "6";
@@ -341,5 +344,86 @@ public class RegistrationServiceTests {
         //Assert
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("Cannot delete: Registration not found", e.getMessage());
+    }
+
+    /**
+   * Tests creation of a new registration when event is full.
+   */
+    @Test
+    public void testCreateRegistrationWithFullEvent() {
+    // Arrange
+    RegistrationCreationDto dto = new RegistrationCreationDto(validPlayerId, validEventId);
+
+    Player player = new Player("Maya", "maya@gmail.com", "12345678", true); 
+    Player player2 = new Player("Tom", "tom@gmail.com", "09654328", true); 
+    Player player3 = new Player("Ben", "ben@gmail.com", "98765432", true); 
+    
+    Event event = new Event(eventName, eventDescription, "2", eventDate, startTime, endTime, location, player, game);
+    
+    when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(player);
+    when(eventRepository.findByEventID(validEventId)).thenReturn(event);
+    List<Registration> mockRegistrations = new ArrayList<>();
+    mockRegistrations.add(new Registration(new Registration.Key(player2, event)));
+    mockRegistrations.add(new Registration(new Registration.Key(player3, event)));
+    when(registrationRepository.findRegistrationByEvent(event)).thenReturn(mockRegistrations);
+    
+    //Act
+    GlobalException e = assertThrows(GlobalException.class, () -> registrationService.createRegistration(dto));
+
+    //Assert
+    assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    assertEquals("Can't register: Event is full", e.getMessage());
+    }
+
+    /**
+   * Tests creation of a new registration when player has already registered.
+   */
+    @Test
+    public void testCreateRegistrationWithPlayerRegistered() {
+        //Arrange
+        RegistrationCreationDto dto = new RegistrationCreationDto(validPlayerId, validEventId);
+
+        Player player = new Player("Maya", "maya@gmail.com", "12345678", true); 
+        Event event = new Event(eventName, eventDescription, maxLimit, eventDate, startTime, endTime, location, player, game);
+        Registration existingRegistration = new Registration(new Registration.Key(player, event));
+ 
+        when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(player);
+        when(eventRepository.findByEventID(validEventId)).thenReturn(event);
+        when(registrationRepository.findRegistrationByEvent(event)).thenReturn(List.of(existingRegistration)); 
+ 
+        //Act 
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.createRegistration(dto));
+        
+        //Assert
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals("Player is already registered for this event", e.getMessage());
+    }
+
+    /**
+   * Tests creation of a new registration when player has already registered.
+   */
+    @Test
+    public void testDeleteRegistrationEventAlreadyStarted() {
+        //Arrange
+        Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
+        
+        Date pastDate = Date.valueOf(LocalDate.now().minusDays(1)); // Yesterday
+        Time pastStartTime = Time.valueOf(LocalTime.now().minusHours(2)); // Started 2 hours ago
+        Time pastEndTime = Time.valueOf(LocalTime.now().minusHours(1));   // Ended 1 hour ago
+
+        Event event = new Event(eventName, eventDescription, maxLimit, pastDate, pastStartTime, pastEndTime, location, player, game);
+        
+        when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(player);
+        when(eventRepository.findByEventID(validEventId)).thenReturn(event);
+        when(registrationRepository.existsById(new Registration.Key(player, event))).thenReturn(true);
+        
+        //Act
+        GlobalException e = assertThrows(
+        GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId)
+        );
+
+        //Assert
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+        assertEquals("Cannot delete: Event has already started or ended.", e.getMessage());
     }
 }
