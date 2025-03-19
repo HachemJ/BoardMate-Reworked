@@ -79,7 +79,7 @@ public class PlayerIntegrationTests {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().getErrors().get(0).contains("There is no person with ID"));
+        assertTrue(response.getBody().getErrors().getFirst().contains("There is no person with ID"));
     }
 
     @Test
@@ -117,7 +117,7 @@ public class PlayerIntegrationTests {
         );
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertTrue(response.getBody().getErrors().get(0).contains("not found"));
+        assertTrue(response.getBody().getErrors().getFirst().contains("not found"));
     }
 
     @Test
@@ -174,7 +174,7 @@ public class PlayerIntegrationTests {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(response.getBody().getErrors().size(), 1);
+        assertEquals(1, response.getBody().getErrors().size());
         assertEquals(response.getBody().getErrors().getFirst(), "No account with email " + loginDto.getEmail() + " exists.");
     }
 
@@ -192,8 +192,8 @@ public class PlayerIntegrationTests {
         // Assert
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(response.getBody().getErrors().size(), 1);
-        assertEquals(response.getBody().getErrors().getFirst(), "Incorrect password.");
+        assertEquals(1, response.getBody().getErrors().size());
+        assertEquals("Incorrect password.", response.getBody().getErrors().getFirst());
     }
 
   @Test
