@@ -1,5 +1,6 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.*;
@@ -23,7 +24,6 @@ public class ReviewCreationDto {
 
     @Positive(message = "Board Game ID must be a positive number.")
     private int boardGameID;
-
 
     public ReviewCreationDto() {}
 
