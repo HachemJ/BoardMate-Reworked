@@ -23,6 +23,7 @@ public class ReviewCreationDto {
     @Positive(message = "Board Game ID must be a positive number.")
     private int boardGameID;
 
+    @SuppressWarnings("unused")
     public ReviewCreationDto() {}
 
     public ReviewCreationDto(ReviewCreationDto review) {
