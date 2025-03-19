@@ -1,18 +1,29 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
-import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
-import ca.mcgill.ecse321.BoardGameManagement.model.Player;
+import jakarta.validation.constraints.*;
 
 public class ReviewCreationDto {
+
+    @Positive(message = "Review ID must be a positive number.")
     private int reviewID;
+
+    @Min(value = 1, message = "Rating must be at least 1.")
+    @Max(value = 5, message = "Rating cannot be more than 5.")
     private int rating;
+
     private String comment;
+
+    @NotNull(message = "Date cannot be null.")
     private LocalDate commentDate;
+
+    @Positive(message = "Player ID must be a positive number.")
     private int playerID;
+
+    @Positive(message = "Board Game ID must be a positive number.")
     private int boardGameID;
+
 
     public ReviewCreationDto() {}
 

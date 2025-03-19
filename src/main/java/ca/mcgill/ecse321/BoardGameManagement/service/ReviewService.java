@@ -38,8 +38,12 @@ public class ReviewService {
             throw new GlobalException(HttpStatus.BAD_REQUEST, "Review is null.");
         }
 
-        if (reviewDto.getRating() < 1 || reviewDto.getRating() > 5) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST, "Rating must be between 0 and 5. Rating is: " + reviewDto.getRating());
+        if (reviewDto.getRating() < 1) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Rating must be at least 1.");
+        }
+
+        if (reviewDto.getRating() > 5) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Rating cannot be more than 5.");
         }
 
         Player player = playerRepository.findByPlayerID(reviewDto.getPlayerID());
