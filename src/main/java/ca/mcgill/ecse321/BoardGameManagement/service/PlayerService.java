@@ -1,6 +1,7 @@
 package ca.mcgill.ecse321.BoardGameManagement.service;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerCreationDto;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
@@ -21,7 +22,9 @@ import java.util.List;
 public class PlayerService {
     @Autowired
     private PlayerRepository playerRepository;
-    
+
+    @Autowired
+    private BoardGameCopyService boardGameCopyService;
 
     @Transactional
     public Player createPlayer(@Valid PlayerCreationDto playerToCreate) {
@@ -74,7 +77,22 @@ public class PlayerService {
 
         return playerRepository.save(p);
     }
-    
+
+    @Transactional
+    public Player togglePlayerOwner(int pid, boolean b) {
+        Player p = playerRepository.findByPlayerID(pid);
+        if (p == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + pid);
+        }
+        if (p.getIsAOwner() && !b) {
+            for (BoardGameCopy bGC : boardGameCopyService.findBoardGameCopiesByPlayerId(pid)) {
+                boardGameCopyService.deleteBoardGameCopy(bGC.getSpecificGameID());
+            }
+        }
+        p.setIsAOwner(b);
+        return playerRepository.save(p);
+    }
+
 
 
 

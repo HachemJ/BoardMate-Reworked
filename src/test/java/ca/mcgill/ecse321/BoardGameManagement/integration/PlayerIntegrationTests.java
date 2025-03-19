@@ -201,4 +201,47 @@ public class PlayerIntegrationTests {
     // Assert that the error message contains the expected validation errors
     assertEquals(3, response.getBody().getErrors().size()); // Expecting 3 errors for null name, email, and password
   }
+
+
+
+  @Test
+  @Order(10)
+  public void togglePlayerOwnerTest() {
+    // Arrange: Create a player that is not an owner.
+    PlayerCreationDto createDto = new PlayerCreationDto("Toggle Test", "toggle@test.com", "password", false);
+    ResponseEntity<PlayerRespDto> createResponse = client.postForEntity("/players", createDto, PlayerRespDto.class);
+    assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
+    int playerId = createResponse.getBody().getPlayerID();
+
+    // Act & Assert Part 1: Toggle to owner (q=true)
+    ResponseEntity<PlayerRespDto> toggleToOwnerResponse = client.exchange(
+        "/players/" + playerId + "/toggle-owner?q=true",
+        HttpMethod.PUT,
+        null,
+        PlayerRespDto.class
+    );
+    assertEquals(HttpStatus.OK, toggleToOwnerResponse.getStatusCode());
+    assertNotNull(toggleToOwnerResponse.getBody());
+    assertTrue(toggleToOwnerResponse.getBody().getIsAOwner());
+
+    // Act & Assert Part 2: Toggle back to non-owner (q=false)
+    ResponseEntity<PlayerRespDto> toggleToNonOwnerResponse = client.exchange(
+        "/players/" + playerId + "/toggle-owner?q=false",
+        HttpMethod.PUT,
+        null,
+        PlayerRespDto.class
+    );
+    assertEquals(HttpStatus.OK, toggleToNonOwnerResponse.getStatusCode());
+    assertNotNull(toggleToNonOwnerResponse.getBody());
+    assertFalse(toggleToNonOwnerResponse.getBody().getIsAOwner());
+  }
+//  @Test
+//  public void togglePlayerOwnerTest() {
+//    //Arrange
+//    PlayerCreationDto createDto = new PlayerCreationDto("Original Name", "update@test.com", "pass", false);
+//    ResponseEntity<PlayerRespDto> createResponse = client.postForEntity("/players", createDto, PlayerRespDto.class);
+//    int updateId = createResponse.getBody().getPlayerID();
+//
+//
+//  }
 }
