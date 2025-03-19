@@ -180,7 +180,7 @@ public class ReviewServiceTests {
         });
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertTrue(exception.getMessage().contains("Rating must be between 0 and 5. Rating is:"));
+        assertTrue(exception.getMessage().contains("Rating must be at least 1."));
     }
 
     @Test
@@ -199,7 +199,7 @@ public class ReviewServiceTests {
         });
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertTrue(exception.getMessage().contains("Rating must be between 0 and 5. Rating is:"));
+        assertTrue(exception.getMessage().contains("Rating cannot be more than 5."));
     }
 
     /**
