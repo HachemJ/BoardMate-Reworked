@@ -33,7 +33,9 @@ public class ReviewService {
 
 
     /**
-     * Creates a review in the database
+     * creates a review in the db
+     * @param reviewDto review info passed from front end
+     * @return Review creates
      */
     @Transactional
     public Review createReview(@Valid ReviewCreationDto reviewDto) {
@@ -65,7 +67,10 @@ public class ReviewService {
     }
 
     /**
-     * Updates a review in the database, based on its ID
+     * Updates the review with the given id
+     * @param reviewId review id to update
+     * @param reviewDto new info to put in
+     * @return changes review
      */
     @Transactional
     public Review updateReview(int reviewId, @Valid ReviewCreationDto reviewDto) {

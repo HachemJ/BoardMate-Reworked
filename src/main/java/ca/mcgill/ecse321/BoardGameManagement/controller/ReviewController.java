@@ -17,11 +17,12 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
+
     @PostMapping("/Reviews")
     @ResponseStatus(HttpStatus.CREATED)
     public ReviewResponseDto createReview(@RequestBody ReviewCreationDto reviewDto) {
         Review review = reviewService.createReview(reviewDto);
-
+        //creates a review
         return new ReviewResponseDto(review);
     }
 
@@ -29,6 +30,7 @@ public class ReviewController {
     @ResponseStatus(HttpStatus.OK)
     public ReviewResponseDto updateReview(@PathVariable int reviewId, @RequestBody ReviewCreationDto reviewDto) {
         Review review = reviewService.updateReview(reviewId, reviewDto);
+        //updates the review with new dto information
 
         return new ReviewResponseDto(review);
     }
@@ -36,6 +38,7 @@ public class ReviewController {
     @GetMapping("/Reviews/")
     @ResponseStatus(HttpStatus.OK)
     public ArrayList<ReviewResponseDto> getAllReviews() {
+        //get all reviews
         ArrayList<Review> reviews = reviewService.getAllReviews();
         ArrayList<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
 

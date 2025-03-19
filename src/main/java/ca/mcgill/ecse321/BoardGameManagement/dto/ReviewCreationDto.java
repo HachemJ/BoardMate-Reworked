@@ -8,10 +8,11 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class ReviewCreationDto {
 
+    //bean validations
     @Min(value = 1, message = "Rating must be at least 1.")
     @Max(value = 5, message = "Rating cannot be more than 5.")
-    private int rating;
 
+    private int rating;
     private String comment;
 
     @NotNull(message = "Date cannot be null.")

@@ -20,6 +20,8 @@ public class ReviewResponseDto {
 
     private BoardGame boardGame;
 
+    //no need for validations since used by code only
+
     @SuppressWarnings("unused")
     public ReviewResponseDto() {}
 
