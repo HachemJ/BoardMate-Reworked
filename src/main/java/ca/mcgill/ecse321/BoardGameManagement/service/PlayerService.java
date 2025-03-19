@@ -1,5 +1,6 @@
 package ca.mcgill.ecse321.BoardGameManagement.service;
 
+import ca.mcgill.ecse321.BoardGameManagement.dto.LoginRequestDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
@@ -94,7 +95,17 @@ public class PlayerService {
     }
 
 
+    public Player login(@Valid LoginRequestDto loginRequestDto) {
 
+        Player player = playerRepository.findByEmail(loginRequestDto.getEmail());
+        if (player == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "No account with email " + loginRequestDto.getEmail() + " exists.");
+        }
+        if (!player.getPassword().equals(loginRequestDto.getPassword())) {
+            throw new GlobalException(HttpStatus.UNAUTHORIZED, "Incorrect password.");
+        }
+        return player;
+    }
 
 
 }

@@ -1,5 +1,6 @@
 package ca.mcgill.ecse321.BoardGameManagement.controller;
 
+import ca.mcgill.ecse321.BoardGameManagement.dto.LoginRequestDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerRespDto;
 import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
@@ -72,5 +73,10 @@ public class PlayerController {
         return ownerDTOs;
     }
 
-
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    public PlayerRespDto login(@RequestBody LoginRequestDto loginRequestDto) {
+        Player loggedInPlayer = playerService.login(loginRequestDto);
+        return new PlayerRespDto(loggedInPlayer);
+    }
 }

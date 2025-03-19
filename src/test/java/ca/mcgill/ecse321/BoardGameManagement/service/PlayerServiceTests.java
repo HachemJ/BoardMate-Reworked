@@ -223,6 +223,54 @@ public class PlayerServiceTests {
         assertEquals("Player not found with ID: " + invalidId, exception.getMessage());
     }
 
+    @Test
+    public void testLoginSuccess() {
+
+        // Arrange
+        Player player = new Player(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);
+        LoginRequestDto loginRequestDto = new LoginRequestDto(VALID_EMAIL, VALID_PASSWORD);
+        when(playerRepository.findByEmail(VALID_EMAIL)).thenReturn(player);
+
+        // Act
+        Player loggedInPlayer = playerService.login(loginRequestDto);
+
+        // Assert
+        assertNotNull(loggedInPlayer);
+        assertEquals(VALID_NAME, loggedInPlayer.getName());
+        assertEquals(VALID_EMAIL, loggedInPlayer.getEmail());
+        assertEquals(VALID_PASSWORD, loggedInPlayer.getPassword());
+    }
+
+    @Test
+    public void testLoginFailureNoAccount() {
+        // Arrange
+        LoginRequestDto loginRequestDto = new LoginRequestDto(VALID_EMAIL, VALID_PASSWORD);
+        when(playerRepository.findByEmail(VALID_EMAIL)).thenReturn(null);
+
+        // Act + Assert
+        GlobalException exception =
+            assertThrows(GlobalException.class, () -> playerService.login(loginRequestDto));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+        assertEquals("No account with email " + VALID_EMAIL + " exists.", exception.getMessage());
+    }
+
+    @Test
+    public void testLoginFailureIncorrectPassword() {
+        // Arrange
+        Player player = new Player(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);
+        LoginRequestDto loginRequestDto = new LoginRequestDto(VALID_EMAIL, "wrongpassword");
+        when(playerRepository.findByEmail(VALID_EMAIL)).thenReturn(player);
+
+        // Act + Assert
+        GlobalException exception =
+            assertThrows(GlobalException.class, () -> playerService.login(loginRequestDto));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("Incorrect password.", exception.getMessage());
+    }
+
+
 }
 
 
