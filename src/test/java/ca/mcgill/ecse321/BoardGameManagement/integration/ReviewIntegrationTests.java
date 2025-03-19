@@ -47,13 +47,6 @@ public class ReviewIntegrationTests {
     private BoardGameRepository boardGameRepository;
 
     private final LocalDate date = LocalDate.now();
-    private final String name = "name";
-    private final String email = "name@mail.com";
-    private final String password = "password";
-    private final int minPlayers = 1;
-    private final int maxPlayers = 2;
-    private final String gameName = "gameName";
-    private final String description = "description";
     private final int rating = 3;
     private final String comment = "comment";
 
@@ -69,7 +62,14 @@ public class ReviewIntegrationTests {
         playerRepository.deleteAll();
         boardGameRepository.deleteAll();
 
+        String name = "name";
+        String email = "name@mail.com";
+        String password = "password";
         player = new Player(name, email, password, false);
+        int minPlayers = 1;
+        int maxPlayers = 2;
+        String gameName = "gameName";
+        String description = "description";
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
 
         boardGame = boardGameRepository.save(boardGame);
