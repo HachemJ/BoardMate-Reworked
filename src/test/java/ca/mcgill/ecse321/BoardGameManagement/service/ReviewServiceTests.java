@@ -115,13 +115,6 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(101)).thenReturn(player2);
         when (boardGameRepository.findByGameID(100)).thenReturn(boardGame2);
 
-        if (player2 == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found");
-        }
-        if (boardGame2 == null) {
-            throw new GlobalException(HttpStatus.NOT_FOUND, "Board Game not found");
-        }
-
         when(reviewRepository.save(any(Review.class))).thenAnswer(
                 (InvocationOnMock invocation) -> invocation.getArgument(0));
 
@@ -139,7 +132,6 @@ public class ReviewServiceTests {
 
     @Test
     public void createInvalidReviewNullDto() {
-        ReviewCreationDto dto = null;
 
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
@@ -148,7 +140,7 @@ public class ReviewServiceTests {
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
 
         GlobalException exception = assertThrows(GlobalException.class, () -> {
-            reviewService.createReview(dto);
+            reviewService.createReview(null);
         });
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());

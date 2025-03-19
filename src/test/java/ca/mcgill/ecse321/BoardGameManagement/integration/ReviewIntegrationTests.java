@@ -56,7 +56,6 @@ public class ReviewIntegrationTests {
     private final String description = "description";
     private final int rating = 3;
     private final String comment = "comment";
-    private final int id = 0;
 
     private Player player;
     private int playerID = 0; //placeholder
@@ -188,7 +187,8 @@ public class ReviewIntegrationTests {
                 "/Reviews/",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<ReviewResponseDto>>() {}
+                new ParameterizedTypeReference<>() {
+                }
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -205,7 +205,8 @@ public class ReviewIntegrationTests {
                 "/Reviews/",
                 HttpMethod.GET,
                 null,
-                new ParameterizedTypeReference<List<ReviewResponseDto>>() {}
+                new ParameterizedTypeReference<>() {
+                }
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());

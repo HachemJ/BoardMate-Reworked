@@ -20,6 +20,7 @@ public class ReviewResponseDto {
 
     private BoardGame boardGame;
 
+    @SuppressWarnings("unused")
     public ReviewResponseDto() {}
 
     public ReviewResponseDto(ReviewResponseDto review) {
