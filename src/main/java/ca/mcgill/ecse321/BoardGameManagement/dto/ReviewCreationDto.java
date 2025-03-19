@@ -8,9 +8,6 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public class ReviewCreationDto {
 
-    @Positive(message = "Review ID must be a positive number.")
-    private int reviewID;
-
     @Min(value = 1, message = "Rating must be at least 1.")
     @Max(value = 5, message = "Rating cannot be more than 5.")
     private int rating;
@@ -29,16 +26,11 @@ public class ReviewCreationDto {
     public ReviewCreationDto() {}
 
     public ReviewCreationDto(ReviewCreationDto review) {
-        this.reviewID = review.getReviewID();
         this.rating = review.getRating();
         this.comment = review.getComment();
         this.commentDate = review.getCommentDate();
         this.playerID = review.getPlayerID();
         this.boardGameID = review.getBoardGameID();
-    }
-
-    public int getReviewID() {
-        return reviewID;
     }
 
     public int getRating() {
@@ -72,7 +64,6 @@ public class ReviewCreationDto {
     @Override
     public String toString() {
         return "ReviewCreationDto{" +
-                "reviewID=" + reviewID +
                 ", rating=" + rating +
                 ", comment='" + comment + '\'' +
                 ", commentDate=" + commentDate +
