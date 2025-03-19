@@ -53,6 +53,22 @@ public class PlayerServiceTests {
     }
 
     @Test
+    public void testCreateInvalidPlayerDuplicateEmail() {
+        // Arrange
+        Player player = new Player(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, true);
+        PlayerCreationDto dto = new PlayerCreationDto(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);
+        when(playerRepository.findByEmail(VALID_EMAIL)).thenReturn(player);
+
+        // Assert + Act
+        GlobalException exception =
+                assertThrows(GlobalException.class, () -> playerService.createPlayer(dto));
+
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        assertEquals( String.format("An account with email %s already exists", VALID_EMAIL), exception.getMessage());
+
+    }
+
+    @Test
     public void testFindPlayerByValidId() {
         // Arrange
         Player mockPlayer = new Player(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);

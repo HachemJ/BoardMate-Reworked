@@ -34,8 +34,8 @@ public class BoardGame {
     return true;
   }
 
-  public boolean setGameName(String aGameName) {
-    name = aGameName;
+  public boolean setName(String aName) {
+    name = aName;
     return true;
   }
 

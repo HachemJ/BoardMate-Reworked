@@ -25,6 +25,12 @@ public class PlayerService {
 
     @Transactional
     public Player createPlayer(@Valid PlayerCreationDto playerToCreate) {
+
+        if (playerRepository.findByEmail(playerToCreate.getEmail()) != null){
+            throw new GlobalException(HttpStatus.CONFLICT,
+                    String.format("An account with email %s already exists", playerToCreate.getEmail()));
+        }
+
         Player pl = new Player(playerToCreate.getName(), playerToCreate.getEmail(),
             playerToCreate.getPassword(), playerToCreate.getIsAOwner()); // Fixed line
         return playerRepository.save(pl);
