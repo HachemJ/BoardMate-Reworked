@@ -1,11 +1,7 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
-import ca.mcgill.ecse321.BoardGameManagement.model.Event;
-
-
-import java.sql.Date;
-import java.sql.Time;
 
 public class EventResponseDto {
+  
   private int eventID;
   private String name;
   private String description;
@@ -59,4 +55,5 @@ public class EventResponseDto {
   public String getLocation() { return location; }
   public String getOwnerName() { return ownerName; }
   public String getBoardGameName() { return boardGameName; }
+
 }
