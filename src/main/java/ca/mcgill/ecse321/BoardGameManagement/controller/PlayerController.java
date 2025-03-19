@@ -2,8 +2,12 @@ package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerRespDto;
+import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
+import ca.mcgill.ecse321.BoardGameManagement.service.BoardGameCopyService;
 import ca.mcgill.ecse321.BoardGameManagement.service.PlayerService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +33,15 @@ public class PlayerController {
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto updatePlayer(@PathVariable int id, @RequestBody PlayerCreationDto playerDto) {
         Player updatedPlayer = playerService.updatePlayer(id, playerDto);
+        return new PlayerRespDto(updatedPlayer);
+    }
+
+    @PutMapping("/{id}/toggle-owner")
+    @ResponseStatus(HttpStatus.OK)
+    public PlayerRespDto togglePlayerOwner(
+        @PathVariable int id,
+        @RequestParam(required = true) boolean q) {
+        Player updatedPlayer = playerService.togglePlayerOwner(id, q);
         return new PlayerRespDto(updatedPlayer);
     }
 
