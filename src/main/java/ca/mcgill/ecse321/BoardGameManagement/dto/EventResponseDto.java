@@ -1,5 +1,10 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
+import ca.mcgill.ecse321.BoardGameManagement.model.Event;
+
+import java.sql.Date;
+import java.sql.Time;
+
 public class EventResponseDto {
   
   private int eventID;
