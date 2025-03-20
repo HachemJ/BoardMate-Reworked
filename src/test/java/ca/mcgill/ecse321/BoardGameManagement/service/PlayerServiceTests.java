@@ -37,7 +37,7 @@ public class PlayerServiceTests {
     private static final String VALID_EMAIL = "john.doe@mail.com";
     private static final String VALID_PASSWORD = "securepassword";
     private static final int VALID_ID = 1;
-    private static final int invalidId = 999;
+    private static final int INVALID_ID = 999;
 
     @Test
     public void testTogglePlayerOwnerFromNotOwnerToOwner() {
@@ -114,13 +114,13 @@ public class PlayerServiceTests {
     @Test
     public void testTogglePlayerOwnerPlayerNotFound() {
         // Arrange
-        when(playerRepository.findByPlayerID(invalidId)).thenReturn(null);
+        when(playerRepository.findByPlayerID(INVALID_ID)).thenReturn(null);
 
         // Act & Assert: Expect a GlobalException when the player is not found.
         GlobalException exception = assertThrows(GlobalException.class, () ->
-            playerService.togglePlayerOwner(invalidId, true)
+            playerService.togglePlayerOwner(INVALID_ID, true)
         );
-        assertEquals("Player not found with ID: " + invalidId, exception.getMessage()); //check the error msg match
+        assertEquals("Player not found with ID: " + INVALID_ID, exception.getMessage()); //check the error msg match
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 
@@ -214,14 +214,14 @@ public class PlayerServiceTests {
         PlayerCreationDto dto =
             new PlayerCreationDto("Test Name", "test@example.com", "password123", true);
         // Simulate that no player exists for the given id
-        when(playerRepository.findByPlayerID(invalidId)).thenReturn(null);
+        when(playerRepository.findByPlayerID(INVALID_ID)).thenReturn(null);
 
         // Act & Assert: Expect GlobalException due to player not found
         GlobalException exception = assertThrows(GlobalException.class, () ->
-            playerService.updatePlayer(invalidId, dto)
+            playerService.updatePlayer(INVALID_ID, dto)
         );
 
-        assertEquals("Player not found with ID: " + invalidId, exception.getMessage());
+        assertEquals("Player not found with ID: " + INVALID_ID, exception.getMessage());
     }
 
     @Test
