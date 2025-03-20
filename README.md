@@ -83,10 +83,10 @@ The working application fulfilling all the abovementioned functionalities
 
 | Name | Role & Responsibility | Hours
 | --- | --- | --- |
-| Kathelina | • Design and implement Dtos, service layer, controller layer, service unit tests, and controller integration tests for borrowRequests <br> •  endpoint documentation for BorrowRequest related controllers <br> • contributed to the software quality assurance plan and report | 30 hours
+| Kathelina | • Design and implement Dtos, service layer, controller layer, service unit tests, and controller integration tests for borrowRequests <br> •  endpoint documentation for BorrowRequest related controllers <br> • contributed to the software quality assurance plan and report | 32 hours
 | Tingyi | • Designed and implemented the BoardGameCopy service, controller, and DTOs.<br> • Developed unit and integration tests for BoardGameCopy-related functionalities.<br> • Documented BoardGameCopy REST API endpoints. <br> • Developed and tested login feature. | 30 Hours
 | Nizar | • Designed and implemented the Event service, controller, and DTOs.<br> • Developed unit and integration tests for Event-related functionalities.<br> • Created and handled global exception management through the GlobalException class.<br> • Documented Event REST API endpoints.<br> • Contributed to the Software Quality Assurance Plan & Report| 32 Hours
-| Alex | • Designed and implemented Review service, controller, DTOs, and associated unit and integration tests <br> • Documented Review REST API endpoints.<br>| 25 Hours
+| Alex | • Designed and implemented Review service, controller, DTOs, and associated unit and integration tests <br> • Documented Review REST API endpoints.<br>| 28 Hours
 | Maria | • Designed and implemented the Registration service, controller, and DTOs.<br> • Developed unit and integration tests for Registration-related functionalities.<br>• Documented Event REST API endpoints for the Registration functionalities.<br> • Documented 2 Meeting Minutes. | 30 Hours
 | Jad | • Designed and implemented the Board Game service, controller, and DTOs.<br> • Developed unit and integration tests for BoardGame-related functionalities.<br> • Documented BoardGame REST API endpoints.<br> | 25 Hours
 | HongYi | • Completed DTOs, Service Layer, Controller layer, unit tests, as well as integration tests for Player <br> • RestFul API documentation <br> • Added content to Quality Assurance Report <br> • Documented 1 Meeting Minute. | 25 Hours
