@@ -17,14 +17,14 @@ public class BoardGameController {
   @Autowired
   private BoardGameService boardGameService;
 
-  @PostMapping("/BoardGames")
+  @PostMapping("/boardgames")
   @ResponseStatus(HttpStatus.CREATED)
   public BoardGameResponseDto createBoardGame(@RequestBody BoardGameCreationDto boardGameDto) {
     BoardGame boardGame = boardGameService.createBoardGame(boardGameDto);
     return new BoardGameResponseDto(boardGame);
   }
 
-  @GetMapping("/BoardGames")
+  @GetMapping("/boardgames")
   public List<BoardGameResponseDto> getAllBoardGames() {
     List<BoardGame> boardGames = boardGameService.getAllBoardGames();
     return boardGames.stream()
@@ -32,19 +32,19 @@ public class BoardGameController {
         .collect(Collectors.toList());
   }
 
-  @GetMapping("/BoardGames/{gameId}")
+  @GetMapping("/boardgames/{gameId}")
   public BoardGameResponseDto getBoardGame(@PathVariable int gameId) {
     BoardGame boardGame = boardGameService.getBoardGameById(gameId);
     return new BoardGameResponseDto(boardGame);
   }
 
-  @PutMapping("/BoardGames/{gameId}")
+  @PutMapping("/boardgames/{gameId}")
   public BoardGameResponseDto updateBoardGame(@PathVariable int gameId, @RequestBody BoardGameCreationDto boardGameDto) {
     BoardGame updatedBoardGame = boardGameService.updateBoardGame(gameId, boardGameDto);
     return new BoardGameResponseDto(updatedBoardGame);
   }
 
-  @DeleteMapping("/BoardGames/{gameId}")
+  @DeleteMapping("/boardgames/{gameId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteBoardGame(@PathVariable int gameId) {
     boardGameService.deleteBoardGame(gameId);
