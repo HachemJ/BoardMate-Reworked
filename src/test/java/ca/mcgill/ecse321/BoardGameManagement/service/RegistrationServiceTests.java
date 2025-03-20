@@ -426,4 +426,58 @@ public class RegistrationServiceTests {
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("Cannot delete: Event has already started or ended.", e.getMessage());
     }
+
+
+    @Test
+    /**
+     * Test find regidtration by a player id that does not exist
+     */
+    public void testGetAllRegistrationsForPlayerNonexistentPlayer(){
+        //Act
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getAllRegistrationsByPlayer(VALID_PLAYER_ID));
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Player not found with ID: " + VALID_PLAYER_ID, e.getMessage());
+
+    }
+
+    @Test
+    public void testGetAllRegistrationsForEventNonexistentEvent() {
+        //Act
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getAllRegistrationsByEvent(VALID_EVENT_ID));
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Event not found with ID: " + VALID_EVENT_ID, e.getMessage());
+    }
+
+    @Test
+    public void testDeleteRegistrationEventNonExistentPlayer() {
+        //Act
+        GlobalException e = assertThrows(
+                GlobalException.class, () -> registrationService.deleteRegistration(VALID_PLAYER_ID, VALID_EVENT_ID)
+        );
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Player not found with ID: " + VALID_PLAYER_ID, e.getMessage());
+    }
+
+    @Test
+    public void testDeleteRegistrationEventNonExistentEvent() {
+        //Arrange
+        Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
+
+        when(playerRepository.findByPlayerID(VALID_PLAYER_ID)).thenReturn(player);
+
+        //Act
+        GlobalException e = assertThrows(
+                GlobalException.class, () -> registrationService.deleteRegistration(VALID_PLAYER_ID, VALID_EVENT_ID)
+        );
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Event not found with ID: " + VALID_EVENT_ID, e.getMessage());
+    }
 }
