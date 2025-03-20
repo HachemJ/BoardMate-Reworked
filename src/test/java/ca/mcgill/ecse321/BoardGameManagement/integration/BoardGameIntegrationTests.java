@@ -1,13 +1,18 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.*;
-import ca.mcgill.ecse321.BoardGameManagement.model.*;
-import ca.mcgill.ecse321.BoardGameManagement.repository.*;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
+import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
+import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCreationDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameResponseDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.ErrorDto;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.*;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
 
