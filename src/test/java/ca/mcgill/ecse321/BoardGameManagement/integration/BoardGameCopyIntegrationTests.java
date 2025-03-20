@@ -109,7 +109,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(1)
-    public void testCreateInvalidBoardGameCopy_nonexistentPlayer() {
+    public void testCreateInvalidBoardGameCopyNonexistentPlayer() {
 
         //Arrange
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
@@ -126,7 +126,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(2)
-    public void testCreateInvalidBoardGameCopy_nonexistentBoardGame() {
+    public void testCreateInvalidBoardGameCopyNonexistentBoardGame() {
 
         //Arrange
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
@@ -143,7 +143,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(3)
-    public void testCreateInvalidBoardGameCopy_nullInput() {
+    public void testCreateInvalidBoardGameCopyNullInput() {
 
         //Arrange
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", 0, 0); // Null input
@@ -193,7 +193,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(6)
-    public void testUpdateInvalidBoardGameCopy_emptySpecification() {
+    public void testUpdateInvalidBoardGameCopyEmptySpecification() {
 
         //Arrange
         String body = ""; // Empty specification, should be caught by bean validation
@@ -351,7 +351,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(14)
-    public void testDeleteInvalidBoardGameCopy_nonexistentId() {
+    public void testDeleteInvalidBoardGameCopyNonexistentId() {
 
         //Act
         String url = "/boardgamecopies/" + 666; // Nonexistent ID 666
@@ -366,7 +366,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(15)
-    public void testFindALlBoardGameCopies_empty() {
+    public void testFindALlBoardGameCopiesEmpty() {
 
         //Arrange
         boardGameCopyRepository.deleteAll();
@@ -382,7 +382,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(16)
-    public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
+    public void testUpdateInvalidBoardGameCopyNonexistentBoardGameCopyId() {
 
         //Arrange
         String body = "Updated specification";
@@ -401,7 +401,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(17)
-    public void testFindBoardGameCopiesByValidPlayerId_empty() {
+    public void testFindBoardGameCopiesByValidPlayerIdEmpty() {
 
         //Arrange
         boardGameCopyRepository.deleteAll();
@@ -418,7 +418,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(18)
-    public void testFindBoardGameCopiesByValidBoardGameId_empty() {
+    public void testFindBoardGameCopiesByValidBoardGameIdEmpty() {
 
         //Arrange
         boardGameCopyRepository.deleteAll();
