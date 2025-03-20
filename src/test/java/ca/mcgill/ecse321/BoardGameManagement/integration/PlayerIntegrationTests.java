@@ -71,15 +71,18 @@ public class PlayerIntegrationTests {
 
         ResponseEntity<PlayerRespDto> response =
                 client.getForEntity("/players/" + tempId, PlayerRespDto.class);
-
+//check all attributes are correctly persisted and retrieved
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(tempId, response.getBody().getPlayerID());
+        assertEquals("Temp User", response.getBody().getName());
+        assertEquals("temp@email.com", response.getBody().getEmail());
+        assertTrue(response.getBody().getIsAOwner());
     }
 
     @Test
     public void getPlayerByIDNotExist() {
-        ResponseEntity<ErrorDto> response = client.getForEntity("/players/9999", ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/players/9999", ErrorDto.class); //pass in an invalid id
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
