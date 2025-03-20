@@ -1,6 +1,5 @@
 package ca.mcgill.ecse321.BoardGameManagement.repository;
 
-import ca.mcgill.ecse321.BoardGameManagement.model.BorrowRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
