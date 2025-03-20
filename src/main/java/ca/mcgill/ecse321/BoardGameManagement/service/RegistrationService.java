@@ -120,7 +120,7 @@ public class RegistrationService {
     }
 
     /**
-   * Deletes an registration by its key.
+   * Deletes a registration by its key.
    */
     @Transactional
     public void deleteRegistration(int playerID, int eventID) {

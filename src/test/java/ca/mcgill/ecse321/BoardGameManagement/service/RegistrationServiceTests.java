@@ -315,13 +315,40 @@ public class RegistrationServiceTests {
         when(registrationRepository.findAll()).thenReturn(List.of());
 
         //Act
-        List<Registration> retrievedrRegistrations = registrationService.getAllRegistrations();
+        List<Registration> retrievedRegistrations = registrationService.getAllRegistrations();
 
         //Assert
-        assertNotNull(retrievedrRegistrations);
-        assertEquals(0, retrievedrRegistrations.size());
+        assertNotNull(retrievedRegistrations);
+        assertEquals(0, retrievedRegistrations.size());
     }
 
+
+    @Test
+    public void getAllRegistrationsForPlayer_nonexistentPlayer(){
+        //Act
+        GlobalException e = assertThrows(
+                GlobalException.class, () -> registrationService.getAllRegistrationsByPlayer(validPlayerId)
+        );
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Player not found with ID: " + validPlayerId, e.getMessage());
+
+    }
+
+    @Test
+    public void getAllRegistrationsForEvent_nonexistentEvent() {
+        //Act
+        GlobalException e = assertThrows(
+                GlobalException.class, () -> registrationService.getAllRegistrationsByEvent(validEventId)
+        );
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Event not found with ID: " + validEventId, e.getMessage());
+
+
+    }
 
    /**
     * Tests deleting a registration that does not exist.
@@ -397,6 +424,43 @@ public class RegistrationServiceTests {
         //Assert
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
         assertEquals("Player is already registered for this event", e.getMessage());
+    }
+
+
+    @Test
+    public void testDeleteRegistrationEventNonExistentPlayer() {
+        //Arrange
+        Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
+
+        Date pastDate = Date.valueOf(LocalDate.now().minusDays(1)); // Yesterday
+        Time pastStartTime = Time.valueOf(LocalTime.now().minusHours(2)); // Started 2 hours ago
+        Time pastEndTime = Time.valueOf(LocalTime.now().minusHours(1));   // Ended 1 hour ago
+
+        //Act
+        GlobalException e = assertThrows(
+                GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId)
+        );
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Player not found with ID: " + validPlayerId, e.getMessage());
+    }
+
+    @Test
+    public void testDeleteRegistrationEventNonExistentEvent() {
+        //Arrange
+        Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
+
+        when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(player);
+
+        //Act
+        GlobalException e = assertThrows(
+                GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId)
+        );
+
+        //Assert
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+        assertEquals("Event not found with ID: " + validEventId, e.getMessage());
     }
 
     /**
