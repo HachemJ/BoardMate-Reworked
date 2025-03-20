@@ -94,13 +94,14 @@ public class ReviewServiceTests {
 
         when(reviewRepository.save(any(Review.class))).thenAnswer(
                 (InvocationOnMock invocation) -> invocation.getArgument(0));
-            
+
+
         Review createdReview = reviewService.createReview(dto);
 
         assertNotNull(createdReview);
         assertEquals(rating, createdReview.getRating());
         assertEquals(comment, createdReview.getComment());
-        assertEquals(Date.valueOf(date), createdReview.getCommentDate());
+        assertEquals(date, createdReview.getCommentDate());
         assertEquals(player.getName(), createdReview.getAuthor().getName());
         assertEquals(boardGame.getName(), createdReview.getBoardGame().getName());
 
@@ -124,13 +125,16 @@ public class ReviewServiceTests {
         assertNotNull(createdReview2);
         assertEquals(rating, createdReview2.getRating());
         assertEquals(comment, createdReview2.getComment());
-        assertEquals(Date.valueOf(date), createdReview2.getCommentDate());
+        assertEquals(date, createdReview2.getCommentDate());
         assertEquals(player2.getName(), createdReview2.getAuthor().getName());
         assertEquals(boardGame2.getName(), createdReview2.getBoardGame().getName());
 
         verify(reviewRepository, times(2)).save(any(Review.class));
     }
 
+    /**
+     * Test the creation of a review with a null dto. This should fail.
+     */
     @Test
     public void createInvalidReviewNullDto() {
 
@@ -149,6 +153,9 @@ public class ReviewServiceTests {
 
     }
 
+    /**
+     * Test the creation of a review with an invalid rating. This should fail.
+     */
     @Test
     public void createInvalidReviewLowRating() {
         ReviewCreationDto dto = new ReviewCreationDto(-999999, comment, date, 100, 99);
@@ -167,6 +174,9 @@ public class ReviewServiceTests {
         assertTrue(exception.getMessage().contains("Rating must be at least 1."));
     }
 
+    /**
+     * Test the creation of a review with an invalid rating. This should fail.
+     */
     @Test
     public void createInvalidReviewHighRating() {
         ReviewCreationDto dto = new ReviewCreationDto(999999, comment, date, 100, 99);
@@ -227,23 +237,29 @@ public class ReviewServiceTests {
         assertTrue(exception.getMessage().contains("BoardGame not found with ID:"));
     }
 
+    /**
+     * Test the retrieval of an existing review by its ID.
+     */
     @Test
     public void findExistingReviewById() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
 
-        Review review = new Review(rating, comment, Date.valueOf(date), player, boardGame);
+        Review review = new Review(rating, comment, date, player, boardGame);
 
         when(reviewRepository.findByReviewID(id)).thenReturn(review);
 
         assertNotNull(review);
         assertEquals(review.getRating(), rating);
         assertEquals(review.getComment(), comment);
-        assertEquals(review.getCommentDate(), Date.valueOf(date));
+        assertEquals(review.getCommentDate(), date);
         assertEquals(review.getAuthor(), player);
         assertEquals(review.getBoardGame(), boardGame);
     }
 
+    /**
+     * Test the retrieval of a non-existent review by its ID. This should fail.
+     */
     @Test
     public void findNonExistentReviewById() {
         when (reviewRepository.findByReviewID(id)).thenReturn(null);
@@ -254,6 +270,9 @@ public class ReviewServiceTests {
         assertEquals("Review not found with ID: " + id, exception.getMessage());
     }
 
+    /**
+     * Test the update of an existing review with valid input.
+     */
     @Test
     public void updateExistingReview() {
         player = new Player(name, email, password, false);
@@ -261,7 +280,7 @@ public class ReviewServiceTests {
 
         int validID = 100;
 
-        Review review = new Review(rating, comment, Date.valueOf(date), player, boardGame);
+        Review review = new Review(rating, comment, date, player, boardGame);
 
         when(reviewRepository.existsById(validID)).thenReturn(true);  // Mock existsById to return true
         when(reviewRepository.findByReviewID(validID)).thenReturn(review);
@@ -274,11 +293,14 @@ public class ReviewServiceTests {
         assertNotNull(updatedReview);
         assertEquals(rating + 1, updatedReview.getRating());
         assertEquals(comment + "2", updatedReview.getComment());
-        assertEquals(Date.valueOf(date), updatedReview.getCommentDate());
+        assertEquals(date, updatedReview.getCommentDate());
         assertEquals(player.getPlayerID(), updatedReview.getAuthor().getPlayerID());
         assertEquals(boardGame.getGameID(), updatedReview.getBoardGame().getGameID());
     }
 
+    /**
+     * Test the update of a review that does not exist. This should fail.
+     */
     @Test
     public void updateNonExistentReview() {
         player = new Player(name, email, password, false);
@@ -292,11 +314,14 @@ public class ReviewServiceTests {
         assertTrue(exception.getMessage().contains("Review not found with ID: "));
     }
 
+    /**
+     * Test the update of a review with invalid input. This should fail.
+     */
     @Test
     public void updateReview_InvalidInput() {
         player = new Player(name, email, password, false);
         boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
-        Review existingReview = new Review(rating, comment, Date.valueOf(date), player, boardGame);
+        Review existingReview = new Review(rating, comment, date, player, boardGame);
         when (reviewRepository.findByReviewID(id)).thenReturn(existingReview);
 
         ReviewCreationDto invalidDto = new ReviewCreationDto(999, comment, date, player.getPlayerID(), boardGame.getGameID());
@@ -308,8 +333,9 @@ public class ReviewServiceTests {
         }
     }
 
-
-
+    /**
+     * Test the deletion of an existing review.
+     */
     @Test
     public void deleteExistingReview() {
         when(reviewRepository.existsById(id)).thenReturn(true);
@@ -319,6 +345,9 @@ public class ReviewServiceTests {
         verify(reviewRepository, times(1)).deleteById(id);
     }
 
+    /**
+     * Test the deletion of a review that does not exist. This should fail.
+     */
     @Test
     public void deleteNonExistentReview() {
         Player player1 = new Player(name, email, password, false);
@@ -334,6 +363,9 @@ public class ReviewServiceTests {
         assertTrue(exception.getMessage().contains("Review not found with ID: "));
     }
 
+    /**
+     * Test the retrieval of all reviews.
+     */
     @Test
     public void getAllReviews() {
         Player player1 = new Player(name, email, password, false);
@@ -342,8 +374,8 @@ public class ReviewServiceTests {
         Player player2 = new Player(name + "2", email, password, false);
         BoardGame boardGame2 = new BoardGame(minPlayers, maxPlayers, gameName + "2", description);
 
-        Review review1 = new Review(rating, comment, Date.valueOf(date), player1, boardGame1);
-        Review review2 = new Review(rating + 1, comment + "abc", Date.valueOf(date), player2, boardGame2);
+        Review review1 = new Review(rating, comment, date, player1, boardGame1);
+        Review review2 = new Review(rating + 1, comment + "abc", date, player2, boardGame2);
 
         ArrayList<Review> reviews = new ArrayList<>();
         reviews.add(review1);

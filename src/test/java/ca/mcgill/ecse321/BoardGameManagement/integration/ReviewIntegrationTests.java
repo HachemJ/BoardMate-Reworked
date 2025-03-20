@@ -3,12 +3,16 @@ package ca.mcgill.ecse321.BoardGameManagement.integration;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.jupiter.api.*;
-
+import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.cache.CacheAutoConfiguration;
@@ -108,10 +112,13 @@ public class ReviewIntegrationTests {
         assertEquals(boardGame.getGameID(), createdReview.getBoardGame().getGameID());
     }
 
+    /**
+     * Test the creation of an invalid review with a bad rating. This should fail.
+     */
     @Test
     @Order(1)
     public void createInvalidReviewsBadRating() {
-        ReviewCreationDto dto = new ReviewCreationDto(invalidID, comment, date, playerID, boardGameID);
+        ReviewCreationDto dto = new ReviewCreationDto(9999999, comment, date, playerID, boardGameID);
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
@@ -119,6 +126,9 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
+    /**
+     * Test the creation of an invalid review with a nonexistent player. This should fail.
+     */
     @Test
     @Order(2)
     public void createInvalidReviewNoPlayer() {
@@ -131,7 +141,9 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
-
+    /**
+     * Test the creation of an invalid review with a nonexistent board game. This should fail.
+     */
     @Test
     @Order(3)
     public void createInvalidReviewNoBoardGame() {
@@ -144,8 +156,9 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
-
-
+    /**
+     * Test the retrieval of an existing review by its ID.
+     */
     @Test
     @Order(4)
     public void findExistingReviewById() {
@@ -166,6 +179,9 @@ public class ReviewIntegrationTests {
         assertEquals(reviewID, review.getReviewID());
     }
 
+    /**
+     * Test the retrieval of a nonexistent review by its ID. This should fail.
+     */
     @Test
     @Order(5)
     public void findNonExistingReviewById() {
@@ -175,6 +191,9 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
+    /**
+     * Test the retrieval of all reviews.
+     */
     @Test
     @Order(6)
     public void findAllReviews() {
@@ -197,7 +216,9 @@ public class ReviewIntegrationTests {
         assertEquals(3, reviews.size());
     }
 
-
+    /**
+     * Test the retrieval of all reviews when there are none.
+     */
     @Test
     @Order(7)
     public void findAllReviewsNoReviews() {
@@ -214,6 +235,9 @@ public class ReviewIntegrationTests {
         assertEquals(0, response.getBody().size());
     }
 
+    /**
+     * Test the update of an existing review.
+     */
     @Test
     @Order(8)
     public void updateReview() {
@@ -248,6 +272,9 @@ public class ReviewIntegrationTests {
         assertEquals(boardGame.getGameID(), updatedReview.getBoardGame().getGameID());
     }
 
+    /**
+     * Test the update of a nonexistent review. This should fail.
+     */
     @Test
     @Order(9)
     public void updateNonExistentReview() {
@@ -259,6 +286,9 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, updatedResponse.getStatusCode());
     }
 
+    /**
+     * Test the deletion of an existing review.
+     */
     @Test
     @Order(10)
     public void deleteReview() {
@@ -278,7 +308,9 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
-
+    /**
+     * Test the deletion of a nonexistent review. This should fail.
+     */
     @Test
     @Order(11)
     public void deleteNonExistentReview() {
