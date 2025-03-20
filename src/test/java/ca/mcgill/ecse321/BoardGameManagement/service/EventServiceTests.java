@@ -35,6 +35,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class EventServiceTests {
 
+  // Mock repositories to isolate service layer from database interactions
   @Mock
   private EventRepository eventRepository;
 
@@ -44,8 +45,10 @@ public class EventServiceTests {
   @Mock
   private BoardGameRepository boardGameRepository;
 
+  // Inject mocks into the EventService instance
   @InjectMocks
   private EventService eventService;
+
   private static final String validEventName = "Chess Tournament";
   private static final String validEventDescription = "Friendly chess match.";
   private static final String validMaxSpots = "20";
@@ -60,7 +63,7 @@ public class EventServiceTests {
   /**Test successful event creation** */
   @Test
   public void testCreateValidEvent() {
-    // Arrange
+    // Arrange: Set up test data and mock repository behavior
     EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
         validMaxSpots, validDate, validStartTime, validEndTime, validLocation, validPlayerId,
         validBoardGameId
@@ -73,10 +76,10 @@ public class EventServiceTests {
     when(boardGameRepository.findByGameID(validBoardGameId)).thenReturn(boardGame);
     when(eventRepository.save(any(Event.class))).thenAnswer((InvocationOnMock iom) -> iom.getArgument(0));
 
-    // Act
+    // Act: Call the service method
     Event createdEvent = eventService.createEvent(dto);
 
-    // Assert
+    // Assert: Verify expected results
     assertNotNull(createdEvent);
     assertEquals(validEventName, createdEvent.getName());
     assertEquals(validEventDescription, createdEvent.getDescription());
@@ -88,23 +91,22 @@ public class EventServiceTests {
     assertEquals(owner, createdEvent.getOwner());
     assertEquals(boardGame, createdEvent.getBoardGame());
 
+    // Ensure eventRepository.save() was called exactly once
     verify(eventRepository, times(1)).save(any(Event.class));
   }
 
   @Test
   public void testCreateEvent_PlayerNotFound_ShouldThrowException() {
-    // Arrange
+    // Arrange: Player does not exist
     when(playerRepository.findByPlayerID(anyInt())).thenReturn(null);
 
     EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, 1,
-        1
+        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, validPlayerId,
+        validBoardGameId
     );
-    // Act & Assert
-    Exception exception = assertThrows(GlobalException.class, () -> {
-      eventService.createEvent(dto);
-    });
 
+    // Act & Assert: Expect a GlobalException with NOT_FOUND status
+    Exception exception = assertThrows(GlobalException.class, () -> eventService.createEvent(dto));
     assertEquals(HttpStatus.NOT_FOUND, ((GlobalException) exception).getStatus());
     assertTrue(exception.getMessage().contains("Owner not found"));
   }
@@ -133,7 +135,7 @@ public class EventServiceTests {
   /** Test getting event by valid ID** */
   @Test
   public void testFindEventById() {
-
+    // Arrange: Mock an existing event
     Player owner = new Player("Niz", "niz@mcgill.ca", "123789", false);
     BoardGame boardGame = new BoardGame(2, 4, "Chess", "Chess Description");
 
@@ -143,8 +145,10 @@ public class EventServiceTests {
 
     when(eventRepository.findByEventID(validEventId)).thenReturn(event);
 
+    // Act
     Event retrievedEvent = eventService.getEventById(validEventId);
 
+    // Assert
     assertNotNull(retrievedEvent);
     assertEquals(validEventName, retrievedEvent.getName());
     assertEquals(validEventDescription, retrievedEvent.getDescription());
@@ -199,10 +203,11 @@ public class EventServiceTests {
 
   @Test
   public void testFindEventThatDoesNotExist() {
+    // Arrange: Event ID does not exist
     when(eventRepository.findByEventID(validEventId)).thenReturn(null);
 
-    GlobalException e = assertThrows(GlobalException.class, () -> eventService.getEventById(42));
-
+    // Act & Assert
+    GlobalException e = assertThrows(GlobalException.class, () -> eventService.getEventById(validEventId));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
 
@@ -240,14 +245,13 @@ public class EventServiceTests {
   /** Test deleting an event that doesn't exist** */
   @Test
   public void testDeleteEvent_NotFound() {
+    // Arrange: Ensure the event does not exist
     when(eventRepository.existsById(validEventId)).thenReturn(false);
 
-    GlobalException e = assertThrows(
-        GlobalException.class, () -> eventService.deleteEvent(validEventId)
-    );
-
+    // Act & Assert
+    GlobalException e = assertThrows(GlobalException.class, () -> eventService.deleteEvent(validEventId));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-    assertEquals("Cannot delete: Event not found with ID: 42", e.getMessage());
+    assertEquals("Cannot delete: Event not found with ID: " + validEventId, e.getMessage());
   }
 
   /** Test event creation with missing owner** */

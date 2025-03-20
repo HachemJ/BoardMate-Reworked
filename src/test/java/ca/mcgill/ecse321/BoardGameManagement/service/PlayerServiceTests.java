@@ -3,15 +3,15 @@ package ca.mcgill.ecse321.BoardGameManagement.service;
 import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
 import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.*;
+import ca.mcgill.ecse321.BoardGameManagement.dto.LoginRequestDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerCreationDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
-import ca.mcgill.ecse321.BoardGameManagement.dto.*;
 
 import java.util.ArrayList;
 import java.util.List;
