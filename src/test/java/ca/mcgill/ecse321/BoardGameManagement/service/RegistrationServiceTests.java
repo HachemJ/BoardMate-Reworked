@@ -458,7 +458,7 @@ public class RegistrationServiceTests {
     * Tests deleting a registration for a invalid player.
     */
     @Test
-    public void testDeleteRegistrationEventNonExistentPlayer() {
+    public void testDeleteRegistrationEventNonexistentPlayer() {
 
         //Act
         GlobalException e = assertThrows(GlobalException.class, () -> registrationService.deleteRegistration(VALID_PLAYER_ID, VALID_EVENT_ID));
@@ -472,7 +472,7 @@ public class RegistrationServiceTests {
     * Tests deleting a registration for a invalid event.
     */
     @Test
-    public void testDeleteRegistrationEventNonExistentEvent() {
+    public void testDeleteRegistrationEventNonexistentEvent() {
         //Arrange
         Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
         when(playerRepository.findByPlayerID(VALID_PLAYER_ID)).thenReturn(player);
