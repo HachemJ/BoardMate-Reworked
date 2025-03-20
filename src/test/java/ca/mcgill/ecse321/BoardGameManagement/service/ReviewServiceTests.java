@@ -41,17 +41,17 @@ public class ReviewServiceTests {
     @InjectMocks
     private ReviewService reviewService;
 
-    private final LocalDate date = LocalDate.now();
-    private final String name = "name";
-    private final String email = "name@mail.com";
-    private final String password = "password";
-    private final int minPlayers = 1;
-    private final int maxPlayers = 2;
-    private final String gameName = "gameName";
-    private final String description = "description";
-    private final int rating = 3;
-    private final String comment = "comment";
-    private final int id = 1;
+    private final LocalDate DATE = LocalDate.now();
+    private final String NAME = "name";
+    private final String EMAIL = "name@mail.com";
+    private final String PASSWORD = "password";
+    private final int MIN_PLAYERS = 1;
+    private final int MAX_PLAYERS = 2;
+    private final String GAME_NAME = "gameName";
+    private final String DESCRIPTION = "description";
+    private final int RATING = 3;
+    private final String COMMENT = "comment";
+    private final int ID = 1;
 
     private Player player;
     private BoardGame boardGame;
@@ -74,10 +74,10 @@ public class ReviewServiceTests {
      */
     @Test
     public void createValidReview() {
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, DATE, 100, 99);
 
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
@@ -96,9 +96,9 @@ public class ReviewServiceTests {
         Review createdReview = reviewService.createReview(dto);
 
         assertNotNull(createdReview);
-        assertEquals(rating, createdReview.getRating());
-        assertEquals(comment, createdReview.getComment());
-        assertEquals(date, createdReview.getCommentDate());
+        assertEquals(RATING, createdReview.getRating());
+        assertEquals(COMMENT, createdReview.getComment());
+        assertEquals(DATE, createdReview.getCommentDate());
         assertEquals(player.getName(), createdReview.getAuthor().getName());
         assertEquals(boardGame.getName(), createdReview.getBoardGame().getName());
 
@@ -106,10 +106,10 @@ public class ReviewServiceTests {
 
         //create second valid review
 
-        ReviewCreationDto dto2 = new ReviewCreationDto(rating, comment, date, 101, 100);
+        ReviewCreationDto dto2 = new ReviewCreationDto(RATING, COMMENT, DATE, 101, 100);
 
-        Player player2 = new Player(name + "2", email, password, false);
-        BoardGame boardGame2 = new BoardGame(minPlayers, maxPlayers, gameName + "2", description);
+        Player player2 = new Player(NAME + "2", EMAIL, PASSWORD, false);
+        BoardGame boardGame2 = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME + "2", DESCRIPTION);
 
         when (playerRepository.findByPlayerID(101)).thenReturn(player2);
         when (boardGameRepository.findByGameID(100)).thenReturn(boardGame2);
@@ -120,9 +120,9 @@ public class ReviewServiceTests {
         Review createdReview2 = reviewService.createReview(dto2);
 
         assertNotNull(createdReview2);
-        assertEquals(rating, createdReview2.getRating());
-        assertEquals(comment, createdReview2.getComment());
-        assertEquals(date, createdReview2.getCommentDate());
+        assertEquals(RATING, createdReview2.getRating());
+        assertEquals(COMMENT, createdReview2.getComment());
+        assertEquals(DATE, createdReview2.getCommentDate());
         assertEquals(player2.getName(), createdReview2.getAuthor().getName());
         assertEquals(boardGame2.getName(), createdReview2.getBoardGame().getName());
 
@@ -135,8 +135,8 @@ public class ReviewServiceTests {
     @Test
     public void createInvalidReviewNullDto() {
 
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
@@ -155,10 +155,10 @@ public class ReviewServiceTests {
      */
     @Test
     public void createInvalidReviewLowRating() {
-        ReviewCreationDto dto = new ReviewCreationDto(-999999, comment, date, 100, 99);
+        ReviewCreationDto dto = new ReviewCreationDto(-999999, COMMENT, DATE, 100, 99);
 
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
@@ -176,10 +176,10 @@ public class ReviewServiceTests {
      */
     @Test
     public void createInvalidReviewHighRating() {
-        ReviewCreationDto dto = new ReviewCreationDto(999999, comment, date, 100, 99);
+        ReviewCreationDto dto = new ReviewCreationDto(999999, COMMENT, DATE, 100, 99);
 
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
@@ -196,10 +196,10 @@ public class ReviewServiceTests {
      */
     @Test
     public void createInvalidReviewNoPlayer() {
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, DATE, 100, 99);
 
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         when (playerRepository.findByPlayerID(100)).thenReturn(null);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
@@ -217,10 +217,10 @@ public class ReviewServiceTests {
      */
     @Test
     public void createInvalidReviewNoBoardGame() {
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, 100, 99);
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, DATE, 100, 99);
 
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(null);
@@ -238,17 +238,17 @@ public class ReviewServiceTests {
      */
     @Test
     public void findExistingReviewById() {
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
-        Review review = new Review(rating, comment, date, player, boardGame);
+        Review review = new Review(RATING, COMMENT, DATE, player, boardGame);
 
-        when(reviewRepository.findByReviewID(id)).thenReturn(review);
+        when(reviewRepository.findByReviewID(ID)).thenReturn(review);
 
         assertNotNull(review);
-        assertEquals(review.getRating(), rating);
-        assertEquals(review.getComment(), comment);
-        assertEquals(review.getCommentDate(), date);
+        assertEquals(review.getRating(), RATING);
+        assertEquals(review.getComment(), COMMENT);
+        assertEquals(review.getCommentDate(), DATE);
         assertEquals(review.getAuthor(), player);
         assertEquals(review.getBoardGame(), boardGame);
     }
@@ -258,12 +258,12 @@ public class ReviewServiceTests {
      */
     @Test
     public void findNonExistentReviewById() {
-        when (reviewRepository.findByReviewID(id)).thenReturn(null);
+        when (reviewRepository.findByReviewID(ID)).thenReturn(null);
 
-        GlobalException exception = assertThrows(GlobalException.class, () -> reviewService.getReviewById(id));
+        GlobalException exception = assertThrows(GlobalException.class, () -> reviewService.getReviewById(ID));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
-        assertEquals("Review not found with ID: " + id, exception.getMessage());
+        assertEquals("Review not found with ID: " + ID, exception.getMessage());
     }
 
     /**
@@ -271,25 +271,25 @@ public class ReviewServiceTests {
      */
     @Test
     public void updateExistingReview() {
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         int validID = 100;
 
-        Review review = new Review(rating, comment, date, player, boardGame);
+        Review review = new Review(RATING, COMMENT, DATE, player, boardGame);
 
         when(reviewRepository.existsById(validID)).thenReturn(true);  // Mock existsById to return true
         when(reviewRepository.findByReviewID(validID)).thenReturn(review);
         when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        ReviewCreationDto dto = new ReviewCreationDto(rating + 1, comment + "2", date, player.getPlayerID(), boardGame.getGameID());
+        ReviewCreationDto dto = new ReviewCreationDto(RATING + 1, COMMENT + "2", DATE, player.getPlayerID(), boardGame.getGameID());
 
         Review updatedReview = reviewService.updateReview(validID, dto);
 
         assertNotNull(updatedReview);
-        assertEquals(rating + 1, updatedReview.getRating());
-        assertEquals(comment + "2", updatedReview.getComment());
-        assertEquals(date, updatedReview.getCommentDate());
+        assertEquals(RATING + 1, updatedReview.getRating());
+        assertEquals(COMMENT + "2", updatedReview.getComment());
+        assertEquals(DATE, updatedReview.getCommentDate());
         assertEquals(player.getPlayerID(), updatedReview.getAuthor().getPlayerID());
         assertEquals(boardGame.getGameID(), updatedReview.getBoardGame().getGameID());
     }
@@ -299,12 +299,12 @@ public class ReviewServiceTests {
      */
     @Test
     public void updateNonExistentReview() {
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, player.getPlayerID(), boardGame.getGameID());
-        when(reviewRepository.findByReviewID(id)).thenReturn(null);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, DATE, player.getPlayerID(), boardGame.getGameID());
+        when(reviewRepository.findByReviewID(ID)).thenReturn(null);
 
-        GlobalException exception = assertThrows(GlobalException.class, () -> reviewService.updateReview(id, dto));
+        GlobalException exception = assertThrows(GlobalException.class, () -> reviewService.updateReview(ID, dto));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertTrue(exception.getMessage().contains("Review not found with ID: "));
@@ -315,15 +315,15 @@ public class ReviewServiceTests {
      */
     @Test
     public void updateReview_InvalidInput() {
-        player = new Player(name, email, password, false);
-        boardGame = new BoardGame(minPlayers, maxPlayers, gameName, description);
-        Review existingReview = new Review(rating, comment, date, player, boardGame);
-        when (reviewRepository.findByReviewID(id)).thenReturn(existingReview);
+        player = new Player(NAME, EMAIL, PASSWORD, false);
+        boardGame = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
+        Review existingReview = new Review(RATING, COMMENT, DATE, player, boardGame);
+        when (reviewRepository.findByReviewID(ID)).thenReturn(existingReview);
 
-        ReviewCreationDto invalidDto = new ReviewCreationDto(999, comment, date, player.getPlayerID(), boardGame.getGameID());
+        ReviewCreationDto invalidDto = new ReviewCreationDto(999, COMMENT, DATE, player.getPlayerID(), boardGame.getGameID());
 
         try {
-            reviewService.updateReview(id, invalidDto);
+            reviewService.updateReview(ID, invalidDto);
         } catch (GlobalException e) {
             verify(reviewRepository, times(0)).save(any(Review.class));
         }
@@ -334,11 +334,11 @@ public class ReviewServiceTests {
      */
     @Test
     public void deleteExistingReview() {
-        when(reviewRepository.existsById(id)).thenReturn(true);
+        when(reviewRepository.existsById(ID)).thenReturn(true);
 
-        reviewService.deleteReview(id);
+        reviewService.deleteReview(ID);
 
-        verify(reviewRepository, times(1)).deleteById(id);
+        verify(reviewRepository, times(1)).deleteById(ID);
     }
 
     /**
@@ -346,8 +346,8 @@ public class ReviewServiceTests {
      */
     @Test
     public void deleteNonExistentReview() {
-        Player player1 = new Player(name, email, password, false);
-        BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        Player player1 = new Player(NAME, EMAIL, PASSWORD, false);
+        BoardGame boardGame1 = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
         int playerID = 1;
         when(playerRepository.findByPlayerID(playerID)).thenReturn(player1);
@@ -366,14 +366,14 @@ public class ReviewServiceTests {
      */
     @Test
     public void getAllReviews() {
-        Player player1 = new Player(name, email, password, false);
-        BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
+        Player player1 = new Player(NAME, EMAIL, PASSWORD, false);
+        BoardGame boardGame1 = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME, DESCRIPTION);
 
-        Player player2 = new Player(name + "2", email, password, false);
-        BoardGame boardGame2 = new BoardGame(minPlayers, maxPlayers, gameName + "2", description);
+        Player player2 = new Player(NAME + "2", EMAIL, PASSWORD, false);
+        BoardGame boardGame2 = new BoardGame(MIN_PLAYERS, MAX_PLAYERS, GAME_NAME + "2", DESCRIPTION);
 
-        Review review1 = new Review(rating, comment, date, player1, boardGame1);
-        Review review2 = new Review(rating + 1, comment + "abc", date, player2, boardGame2);
+        Review review1 = new Review(RATING, COMMENT, DATE, player1, boardGame1);
+        Review review2 = new Review(RATING + 1, COMMENT + "abc", DATE, player2, boardGame2);
 
         ArrayList<Review> reviews = new ArrayList<>();
         reviews.add(review1);
