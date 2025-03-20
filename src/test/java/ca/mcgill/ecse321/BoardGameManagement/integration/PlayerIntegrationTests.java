@@ -23,12 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PlayerIntegrationTests {
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate client;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
-    private static int createdPlayerId;
     private static final String TEST_EMAIL = "test@email.com";
 
     @BeforeEach //so that we have a clean database
@@ -45,7 +46,7 @@ public class PlayerIntegrationTests {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        createdPlayerId = response.getBody().getPlayerID();
+        int createdPlayerId = response.getBody().getPlayerID();
         assertTrue(createdPlayerId > 0);
     }
 
@@ -178,9 +179,9 @@ public class PlayerIntegrationTests {
     public void loginSuccess() {
         // Create a player to login
         PlayerCreationDto createDto = new PlayerCreationDto("Original Name", TEST_EMAIL, "password", false);
-        ResponseEntity<PlayerRespDto> createResponse = client.postForEntity("/players", createDto, PlayerRespDto.class);
+        client.postForEntity("/players", createDto, PlayerRespDto.class);
 
-        // Attempt to login with valid credentials
+        // Attempt to log in with valid credentials
         LoginRequestDto loginDto = new LoginRequestDto(TEST_EMAIL, "password");
         ResponseEntity<PlayerRespDto> response = client.postForEntity("/players/login", loginDto, PlayerRespDto.class);
 
@@ -194,7 +195,7 @@ public class PlayerIntegrationTests {
     @Test
     public void loginFailureNoAccount() {
 
-        // Attempt to login with valid credentials
+        // Attempt to log in with valid credentials
         LoginRequestDto loginDto = new LoginRequestDto("notExist@gmail.com", "password");
         ResponseEntity<ErrorDto> response = client.postForEntity("/players/login", loginDto, ErrorDto.class);
 
@@ -209,9 +210,9 @@ public class PlayerIntegrationTests {
 
         // Create a player to login
         PlayerCreationDto createDto = new PlayerCreationDto("Original Name", TEST_EMAIL, "password", false);
-        ResponseEntity<PlayerRespDto> createResponse = client.postForEntity("/players", createDto, PlayerRespDto.class);
+        client.postForEntity("/players", createDto, PlayerRespDto.class);
 
-        // Attempt to login with valid credentials
+        // Attempt to log in with valid credentials
         LoginRequestDto loginDto = new LoginRequestDto(TEST_EMAIL, "wrongpassword");
         ResponseEntity<ErrorDto> response = client.postForEntity("/players/login", loginDto, ErrorDto.class);
 

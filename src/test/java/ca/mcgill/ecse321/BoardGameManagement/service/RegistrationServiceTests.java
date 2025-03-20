@@ -147,7 +147,7 @@ public class RegistrationServiceTests {
         assertNotNull(retrievedRegistrations);
         assertEquals(2, retrievedRegistrations.size());
         // Assertions for Registration 1
-        assertEquals(registration1, retrievedRegistrations.get(0));
+        assertEquals(registration1, retrievedRegistrations.getFirst());
         assertEquals(player1, retrievedRegistrations.get(0).getKey().getRegistrant());
         assertEquals(event1, retrievedRegistrations.get(0).getKey().getEvent());
         // Assertions for Registration 2
@@ -183,7 +183,7 @@ public class RegistrationServiceTests {
         assertNotNull(retrievedRegistrations);
         assertEquals(2, retrievedRegistrations.size());
         // Assertions for Registration 1
-        assertEquals(registration1, retrievedRegistrations.get(0));
+        assertEquals(registration1, retrievedRegistrations.getFirst());
         assertEquals(player, retrievedRegistrations.get(0).getKey().getRegistrant());
         assertEquals(event1, retrievedRegistrations.get(0).getKey().getEvent());
         // Assertions for Registration 2
@@ -217,7 +217,7 @@ public class RegistrationServiceTests {
         assertNotNull(retrievedRegistrations);
         assertEquals(2, retrievedRegistrations.size());
         // Assertions for Registration 1
-        assertEquals(registration1, retrievedRegistrations.get(0));
+        assertEquals(registration1, retrievedRegistrations.getFirst());
         assertEquals(player1, retrievedRegistrations.get(0).getKey().getRegistrant());
         assertEquals(event, retrievedRegistrations.get(0).getKey().getEvent());
         // Assertions for Registration 2
@@ -429,12 +429,6 @@ public class RegistrationServiceTests {
 
     @Test
     public void testDeleteRegistrationEventNonExistentPlayer() {
-        //Arrange
-        Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
-
-        Date pastDate = Date.valueOf(LocalDate.now().minusDays(1)); // Yesterday
-        Time pastStartTime = Time.valueOf(LocalTime.now().minusHours(2)); // Started 2 hours ago
-        Time pastEndTime = Time.valueOf(LocalTime.now().minusHours(1));   // Ended 1 hour ago
 
         //Act
         GlobalException e = assertThrows(

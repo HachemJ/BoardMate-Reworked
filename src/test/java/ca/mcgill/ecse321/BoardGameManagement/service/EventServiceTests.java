@@ -122,9 +122,9 @@ public class EventServiceTests {
         2
     );
     // Act & Assert
-    Exception exception = assertThrows(GlobalException.class, () -> {
-      eventService.createEvent(dto);
-    });
+    Exception exception = assertThrows(GlobalException.class, () ->
+      eventService.createEvent(dto)
+    );
 
     assertEquals(HttpStatus.NOT_FOUND, ((GlobalException) exception).getStatus());
     assertTrue(exception.getMessage().contains("BoardGame not found"));
@@ -179,13 +179,13 @@ public class EventServiceTests {
     assertNotNull(retrievedEvents);
     assertEquals(2, retrievedEvents.size());
     // Assertions for Event 1
-    assertEquals(validEventName, retrievedEvents.get(0).getName());
-    assertEquals(validEventDescription, retrievedEvents.get(0).getDescription());
-    assertEquals(validMaxSpots, retrievedEvents.get(0).getMaxSpot());
-    assertEquals(validDate, retrievedEvents.get(0).getEventDate());
-    assertEquals(validStartTime, retrievedEvents.get(0).getStartTime());
-    assertEquals(validEndTime, retrievedEvents.get(0).getEndTime());
-    assertEquals(validLocation, retrievedEvents.get(0).getLocation());
+    assertEquals(validEventName, retrievedEvents.getFirst().getName());
+    assertEquals(validEventDescription, retrievedEvents.getFirst().getDescription());
+    assertEquals(validMaxSpots, retrievedEvents.getFirst().getMaxSpot());
+    assertEquals(validDate, retrievedEvents.getFirst().getEventDate());
+    assertEquals(validStartTime, retrievedEvents.getFirst().getStartTime());
+    assertEquals(validEndTime, retrievedEvents.getFirst().getEndTime());
+    assertEquals(validLocation, retrievedEvents.getFirst().getLocation());
     assertEquals(owner, retrievedEvents.get(0).getOwner());
     assertEquals(boardGame, retrievedEvents.get(0).getBoardGame());
 

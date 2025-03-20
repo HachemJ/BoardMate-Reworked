@@ -1,6 +1,5 @@
 package ca.mcgill.ecse321.BoardGameManagement.service;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -55,9 +54,7 @@ public class ReviewServiceTests {
     private final int id = 1;
 
     private Player player;
-    private final int playerID = 1;
     private BoardGame boardGame;
-    private final int boardGameID = 2;
 
 
     @BeforeEach
@@ -144,9 +141,9 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
 
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            reviewService.createReview(null);
-        });
+        GlobalException exception = assertThrows(GlobalException.class, () ->
+            reviewService.createReview(null)
+        );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertTrue(exception.getMessage().contains("Review is null."));
@@ -166,9 +163,9 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
 
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            reviewService.createReview(dto);
-        });
+        GlobalException exception = assertThrows(GlobalException.class, () ->
+            reviewService.createReview(dto)
+        );
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertTrue(exception.getMessage().contains("Rating must be at least 1."));
@@ -187,9 +184,8 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
 
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            reviewService.createReview(dto);
-        });
+        GlobalException exception = assertThrows(GlobalException.class, () ->
+                reviewService.createReview(dto));
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertTrue(exception.getMessage().contains("Rating cannot be more than 5."));
@@ -353,7 +349,9 @@ public class ReviewServiceTests {
         Player player1 = new Player(name, email, password, false);
         BoardGame boardGame1 = new BoardGame(minPlayers, maxPlayers, gameName, description);
 
+        int playerID = 1;
         when(playerRepository.findByPlayerID(playerID)).thenReturn(player1);
+        int boardGameID = 2;
         when(boardGameRepository.findByGameID(boardGameID)).thenReturn(boardGame1);
         when(reviewRepository.findByReviewID(999)).thenReturn(null);
 
