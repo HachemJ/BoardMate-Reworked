@@ -71,13 +71,13 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testCreateInvalidBoardGameCopy_nonexistentPlayerId() {
+    public void testCreateInvalidBoardGameCopyNonexistentPlayerId() {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
                 PLAYER_ID, BOARD_GAME_ID);
         BoardGame boardGame = new BoardGame(4, 8, "A fun game", "This is a fun game");
-        when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(null);
+        when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(null); // Mocking nonexistent player
         when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(boardGame);
 
         // Act and Assert
@@ -87,14 +87,14 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testCreateInvalidBoardGameCopy_nonexistentBoardGameId() {
+    public void testCreateInvalidBoardGameCopyNonexistentBoardGameId() {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
                 PLAYER_ID, BOARD_GAME_ID);
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
         when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(player);
-        when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(null);
+        when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(null); // Mocking nonexistent board game
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.createBoardGameCopy(boardGameCopyCreationDto));
@@ -125,7 +125,7 @@ public class BoardGameCopyServiceTests {
     public void testFindBoardGameCopyByInvalidId() {
 
         // Arrange
-        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null);
+        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null); // Mocking nonexistent board game copy
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopyById(1));
@@ -167,7 +167,7 @@ public class BoardGameCopyServiceTests {
     public void testFindBoardGameCopiesByInvalidBoardGameId() {
 
         // Arrange
-        when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(null);
+        when(boardGameRepository.findByGameID(BOARD_GAME_ID)).thenReturn(null); // Mocking nonexistent board game
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopiesByBoardGameId(BOARD_GAME_ID));
@@ -215,7 +215,7 @@ public class BoardGameCopyServiceTests {
     public void testFindBoardGameCopiesByInvalidPlayerId() {
 
         // Arrange
-        when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(null);
+        when(playerRepository.findByPlayerID(PLAYER_ID)).thenReturn(null); // Mocking nonexistent player
 
         // Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.findBoardGameCopiesByPlayerId(PLAYER_ID));
@@ -283,10 +283,10 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
+    public void testUpdateInvalidBoardGameCopyNonexistentBoardGameCopyId() {
 
         //Arrange
-        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null);
+        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null); // Mocking nonexistent board game copy
 
         //Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.updateBoardGameCopy(1, "new specification"));
@@ -295,7 +295,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testUpdaeInvalidBoardGameCopy_emptySpecification() {
+    public void testUpdaeInvalidBoardGameCopyEmptySpecification() {
 
         //Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
@@ -327,10 +327,10 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testDeleteInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
+    public void testDeleteInvalidBoardGameCopyNonexistentBoardGameCopyId() {
 
         //Arrange
-        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null);
+        when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null); // Mocking nonexistent board game copy
 
         //Act and Assert
         GlobalException e = assertThrows(GlobalException.class, () -> boardGameCopyService.deleteBoardGameCopy(1));

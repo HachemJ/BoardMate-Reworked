@@ -51,8 +51,11 @@ public class BorrowRequestService {
     }
 
 
-
-
+    /**
+     * Service method to create a borrow request
+     * @param requestDTO dto containing info for new borrow request
+     * @return the borrow request
+     */
     @Transactional
     public BorrowRequest createBorrowRequest(@Valid BorrowRequestCreationDTO requestDTO) {
         checkNotNull(requestDTO);
@@ -94,6 +97,11 @@ public class BorrowRequestService {
     }
 
 
+    /**
+     * Get the borrow requests for games belonging to a specific owner
+     * @param ownerId the id of the owner to find requests for
+     * @return the list of borrow requests for that owner
+     */
     public ArrayList<BorrowRequest> getBorrowRequestsByOwner(int ownerId) {
         checkValidId(ownerId, "ownerId");
 
@@ -109,6 +117,11 @@ public class BorrowRequestService {
         return borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
     }
 
+    /**
+     * get the borrow request with the given request id
+     * @param requestId the id to find
+     * @return the borrow request
+     */
     public BorrowRequest getBorrowRequest(int requestId) {
         checkValidId(requestId, "requestId");
 

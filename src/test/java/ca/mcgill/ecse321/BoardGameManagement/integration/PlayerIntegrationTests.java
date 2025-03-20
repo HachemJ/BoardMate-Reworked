@@ -23,12 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class PlayerIntegrationTests {
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate client;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
-    private static int createdPlayerId;
     private static final String TEST_EMAIL = "test@email.com";
 
     @BeforeEach //so that we have a clean database
@@ -45,7 +46,7 @@ public class PlayerIntegrationTests {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        createdPlayerId = response.getBody().getPlayerID();
+        int createdPlayerId = response.getBody().getPlayerID();
         assertTrue(createdPlayerId > 0);
     }
 
@@ -70,15 +71,18 @@ public class PlayerIntegrationTests {
 
         ResponseEntity<PlayerRespDto> response =
                 client.getForEntity("/players/" + tempId, PlayerRespDto.class);
-
+//check all attributes are correctly persisted and retrieved
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(tempId, response.getBody().getPlayerID());
+        assertEquals("Temp User", response.getBody().getName());
+        assertEquals("temp@email.com", response.getBody().getEmail());
+        assertTrue(response.getBody().getIsAOwner());
     }
 
     @Test
     public void getPlayerByIDNotExist() {
-        ResponseEntity<ErrorDto> response = client.getForEntity("/players/9999", ErrorDto.class);
+        ResponseEntity<ErrorDto> response = client.getForEntity("/players/9999", ErrorDto.class); //pass in an invalid id
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -178,9 +182,9 @@ public class PlayerIntegrationTests {
     public void loginSuccess() {
         // Create a player to login
         PlayerCreationDto createDto = new PlayerCreationDto("Original Name", TEST_EMAIL, "password", false);
-        ResponseEntity<PlayerRespDto> createResponse = client.postForEntity("/players", createDto, PlayerRespDto.class);
+        client.postForEntity("/players", createDto, PlayerRespDto.class);
 
-        // Attempt to login with valid credentials
+        // Attempt to log in with valid credentials
         LoginRequestDto loginDto = new LoginRequestDto(TEST_EMAIL, "password");
         ResponseEntity<PlayerRespDto> response = client.postForEntity("/players/login", loginDto, PlayerRespDto.class);
 
@@ -194,7 +198,7 @@ public class PlayerIntegrationTests {
     @Test
     public void loginFailureNoAccount() {
 
-        // Attempt to login with valid credentials
+        // Attempt to log in with valid credentials
         LoginRequestDto loginDto = new LoginRequestDto("notExist@gmail.com", "password");
         ResponseEntity<ErrorDto> response = client.postForEntity("/players/login", loginDto, ErrorDto.class);
 
@@ -209,9 +213,9 @@ public class PlayerIntegrationTests {
 
         // Create a player to login
         PlayerCreationDto createDto = new PlayerCreationDto("Original Name", TEST_EMAIL, "password", false);
-        ResponseEntity<PlayerRespDto> createResponse = client.postForEntity("/players", createDto, PlayerRespDto.class);
+        client.postForEntity("/players", createDto, PlayerRespDto.class);
 
-        // Attempt to login with valid credentials
+        // Attempt to log in with valid credentials
         LoginRequestDto loginDto = new LoginRequestDto(TEST_EMAIL, "wrongpassword");
         ResponseEntity<ErrorDto> response = client.postForEntity("/players/login", loginDto, ErrorDto.class);
 
