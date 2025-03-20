@@ -326,7 +326,7 @@ public class RegistrationServiceTests {
     * Tests finding all registratiosn for an invalid player.
    */
     @Test
-    public void getAllRegistrationsForPlayer_nonexistentPlayer(){
+    public void testGetAllRegistrationsForPlayerNonexistentPlayer(){
         //Act
         GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getAllRegistrationsByPlayer(validPlayerId));
 
@@ -340,7 +340,7 @@ public class RegistrationServiceTests {
     * Tests finding all registrations for an invalid event.
    */
     @Test
-    public void getAllRegistrationsForEvent_nonexistentEvent() {
+    public void testGetAllRegistrationsForEventNonexistentEvent() {
         //Act
         GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getAllRegistrationsByEvent(validEventId));
 
@@ -353,7 +353,7 @@ public class RegistrationServiceTests {
     * Tests deleting a registration that does not exist.
    */
     @Test
-    public void testDeleteRegistration_NotFound() {
+    public void testDeleteRegistrationNotFound() {
         //Arrange
         Player player = new Player("Maya", "maya@gmail.com", "12345678", false);
         Event event = new Event(eventName, eventDescription, maxLimit, eventDate, startTime, endTime, location, player, game);
