@@ -6,6 +6,7 @@ public class LoginRequestDto {
 
     private String password;
 
+    @SuppressWarnings("unused")
     public LoginRequestDto() {}
 
     public LoginRequestDto(String email, String password) {
