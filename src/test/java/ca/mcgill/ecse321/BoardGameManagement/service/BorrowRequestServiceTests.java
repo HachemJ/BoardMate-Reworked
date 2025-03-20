@@ -70,7 +70,7 @@ public class BorrowRequestServiceTests {
 
 
     @Test
-    public void createValidBorrowRequest() {
+    public void testCreateValidBorrowRequest() {
         //arrange
         BorrowRequestCreationDTO dto = new BorrowRequestCreationDTO(START_LOAN, END_LOAN, 222, 333);
 
@@ -92,7 +92,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createValidBorrowRequest_nonOverlappingDate() {
+    public void testCreateValidBorrowRequestNonOverlappingDate() {
         //arrange
         BorrowRequestCreationDTO newDto = new BorrowRequestCreationDTO(
                 Date.valueOf(LocalDate.now().plusDays(7)),
@@ -120,7 +120,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_nullInput() {
+    public void testCreateInvalidBorrowRequestNullInput() {
 
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.createBorrowRequest(null));
@@ -133,7 +133,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_nonexistentRequester() {
+    public void testCreateInvalidBorrowRequestNonexistentRequester() {
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
                 START_LOAN, END_LOAN, 0, 333);
         GlobalException e = assertThrows(GlobalException.class,
@@ -145,7 +145,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_invalidBoardGameCopy() {
+    public void testCreateInvalidBorrowRequestInvalidBoardGameCopy() {
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
                 START_LOAN, END_LOAN, 222, 0);
 
@@ -161,7 +161,7 @@ public class BorrowRequestServiceTests {
 
 
     @Test
-    public void createInvalidBorrowRequest_startDateAfterEndDate() {
+    public void teatCreateInvalidBorrowRequestStartDateAfterEndDate() {
         ///dates cannot be null from the DTO constructor validation
         Date badStartDate = Date.valueOf(LocalDate.now().plusDays(3));
         Date badEndDate = Date.valueOf(LocalDate.now().plusDays(2));
@@ -180,7 +180,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_conflictSameTimeAsExistingRequest() {
+    public void testCreateInvalidBorrowRequestConflictSameTimeAsExistingRequest() {
         ///dates cannot be null from the DTO constructor validation
 
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
@@ -202,7 +202,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_conflictTimeFullOverlapWithExisting() {
+    public void testCreateInvalidBorrowRequestConflictTimeFullOverlapWithExisting() {
         ///dates cannot be null from the DTO constructor validation
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
                 Date.valueOf(LocalDate.now().plusDays(1)),
@@ -224,7 +224,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_conflictTimeLeftOverlapWithExisting() {
+    public void testCreateInvalidBorrowRequestConflictTimeLeftOverlapWithExisting() {
         ///dates cannot be null from the DTO constructor validation
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
                 Date.valueOf(LocalDate.now().plusDays(1)),
@@ -246,7 +246,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_conflictTimeRightOverlapWithExisting() {
+    public void testCreateInvalidBorrowRequestConflictTimeRightOverlapWithExisting() {
         ///dates cannot be null from the DTO constructor validation
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
                 Date.valueOf(LocalDate.now().plusDays(3)),
@@ -268,7 +268,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void createInvalidBorrowRequest_conflictTimeInternalOverlapWithExisting() {
+    public void testCreateInvalidBorrowRequestConflictTimeInternalOverlapWithExisting() {
         ///dates cannot be null from the DTO constructor validation
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
                 Date.valueOf(LocalDate.now().plusDays(3)),
@@ -290,7 +290,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getSuccessfulBorrowRequestByOwner_single() {
+    public void testGetSuccessfulBorrowRequestByOwnerSingle() {
         ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
         borrowRequests.add(borrowRequest);
         when(playerRepository.findByPlayerID(222)).thenReturn(owner1);
@@ -305,7 +305,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getSuccessfulBorrowRequestByOwner_many() {
+    public void testGetSuccessfulBorrowRequestByOwnerMany() {
         ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
         borrowRequests.add(borrowRequest);
         borrowRequests.add(borrowRequest2);
@@ -323,7 +323,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getSuccessfulBorrowRequestByOwner_noRequests() {
+    public void testGetSuccessfulBorrowRequestByOwnerNoRequests() {
         when(playerRepository.findByPlayerID(222)).thenReturn(owner1);
 
         assertDoesNotThrow(() -> borrowRequestService.getBorrowRequestsByOwner(222));
@@ -334,7 +334,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getUnsuccessfulBorrowRequestByOwner_zeroInput() {
+    public void testGetUnsuccessfulBorrowRequestByOwnerZeroInput() {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequestsByOwner(0));
 
@@ -345,7 +345,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getUnsuccessfulBorrowRequestByOwner_nonexistentId() {
+    public void testGetUnsuccessfulBorrowRequestByOwnerNonexistentId() {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequestsByOwner(222));
 
@@ -356,7 +356,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getUnsuccessfulBorrowRequestByOwner_notAnOwner() {
+    public void testGetUnsuccessfulBorrowRequestByOwnerNotAnOwner() {
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
 
         GlobalException e = assertThrows(GlobalException.class,
@@ -369,7 +369,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getSuccessfulBorrowRequest() {
+    public void testGetSuccessfulBorrowRequest() {
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
 
         assertDoesNotThrow(() -> borrowRequestService.getBorrowRequest(222));
@@ -384,7 +384,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getUnsuccessfulBorrowRequest_zeroInput() {
+    public void testGetUnsuccessfulBorrowRequestZeroInput() {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequest(0));
 
@@ -395,7 +395,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void getUnsuccessfulBorrowRequest_InvalidId() {
+    public void testGetUnsuccessfulBorrowRequestInvalidId() {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequest(202));
 
@@ -413,7 +413,7 @@ public class BorrowRequestServiceTests {
      * getBorrowRequestTests therefore already ensure that null and invalid inputs don't cause problems
      * These are therefore not tested for set of tests pertaining to it.
      */
-    public void successfulAcceptBorrowRequest(){
+    public void testSuccessfulAcceptBorrowRequest(){
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(borrowRequestRepository.save(any(BorrowRequest.class))).thenAnswer(
                 (InvocationOnMock iom) -> (iom.getArgument(0))
@@ -430,7 +430,7 @@ public class BorrowRequestServiceTests {
 
 
     @Test
-    public void successfulDeclineBorrowRequest(){
+    public void testSuccessfulDeclineBorrowRequest(){
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(borrowRequestRepository.save(any(BorrowRequest.class))).thenAnswer(
                 (InvocationOnMock iom) -> (iom.getArgument(0))
@@ -447,7 +447,7 @@ public class BorrowRequestServiceTests {
 
 
     @Test
-    public void unsuccessfulManageBorrowRequest_nullAction() {
+    public void testUnsuccessfulManageBorrowRequestNullAction() {
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
 
         GlobalException e = assertThrows(GlobalException.class,
@@ -459,7 +459,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulManageBorrowRequest_InvalidAction() {
+    public void testUnsuccessfulManageBorrowRequestInvalidAction() {
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
 
         GlobalException e = assertThrows(GlobalException.class,
@@ -471,7 +471,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulManageBorrowRequest_notPendingRequest() {
+    public void testUnsuccessfulManageBorrowRequestNotPendingRequest() {
         borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         // temporary change to make borrowRequest nor suitable for request management
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
@@ -492,7 +492,7 @@ public class BorrowRequestServiceTests {
      * getBorrowRequestTests therefore already ensure that null and invalid inputs don't cause problems
      * These are therefore not tested for set of tests pertaining to it.
      */
-    public void successfulConfirmBorrowing(){
+    public void testSuccessfulConfirmBorrowing(){
         borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID())).thenReturn(boardGameCopy);
@@ -503,7 +503,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulConfirmBorrowing_nullBoardGameCopy(){
+    public void testUnsuccessfulConfirmBorrowingNullBoardGameCopy(){
         borrowRequest.setBoardGameCopy(null);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
 
@@ -514,7 +514,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulConfirmBorrowing_wrongAvailability() {
+    public void testUnsuccessfulConfirmBorrowingWrongAvailability() {
         boardGameCopy.setIsAvailable(false);
         borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
@@ -530,7 +530,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulConfirmBorrowing_requestNotAccepted() {
+    public void testUnsuccessfulConfirmBorrowingRequestNotAccepted() {
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID())).thenReturn(boardGameCopy);
 
@@ -548,7 +548,7 @@ public class BorrowRequestServiceTests {
      * getBorrowRequestTests therefore already ensure that null and invalid inputs don't cause problems
      * These are therefore not tested for set of tests pertaining to it.
      */
-    public void successfulCancelBorrowing(){
+    public void testSuccessfulCancelBorrowing(){
         boardGameCopy.setIsAvailable(false);
         borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
@@ -562,7 +562,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulCancelBorrowing_nullBoardGameCopy(){
+    public void testUnsuccessfulCancelBorrowingNullBoardGameCopy(){
         boardGameCopy.setIsAvailable(false);
         borrowRequest.setBoardGameCopy(null);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
@@ -574,7 +574,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulCancelBorrowing_wrongBoardGameAvailability() {
+    public void testUnsuccessfulCancelBorrowingWrongBoardGameAvailability() {
 
         borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
@@ -590,7 +590,7 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void unsuccessfulCancelBorrowing_requestNotAccepted() {
+    public void testUnsuccessfulCancelBorrowingRequestNotAccepted() {
         boardGameCopy.setIsAvailable(false);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID())).thenReturn(boardGameCopy);
@@ -607,7 +607,7 @@ public class BorrowRequestServiceTests {
      * getBorrowRequestTests therefore already ensure that null and invalid inputs don't cause problems
      * These are therefore not tested for set of tests pertaining to it.
      */
-    public void successfulDeleteBorrowRequest(){
+    public void testSuccessfulDeleteBorrowRequest(){
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         assertDoesNotThrow(() -> borrowRequestService.deleteBorrowRequest(222));
         verify(borrowRequestRepository, times(1)).deleteById(222);

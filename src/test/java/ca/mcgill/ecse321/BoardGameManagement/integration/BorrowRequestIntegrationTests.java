@@ -110,7 +110,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(0)
-    public void createValidBorrowRequest() {
+    public void testCreateValidBorrowRequest() {
         //arrange
         BorrowRequestCreationDTO body = new BorrowRequestCreationDTO(
                 START_DATE, END_DATE, requester1.getPlayerID(), boardGameCopy.getSpecificGameID());
@@ -139,7 +139,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(1)
-    public void createInvalidBorrowRequest_nullInputs() {
+    public void testCreateInvalidBorrowRequestNullInputs() {
         BorrowRequestCreationDTO body = new BorrowRequestCreationDTO(null, null, 0, 0);
 
         ResponseEntity<ErrorDto> response = client.postForEntity(
@@ -163,7 +163,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(2)
-    public void createInvalidBorrowRequest_invalidInputs() {
+    public void testCreateInvalidBorrowRequestInvalidInputs() {
         BorrowRequestCreationDTO body = new BorrowRequestCreationDTO(
                 Date.valueOf(LocalDate.now().minusDays(1)),
                 Date.valueOf(LocalDate.now()), -2, -100);
@@ -186,7 +186,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(3)
-    public void getValidBorrowRequestsByOwner() {
+    public void testGetValidBorrowRequestsByOwner() {
 
         String url = "/borrowrequests?ownerId=" + owner1.getPlayerID();
 
@@ -207,7 +207,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(4)
-    public void getInvalidBorrowRequestsByOwner_InvalidInputs() {
+    public void testGetInvalidBorrowRequestsByOwnerInvalidInputs() {
 
         String url = "/borrowrequests?ownerId=999";
         ResponseEntity<ErrorDto> response =  client.getForEntity(url, ErrorDto.class);
@@ -222,7 +222,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(5)
-    public void getValidBorrowRequest(){
+    public void testGetValidBorrowRequest(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId;
         ResponseEntity<BorrowRequestResponseDTO> response = client.getForEntity(url, BorrowRequestResponseDTO.class);
@@ -244,7 +244,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(6)
-    public void acceptValidBorrowRequest(){
+    public void testAcceptValidBorrowRequest(){
         String url = "/borrowrequests/" + createdBorrowRequestId + "?action=accept";
 
         ResponseEntity<BorrowRequestResponseDTO> request = client.exchange(url, HttpMethod.PUT, null, BorrowRequestResponseDTO.class);
@@ -264,7 +264,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(7)
-    public void declineValidBorrowRequest(){
+    public void testDeclineValidBorrowRequest(){
         String url = "/borrowrequests/" + borrowRequest2.getRequestID() + "?action=decline";
 
         ResponseEntity<BorrowRequestResponseDTO> request = client.exchange(url, HttpMethod.PUT, null, BorrowRequestResponseDTO.class);
@@ -286,7 +286,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(8)
-    public void doInvalidBorrowRequest_emptyAction() {
+    public void testDoInvalidBorrowRequestEmptyAction() {
         String url = "/borrowrequests/" + borrowRequest.getRequestID() ;
 
         ResponseEntity<ErrorDto> request = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
@@ -301,7 +301,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(8)
-    public void doInvalidBorrowRequest_InvalidAction() {
+    public void testDoInvalidBorrowRequestInvalidAction() {
         String url = "/borrowrequests/" + borrowRequest.getRequestID() + "?action=Done";
 
         ResponseEntity<ErrorDto> request = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
@@ -317,7 +317,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(9)
-    public void confirmValidBorrowing(){
+    public void testConfirmValidBorrowing(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=confirm";
 
@@ -329,7 +329,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(10)
-    public void cancelValidBorrowing(){
+    public void testCancelValidBorrowing(){
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=cancel";
 
         ResponseEntity<Void> response = client.exchange(url, HttpMethod.PUT, null, Void.class);
@@ -341,7 +341,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(11)
-    public void confirmInvalidBorrowing_invalidAction(){
+    public void testConfirmInvalidBorrowingInvalidAction(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=accept";
 
@@ -356,7 +356,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(11)
-    public void confirmInvalidBorrowing_emptyAction(){
+    public void testConfirmInvalidBorrowingEmptyAction(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy";
 
@@ -371,7 +371,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(13)
-    public void deleteValidBorrowRequest(){
+    public void testDeleteValidBorrowRequest(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId;
 
@@ -384,7 +384,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(14) /// SET TO LAST
-    public void getValidBorrowRequestsByOwner_noGames() {
+    public void testGetValidBorrowRequestsByOwnerNoGames() {
 
         //delete all remaining borrowRequests of owner1
         String url = "/borrowrequests/" + borrowRequest.getRequestID();
