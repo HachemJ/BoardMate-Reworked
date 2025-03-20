@@ -49,31 +49,31 @@ public class EventServiceTests {
   @InjectMocks
   private EventService eventService;
 
-  private static final String validEventName = "Chess Tournament";
-  private static final String validEventDescription = "Friendly chess match.";
-  private static final String validMaxSpots = "20";
-  private static final Date validDate = Date.valueOf(LocalDate.now().plusDays(7));
-  private static final Time validStartTime = Time.valueOf(LocalTime.of(14, 0));
-  private static final Time validEndTime = Time.valueOf(LocalTime.of(18, 0));
-  private static final String validLocation = "McGill";
-  private static final int validEventId = 42;
-  private static final int validPlayerId = 1;
-  private static final int validBoardGameId = 2;
+  private static final String VALID_EVENT_NAME = "Chess Tournament";
+  private static final String VALID_EVENT_DESCRIPTION = "Friendly chess match.";
+  private static final String VALID_MAX_SPOTS = "20";
+  private static final Date VALID_DATE = Date.valueOf(LocalDate.now().plusDays(7));
+  private static final Time VALID_START_TIME = Time.valueOf(LocalTime.of(14, 0));
+  private static final Time VALID_END_TIME = Time.valueOf(LocalTime.of(18, 0));
+  private static final String VALID_LOCATION = "McGill";
+  private static final int VALID_EVENT_ID = 42;
+  private static final int VALID_PLAYER_ID = 1;
+  private static final int VALID_BOARDGAME_ID = 2;
 
   /**Test successful event creation** */
   @Test
   public void testCreateValidEvent() {
     // Arrange: Set up test data and mock repository behavior
-    EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, validPlayerId,
-        validBoardGameId
+    EventCreationDto dto = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION,
+        VALID_PLAYER_ID, VALID_BOARDGAME_ID
     );
 
     Player owner = new Player("Niz", "niz@mcgill.ca", "123789", false);
     BoardGame boardGame = new BoardGame(2, 4, "Chess", "Chess Description");
 
-    when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(owner);
-    when(boardGameRepository.findByGameID(validBoardGameId)).thenReturn(boardGame);
+    when(playerRepository.findByPlayerID(VALID_PLAYER_ID)).thenReturn(owner);
+    when(boardGameRepository.findByGameID(VALID_BOARDGAME_ID)).thenReturn(boardGame);
     when(eventRepository.save(any(Event.class))).thenAnswer((InvocationOnMock iom) -> iom.getArgument(0));
 
     // Act: Call the service method
@@ -81,13 +81,13 @@ public class EventServiceTests {
 
     // Assert: Verify expected results
     assertNotNull(createdEvent);
-    assertEquals(validEventName, createdEvent.getName());
-    assertEquals(validEventDescription, createdEvent.getDescription());
-    assertEquals(validMaxSpots, createdEvent.getMaxSpot());
-    assertEquals(validDate, createdEvent.getEventDate());
-    assertEquals(validStartTime, createdEvent.getStartTime());
-    assertEquals(validEndTime, createdEvent.getEndTime());
-    assertEquals(validLocation, createdEvent.getLocation());
+    assertEquals(VALID_EVENT_NAME, createdEvent.getName());
+    assertEquals(VALID_EVENT_DESCRIPTION, createdEvent.getDescription());
+    assertEquals(VALID_MAX_SPOTS, createdEvent.getMaxSpot());
+    assertEquals(VALID_DATE, createdEvent.getEventDate());
+    assertEquals(VALID_START_TIME, createdEvent.getStartTime());
+    assertEquals(VALID_END_TIME, createdEvent.getEndTime());
+    assertEquals(VALID_LOCATION, createdEvent.getLocation());
     assertEquals(owner, createdEvent.getOwner());
     assertEquals(boardGame, createdEvent.getBoardGame());
 
@@ -96,13 +96,13 @@ public class EventServiceTests {
   }
 
   @Test
-  public void testCreateEvent_PlayerNotFound_ShouldThrowException() {
+  public void testCreateEventPlayerNotFound() {
     // Arrange: Player does not exist
     when(playerRepository.findByPlayerID(anyInt())).thenReturn(null);
 
-    EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, validPlayerId,
-        validBoardGameId
+    EventCreationDto dto = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION,
+        VALID_PLAYER_ID, VALID_BOARDGAME_ID
     );
 
     // Act & Assert: Expect a GlobalException with NOT_FOUND status
@@ -112,19 +112,19 @@ public class EventServiceTests {
   }
 
   @Test
-  public void testCreateEvent_BoardGameNotFound_ShouldThrowException() {
+  public void testCreateEventBoardGameNotFound() {
     // Arrange
     when(playerRepository.findByPlayerID(anyInt())).thenReturn(new Player());
     when(boardGameRepository.findByGameID(anyInt())).thenReturn(null);
 
-    EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, 1,
+    EventCreationDto dto = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, 1,
         2
     );
     // Act & Assert
-    Exception exception = assertThrows(GlobalException.class, () -> {
-      eventService.createEvent(dto);
-    });
+    Exception exception = assertThrows(GlobalException.class, () ->
+      eventService.createEvent(dto)
+    );
 
     assertEquals(HttpStatus.NOT_FOUND, ((GlobalException) exception).getStatus());
     assertTrue(exception.getMessage().contains("BoardGame not found"));
@@ -139,38 +139,38 @@ public class EventServiceTests {
     Player owner = new Player("Niz", "niz@mcgill.ca", "123789", false);
     BoardGame boardGame = new BoardGame(2, 4, "Chess", "Chess Description");
 
-    Event event = new Event(validEventName, validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, owner, boardGame
+    Event event = new Event(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS, VALID_DATE,
+        VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, owner, boardGame
     );
 
-    when(eventRepository.findByEventID(validEventId)).thenReturn(event);
+    when(eventRepository.findByEventID(VALID_EVENT_ID)).thenReturn(event);
 
     // Act
-    Event retrievedEvent = eventService.getEventById(validEventId);
+    Event retrievedEvent = eventService.getEventById(VALID_EVENT_ID);
 
     // Assert
     assertNotNull(retrievedEvent);
-    assertEquals(validEventName, retrievedEvent.getName());
-    assertEquals(validEventDescription, retrievedEvent.getDescription());
-    assertEquals(validMaxSpots, retrievedEvent.getMaxSpot());
-    assertEquals(validDate, retrievedEvent.getEventDate());
-    assertEquals(validStartTime, retrievedEvent.getStartTime());
-    assertEquals(validEndTime, retrievedEvent.getEndTime());
-    assertEquals(validLocation, retrievedEvent.getLocation());
+    assertEquals(VALID_EVENT_NAME, retrievedEvent.getName());
+    assertEquals(VALID_EVENT_DESCRIPTION, retrievedEvent.getDescription());
+    assertEquals(VALID_MAX_SPOTS, retrievedEvent.getMaxSpot());
+    assertEquals(VALID_DATE, retrievedEvent.getEventDate());
+    assertEquals(VALID_START_TIME, retrievedEvent.getStartTime());
+    assertEquals(VALID_END_TIME, retrievedEvent.getEndTime());
+    assertEquals(VALID_LOCATION, retrievedEvent.getLocation());
     assertEquals(owner, retrievedEvent.getOwner());
     assertEquals(boardGame, retrievedEvent.getBoardGame());
   }
 
   @Test
-  public void testGetAllEvents_WithEvents() {
+  public void testGetAllEventsWithEvents() {
     Player owner = new Player("Alice", "alice@mcgill.ca", "password", false);
     BoardGame boardGame = new BoardGame(2, 4, "Monopoly", "Classic game");
 
-    Event event1 = new Event(validEventName, validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, owner, boardGame
+    Event event1 = new Event(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS, VALID_DATE,
+        VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, owner, boardGame
     );
-    Event event2 = new Event("Chess Battle", "Intense match", "8", validDate, validStartTime,
-        validEndTime, "Campus", owner, boardGame);
+    Event event2 = new Event("Chess Battle", "Intense match", "8", VALID_DATE, VALID_START_TIME,
+        VALID_END_TIME, "Campus", owner, boardGame);
 
     when(eventRepository.findAll()).thenReturn(List.of(event1, event2));
 
@@ -179,13 +179,13 @@ public class EventServiceTests {
     assertNotNull(retrievedEvents);
     assertEquals(2, retrievedEvents.size());
     // Assertions for Event 1
-    assertEquals(validEventName, retrievedEvents.get(0).getName());
-    assertEquals(validEventDescription, retrievedEvents.get(0).getDescription());
-    assertEquals(validMaxSpots, retrievedEvents.get(0).getMaxSpot());
-    assertEquals(validDate, retrievedEvents.get(0).getEventDate());
-    assertEquals(validStartTime, retrievedEvents.get(0).getStartTime());
-    assertEquals(validEndTime, retrievedEvents.get(0).getEndTime());
-    assertEquals(validLocation, retrievedEvents.get(0).getLocation());
+    assertEquals(VALID_EVENT_NAME, retrievedEvents.getFirst().getName());
+    assertEquals(VALID_EVENT_DESCRIPTION, retrievedEvents.getFirst().getDescription());
+    assertEquals(VALID_MAX_SPOTS, retrievedEvents.getFirst().getMaxSpot());
+    assertEquals(VALID_DATE, retrievedEvents.getFirst().getEventDate());
+    assertEquals(VALID_START_TIME, retrievedEvents.getFirst().getStartTime());
+    assertEquals(VALID_END_TIME, retrievedEvents.getFirst().getEndTime());
+    assertEquals(VALID_LOCATION, retrievedEvents.getFirst().getLocation());
     assertEquals(owner, retrievedEvents.get(0).getOwner());
     assertEquals(boardGame, retrievedEvents.get(0).getBoardGame());
 
@@ -193,9 +193,9 @@ public class EventServiceTests {
     assertEquals("Chess Battle", retrievedEvents.get(1).getName());
     assertEquals("Intense match", retrievedEvents.get(1).getDescription());
     assertEquals("8", retrievedEvents.get(1).getMaxSpot());
-    assertEquals(validDate, retrievedEvents.get(1).getEventDate());
-    assertEquals(validStartTime, retrievedEvents.get(1).getStartTime());
-    assertEquals(validEndTime, retrievedEvents.get(1).getEndTime());
+    assertEquals(VALID_DATE, retrievedEvents.get(1).getEventDate());
+    assertEquals(VALID_START_TIME, retrievedEvents.get(1).getStartTime());
+    assertEquals(VALID_END_TIME, retrievedEvents.get(1).getEndTime());
     assertEquals("Campus", retrievedEvents.get(1).getLocation());
     assertEquals(owner, retrievedEvents.get(1).getOwner());
     assertEquals(boardGame, retrievedEvents.get(1).getBoardGame());
@@ -204,16 +204,17 @@ public class EventServiceTests {
   @Test
   public void testFindEventThatDoesNotExist() {
     // Arrange: Event ID does not exist
-    when(eventRepository.findByEventID(validEventId)).thenReturn(null);
+    when(eventRepository.findByEventID(VALID_EVENT_ID)).thenReturn(null);
 
     // Act & Assert
-    GlobalException e = assertThrows(GlobalException.class, () -> eventService.getEventById(validEventId));
+    GlobalException e = assertThrows(GlobalException.class, () -> eventService.getEventById(
+        VALID_EVENT_ID));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
   }
 
   /** Test: Delete already deleted event */
   @Test
-  public void testDeleteEvent_AlreadyDeleted() {
+  public void testDeleteEventAlreadyDeleted() {
     when(eventRepository.existsById(99)).thenReturn(false);
 
     GlobalException e = assertThrows(GlobalException.class, () -> eventService.deleteEvent(99));
@@ -223,7 +224,7 @@ public class EventServiceTests {
 
   /** Test getting all events (empty list case)** */
   @Test
-  public void testGetAllEvents_EmptyList() {
+  public void testGetAllEventsEmptyList() {
     when(eventRepository.findAll()).thenReturn(List.of());
 
     List<Event> retrievedEvents = eventService.getAllEvents();
@@ -235,53 +236,54 @@ public class EventServiceTests {
   /** Test deleting an event successfully** */
   @Test
   public void testDeleteEventSuccess() {
-    when(eventRepository.existsById(validEventId)).thenReturn(true);
+    when(eventRepository.existsById(VALID_EVENT_ID)).thenReturn(true);
 
-    eventService.deleteEvent(validEventId);
+    eventService.deleteEvent(VALID_EVENT_ID);
 
-    verify(eventRepository, times(1)).deleteById(validEventId);
+    verify(eventRepository, times(1)).deleteById(VALID_EVENT_ID);
   }
 
   /** Test deleting an event that doesn't exist** */
   @Test
-  public void testDeleteEvent_NotFound() {
+  public void testDeleteEventNotFound() {
     // Arrange: Ensure the event does not exist
-    when(eventRepository.existsById(validEventId)).thenReturn(false);
+    when(eventRepository.existsById(VALID_EVENT_ID)).thenReturn(false);
 
     // Act & Assert
-    GlobalException e = assertThrows(GlobalException.class, () -> eventService.deleteEvent(validEventId));
+    GlobalException e = assertThrows(GlobalException.class, () -> eventService.deleteEvent(
+        VALID_EVENT_ID));
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-    assertEquals("Cannot delete: Event not found with ID: " + validEventId, e.getMessage());
+    assertEquals("Cannot delete: Event not found with ID: " + VALID_EVENT_ID, e.getMessage());
   }
 
   /** Test event creation with missing owner** */
   @Test
   public void testCreateEventWithMissingOwner() {
-    EventCreationDto dto = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation, validPlayerId,
-        validBoardGameId
+    EventCreationDto dto = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION,
+        VALID_PLAYER_ID, VALID_BOARDGAME_ID
     );
-    when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(null);
+    when(playerRepository.findByPlayerID(VALID_PLAYER_ID)).thenReturn(null);
 
     GlobalException e = assertThrows(
         GlobalException.class, () -> eventService.createEvent(dto)
     );
 
     assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-    assertEquals("Owner not found with ID: " + validPlayerId, e.getMessage());
+    assertEquals("Owner not found with ID: " + VALID_PLAYER_ID, e.getMessage());
   }
 
   @Test
-  public void testUpdateEvent_Success() {
+  public void testUpdateEventSuccess() {
     // Arrange: Create an existing event
     Player owner = new Player("Alice", "alice@mail.com", "password", false);
     BoardGame boardGame = new BoardGame(2, 4, "Chess", "Strategy game");
 
-    Event existingEvent = new Event(validEventName, validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, owner, boardGame
+    Event existingEvent = new Event(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS,
+        VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, owner, boardGame
     );
 
-    when(eventRepository.findByEventID(validEventId)).thenReturn(existingEvent);
+    when(eventRepository.findByEventID(VALID_EVENT_ID)).thenReturn(existingEvent);
     when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
     EventCreationDto updateDto = new EventCreationDto(
@@ -289,11 +291,11 @@ public class EventServiceTests {
         Date.valueOf(LocalDate.now().plusDays(10)),
         Time.valueOf(LocalTime.of(15, 0)),
         Time.valueOf(LocalTime.of(19, 0)),
-        "Updated Location", validPlayerId, validBoardGameId
+        "Updated Location", VALID_PLAYER_ID, VALID_BOARDGAME_ID
     );
 
     // Act
-    Event updatedEvent = eventService.updateEvent(validEventId, updateDto);
+    Event updatedEvent = eventService.updateEvent(VALID_EVENT_ID, updateDto);
 
     // Assert
     assertNotNull(updatedEvent);
@@ -306,7 +308,7 @@ public class EventServiceTests {
   }
 
   @Test
-  public void testUpdateEvent_NotFound() {
+  public void testUpdateEventNotFound() {
     when(eventRepository.findByEventID(999)).thenReturn(null); // No event with ID 999
 
     EventCreationDto updateDto = new EventCreationDto(
@@ -314,7 +316,7 @@ public class EventServiceTests {
         Date.valueOf(LocalDate.now().plusDays(10)),
         Time.valueOf(LocalTime.of(15, 0)),
         Time.valueOf(LocalTime.of(19, 0)),
-        "New Location", validPlayerId, validBoardGameId
+        "New Location", VALID_PLAYER_ID, VALID_BOARDGAME_ID
     );
 
     GlobalException e = assertThrows(GlobalException.class, () -> eventService.updateEvent(999, updateDto));
@@ -324,31 +326,31 @@ public class EventServiceTests {
   }
 
   @Test
-  public void testGetEventsByOwner_Valid() {
+  public void testGetEventsByOwnerValid() {
     // Arrange
     Player owner = new Player("John Doe", "john@example.com", "password", true);
     BoardGame boardGame = new BoardGame(2, 4, "Chess", "Chess Description");
 
-    Event event1 = new Event(validEventName, validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, owner, boardGame
+    Event event1 = new Event(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS, VALID_DATE,
+        VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, owner, boardGame
     );
-    Event event2 = new Event("Chess Battle", "Intense match", "8", validDate, validStartTime,
-        validEndTime, "Campus", owner, boardGame);
+    Event event2 = new Event("Chess Battle", "Intense match", "8", VALID_DATE, VALID_START_TIME,
+        VALID_END_TIME, "Campus", owner, boardGame);
     List<Event> events = List.of(event1, event2);
 
-    when(eventRepository.findByOwner_PlayerID(validPlayerId)).thenReturn(events);
+    when(eventRepository.findByOwner_PlayerID(VALID_PLAYER_ID)).thenReturn(events);
 
     // Act
-    List<Event> retrievedEvents = eventService.getEventsByOwner(validPlayerId);
+    List<Event> retrievedEvents = eventService.getEventsByOwner(VALID_PLAYER_ID);
 
     // Assert
     assertNotNull(retrievedEvents);
     assertEquals(2, retrievedEvents.size());
-    verify(eventRepository, times(1)).findByOwner_PlayerID(validPlayerId);
+    verify(eventRepository, times(1)).findByOwner_PlayerID(VALID_PLAYER_ID);
   }
 
   @Test
-  public void testGetEventsByOwner_NoEvents_ShouldThrowException() {
+  public void testGetEventsByOwnerNoEvents() {
     // Arrange
     int ownerId = 999; // Non-existent owner
     when(eventRepository.findByOwner_PlayerID(ownerId)).thenReturn(Collections.emptyList());
@@ -360,7 +362,7 @@ public class EventServiceTests {
 
 
   @Test
-  public void testGetEventsByGame_NoEvents_ShouldThrowException() {
+  public void testGetEventsByGameNoEvents() {
     // Arrange
     int gameId = 999; // Non-existent game
     when(eventRepository.findByBoardGame_GameID(gameId)).thenReturn(Collections.emptyList());
@@ -372,27 +374,27 @@ public class EventServiceTests {
 
 
   @Test
-  public void testGetEventsByGame_Valid() {
+  public void testGetEventsByGameValid() {
     // Arrange
     Player owner = new Player("John Doe", "john@example.com", "password", false);
     BoardGame boardGame = new BoardGame(2, 4, "Chess", "Chess Description");
 
-    Event event1 = new Event(validEventName, validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, owner, boardGame
+    Event event1 = new Event(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS, VALID_DATE,
+        VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, owner, boardGame
     );
-    Event event2 = new Event("Chess Battle", "Intense match", "8", validDate, validStartTime,
-        validEndTime, "Campus", owner, boardGame);
+    Event event2 = new Event("Chess Battle", "Intense match", "8", VALID_DATE, VALID_START_TIME,
+        VALID_END_TIME, "Campus", owner, boardGame);
     List<Event> events = List.of(event1, event2);
 
-    when(eventRepository.findByBoardGame_GameID(validBoardGameId)).thenReturn(events);
+    when(eventRepository.findByBoardGame_GameID(VALID_BOARDGAME_ID)).thenReturn(events);
 
     // Act
-    List<Event> retrievedEvents = eventService.getEventsByGame(validBoardGameId);
+    List<Event> retrievedEvents = eventService.getEventsByGame(VALID_BOARDGAME_ID);
 
     // Assert
     assertNotNull(retrievedEvents);
     assertEquals(2, retrievedEvents.size());
-    verify(eventRepository, times(1)).findByBoardGame_GameID(validBoardGameId);
+    verify(eventRepository, times(1)).findByBoardGame_GameID(VALID_BOARDGAME_ID);
   }
 
 }

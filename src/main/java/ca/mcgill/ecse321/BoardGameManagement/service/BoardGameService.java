@@ -21,9 +21,15 @@ public class BoardGameService {
   @SuppressWarnings("unused")
   private BoardGameRepository boardGameRepository;
 
+  /**
+   * Creates a new BoardGame and saves it to the database.
+   * Validates the input DTO before creation.
+   *
+   * @param boardGameDto DTO containing board game details.
+   * @return The saved BoardGame.
+   */
   @Transactional
   public BoardGame createBoardGame(@Valid BoardGameCreationDto boardGameDto) {
-
     validateBoardGameDto(boardGameDto);
 
     BoardGame boardGame = new BoardGame(
@@ -33,24 +39,26 @@ public class BoardGameService {
         boardGameDto.getDescription()
     );
 
-
     return boardGameRepository.save(boardGame);
   }
 
+  /**
+   * Updates an existing BoardGame with new details.
+   * Ensures the board game exists before updating.
+   *
+   * @param boardGameID The ID of the BoardGame to update.
+   * @param boardGameDto DTO containing updated board game details.
+   * @return The updated BoardGame.
+   */
   @Transactional
   public BoardGame updateBoardGame(int boardGameID, @Valid BoardGameCreationDto boardGameDto) {
-    // Fetch the existing board game from the repository
     BoardGame boardGame = boardGameRepository.findByGameID(boardGameID);
-
-    // If the board game does not exist, return 404 Not Found
     if (boardGame == null) {
       throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + boardGameID);
     }
 
     validateBoardGameDto(boardGameDto);
 
-
-    // Apply the updates after validation
     boardGame.setMinPlayers(boardGameDto.getMinPlayers());
     boardGame.setMaxPlayers(boardGameDto.getMaxPlayers());
     boardGame.setName(boardGameDto.getName());
@@ -59,13 +67,23 @@ public class BoardGameService {
     return boardGameRepository.save(boardGame);
   }
 
-
-
+  /**
+   * Retrieves all BoardGames from the database.
+   *
+   * @return A list of all BoardGames.
+   */
   @Transactional
   public List<BoardGame> getAllBoardGames() {
     return (List<BoardGame>) boardGameRepository.findAll();
   }
 
+  /**
+   * Retrieves a BoardGame by its ID.
+   * Throws an exception if the board game is not found.
+   *
+   * @param boardGameID The ID of the BoardGame.
+   * @return The BoardGame with the given ID.
+   */
   @Transactional
   public BoardGame getBoardGameById(int boardGameID) {
     BoardGame boardGame = boardGameRepository.findByGameID(boardGameID);
@@ -75,6 +93,12 @@ public class BoardGameService {
     return boardGame;
   }
 
+  /**
+   * Deletes a BoardGame by its ID.
+   * Ensures the board game exists before deletion.
+   *
+   * @param boardGameID The ID of the BoardGame to delete.
+   */
   @Transactional
   public void deleteBoardGame(int boardGameID) {
     if (!boardGameRepository.existsById(boardGameID)) {
@@ -83,6 +107,12 @@ public class BoardGameService {
     boardGameRepository.deleteById(boardGameID);
   }
 
+  /**
+   * Validates a BoardGameCreationDto before creating or updating a BoardGame.
+   * Throws an exception if any validation fails.
+   *
+   * @param boardGameDto The DTO containing BoardGame details.
+   */
   private void validateBoardGameDto(BoardGameCreationDto boardGameDto) {
     if (boardGameDto.getMinPlayers() <= 0) {
       throw new GlobalException(HttpStatus.BAD_REQUEST, "Minimum players must be at least 1.");
@@ -100,5 +130,4 @@ public class BoardGameService {
       throw new GlobalException(HttpStatus.BAD_REQUEST, "Board game description must not be empty or contain only spaces.");
     }
   }
-
 }

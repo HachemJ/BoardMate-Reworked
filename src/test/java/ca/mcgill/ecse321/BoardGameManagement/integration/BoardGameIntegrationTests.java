@@ -22,14 +22,14 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BoardGameIntegrationTests {
 
   @Autowired
+  @SuppressWarnings("unused")
   private TestRestTemplate client;
 
   @Autowired
+  @SuppressWarnings("unused")
   private BoardGameRepository boardGameRepository;
 
-  private BoardGame game1;
-
-  private BoardGame game2;
+    private BoardGame game2;
   private int createdGame1Id;
 
   private int createdGame2Id;
@@ -41,7 +41,7 @@ public class BoardGameIntegrationTests {
   @BeforeAll
   public void setup() {
     boardGameRepository.deleteAll();
-    game1 = boardGameRepository.save(new BoardGame(2, 6, "Monopoly", "A description"));
+      BoardGame game1 = boardGameRepository.save(new BoardGame(2, 6, "Monopoly", "A description"));
     game2 = boardGameRepository.save(new BoardGame(2, 6, "Chess", "A strategic board game"));
 
     //Game1 ID
@@ -197,7 +197,6 @@ public class BoardGameIntegrationTests {
   public void testDeleteBoardGameAndCheckUpdatedList() {
     boardGameRepository.deleteAll();
     BoardGame game1 = boardGameRepository.save(new BoardGame(2, 4, "Game1", "Test Game 1"));
-    BoardGame game2 = boardGameRepository.save(new BoardGame(3, 6, "Game2", "Test Game 2"));
     ResponseEntity<BoardGameResponseDto[]> initialResponse = client.getForEntity("/boardgames", BoardGameResponseDto[].class);
     int initialCount = initialResponse.getBody().length;
 

@@ -26,21 +26,23 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BoardGameCopyIntegrationTests {
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate client;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameCopyRepository boardGameCopyRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     private Player player1;
-    private Player player2;
     private BoardGame boardGame1;
-    private BoardGame boardGame2;
     private BoardGameCopy boardGameCopy1;
     private BoardGameCopy boardGameCopy2;
     private BoardGameCopy boardGameCopy3;
@@ -53,9 +55,9 @@ public class BoardGameCopyIntegrationTests {
         playerRepository.deleteAll();
 
         player1 = new Player("John", "john@gmail.com", "222", true);
-        player2 = new Player("Jane", "Jane@hotmail.com", "33333", true);
+        Player player2 = new Player("Jane", "Jane@hotmail.com", "33333", true);
         boardGame1 = new BoardGame(2, 8, "Monopoly", "Monopoly is a fun game");
-        boardGame2 = new BoardGame(2, 2, "Chess", "Chess is cool");
+        BoardGame boardGame2 = new BoardGame(2, 2, "Chess", "Chess is cool");
 
         player1 = playerRepository.save(player1);
         player2 = playerRepository.save(player2);
@@ -107,11 +109,11 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(1)
-    public void testCreateInvalidBoardGameCopy_nonexistentPlayer() {
+    public void testCreateInvalidBoardGameCopyNonexistentPlayer() {
 
         //Arrange
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
-                666, boardGame1.getGameID());
+                666, boardGame1.getGameID()); // Nonexistent player ID 666
 
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
@@ -124,11 +126,11 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(2)
-    public void testCreateInvalidBoardGameCopy_nonexistentBoardGame() {
+    public void testCreateInvalidBoardGameCopyNonexistentBoardGame() {
 
         //Arrange
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
-                player1.getPlayerID(), 55555);
+                player1.getPlayerID(), 55555); // Nonexistent board game ID 55555
 
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
@@ -141,10 +143,10 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(3)
-    public void testCreateInvalidBoardGameCopy_nullInput() {
+    public void testCreateInvalidBoardGameCopyNullInput() {
 
         //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", 0, 0);
+        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", 0, 0); // Null input
 
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
@@ -179,7 +181,7 @@ public class BoardGameCopyIntegrationTests {
     public void testFindBoardGameCopyByInvalidId() {
 
         //Act
-        String url = "/boardgamecopies/" + 666;
+        String url = "/boardgamecopies/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
 
         //Assert
@@ -191,10 +193,10 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(6)
-    public void testUpdateInvalidBoardGameCopy_emptySpecification() {
+    public void testUpdateInvalidBoardGameCopyEmptySpecification() {
 
         //Arrange
-        String body = "";
+        String body = ""; // Empty specification, should be caught by bean validation
 
         //Act
         String url = "/boardgamecopies/" + boardGameCopy1.getSpecificGameID();
@@ -235,7 +237,7 @@ public class BoardGameCopyIntegrationTests {
     public void testFindBoardGameCopiesByInvalidPlayerId() {
 
         //Act
-        String url = "/boardgamecopies/byplayer/" + 666;
+        String url = "/boardgamecopies/byplayer/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
 
         //Assert
@@ -272,7 +274,7 @@ public class BoardGameCopyIntegrationTests {
     public void testFindBoardGameCopiesByInvalidBoardGameId() {
 
         //Act
-        String url = "/boardgamecopies/byboardgame/" + 666;
+        String url = "/boardgamecopies/byboardgame/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
 
         //Assert
@@ -349,10 +351,10 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(14)
-    public void testDeleteInvalidBoardGameCopy_nonexistentId() {
+    public void testDeleteInvalidBoardGameCopyNonexistentId() {
 
         //Act
-        String url = "/boardgamecopies/" + 666;
+        String url = "/boardgamecopies/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.DELETE, null, ErrorDto.class);
 
         //Assert
@@ -364,7 +366,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(15)
-    public void testFindALlBoardGameCopies_empty() {
+    public void testFindALlBoardGameCopiesEmpty() {
 
         //Arrange
         boardGameCopyRepository.deleteAll();
@@ -374,19 +376,19 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode()); // No content is OKAY
         assertEquals(0, response.getBody().length);
     }
 
     @Test
     @Order(16)
-    public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
+    public void testUpdateInvalidBoardGameCopyNonexistentBoardGameCopyId() {
 
         //Arrange
         String body = "Updated specification";
 
         //Act
-        String url = "/boardgamecopies/" + 666;
+        String url = "/boardgamecopies/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, new HttpEntity<>(body),
                 ErrorDto.class);
 
@@ -399,7 +401,7 @@ public class BoardGameCopyIntegrationTests {
 
     @Test
     @Order(17)
-    public void testFindBoardGameCopiesByValidPlayerId_empty() {
+    public void testFindBoardGameCopiesByValidPlayerIdEmpty() {
 
         //Arrange
         boardGameCopyRepository.deleteAll();
@@ -410,13 +412,13 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode()); // No content is OKAY
         assertEquals(0, response.getBody().length);
     }
 
     @Test
     @Order(18)
-    public void testFindBoardGameCopiesByValidBoardGameId_empty() {
+    public void testFindBoardGameCopiesByValidBoardGameIdEmpty() {
 
         //Arrange
         boardGameCopyRepository.deleteAll();
@@ -427,7 +429,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode()); // No content is OKAY
         assertEquals(0, response.getBody().length);
     }
 }
