@@ -1,8 +1,10 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.*;
 import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.*;
+import ca.mcgill.ecse321.BoardGameManagement.dto.ErrorDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationCreationDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationResponseDto;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -94,7 +96,8 @@ public class RegistrationIntegrationTests {
     @Order(0)
     public void testCreateAndFindRegistration() {
         //Arrange
-        RegistrationCreationDto registrationBody = new RegistrationCreationDto(player.getPlayerID(), event.getEventID());
+        RegistrationCreationDto
+            registrationBody = new RegistrationCreationDto(player.getPlayerID(), event.getEventID());
         
         // Act
         ResponseEntity<RegistrationResponseDto> response = client.postForEntity("/registrations", registrationBody, RegistrationResponseDto.class);

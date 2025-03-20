@@ -1,13 +1,18 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.*;
-import ca.mcgill.ecse321.BoardGameManagement.model.*;
-import ca.mcgill.ecse321.BoardGameManagement.repository.*;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
+import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
+import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCreationDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameResponseDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.ErrorDto;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.*;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -62,7 +67,7 @@ public class BoardGameIntegrationTests {
   @Order(0)
   public void testCreateValidBoardGame() {
     BoardGameCreationDto request = new BoardGameCreationDto(2, 4, "Monopoly", "A trading board game");
-    ResponseEntity<BoardGameResponseDto> response = client.postForEntity("/BoardGames", request, BoardGameResponseDto.class);
+    ResponseEntity<BoardGameResponseDto> response = client.postForEntity("/boardgames", request, BoardGameResponseDto.class);
 
     assertNotNull(response.getBody());
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -76,7 +81,7 @@ public class BoardGameIntegrationTests {
   @Test
   @Order(1)
   public void testGetBoardGameById() {
-    ResponseEntity<BoardGameResponseDto> response = client.getForEntity("/BoardGames/" + createdGame2Id, BoardGameResponseDto.class);
+    ResponseEntity<BoardGameResponseDto> response = client.getForEntity("/boardgames/" + createdGame2Id, BoardGameResponseDto.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals(game2.getName(), response.getBody().getName());
@@ -88,7 +93,7 @@ public class BoardGameIntegrationTests {
   @Test
   @Order(2)
   public void testGetNonExistentBoardGame() {
-    ResponseEntity<ErrorDto> response = client.getForEntity("/BoardGames/99999", ErrorDto.class);
+    ResponseEntity<ErrorDto> response = client.getForEntity("/boardgames/99999", ErrorDto.class);
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().getErrors().contains("BoardGame not found with ID: 99999"));
@@ -101,7 +106,7 @@ public class BoardGameIntegrationTests {
   @Order(3)
   public void testUpdateBoardGame() {
     BoardGameCreationDto request = new BoardGameCreationDto(2, 8, "Updated Chess", "A more advanced version");
-    ResponseEntity<BoardGameResponseDto> response = client.exchange("/BoardGames/" + createdGame2Id, HttpMethod.PUT, new HttpEntity<>(request), BoardGameResponseDto.class);
+    ResponseEntity<BoardGameResponseDto> response = client.exchange("/boardgames/" + createdGame2Id, HttpMethod.PUT, new HttpEntity<>(request), BoardGameResponseDto.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertEquals("Updated Chess", response.getBody().getName());
@@ -113,7 +118,7 @@ public class BoardGameIntegrationTests {
   @Test
   @Order(4)
   public void testDeleteBoardGame() {
-    ResponseEntity<Void> response = client.exchange("/BoardGames/" + createdGame2Id, HttpMethod.DELETE, null, Void.class);
+    ResponseEntity<Void> response = client.exchange("/boardgames/" + createdGame2Id, HttpMethod.DELETE, null, Void.class);
     assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
   }
 
@@ -123,7 +128,7 @@ public class BoardGameIntegrationTests {
   @Test
   @Order(5)
   public void testDeleteNonExistentBoardGame() {
-    ResponseEntity<ErrorDto> response = client.exchange("/BoardGames/99999", HttpMethod.DELETE, null, ErrorDto.class);
+    ResponseEntity<ErrorDto> response = client.exchange("/boardgames/99999", HttpMethod.DELETE, null, ErrorDto.class);
     assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     assertNotNull(response.getBody());
 
@@ -139,7 +144,7 @@ public class BoardGameIntegrationTests {
   public void testUpdateBoardGameWithInvalidData() {
     BoardGameCreationDto request = new BoardGameCreationDto(-1, 0, "", "");
     ResponseEntity<ErrorDto> response =
-        client.exchange("/BoardGames/" + createdGame1Id, HttpMethod.PUT, new HttpEntity<>(request),
+        client.exchange("/boardgames/" + createdGame1Id, HttpMethod.PUT, new HttpEntity<>(request),
             ErrorDto.class);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -156,8 +161,8 @@ public class BoardGameIntegrationTests {
   @Test
   @Order(7)
   public void testDeleteBoardGameTwice() {
-    client.exchange("/BoardGames/" + createdGame2Id, HttpMethod.DELETE, null, Void.class);
-    ResponseEntity<ErrorDto> secondAttempt = client.exchange("/BoardGames/" + createdGame2Id, HttpMethod.DELETE, null, ErrorDto.class);
+    client.exchange("/boardgames/" + createdGame2Id, HttpMethod.DELETE, null, Void.class);
+    ResponseEntity<ErrorDto> secondAttempt = client.exchange("/boardgames/" + createdGame2Id, HttpMethod.DELETE, null, ErrorDto.class);
     assertEquals(HttpStatus.NOT_FOUND, secondAttempt.getStatusCode());
     assertNotNull(secondAttempt.getBody());
 
@@ -173,7 +178,7 @@ public class BoardGameIntegrationTests {
   @Order(8)
   public void testCreateBoardGameWithInvalidPlayerRange() {
     BoardGameCreationDto request = new BoardGameCreationDto(4, 2, "InvalidGame", "Max players < Min players");
-    ResponseEntity<ErrorDto> response = client.postForEntity("/BoardGames", request, ErrorDto.class);
+    ResponseEntity<ErrorDto> response = client.postForEntity("/boardgames", request, ErrorDto.class);
 
     assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     assertNotNull(response.getBody());
@@ -193,12 +198,12 @@ public class BoardGameIntegrationTests {
     boardGameRepository.deleteAll();
     BoardGame game1 = boardGameRepository.save(new BoardGame(2, 4, "Game1", "Test Game 1"));
     BoardGame game2 = boardGameRepository.save(new BoardGame(3, 6, "Game2", "Test Game 2"));
-    ResponseEntity<BoardGameResponseDto[]> initialResponse = client.getForEntity("/BoardGames", BoardGameResponseDto[].class);
+    ResponseEntity<BoardGameResponseDto[]> initialResponse = client.getForEntity("/boardgames", BoardGameResponseDto[].class);
     int initialCount = initialResponse.getBody().length;
 
-    client.exchange("/BoardGames/" + game1.getGameID(), HttpMethod.DELETE, null, Void.class);
+    client.exchange("/boardgames/" + game1.getGameID(), HttpMethod.DELETE, null, Void.class);
 
-    ResponseEntity<BoardGameResponseDto[]> updatedResponse = client.getForEntity("/BoardGames", BoardGameResponseDto[].class);
+    ResponseEntity<BoardGameResponseDto[]> updatedResponse = client.getForEntity("/boardgames", BoardGameResponseDto[].class);
     int updatedCount = updatedResponse.getBody().length;
 
     assertEquals(initialCount - 1, updatedCount);
@@ -211,7 +216,7 @@ public class BoardGameIntegrationTests {
   @Order(10)
   public void testGetAllBoardGamesWhenEmpty() {
     boardGameRepository.deleteAll();
-    ResponseEntity<BoardGameResponseDto[]> response = client.getForEntity("/BoardGames", BoardGameResponseDto[].class);
+    ResponseEntity<BoardGameResponseDto[]> response = client.getForEntity("/boardgames", BoardGameResponseDto[].class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(0, response.getBody().length);
   }
