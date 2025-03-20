@@ -28,7 +28,7 @@ public class PlayerServiceTests {
     @Mock
     private PlayerRepository playerRepository;
 
-    @InjectMocks
+    @InjectMocks //use injectMocks bc this is what we are testing
     private PlayerService playerService;
     @Mock
     private BoardGameCopyService boardGameCopyService;
@@ -65,7 +65,7 @@ public class PlayerServiceTests {
         // Arrange
         PlayerCreationDto dto = new PlayerCreationDto(VALID_NAME, VALID_EMAIL, VALID_PASSWORD, false);
         when(playerRepository.save(any(Player.class))).thenAnswer(
-            (InvocationOnMock invocation) -> invocation.getArgument(0));
+            (InvocationOnMock invocation) -> invocation.getArgument(0)); //Stubbing the Repository
 
         // Act
         Player createdPlayer = playerService.createPlayer(dto);
@@ -75,9 +75,9 @@ public class PlayerServiceTests {
         assertEquals(VALID_NAME, createdPlayer.getName());
         assertEquals(VALID_EMAIL, createdPlayer.getEmail());
         assertEquals(VALID_PASSWORD, createdPlayer.getPassword());
-        assertFalse(createdPlayer.getIsAOwner());  // Default should be false
+        assertFalse(createdPlayer.getIsAOwner());
 
-        verify(playerRepository, times(1)).save(any(Player.class));
+        verify(playerRepository, times(1)).save(any(Player.class)); //checks the method only called once
     }
 
     @Test
@@ -120,7 +120,7 @@ public class PlayerServiceTests {
         GlobalException exception = assertThrows(GlobalException.class, () ->
             playerService.togglePlayerOwner(invalidId, true)
         );
-        assertEquals("Player not found with ID: " + invalidId, exception.getMessage());
+        assertEquals("Player not found with ID: " + invalidId, exception.getMessage()); //check the error msg match
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 

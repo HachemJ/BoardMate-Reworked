@@ -27,6 +27,11 @@ public class PlayerService {
     @Autowired
     private BoardGameCopyService boardGameCopyService;
 
+    /**
+     * create a player object
+     * @param playerToCreate
+     * @return the player created
+     */
     @Transactional
     public Player createPlayer(@Valid PlayerCreationDto playerToCreate) {
 
@@ -39,6 +44,12 @@ public class PlayerService {
             playerToCreate.getPassword(), playerToCreate.getIsAOwner()); // Fixed line
         return playerRepository.save(pl);
     }
+
+    /**
+     * find a player by id
+     * @param pid
+     * @return the player found
+     */
     @Transactional
     public Player findPlayerById(int pid) {
         Player p = playerRepository.findByPlayerID(pid);
@@ -48,6 +59,10 @@ public class PlayerService {
         return p;
     }
 
+    /**
+     * get all players
+     * @return a list containing all players
+     */
     public List<Player> findAllPlayers() {
         return (List<Player>) playerRepository.findAll();
     }
@@ -60,6 +75,13 @@ public class PlayerService {
         }
         return (List<Player>) owners;
     }
+
+    /**
+     * update the attributes of a player
+     * @param pid
+     * @param playerDto
+     * @return the updated player
+     */
     @Transactional
     public Player updatePlayer(int pid, @Valid PlayerCreationDto playerDto) {
         Player p = playerRepository.findByPlayerID(pid);
@@ -79,6 +101,12 @@ public class PlayerService {
         return playerRepository.save(p);
     }
 
+    /**
+     * toggle the owner status ; if already owner, board game copies will be deleted
+     * @param pid
+     * @param b
+     * @return the player updated
+     */
     @Transactional
     public Player togglePlayerOwner(int pid, boolean b) {
         Player p = playerRepository.findByPlayerID(pid);
@@ -94,7 +122,11 @@ public class PlayerService {
         return playerRepository.save(p);
     }
 
-
+    /**
+     * enables the login use case
+     * @param loginRequestDto
+     * @return the player that the user is, if credentials correct
+     */
     public Player login(@Valid LoginRequestDto loginRequestDto) {
 
         Player player = playerRepository.findByEmail(loginRequestDto.getEmail());

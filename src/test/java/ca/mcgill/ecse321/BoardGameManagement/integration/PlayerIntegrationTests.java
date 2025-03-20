@@ -31,7 +31,7 @@ public class PlayerIntegrationTests {
     private static int createdPlayerId;
     private static final String TEST_EMAIL = "test@email.com";
 
-    @BeforeEach
+    @BeforeEach //so that we have a clean database
     public void setupTestData() {
         playerRepository.deleteAll(); // Clear before each test
     }
@@ -49,7 +49,7 @@ public class PlayerIntegrationTests {
         assertTrue(createdPlayerId > 0);
     }
 
-    @Test
+    @Test //should get bad request bc null inputs fails the Spring Validation @NotBlank
     public void createInvalidPlayerNullInputs() {
         PlayerCreationDto invalidDto = new PlayerCreationDto(null, null, null, false);
 
@@ -62,7 +62,7 @@ public class PlayerIntegrationTests {
 
     @Test
     public void getPlayerByID() {
-        // Create fresh player for this test
+        // Create a new player
         PlayerCreationDto dto = new PlayerCreationDto("Temp User", "temp@email.com", "pass", true);
         ResponseEntity<PlayerRespDto> createResponse =
                 client.postForEntity("/players", dto, PlayerRespDto.class);
@@ -145,8 +145,8 @@ public class PlayerIntegrationTests {
         // Verify all created players exist in response
         boolean foundUser1 = false, foundUser2 = false;
         for (PlayerRespDto p : players) {
-            if (p.getName().equals("User1") && p.getEmail().equals("user1@test.com")) foundUser1 = true;
-            if (p.getName().equals("User2") && p.getEmail().equals("user2@test.com")) foundUser2 = true;
+            if (p.getName().equals("User1") && p.getEmail().equals("user1@test.com") && !p.getIsAOwner()) foundUser1 = true;
+            if (p.getName().equals("User2") && p.getEmail().equals("user2@test.com") && p.getIsAOwner()) foundUser2 = true;
         }
         assertTrue(foundUser1 && foundUser2);
     }

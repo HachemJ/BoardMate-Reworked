@@ -19,6 +19,11 @@ public class PlayerController {
     @Autowired
     private PlayerService playerService;
 
+    /**
+     * handles the request to create a player
+     * @param playerToCreate
+     * @return
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PlayerRespDto createPlayer(@RequestBody PlayerCreationDto playerToCreate) {
@@ -26,6 +31,12 @@ public class PlayerController {
         return new PlayerRespDto(createdPlayer);
     }
 
+    /**
+     * handles the request to update an existing player
+     * @param id
+     * @param playerDto
+     * @return the player created through response DTO
+     */
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto updatePlayer(@PathVariable int id, @RequestBody PlayerCreationDto playerDto) {
@@ -33,6 +44,12 @@ public class PlayerController {
         return new PlayerRespDto(updatedPlayer);
     }
 
+    /**
+     * change a player to owner and vice versa
+     * @param id
+     * @param q
+     * @return the player updated through DTO
+     */
     @PutMapping("/{id}/toggle-owner")
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto togglePlayerOwner(
@@ -42,6 +59,11 @@ public class PlayerController {
         return new PlayerRespDto(updatedPlayer);
     }
 
+    /**
+     * find a player by his/her id
+     * @param id
+     * @return the player found as a DTO
+     */
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto findPlayerById(@PathVariable int id) {
@@ -49,6 +71,10 @@ public class PlayerController {
         return new PlayerRespDto(playerFound);
     }
 
+    /**
+     * retrieve all players
+     * @return an arraylist of player response DTO
+     */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public ArrayList<PlayerRespDto> getAllPlayers() {
@@ -59,6 +85,10 @@ public class PlayerController {
         return playerDTOs;
     }
 
+    /**
+     * find all owners
+     * @return an arraylist of owners (as player resp dto)
+     */
     @GetMapping("/owners")
     @ResponseStatus(HttpStatus.OK)
     public ArrayList<PlayerRespDto> getAllOwners() {
@@ -69,6 +99,11 @@ public class PlayerController {
         return ownerDTOs;
     }
 
+    /**
+     * enables a user to login
+     * @param loginRequestDto
+     * @return a player resp dto
+     */
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto login(@RequestBody LoginRequestDto loginRequestDto) {
