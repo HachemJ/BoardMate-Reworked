@@ -33,15 +33,15 @@ public class EventIntegrationTests {
   private TestRestTemplate client; // Provides HTTP client for integration tests
 
 
-  private static final String validEventName = "Chess Tournament";
-  private static final String validEventDescription = "Friendly chess match.";
-  private static final String validMaxSpots = "20";
-  private static final Date validDate = Date.valueOf(LocalDate.now().plusDays(7));
-  private static final Time validStartTime = Time.valueOf(LocalTime.of(14, 0));
-  private static final Time validEndTime = Time.valueOf(LocalTime.of(18, 0));
-  private static final String validLocation = "McGill";
-  private static final int validPlayerId = 1;
-  private static final int validBoardGameId = 2;
+  private static final String VALID_EVENT_NAME = "Chess Tournament";
+  private static final String VALID_EVENT_DESCRIPTION = "Friendly chess match.";
+  private static final String VALID_MAX_SPOTS = "20";
+  private static final Date VALID_DATE = Date.valueOf(LocalDate.now().plusDays(7));
+  private static final Time VALID_START_TIME = Time.valueOf(LocalTime.of(14, 0));
+  private static final Time VALID_END_TIME = Time.valueOf(LocalTime.of(18, 0));
+  private static final String VALID_LOCATION = "McGill";
+  private static final int VALID_PLAYER_ID = 1;
+  private static final int VALID_BOARDGAME_ID = 2;
 
   @Autowired
   @SuppressWarnings("unused")
@@ -79,8 +79,8 @@ public class EventIntegrationTests {
 
     // Create the Event with the valid entity IDs
     EventCreationDto eventBody =
-        new EventCreationDto(validEventName, validEventDescription, validMaxSpots, validDate, validStartTime,
-            validEndTime, validLocation, player.getPlayerID(), boardGame.getGameID());
+        new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS, VALID_DATE,
+            VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, player.getPlayerID(), boardGame.getGameID());
 
     // Act: Send POST request to create event
     ResponseEntity<EventResponseDto> response = client.postForEntity("/events", eventBody, EventResponseDto.class);
@@ -98,8 +98,9 @@ public class EventIntegrationTests {
   @Test
   public void testCreateEventWithEmptyName() {
     // Arrange: Create an event with an empty name
-    EventCreationDto body = new EventCreationDto("", validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, validPlayerId, validBoardGameId);
+    EventCreationDto body = new EventCreationDto("", VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS,
+        VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, VALID_PLAYER_ID,
+        VALID_BOARDGAME_ID);
 
     // Act: Send POST request to create event
     ResponseEntity<ErrorDto> response = client.postForEntity("/events", body, ErrorDto.class);
@@ -117,8 +118,8 @@ public class EventIntegrationTests {
   public void testCreateEventWithNegativeMaxSpots() {
     // Arrange
     EventCreationDto body =
-        new EventCreationDto(validEventName, validEventDescription, "-5", validDate, validStartTime,
-            validEndTime, validLocation, validPlayerId, validBoardGameId);
+        new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, "-5", VALID_DATE,
+            VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, VALID_PLAYER_ID, VALID_BOARDGAME_ID);
 
     // Act
     ResponseEntity<ErrorDto> response = client.postForEntity("/events", body, ErrorDto.class);
@@ -143,8 +144,8 @@ public class EventIntegrationTests {
     boardGame = boardGameRepository.save(boardGame);
 
     // Arrange: Create an event
-    EventCreationDto eventBody = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation,
+    EventCreationDto eventBody = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION,
         player.getPlayerID(), boardGame.getGameID());
     ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", eventBody, EventResponseDto.class);
     int eventId = createdEvent.getBody().getEventID();
@@ -186,8 +187,8 @@ public class EventIntegrationTests {
     BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Catan", "Strategy game"));
 
     EventCreationDto eventBody =
-        new EventCreationDto(validEventName, validEventDescription, validMaxSpots, validDate, validStartTime,
-            validEndTime, validLocation, player.getPlayerID(), boardGame.getGameID());
+        new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS, VALID_DATE,
+            VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, player.getPlayerID(), boardGame.getGameID());
 
     ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", eventBody, EventResponseDto.class);
     assertEquals(HttpStatus.CREATED, createdEvent.getStatusCode());
@@ -211,8 +212,8 @@ public class EventIntegrationTests {
     Player player = playerRepository.save(new Player("Temp User", "temp@mail.com", "pass", false));
     BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Checkers", "Simple game"));
 
-    EventCreationDto eventBody = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation,
+    EventCreationDto eventBody = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION,
         player.getPlayerID(), boardGame.getGameID());
     ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", eventBody, EventResponseDto.class);
     int eventId = createdEvent.getBody().getEventID();
@@ -230,7 +231,7 @@ public class EventIntegrationTests {
    * Test case: Attempting to delete an event that does not exist.
    */
   @Test
-  public void testDeleteEvent_NotFound() {
+  public void testDeleteEventNotFound() {
     // Arrange
     String url = "/events/999999"; // Non-existent ID
 
@@ -249,20 +250,20 @@ public class EventIntegrationTests {
    * Test case: Updating an existing event should change its details.
    */
   @Test
-  public void testUpdateEvent_Success() {
+  public void testUpdateEventSuccess() {
     // Arrange: Create an event first
     Player player = playerRepository.save(new Player("Temp User", "temp@mail.com", "pass", false));
     BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Catan", "Strategy game"));
 
-    EventCreationDto createBody = new EventCreationDto(validEventName, validEventDescription,
-        validMaxSpots, validDate, validStartTime, validEndTime, validLocation,
+    EventCreationDto createBody = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION,
         player.getPlayerID(), boardGame.getGameID());
     ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", createBody, EventResponseDto.class);
     int eventId = createdEvent.getBody().getEventID();
 
     // Act: Update event details
     EventCreationDto updateBody = new EventCreationDto("Updated Event", "Updated Description",
-        validMaxSpots, validDate, validStartTime, validEndTime, "Updated Location",
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, "Updated Location",
         player.getPlayerID(), boardGame.getGameID());
     ResponseEntity<EventResponseDto> response = client.exchange(String.format("/events/%d", eventId),
         HttpMethod.PUT, new HttpEntity<>(updateBody), EventResponseDto.class);
@@ -277,13 +278,13 @@ public class EventIntegrationTests {
    * Test case: Creating an event with a non-existent owner.
    */
   @Test
-  public void testCreateEvent_NoOwner() {
+  public void testCreateEventNoOwner() {
     // Arrange
     BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Chess", "Classic game"));
 
     EventCreationDto body =
-        new EventCreationDto("No Owner Event", "This should fail.", "10", validDate, validStartTime,
-            validEndTime, "Library", 999999, // Non-existent Player ID
+        new EventCreationDto("No Owner Event", "This should fail.", "10", VALID_DATE,
+            VALID_START_TIME, VALID_END_TIME, "Library", 999999, // Non-existent Player ID
             boardGame.getGameID());
 
     // Act
@@ -300,7 +301,7 @@ public class EventIntegrationTests {
    * Test case: Retrieving all events when the database is empty.
    */
   @Test
-  public void testGetAllEvents_EmptyDatabase() {
+  public void testGetAllEventsEmptyDatabase() {
     // Arrange
     eventRepository.deleteAll();
 
@@ -317,11 +318,11 @@ public class EventIntegrationTests {
    * Test case: Attempting to update a non-existent event.
    */
   @Test
-  public void testUpdateEvent_NotFound() {
+  public void testUpdateEventNotFound() {
     // Arrange
     EventCreationDto updateBody = new EventCreationDto(
-        "Updated Event", "Updated Description", "25", validDate, validStartTime, validEndTime,
-        "Updated Location", validPlayerId, validBoardGameId
+        "Updated Event", "Updated Description", "25", VALID_DATE, VALID_START_TIME, VALID_END_TIME,
+        "Updated Location", VALID_PLAYER_ID, VALID_BOARDGAME_ID
     );
 
     // Act
@@ -340,14 +341,14 @@ public class EventIntegrationTests {
    * Test case: Attempting to update an event with invalid data.
    */
   @Test
-  public void testUpdateEvent_InvalidData() {
+  public void testUpdateEventInvalidData() {
     // Arrange
     Player player = playerRepository.save(new Player("User", "user@mail.com", "pass", false));
     BoardGame boardGame = boardGameRepository.save(new BoardGame(2, 4, "Catan", "Strategy"));
 
     EventCreationDto createBody =
-        new EventCreationDto(validEventName, validEventDescription, validMaxSpots, validDate, validStartTime,
-            validEndTime, validLocation, player.getPlayerID(), boardGame.getGameID());
+        new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION, VALID_MAX_SPOTS, VALID_DATE,
+            VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, player.getPlayerID(), boardGame.getGameID());
 
     ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", createBody, EventResponseDto.class);
     int eventId = createdEvent.getBody().getEventID();
@@ -392,9 +393,8 @@ public class EventIntegrationTests {
     boardGame = boardGameRepository.save(boardGame);
 
     // Arrange: Create an event associated with the owner
-    EventCreationDto eventBody = new EventCreationDto(
-        validEventName, validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, player.getPlayerID(), boardGame.getGameID()
+    EventCreationDto eventBody = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, player.getPlayerID(), boardGame.getGameID()
     );
 
     ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", eventBody, EventResponseDto.class);
@@ -407,7 +407,7 @@ public class EventIntegrationTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().length > 0, "There should be at least one event associated with this owner.");
-    assertEquals(validEventName, response.getBody()[0].getName());
+    assertEquals(VALID_EVENT_NAME, response.getBody()[0].getName());
   }
 
   /**
@@ -423,9 +423,8 @@ public class EventIntegrationTests {
     boardGame = boardGameRepository.save(boardGame);
 
     // Arrange: Create an event associated with the board game
-    EventCreationDto eventBody = new EventCreationDto(
-        validEventName, validEventDescription, validMaxSpots, validDate,
-        validStartTime, validEndTime, validLocation, player.getPlayerID(), boardGame.getGameID()
+    EventCreationDto eventBody = new EventCreationDto(VALID_EVENT_NAME, VALID_EVENT_DESCRIPTION,
+        VALID_MAX_SPOTS, VALID_DATE, VALID_START_TIME, VALID_END_TIME, VALID_LOCATION, player.getPlayerID(), boardGame.getGameID()
     );
 
     ResponseEntity<EventResponseDto> createdEvent = client.postForEntity("/events", eventBody, EventResponseDto.class);
@@ -438,6 +437,6 @@ public class EventIntegrationTests {
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertNotNull(response.getBody());
     assertTrue(response.getBody().length > 0, "There should be at least one event associated with this board game.");
-    assertEquals(validEventName, response.getBody()[0].getName());
+    assertEquals(VALID_EVENT_NAME, response.getBody()[0].getName());
   }
 }
