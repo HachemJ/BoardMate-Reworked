@@ -20,22 +20,30 @@ import java.util.ArrayList;
 public class BorrowRequestService {
 
     @Autowired
+    @SuppressWarnings("unused")
     private BorrowRequestRepository borrowRequestRepository;
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameCopyRepository boardGameCopyRepository;
 
 
     public BorrowRequestService() {}
 
-
+    /**
+     *  private method to ensure ids are valid
+     */
     private void checkValidId(int Id, String type){
         if (Id <= 0){
             throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s %d is invalid", type, Id));
         }
     }
 
+    /**
+     * private method to check that dto is not null
+     */
     private void checkNotNull(Object tested){
         if (tested == null){
             throw new GlobalException(HttpStatus.BAD_REQUEST, String.format("The inputted %s is null", "requestDTO"));

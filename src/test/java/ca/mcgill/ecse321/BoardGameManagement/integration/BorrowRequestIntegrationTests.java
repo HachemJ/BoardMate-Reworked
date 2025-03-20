@@ -30,15 +30,20 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BorrowRequestIntegrationTests {
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate client; //this is the client we're communicating with through Http
 
     @Autowired
+    @SuppressWarnings("unused")
     private BorrowRequestRepository borrowRequestRepository;
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameCopyRepository boardGameCopyRepository;
 
     private static final Date startDate = Date.valueOf(LocalDate.now().plusDays(3));

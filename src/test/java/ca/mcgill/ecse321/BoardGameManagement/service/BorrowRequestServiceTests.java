@@ -49,6 +49,7 @@ public class BorrowRequestServiceTests {
     @BeforeEach
     public void setup() {
         borrowRequestRepository.deleteAll();
+        //create necessary objects for testing
 
         requester1 = new Player("requester1", "requester1@mail", "PPassword1", false);
         requester2 = new Player("requester2", "requester2@mail", "PPassword2", false);
@@ -175,7 +176,6 @@ public class BorrowRequestServiceTests {
         assertEquals( String.format("Borrow end time %s cannot be earlier than start time %s",
                 badEndDate, badStartDate), e.getMessage());
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
-
         //check the returned event exception is the right one (status and message are the ones expected)
     }
 
@@ -384,10 +384,6 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    /*
-     * All methods tested after this one use this to find the BorrowRequest they need.
-     * They will therefore not be tested for null input since this test proves it works.
-     */
     public void getUnsuccessfulBorrowRequest_zeroInput() {
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.getBorrowRequest(0));
