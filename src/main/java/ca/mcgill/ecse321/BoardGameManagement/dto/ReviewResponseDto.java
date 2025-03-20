@@ -70,7 +70,7 @@ public class ReviewResponseDto {
         this.reviewID = review.getReviewID();
         this.rating = review.getRating();
         this.comment = review.getComment();
-        this.commentDate = review.getCommentDate().toLocalDate();
+        this.commentDate = review.getCommentDate();
         this.author = review.getAuthor();
         this.boardGame = review.getBoardGame();
     }

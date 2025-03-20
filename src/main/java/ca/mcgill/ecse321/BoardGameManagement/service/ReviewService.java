@@ -1,21 +1,24 @@
 package ca.mcgill.ecse321.BoardGameManagement.service;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewCreationDto;
-import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
-import ca.mcgill.ecse321.BoardGameManagement.model.*;
-import ca.mcgill.ecse321.BoardGameManagement.repository.*;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
-import jakarta.transaction.Transactional;
-
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewCreationDto;
+import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
+import ca.mcgill.ecse321.BoardGameManagement.model.Player;
+import ca.mcgill.ecse321.BoardGameManagement.model.Review;
+import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
+import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
+import ca.mcgill.ecse321.BoardGameManagement.repository.ReviewRepository;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 
 @Service
 @Validated
@@ -36,7 +39,8 @@ public class ReviewService {
     /**
      * creates a review in the db
      * @param reviewDto review info passed from front end
-     * @return Review creates
+     * @return created review
+     * @throws GlobalException if player or boardgame not found, rating is invalid, or review is null
      */
     @Transactional
     public Review createReview(@Valid ReviewCreationDto reviewDto) {
@@ -63,7 +67,7 @@ public class ReviewService {
         }
 
 
-        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), Date.valueOf(LocalDate.now()), player, boardGame);
+        Review review = new Review(reviewDto.getRating(), reviewDto.getComment(), LocalDate.now(), player, boardGame);
         return reviewRepository.save(review);
     }
 
@@ -71,7 +75,8 @@ public class ReviewService {
      * Updates the review with the given id
      * @param reviewId review id to update
      * @param reviewDto new info to put in
-     * @return changes review
+     * @return updated review
+     * @throws GlobalException if review not found
      */
     @Transactional
     public Review updateReview(int reviewId, @Valid ReviewCreationDto reviewDto) {
@@ -81,13 +86,14 @@ public class ReviewService {
         Review review = reviewRepository.findByReviewID(reviewId);
         review.setRating(reviewDto.getRating());
         review.setComment(reviewDto.getComment());
-        review.setCommentDate(Date.valueOf(reviewDto.getCommentDate()));
+        review.setCommentDate(reviewDto.getCommentDate());
 
         return reviewRepository.save(review);
     }
 
     /**
      * Returns all reviews from the database
+     * @return all reviews
      */
     public ArrayList<Review> getAllReviews() {
         return (ArrayList<Review>) reviewRepository.findAll();
@@ -95,6 +101,9 @@ public class ReviewService {
 
     /**
      * Returns a review from the database, based on its ID
+     * @param reviewId review id to get
+     * @return review with that id
+     * @throws GlobalException if review not found
      */
     public Review getReviewById(int reviewId) {
         if (!reviewRepository.existsById(reviewId)) {
@@ -105,6 +114,8 @@ public class ReviewService {
     
     /**
      * Deletes a review from the database, based on its ID
+     * @param reviewId review id to delete
+     * @throws GlobalException if review not found
      */
     @Transactional
     public void deleteReview(int reviewId) {
