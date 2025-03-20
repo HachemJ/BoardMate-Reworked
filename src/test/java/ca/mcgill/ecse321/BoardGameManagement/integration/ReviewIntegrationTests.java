@@ -99,7 +99,7 @@ public class ReviewIntegrationTests {
     public void createValidReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
 
-        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -120,7 +120,7 @@ public class ReviewIntegrationTests {
     public void createInvalidReviewsBadRating() {
         ReviewCreationDto dto = new ReviewCreationDto(9999999, comment, date, playerID, boardGameID);
 
-        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -135,7 +135,7 @@ public class ReviewIntegrationTests {
         //test nonexistent player
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, invalidID, boardGameID);
 
-        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -150,7 +150,7 @@ public class ReviewIntegrationTests {
         //test nonexistent player
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, playerID, invalidID);
 
-        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -163,14 +163,14 @@ public class ReviewIntegrationTests {
     @Order(4)
     public void findExistingReviewById() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
-        ResponseEntity<ReviewResponseDto> createResponse = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> createResponse = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(createResponse.getBody());
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
 
         int reviewID = createResponse.getBody().getReviewID();
 
-        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/Reviews/" + reviewID, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/reviews/" + reviewID, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -185,7 +185,7 @@ public class ReviewIntegrationTests {
     @Test
     @Order(5)
     public void findNonExistingReviewById() {
-        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/Reviews/" + invalidID, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/reviews/" + invalidID, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -197,13 +197,13 @@ public class ReviewIntegrationTests {
     @Test
     @Order(6)
     public void findAllReviews() {
-        client.postForEntity("/Reviews", new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
-        client.postForEntity("/Reviews", new ReviewCreationDto(rating + 1, comment + "2", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
-        client.postForEntity("/Reviews", new ReviewCreationDto(rating + 2, comment + "3", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
+        client.postForEntity("/reviews", new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
+        client.postForEntity("/reviews", new ReviewCreationDto(rating + 1, comment + "2", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
+        client.postForEntity("/reviews", new ReviewCreationDto(rating + 2, comment + "3", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
 
 
         ResponseEntity<List<ReviewResponseDto>> response = client.exchange(
-                "/Reviews/",
+                "/reviews/",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<>() {
@@ -223,7 +223,7 @@ public class ReviewIntegrationTests {
     @Order(7)
     public void findAllReviewsNoReviews() {
         ResponseEntity<List<ReviewResponseDto>> response = client.exchange(
-                "/Reviews/",
+                "/reviews/",
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<>() {
@@ -243,7 +243,7 @@ public class ReviewIntegrationTests {
     public void updateReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, playerID, boardGameID);
 
-        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -258,7 +258,7 @@ public class ReviewIntegrationTests {
 
         ReviewCreationDto updatedDto = new ReviewCreationDto(1, "new comment", LocalDate.now(), playerID, boardGameID);
 
-        ResponseEntity<ReviewResponseDto> updatedResponse = client.exchange("/Reviews/" + createdReview.getReviewID(), HttpMethod.PUT, new HttpEntity<>(updatedDto), ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> updatedResponse = client.exchange("/reviews/" + createdReview.getReviewID(), HttpMethod.PUT, new HttpEntity<>(updatedDto), ReviewResponseDto.class);
 
         assertNotNull(updatedResponse.getBody());
         assertEquals(HttpStatus.OK, updatedResponse.getStatusCode());
@@ -280,7 +280,7 @@ public class ReviewIntegrationTests {
     public void updateNonExistentReview() {
         ReviewCreationDto updatedDto = new ReviewCreationDto(1, "new comment", LocalDate.now(), playerID, boardGameID);
 
-        ResponseEntity<ReviewResponseDto> updatedResponse = client.exchange("/Reviews/" + invalidID, HttpMethod.PUT, new HttpEntity<>(updatedDto), ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> updatedResponse = client.exchange("/reviews/" + invalidID, HttpMethod.PUT, new HttpEntity<>(updatedDto), ReviewResponseDto.class);
 
         assertNotNull(updatedResponse.getBody());
         assertEquals(HttpStatus.NOT_FOUND, updatedResponse.getStatusCode());
@@ -293,17 +293,17 @@ public class ReviewIntegrationTests {
     @Order(10)
     public void deleteReview() {
         ReviewCreationDto dto = new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
-        ResponseEntity<ReviewResponseDto> createResponse = client.postForEntity("/Reviews", dto, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> createResponse = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(createResponse.getBody());
         assertEquals(HttpStatus.CREATED, createResponse.getStatusCode());
 
         int reviewID = createResponse.getBody().getReviewID();
 
-        client.delete("/Reviews/" + reviewID);
+        client.delete("/reviews/" + reviewID);
 
         //get response. Should be 404 not found, since it is deleted.
-        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/Reviews/" + reviewID, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/reviews/" + reviewID, ReviewResponseDto.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -314,9 +314,9 @@ public class ReviewIntegrationTests {
     @Test
     @Order(11)
     public void deleteNonExistentReview() {
-        client.delete("/Reviews/" + invalidID);
+        client.delete("/reviews/" + invalidID);
 
-        ResponseEntity<String> response = client.getForEntity("/Reviews/" + invalidID, String.class);
+        ResponseEntity<String> response = client.getForEntity("/reviews/" + invalidID, String.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }

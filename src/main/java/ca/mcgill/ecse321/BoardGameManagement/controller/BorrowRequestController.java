@@ -18,7 +18,7 @@ public class BorrowRequestController {
     @Autowired
     private BorrowRequestService borrowRequestService;
 
-    @PostMapping("/BorrowRequests")
+    @PostMapping("/borrowrequests")
     @ResponseStatus(HttpStatus.CREATED)
     public BorrowRequestResponseDTO createBorrowRequest(@RequestBody BorrowRequestCreationDTO newRequest) {
         BorrowRequest request = borrowRequestService.createBorrowRequest(newRequest);
@@ -27,7 +27,7 @@ public class BorrowRequestController {
 
     }
 
-    @GetMapping("/BorrowRequests")
+    @GetMapping("/borrowrequests")
     public List<BorrowRequestResponseDTO> getAllBorrowRequestsByOwner(@RequestParam int ownerId) {
 
         List<BorrowRequest> requests = borrowRequestService.getBorrowRequestsByOwner(ownerId);
@@ -37,7 +37,7 @@ public class BorrowRequestController {
 
     }
 
-    @GetMapping("/BorrowRequests/{requestId}")
+    @GetMapping("/borrowrequests/{requestId}")
     public BorrowRequestResponseDTO getBorrowRequest(@PathVariable int requestId) {
         BorrowRequest request = borrowRequestService.getBorrowRequest(requestId);
 
@@ -45,7 +45,7 @@ public class BorrowRequestController {
     }
 
 
-    @PutMapping("/BorrowRequests/{requestId}")
+    @PutMapping("/borrowrequests/{requestId}")
     public BorrowRequestResponseDTO manageBorrowRequest(@PathVariable int requestId, @RequestParam(defaultValue = "") String action) {
         if (action.isEmpty()) {
             throw new GlobalException(HttpStatus.BAD_REQUEST,
@@ -67,7 +67,7 @@ public class BorrowRequestController {
     }
 
 
-    @PutMapping("/BorrowRequests/{requestId}/boardGameCopy")
+    @PutMapping("/borrowrequests/{requestId}/boardGameCopy")
 
     public void manageBorrowedGameAvailability(@PathVariable int requestId, @RequestParam(defaultValue ="") String confirmOrCancel) {
         if (confirmOrCancel.isEmpty()) {
@@ -83,7 +83,7 @@ public class BorrowRequestController {
 
     }
 
-    @DeleteMapping("/BorrowRequests/{requestId}")
+    @DeleteMapping("/borrowrequests/{requestId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBorrowRequest(@PathVariable int requestId) {
         borrowRequestService.deleteBorrowRequest(requestId);

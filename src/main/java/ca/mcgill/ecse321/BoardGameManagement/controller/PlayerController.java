@@ -1,5 +1,6 @@
 package ca.mcgill.ecse321.BoardGameManagement.controller;
 
+import ca.mcgill.ecse321.BoardGameManagement.dto.LoginRequestDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.PlayerRespDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
@@ -32,6 +33,15 @@ public class PlayerController {
         return new PlayerRespDto(updatedPlayer);
     }
 
+    @PutMapping("/{id}/toggle-owner")
+    @ResponseStatus(HttpStatus.OK)
+    public PlayerRespDto togglePlayerOwner(
+        @PathVariable int id,
+        @RequestParam(required = true) boolean q) {
+        Player updatedPlayer = playerService.togglePlayerOwner(id, q);
+        return new PlayerRespDto(updatedPlayer);
+    }
+
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto findPlayerById(@PathVariable int id) {
@@ -59,5 +69,10 @@ public class PlayerController {
         return ownerDTOs;
     }
 
-
+    @PostMapping("/login")
+    @ResponseStatus(HttpStatus.OK)
+    public PlayerRespDto login(@RequestBody LoginRequestDto loginRequestDto) {
+        Player loggedInPlayer = playerService.login(loginRequestDto);
+        return new PlayerRespDto(loggedInPlayer);
+    }
 }

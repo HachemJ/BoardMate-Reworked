@@ -1,8 +1,10 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
-import ca.mcgill.ecse321.BoardGameManagement.dto.*;
 import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.*;
+import ca.mcgill.ecse321.BoardGameManagement.dto.ErrorDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationCreationDto;
+import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationResponseDto;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -35,15 +38,17 @@ public class RegistrationIntegrationTests {
 
     @Autowired
     private RegistrationRepository registrationRepository;
-
+    
+    public int createdEventId;
+    public int createdPlayerId;
     private Player player;
     private Player player2;
     private Event event;
     private Event event2;
     private static final String eventName = "Clue Event";
     private static final String eventDescription = "Clue Event Description";
-    private static final Date eventDate = Date.valueOf("2025-02-16");
-    private static final Date eventDate2 = Date.valueOf("2025-03-16");
+    private static final Date eventDate = Date.valueOf(LocalDate.now().plusDays(7));
+    private static final Date eventDate2 = Date.valueOf(LocalDate.now().plusDays(10));
     private static final Time startTime = Time.valueOf("17:00:00");
     private static final Time endTime = Time.valueOf("20:00:00");
     private static final String maxLimit = "6";
@@ -91,7 +96,8 @@ public class RegistrationIntegrationTests {
     @Order(0)
     public void testCreateAndFindRegistration() {
         //Arrange
-        RegistrationCreationDto registrationBody = new RegistrationCreationDto(player.getPlayerID(), event.getEventID());
+        RegistrationCreationDto
+            registrationBody = new RegistrationCreationDto(player.getPlayerID(), event.getEventID());
         
         // Act
         ResponseEntity<RegistrationResponseDto> response = client.postForEntity("/registrations", registrationBody, RegistrationResponseDto.class);
