@@ -26,21 +26,23 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BoardGameCopyIntegrationTests {
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate client;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameCopyRepository boardGameCopyRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     private Player player1;
-    private Player player2;
     private BoardGame boardGame1;
-    private BoardGame boardGame2;
     private BoardGameCopy boardGameCopy1;
     private BoardGameCopy boardGameCopy2;
     private BoardGameCopy boardGameCopy3;
@@ -53,9 +55,9 @@ public class BoardGameCopyIntegrationTests {
         playerRepository.deleteAll();
 
         player1 = new Player("John", "john@gmail.com", "222", true);
-        player2 = new Player("Jane", "Jane@hotmail.com", "33333", true);
+        Player player2 = new Player("Jane", "Jane@hotmail.com", "33333", true);
         boardGame1 = new BoardGame(2, 8, "Monopoly", "Monopoly is a fun game");
-        boardGame2 = new BoardGame(2, 2, "Chess", "Chess is cool");
+        BoardGame boardGame2 = new BoardGame(2, 2, "Chess", "Chess is cool");
 
         player1 = playerRepository.save(player1);
         player2 = playerRepository.save(player2);

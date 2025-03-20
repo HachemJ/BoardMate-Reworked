@@ -39,15 +39,19 @@ import ca.mcgill.ecse321.BoardGameManagement.repository.ReviewRepository;
 public class ReviewIntegrationTests {
 
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate client;
 
     @Autowired
+    @SuppressWarnings("unused")
     private ReviewRepository reviewRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
     private final LocalDate date = LocalDate.now();

@@ -217,9 +217,10 @@ public class PlayerServiceTests {
         when(playerRepository.findByPlayerID(invalidId)).thenReturn(null);
 
         // Act & Assert: Expect GlobalException due to player not found
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            playerService.updatePlayer(invalidId, dto);
-        });
+        GlobalException exception = assertThrows(GlobalException.class, () ->
+            playerService.updatePlayer(invalidId, dto)
+        );
+
         assertEquals("Player not found with ID: " + invalidId, exception.getMessage());
     }
 

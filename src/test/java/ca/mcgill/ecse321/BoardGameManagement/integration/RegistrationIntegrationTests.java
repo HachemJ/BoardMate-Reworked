@@ -25,22 +25,25 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(Lifecycle.PER_CLASS)
 public class RegistrationIntegrationTests {
     @Autowired
+    @SuppressWarnings("unused")
     private TestRestTemplate client;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private EventRepository eventRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private RegistrationRepository registrationRepository;
-    
-    public int createdEventId;
-    public int createdPlayerId;
+
     private Player player;
     private Player player2;
     private Event event;

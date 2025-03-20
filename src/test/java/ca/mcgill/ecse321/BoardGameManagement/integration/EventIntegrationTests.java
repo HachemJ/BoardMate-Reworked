@@ -29,9 +29,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class EventIntegrationTests {
 
   @Autowired
+  @SuppressWarnings("unused")
   private TestRestTemplate client; // Provides HTTP client for integration tests
 
-  private int createdEventId;
+
   private static final String validEventName = "Chess Tournament";
   private static final String validEventDescription = "Friendly chess match.";
   private static final String validMaxSpots = "20";
@@ -43,11 +44,14 @@ public class EventIntegrationTests {
   private static final int validBoardGameId = 2;
 
   @Autowired
+  @SuppressWarnings("unused")
   private PlayerRepository playerRepository;
   @Autowired
+  @SuppressWarnings("unused")
   private BoardGameRepository boardGameRepository;
 
   @Autowired
+  @SuppressWarnings("unused")
   private EventRepository eventRepository;
 
   /**
