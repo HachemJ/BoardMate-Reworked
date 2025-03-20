@@ -83,7 +83,7 @@ The working application fulfilling all the abovementioned functionalities
 
 | Name | Role & Responsibility | Hours
 | --- | --- | --- |
-| Kathelina | • Design and implement Dtos, service layer, controller layer, service unit tests, and controller integration tests for borrowRequests <br> •  endpoint documentation for BorrowRequest related controllers <br> • contributed to the software quality assurance plan and report | 30 hours
+| Kathelina | • Design and implement Dtos, service layer, controller layer, service unit tests, and controller integration tests for borrowRequests <br> •  endpoint documentation for BorrowRequest related controllers <br> • contributed to the software quality assurance plan and report | 32 hours
 | Tingyi | • Designed and implemented the BoardGameCopy service, controller, and DTOs.<br> • Developed unit and integration tests for BoardGameCopy-related functionalities.<br> • Documented BoardGameCopy REST API endpoints. <br> • Developed and tested login feature. | 30 Hours
 | Nizar | • Designed and implemented the Event service, controller, and DTOs.<br> • Developed unit and integration tests for Event-related functionalities.<br> • Created and handled global exception management through the GlobalException class.<br> • Documented Event REST API endpoints.<br> • Contributed to the Software Quality Assurance Plan & Report| 32 Hours
 | Alex | • Designed and implemented Review service, controller, DTOs, and associated unit and integration tests <br> • Documented Review REST API endpoints.<br>| 28 Hours
