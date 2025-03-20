@@ -34,8 +34,8 @@ public class BorrowRequestServiceTests {
     @InjectMocks
     private BorrowRequestService borrowRequestService;
 
-    private final Date startLoan = Date.valueOf(LocalDate.now().plusDays(2));
-    private final Date endLoan = Date.valueOf(LocalDate.now().plusDays(5));
+    private final Date START_LOAN = Date.valueOf(LocalDate.now().plusDays(2));
+    private final Date END_LOAN = Date.valueOf(LocalDate.now().plusDays(5));
 
     private Player requester1;
     private Player requester2;
@@ -61,7 +61,7 @@ public class BorrowRequestServiceTests {
         boardGameCopy = new BoardGameCopy("copySpecificationGame1", true, owner1, boardGame);
         boardGameCopy2 = new BoardGameCopy("copySpecificationGame1", true, owner1, boardGame2);
         BorrowRequest.RequestStatus status = BorrowRequest.RequestStatus.Pending;
-        borrowRequest = new BorrowRequest(startLoan, endLoan, status, requester1, boardGameCopy);
+        borrowRequest = new BorrowRequest(START_LOAN, END_LOAN, status, requester1, boardGameCopy);
         borrowRequest2 = new BorrowRequest(
                 Date.valueOf(LocalDate.now().plusDays(7)),
                 Date.valueOf(LocalDate.now().plusDays(9)),
@@ -72,7 +72,7 @@ public class BorrowRequestServiceTests {
     @Test
     public void createValidBorrowRequest() {
         //arrange
-        BorrowRequestCreationDTO dto = new BorrowRequestCreationDTO(startLoan, endLoan, 222, 333);
+        BorrowRequestCreationDTO dto = new BorrowRequestCreationDTO(START_LOAN, END_LOAN, 222, 333);
 
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
         when(boardGameCopyRepository.findBySpecificGameID(333)).thenReturn(boardGameCopy);
@@ -85,8 +85,8 @@ public class BorrowRequestServiceTests {
         verify(borrowRequestRepository, times(1)).save(argThat((BorrowRequest r) ->
                 r.getRequester().getName().equals(requester1.getName()) &&
                 r.getBoardGameCopy().getPlayer().getName().equals(owner1.getName()) &&
-                r.getStartOfLoan().equals(startLoan) &&
-                r.getEndOfLoan().equals(endLoan)&&
+                r.getStartOfLoan().equals(START_LOAN) &&
+                r.getEndOfLoan().equals(END_LOAN)&&
                 r.getRequestStatus().equals(BorrowRequest.RequestStatus.Pending))
         );
     }
@@ -135,7 +135,7 @@ public class BorrowRequestServiceTests {
     @Test
     public void createInvalidBorrowRequest_nonexistentRequester() {
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
-                startLoan, endLoan, 0, 333);
+                START_LOAN, END_LOAN, 0, 333);
         GlobalException e = assertThrows(GlobalException.class,
                 () -> borrowRequestService.createBorrowRequest(requestDTO));
         assertEquals("The requester 0 does not exist", e.getMessage());
@@ -147,7 +147,7 @@ public class BorrowRequestServiceTests {
     @Test
     public void createInvalidBorrowRequest_invalidBoardGameCopy() {
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
-                startLoan, endLoan, 222, 0);
+                START_LOAN, END_LOAN, 222, 0);
 
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
 
@@ -184,7 +184,7 @@ public class BorrowRequestServiceTests {
         ///dates cannot be null from the DTO constructor validation
 
         BorrowRequestCreationDTO requestDTO = new BorrowRequestCreationDTO(
-                startLoan, endLoan, 222, 333
+                START_LOAN, END_LOAN, 222, 333
         );
 
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
@@ -603,7 +603,7 @@ public class BorrowRequestServiceTests {
 
     @Test
     /*
-     * The method tested here (de;eteBorrowRequest) uses getBorrowRequest to get the BorrowRequest entity needed;
+     * The method tested here (deleteBorrowRequest) uses getBorrowRequest to get the BorrowRequest entity needed;
      * getBorrowRequestTests therefore already ensure that null and invalid inputs don't cause problems
      * These are therefore not tested for set of tests pertaining to it.
      */

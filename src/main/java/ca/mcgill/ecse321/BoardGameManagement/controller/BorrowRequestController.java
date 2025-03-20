@@ -19,6 +19,11 @@ public class BorrowRequestController {
     @Autowired
     private BorrowRequestService borrowRequestService;
 
+    /**
+     * controller method to create a new borrow request
+     * @param newRequest dto with info about new request
+     * @return the response dto of the created request
+     */
     @PostMapping("/borrowrequests")
     @ResponseStatus(HttpStatus.CREATED)
     public BorrowRequestResponseDTO createBorrowRequest(@RequestBody BorrowRequestCreationDTO newRequest) {
@@ -28,6 +33,11 @@ public class BorrowRequestController {
 
     }
 
+    /**
+     * Controller method to get all the requests for games of a specific owner
+     * @param ownerId id of the owner
+     * @return list of all the requests for games of that owner
+     */
     @GetMapping("/borrowrequests")
     public List<BorrowRequestResponseDTO> getAllBorrowRequestsByOwner(@RequestParam int ownerId) {
 
@@ -38,6 +48,11 @@ public class BorrowRequestController {
 
     }
 
+    /**
+     * get the borrow request with that specific id
+     * @param requestId borrow request to find's id
+     * @return the response dto of that object
+     */
     @GetMapping("/borrowrequests/{requestId}")
     public BorrowRequestResponseDTO getBorrowRequest(@PathVariable int requestId) {
         BorrowRequest request = borrowRequestService.getBorrowRequest(requestId);
@@ -46,6 +61,12 @@ public class BorrowRequestController {
     }
 
 
+    /**
+     * FOR OWNERS, to accept or decline the borrow requests they receive
+     * @param requestId the borrow request to manage
+     * @param action string representing whether to accept or decline
+     * @return the response dto of the updated request
+     */
     @PutMapping("/borrowrequests/{requestId}")
     public BorrowRequestResponseDTO manageBorrowRequest(@PathVariable int requestId, @RequestParam(defaultValue = "") String action) {
         if (action.isEmpty()) {
@@ -68,6 +89,13 @@ public class BorrowRequestController {
     }
 
 
+    /**
+     * When to confirm, the requester confirms that they received the game then loan time comes
+     * When to cancel, either the player wants to cancel the borrowing prematurely
+     *  OR the owner cancels when the borrow is up-to-date, and they received their game back
+     * @param requestId id of request to manage availability of
+     * @param confirmOrCancel confirming or cancelling the request
+     */
     @PutMapping("/borrowrequests/{requestId}/boardGameCopy")
 
     public void manageBorrowedGameAvailability(@PathVariable int requestId, @RequestParam(defaultValue ="") String confirmOrCancel) {
@@ -84,6 +112,10 @@ public class BorrowRequestController {
 
     }
 
+    /**
+     * Delete the borrow request
+     * @param requestId id of request to delete
+     */
     @DeleteMapping("/borrowrequests/{requestId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBorrowRequest(@PathVariable int requestId) {
