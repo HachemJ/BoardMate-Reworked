@@ -8,6 +8,7 @@ public class BoardGameCopyResponseDto {
     private boolean isAvailable;
     private String playerName;
     private String boardGameName;
+    private int boardGameCopyId;
 
     @SuppressWarnings("unused")
     private BoardGameCopyResponseDto() {}
@@ -17,6 +18,7 @@ public class BoardGameCopyResponseDto {
         this.playerName = boardGameCopy.getPlayer().getName();
         this.specification = boardGameCopy.getSpecification();
         this.isAvailable = boardGameCopy.getIsAvailable();
+        this.boardGameCopyId = boardGameCopy.getSpecificGameID();
     }
 
     public String getSpecification() {
@@ -33,6 +35,10 @@ public class BoardGameCopyResponseDto {
 
     public String getBoardGameName() {
         return boardGameName;
+    }
+
+    public int getBoardGameCopyId() {
+        return boardGameCopyId;
     }
 
 }
