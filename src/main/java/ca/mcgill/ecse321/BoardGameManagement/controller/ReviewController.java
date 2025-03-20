@@ -24,7 +24,7 @@ public class ReviewController {
      * @param reviewDto the reviewDto to create the review with
      * @return the ReviewResponseDto of the created review
      */
-    @PostMapping("/Reviews")
+    @PostMapping("/reviews")
     @ResponseStatus(HttpStatus.CREATED)
     public ReviewResponseDto createReview(@RequestBody ReviewCreationDto reviewDto) {
         Review review = reviewService.createReview(reviewDto);
@@ -38,7 +38,7 @@ public class ReviewController {
      * @param reviewDto the reviewDto to update the review with
      * @return the ReviewResponseDto of the updated review
      */
-    @PutMapping("/Reviews/{reviewId}")
+    @PutMapping("/reviews/{reviewId}")
     @ResponseStatus(HttpStatus.OK)
     public ReviewResponseDto updateReview(@PathVariable int reviewId, @RequestBody ReviewCreationDto reviewDto) {
         Review review = reviewService.updateReview(reviewId, reviewDto);
@@ -51,7 +51,7 @@ public class ReviewController {
      * This method gets all reviews.
      * @return an ArrayList of ReviewResponseDto of all reviews
      */
-    @GetMapping("/Reviews/")
+    @GetMapping("/reviews/")
     @ResponseStatus(HttpStatus.OK)
     public ArrayList<ReviewResponseDto> getAllReviews() {
         //get all reviews
@@ -70,7 +70,7 @@ public class ReviewController {
      * @param reviewId the id of the review to get
      * @return the ReviewResponseDto of the review
      */
-    @GetMapping("/Reviews/{reviewId}")
+    @GetMapping("/reviews/{reviewId}")
     @ResponseStatus(HttpStatus.OK)
     public ReviewResponseDto getReviewById(@PathVariable int reviewId) {
         Review review = reviewService.getReviewById(reviewId);
@@ -82,7 +82,7 @@ public class ReviewController {
      * This method deletes a review by its id.
      * @param reviewId the id of the review to delete
      */
-    @DeleteMapping("/Reviews/{reviewId}")
+    @DeleteMapping("/reviews/{reviewId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReview(@PathVariable int reviewId) {
         reviewService.deleteReview(reviewId);
