@@ -429,18 +429,19 @@ public class RegistrationServiceTests {
    */
     @Test
     public void testDeleteRegistrationEventNonExistentPlayer() {
-        //Arrange
-        Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
-	Event event = new Event(eventName, eventDescription, maxLimit, eventDate, startTime, endTime, location, player, game);
-	when(eventRepository.findByEventID(validEventId)).thenReturn(event);
-
-        //Act
-        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId));
-
-        //Assert
-        assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
-        assertEquals("Player not found with ID: " + validPlayerId, e.getMessage());
-    }
+         //Arrange
+         Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
+         Date pastDate = Date.valueOf(LocalDate.now().minusDays(1)); // Yesterday
+         Time pastStartTime = Time.valueOf(LocalTime.now().minusHours(2)); // Started 2 hours ago
+         Time pastEndTime = Time.valueOf(LocalTime.now().minusHours(1));   // Ended 1 hour ago
+ 
+         //Act
+         GlobalException e = assertThrows(GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId));
+ 
+         //Assert
+         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+         assertEquals("Player not found with ID: " + validPlayerId, e.getMessage());
+     }
 
     /**
     * Tests deleting a registration for a invalid event.
