@@ -1,6 +1,5 @@
 package ca.mcgill.ecse321.BoardGameManagement.service;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -25,12 +24,15 @@ import jakarta.validation.Valid;
 public class ReviewService {
 
     @Autowired
+    @SuppressWarnings("unused")
     private ReviewRepository reviewRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
     public ReviewService() {}

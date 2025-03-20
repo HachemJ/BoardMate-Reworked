@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/boardgamecopies")
+@SuppressWarnings("unused")
 public class BoardGameCopyController {
 
     @Autowired

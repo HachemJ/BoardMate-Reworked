@@ -22,14 +22,16 @@ import java.util.List;
 @Validated
 public class PlayerService {
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameCopyService boardGameCopyService;
 
     /**
      * create a player object
-     * @param playerToCreate
+     * @param playerToCreate player info to create wth
      * @return the player created
      */
     @Transactional
@@ -47,7 +49,7 @@ public class PlayerService {
 
     /**
      * find a player by id
-     * @param pid
+     * @param pid player id
      * @return the player found
      */
     @Transactional
@@ -73,13 +75,13 @@ public class PlayerService {
                 owners.add(p);
             }
         }
-        return (List<Player>) owners;
+        return owners;
     }
 
     /**
      * update the attributes of a player
-     * @param pid
-     * @param playerDto
+     * @param pid player id
+     * @param playerDto info to update player with
      * @return the updated player
      */
     @Transactional
@@ -103,8 +105,8 @@ public class PlayerService {
 
     /**
      * toggle the owner status ; if already owner, board game copies will be deleted
-     * @param pid
-     * @param b
+     * @param pid player id
+     * @param b isOwner toggle
      * @return the player updated
      */
     @Transactional
@@ -124,7 +126,7 @@ public class PlayerService {
 
     /**
      * enables the login use case
-     * @param loginRequestDto
+     * @param loginRequestDto login info
      * @return the player that the user is, if credentials correct
      */
     public Player login(@Valid LoginRequestDto loginRequestDto) {

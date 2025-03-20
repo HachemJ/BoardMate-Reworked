@@ -22,12 +22,15 @@ import java.util.List;
 @Validated
 public class RegistrationService {
     @Autowired
+    @SuppressWarnings("unused")
     private EventRepository eventRepository;
   
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private RegistrationRepository registrationRepository;
     
     /**
@@ -104,7 +107,7 @@ public class RegistrationService {
         if (player == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerId);
         }
-        return (List<Registration>) registrationRepository.findRegistrationByPlayer(player);
+        return registrationRepository.findRegistrationByPlayer(player);
     }
 
     /**
@@ -116,7 +119,7 @@ public class RegistrationService {
         if (event == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventId);
         }
-        return (List<Registration>) registrationRepository.findRegistrationByEvent(event);
+        return registrationRepository.findRegistrationByEvent(event);
     }
 
     /**

@@ -14,6 +14,7 @@ import java.util.ArrayList;
  * This class is the controller for the Review entity. It is responsible for handling requests related to Reviews.
  */
 @RestController
+@SuppressWarnings("unused")
 public class ReviewController {
 
     @Autowired

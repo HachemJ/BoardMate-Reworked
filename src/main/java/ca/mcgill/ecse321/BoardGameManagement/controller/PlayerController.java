@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("players")
+@SuppressWarnings("unused")
 public class PlayerController {
 
     @Autowired
@@ -21,8 +22,8 @@ public class PlayerController {
 
     /**
      * handles the request to create a player
-     * @param playerToCreate
-     * @return
+     * @param playerToCreate dto of player info
+     * @return response dto of player
      */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -33,8 +34,8 @@ public class PlayerController {
 
     /**
      * handles the request to update an existing player
-     * @param id
-     * @param playerDto
+     * @param id player id
+     * @param playerDto dto info to update to
      * @return the player created through response DTO
      */
     @PutMapping("/{id}")
@@ -46,22 +47,22 @@ public class PlayerController {
 
     /**
      * change a player to owner and vice versa
-     * @param id
-     * @param q
+     * @param id player to toggle owner status of
+     * @param q toggle status (isOwner or isNotOwner)
      * @return the player updated through DTO
      */
     @PutMapping("/{id}/toggle-owner")
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto togglePlayerOwner(
         @PathVariable int id,
-        @RequestParam(required = true) boolean q) {
+        @RequestParam boolean q) {
         Player updatedPlayer = playerService.togglePlayerOwner(id, q);
         return new PlayerRespDto(updatedPlayer);
     }
 
     /**
      * find a player by his/her id
-     * @param id
+     * @param id player id
      * @return the player found as a DTO
      */
     @GetMapping("/{id}")
@@ -101,7 +102,7 @@ public class PlayerController {
 
     /**
      * enables a user to login
-     * @param loginRequestDto
+     * @param loginRequestDto username and password to login
      * @return a player resp dto
      */
     @PostMapping("/login")

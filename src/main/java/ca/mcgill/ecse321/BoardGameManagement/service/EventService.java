@@ -22,12 +22,15 @@ import java.util.List;
 public class EventService {
 
   @Autowired
+  @SuppressWarnings("unused")
   private EventRepository eventRepository;
 
   @Autowired
+  @SuppressWarnings("unused")
   private PlayerRepository playerRepository;
 
   @Autowired
+  @SuppressWarnings("unused")
   private BoardGameRepository boardGameRepository;
 
   /**

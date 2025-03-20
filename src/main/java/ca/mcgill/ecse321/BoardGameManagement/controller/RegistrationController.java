@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
+@SuppressWarnings("unused")
 public class RegistrationController {
     @Autowired
 	private RegistrationService registrationService;

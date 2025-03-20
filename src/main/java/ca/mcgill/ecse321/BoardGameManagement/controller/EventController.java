@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/events")
+@SuppressWarnings("unused")
 public class EventController {
 
   @Autowired

@@ -22,12 +22,15 @@ import java.util.ArrayList;
 public class BoardGameCopyService {
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameCopyRepository boardGameCopyRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     @Autowired
+    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
     @Transactional

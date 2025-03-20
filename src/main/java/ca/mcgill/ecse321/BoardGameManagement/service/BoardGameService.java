@@ -18,6 +18,7 @@ import java.util.List;
 public class BoardGameService {
 
   @Autowired
+  @SuppressWarnings("unused")
   private BoardGameRepository boardGameRepository;
 
   @Transactional
