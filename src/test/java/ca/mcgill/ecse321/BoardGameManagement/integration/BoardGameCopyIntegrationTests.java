@@ -113,7 +113,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Arrange
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
-                666, boardGame1.getGameID());
+                666, boardGame1.getGameID()); // Nonexistent player ID 666
 
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
@@ -130,7 +130,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Arrange
         BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("whatever",
-                player1.getPlayerID(), 55555);
+                player1.getPlayerID(), 55555); // Nonexistent board game ID 55555
 
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
@@ -146,7 +146,7 @@ public class BoardGameCopyIntegrationTests {
     public void testCreateInvalidBoardGameCopy_nullInput() {
 
         //Arrange
-        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", 0, 0);
+        BoardGameCopyCreationDto body = new BoardGameCopyCreationDto("", 0, 0); // Null input
 
         //Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/boardgamecopies", body, ErrorDto.class);
@@ -181,7 +181,7 @@ public class BoardGameCopyIntegrationTests {
     public void testFindBoardGameCopyByInvalidId() {
 
         //Act
-        String url = "/boardgamecopies/" + 666;
+        String url = "/boardgamecopies/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
 
         //Assert
@@ -196,7 +196,7 @@ public class BoardGameCopyIntegrationTests {
     public void testUpdateInvalidBoardGameCopy_emptySpecification() {
 
         //Arrange
-        String body = "";
+        String body = ""; // Empty specification, should be caught by bean validation
 
         //Act
         String url = "/boardgamecopies/" + boardGameCopy1.getSpecificGameID();
@@ -237,7 +237,7 @@ public class BoardGameCopyIntegrationTests {
     public void testFindBoardGameCopiesByInvalidPlayerId() {
 
         //Act
-        String url = "/boardgamecopies/byplayer/" + 666;
+        String url = "/boardgamecopies/byplayer/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
 
         //Assert
@@ -274,7 +274,7 @@ public class BoardGameCopyIntegrationTests {
     public void testFindBoardGameCopiesByInvalidBoardGameId() {
 
         //Act
-        String url = "/boardgamecopies/byboardgame/" + 666;
+        String url = "/boardgamecopies/byboardgame/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
 
         //Assert
@@ -354,7 +354,7 @@ public class BoardGameCopyIntegrationTests {
     public void testDeleteInvalidBoardGameCopy_nonexistentId() {
 
         //Act
-        String url = "/boardgamecopies/" + 666;
+        String url = "/boardgamecopies/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.DELETE, null, ErrorDto.class);
 
         //Assert
@@ -376,7 +376,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode()); // No content is OKAY
         assertEquals(0, response.getBody().length);
     }
 
@@ -388,7 +388,7 @@ public class BoardGameCopyIntegrationTests {
         String body = "Updated specification";
 
         //Act
-        String url = "/boardgamecopies/" + 666;
+        String url = "/boardgamecopies/" + 666; // Nonexistent ID 666
         ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, new HttpEntity<>(body),
                 ErrorDto.class);
 
@@ -412,7 +412,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode()); // No content is OKAY
         assertEquals(0, response.getBody().length);
     }
 
@@ -429,7 +429,7 @@ public class BoardGameCopyIntegrationTests {
 
         //Assert
         assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode()); // No content is OKAY
         assertEquals(0, response.getBody().length);
     }
 }
