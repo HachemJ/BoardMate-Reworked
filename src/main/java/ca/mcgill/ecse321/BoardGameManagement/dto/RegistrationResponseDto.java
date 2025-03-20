@@ -9,7 +9,8 @@ public class RegistrationResponseDto {
     private int eventID;
     @JsonProperty("playerID")
     private int playerID;
-    
+
+    @SuppressWarnings("unused")
     public RegistrationResponseDto() {
 	}
 

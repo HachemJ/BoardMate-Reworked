@@ -27,14 +27,6 @@ public class ReviewCreationDto {
     @SuppressWarnings("unused")
     public ReviewCreationDto() {}
 
-    public ReviewCreationDto(ReviewCreationDto review) {
-        this.rating = review.getRating();
-        this.comment = review.getComment();
-        this.commentDate = review.getCommentDate();
-        this.playerID = review.getPlayerID();
-        this.boardGameID = review.getBoardGameID();
-    }
-
     public int getRating() {
         return rating;
     }

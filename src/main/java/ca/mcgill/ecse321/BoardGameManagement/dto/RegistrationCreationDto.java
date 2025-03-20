@@ -11,6 +11,7 @@ public class RegistrationCreationDto {
     @Positive(message = "Event ID must be a positive number.")
     private int eventID;
 
+    @SuppressWarnings("unused")
     public RegistrationCreationDto() {}
 
     public RegistrationCreationDto(int playerID, int eventID) {

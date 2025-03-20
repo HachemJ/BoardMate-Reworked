@@ -204,10 +204,9 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(null);
         when (boardGameRepository.findByGameID(99)).thenReturn(boardGame);
 
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            reviewService.createReview(dto);
-        });
-
+        GlobalException exception = assertThrows(GlobalException.class, () ->
+            reviewService.createReview(dto)
+        );
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertTrue(exception.getMessage().contains("Player not found with ID:"));
     }
@@ -225,9 +224,9 @@ public class ReviewServiceTests {
         when (playerRepository.findByPlayerID(100)).thenReturn(player);
         when (boardGameRepository.findByGameID(99)).thenReturn(null);
 
-        GlobalException exception = assertThrows(GlobalException.class, () -> {
-            reviewService.createReview(dto);
-        });
+        GlobalException exception = assertThrows(GlobalException.class, () ->
+            reviewService.createReview(dto)
+        );
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
         assertTrue(exception.getMessage().contains("BoardGame not found with ID:"));

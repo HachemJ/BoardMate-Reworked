@@ -13,14 +13,8 @@ public class PlayerCreationDto {
     @NotBlank(message = "password must not be null")
     private String password;
     private boolean isAOwner;
+    @SuppressWarnings("unused")
     public PlayerCreationDto() {
-    }
-    public PlayerCreationDto(PlayerCreationDto player) {
-    this.name = player.getName();
-    this.email = player.getEmail();
-    this.password = player.getPassword();
-    this.isAOwner = player.getIsAOwner();
-    //isAOwner
     }
     
     public PlayerCreationDto(String name, String email, String psw, boolean isAOwner) {
