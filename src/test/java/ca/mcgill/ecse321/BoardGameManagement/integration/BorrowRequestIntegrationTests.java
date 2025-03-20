@@ -113,7 +113,7 @@ public class BorrowRequestIntegrationTests {
 
         // Act
         ResponseEntity<BorrowRequestResponseDTO> response = client.postForEntity(
-                "/BorrowRequests", body, BorrowRequestResponseDTO.class);
+                "/borrowrequests", body, BorrowRequestResponseDTO.class);
 
         // Assert
         assertNotNull(response.getBody());
@@ -139,7 +139,7 @@ public class BorrowRequestIntegrationTests {
         BorrowRequestCreationDTO body = new BorrowRequestCreationDTO(null, null, 0, 0);
 
         ResponseEntity<ErrorDto> response = client.postForEntity(
-               "/BorrowRequests", body, ErrorDto.class);
+               "/borrowrequests", body, ErrorDto.class);
 
 
         // Assert
@@ -166,7 +166,7 @@ public class BorrowRequestIntegrationTests {
                 Date.valueOf(LocalDate.now()), -2, -100);
 
         ResponseEntity<ErrorDto> response = client.postForEntity(
-                "/BorrowRequests", body, ErrorDto.class);
+                "/borrowrequests", body, ErrorDto.class);
 
         // Assert
         assertNotNull(response.getBody());
@@ -185,7 +185,7 @@ public class BorrowRequestIntegrationTests {
     @Order(3)
     public void getValidBorrowRequestsByOwner() {
 
-        String url = "/BorrowRequests?ownerId=" + owner1.getPlayerID();
+        String url = "/borrowrequests?ownerId=" + owner1.getPlayerID();
 
         ResponseEntity<BorrowRequestResponseDTO[]> response =  client.getForEntity(url, BorrowRequestResponseDTO[].class);
 
@@ -205,7 +205,7 @@ public class BorrowRequestIntegrationTests {
     @Order(4)
     public void getInvalidBorrowRequestsByOwner_InvalidInputs() {
 
-        String url = "/BorrowRequests?ownerId=999";
+        String url = "/borrowrequests?ownerId=999";
         ResponseEntity<ErrorDto> response =  client.getForEntity(url, ErrorDto.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -220,7 +220,7 @@ public class BorrowRequestIntegrationTests {
     @Order(5)
     public void getValidBorrowRequest(){
 
-        String url = "/BorrowRequests/" + createdBorrowRequestId;
+        String url = "/borrowrequests/" + createdBorrowRequestId;
         ResponseEntity<BorrowRequestResponseDTO> response = client.getForEntity(url, BorrowRequestResponseDTO.class);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -241,7 +241,7 @@ public class BorrowRequestIntegrationTests {
     @Test
     @Order(6)
     public void acceptValidBorrowRequest(){
-        String url = "/BorrowRequests/" + createdBorrowRequestId + "?action=accept";
+        String url = "/borrowrequests/" + createdBorrowRequestId + "?action=accept";
 
         ResponseEntity<BorrowRequestResponseDTO> request = client.exchange(url, HttpMethod.PUT, null, BorrowRequestResponseDTO.class);
         assertEquals(HttpStatus.OK, request.getStatusCode());
@@ -261,7 +261,7 @@ public class BorrowRequestIntegrationTests {
     @Test
     @Order(7)
     public void declineValidBorrowRequest(){
-        String url = "/BorrowRequests/" + borrowRequest2.getRequestID() + "?action=decline";
+        String url = "/borrowrequests/" + borrowRequest2.getRequestID() + "?action=decline";
 
         ResponseEntity<BorrowRequestResponseDTO> request = client.exchange(url, HttpMethod.PUT, null, BorrowRequestResponseDTO.class);
 
@@ -283,7 +283,7 @@ public class BorrowRequestIntegrationTests {
     @Test
     @Order(8)
     public void doInvalidBorrowRequest_emptyAction() {
-        String url = "/BorrowRequests/" + borrowRequest.getRequestID() ;
+        String url = "/borrowrequests/" + borrowRequest.getRequestID() ;
 
         ResponseEntity<ErrorDto> request = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
 
@@ -298,7 +298,7 @@ public class BorrowRequestIntegrationTests {
     @Test
     @Order(8)
     public void doInvalidBorrowRequest_InvalidAction() {
-        String url = "/BorrowRequests/" + borrowRequest.getRequestID() + "?action=Done";
+        String url = "/borrowrequests/" + borrowRequest.getRequestID() + "?action=Done";
 
         ResponseEntity<ErrorDto> request = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
 
@@ -315,7 +315,7 @@ public class BorrowRequestIntegrationTests {
     @Order(9)
     public void confirmValidBorrowing(){
 
-        String url = "/BorrowRequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=confirm";
+        String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=confirm";
 
         ResponseEntity<Void> response = client.exchange(url, HttpMethod.PUT, null, Void.class);
 
@@ -326,7 +326,7 @@ public class BorrowRequestIntegrationTests {
     @Test
     @Order(10)
     public void cancelValidBorrowing(){
-        String url = "/BorrowRequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=cancel";
+        String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=cancel";
 
         ResponseEntity<Void> response = client.exchange(url, HttpMethod.PUT, null, Void.class);
 
@@ -339,7 +339,7 @@ public class BorrowRequestIntegrationTests {
     @Order(11)
     public void confirmInvalidBorrowing_invalidAction(){
 
-        String url = "/BorrowRequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=accept";
+        String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=accept";
 
         ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
 
@@ -354,7 +354,7 @@ public class BorrowRequestIntegrationTests {
     @Order(11)
     public void confirmInvalidBorrowing_emptyAction(){
 
-        String url = "/BorrowRequests/" + createdBorrowRequestId + "/boardGameCopy";
+        String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy";
 
         ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
 
@@ -369,7 +369,7 @@ public class BorrowRequestIntegrationTests {
     @Order(13)
     public void deleteValidBorrowRequest(){
 
-        String url = "/BorrowRequests/" + createdBorrowRequestId;
+        String url = "/borrowrequests/" + createdBorrowRequestId;
 
         ResponseEntity<Void> response = client.exchange(url, HttpMethod.DELETE, null, Void.class);
 
@@ -383,12 +383,12 @@ public class BorrowRequestIntegrationTests {
     public void getValidBorrowRequestsByOwner_noGames() {
 
         //delete all remaining borrowRequests of owner1
-        String url = "/BorrowRequests/" + borrowRequest.getRequestID();
+        String url = "/borrowrequests/" + borrowRequest.getRequestID();
         ResponseEntity<Void> response = client.exchange(url, HttpMethod.DELETE, null, Void.class);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 
-        String urlFind = "/BorrowRequests?ownerId=" + owner1.getPlayerID();
+        String urlFind = "/borrowrequests?ownerId=" + owner1.getPlayerID();
 
         ResponseEntity<BorrowRequestResponseDTO[]> responseFind =  client.getForEntity(urlFind, BorrowRequestResponseDTO[].class);
 
