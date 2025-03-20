@@ -427,8 +427,8 @@ public class RegistrationServiceTests {
         assertEquals("Cannot delete: Event has already started or ended.", e.getMessage());
     }
 
-    /**
-    * Tests finding all registratiosn for an invalid player.
+   /**
+   * Tests finding all registratiosn for an invalid player.
    */
     @Test
     public void testGetAllRegistrationsForPlayerNonexistentPlayer(){
@@ -441,8 +441,8 @@ public class RegistrationServiceTests {
 
     }
 
-    /**
-    * Tests finding all registrations for an invalid event.
+   /**
+   * Tests finding all registrations for an invalid event.
    */
     @Test
     public void testGetAllRegistrationsForEventNonexistentEvent() {
