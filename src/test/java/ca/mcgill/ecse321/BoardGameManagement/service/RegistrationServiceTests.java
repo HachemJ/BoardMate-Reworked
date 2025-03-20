@@ -322,13 +322,13 @@ public class RegistrationServiceTests {
         assertEquals(0, retrievedRegistrations.size());
     }
 
-
+    /**
+    * Tests finding all registratiosn for an invalid player.
+   */
     @Test
     public void getAllRegistrationsForPlayer_nonexistentPlayer(){
         //Act
-        GlobalException e = assertThrows(
-                GlobalException.class, () -> registrationService.getAllRegistrationsByPlayer(validPlayerId)
-        );
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getAllRegistrationsByPlayer(validPlayerId));
 
         //Assert
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
@@ -336,18 +336,17 @@ public class RegistrationServiceTests {
 
     }
 
+    /**
+    * Tests finding all registrations for an invalid event.
+   */
     @Test
     public void getAllRegistrationsForEvent_nonexistentEvent() {
         //Act
-        GlobalException e = assertThrows(
-                GlobalException.class, () -> registrationService.getAllRegistrationsByEvent(validEventId)
-        );
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.getAllRegistrationsByEvent(validEventId));
 
         //Assert
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("Event not found with ID: " + validEventId, e.getMessage());
-
-
     }
 
    /**
@@ -365,8 +364,7 @@ public class RegistrationServiceTests {
 
         //Act
         GlobalException e = assertThrows(
-        GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId)
-        );
+        GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId));
 
         //Assert
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
@@ -426,31 +424,31 @@ public class RegistrationServiceTests {
         assertEquals("Player is already registered for this event", e.getMessage());
     }
 
-
+    /**
+    * Tests deleting a registration for a invalid player.
+   */
     @Test
     public void testDeleteRegistrationEventNonExistentPlayer() {
 
         //Act
-        GlobalException e = assertThrows(
-                GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId)
-        );
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId));
 
         //Assert
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
         assertEquals("Player not found with ID: " + validPlayerId, e.getMessage());
     }
 
+    /**
+    * Tests deleting a registration for a invalid event.
+   */
     @Test
     public void testDeleteRegistrationEventNonExistentEvent() {
         //Arrange
         Player player = new Player("Maya", "maya@gmail.com", "12345678", true);
-
         when(playerRepository.findByPlayerID(validPlayerId)).thenReturn(player);
 
         //Act
-        GlobalException e = assertThrows(
-                GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId)
-        );
+        GlobalException e = assertThrows(GlobalException.class, () -> registrationService.deleteRegistration(validPlayerId, validEventId));
 
         //Assert
         assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
