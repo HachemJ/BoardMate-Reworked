@@ -24,22 +24,17 @@ public class ReviewResponseDto {
 
     @SuppressWarnings("unused")
     public ReviewResponseDto() {}
+    public BoardGame getBoardGame() {
+        return boardGame;
+    }
 
-    public ReviewResponseDto(ReviewResponseDto review) {
+    public ReviewResponseDto(Review review) {
         this.reviewID = review.getReviewID();
         this.rating = review.getRating();
         this.comment = review.getComment();
         this.commentDate = review.getCommentDate();
         this.author = review.getAuthor();
         this.boardGame = review.getBoardGame();
-    }
-
-    public ReviewResponseDto(int rating, String comment, LocalDate commentDate, Player author, BoardGame boardGame) {
-        this.rating = rating;
-        this.comment = comment;
-        this.commentDate = commentDate;
-        this.author = author;
-        this.boardGame = boardGame;
     }
 
     public int getReviewID() {
@@ -62,18 +57,6 @@ public class ReviewResponseDto {
         return author;
     }
 
-    public BoardGame getBoardGame() {
-        return boardGame;
-    }
-
-    public ReviewResponseDto(Review review) {
-        this.reviewID = review.getReviewID();
-        this.rating = review.getRating();
-        this.comment = review.getComment();
-        this.commentDate = review.getCommentDate();
-        this.author = review.getAuthor();
-        this.boardGame = review.getBoardGame();
-    }
 
     @Override
     public String toString() {

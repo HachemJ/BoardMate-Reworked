@@ -54,15 +54,15 @@ public class ReviewIntegrationTests {
     @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
-    private final LocalDate date = LocalDate.now();
-    private final int rating = 3;
-    private final String comment = "comment";
+    private final LocalDate DATE = LocalDate.now();
+    private final int RATING = 3;
+    private final String COMMENT = "comment";
 
     private Player player;
     private int playerID = 0; //placeholder
     private BoardGame boardGame;
     private int boardGameID = 0; //placeholder
-    private final int invalidID = 999999;
+    private final int INVALID_ID = 999999;
 
     @BeforeEach
     public void setup() {
@@ -101,7 +101,7 @@ public class ReviewIntegrationTests {
     @Test
     @Order(0)
     public void createValidReview() {
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
@@ -109,20 +109,20 @@ public class ReviewIntegrationTests {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         ReviewResponseDto createdReview = response.getBody();
         assertTrue(createdReview.getReviewID() > 0);
-        assertEquals(rating, createdReview.getRating());
-        assertEquals(comment, createdReview.getComment());
+        assertEquals(RATING, createdReview.getRating());
+        assertEquals(COMMENT, createdReview.getComment());
         assertEquals(LocalDate.now(), createdReview.getCommentDate());
         assertEquals(player.getPlayerID(), createdReview.getAuthor().getPlayerID());
         assertEquals(boardGame.getGameID(), createdReview.getBoardGame().getGameID());
     }
 
     /**
-     * Test the creation of an invalid review with a bad rating. This should fail.
+     * Test the creation of an invalid review with a bad RATING. This should fail.
      */
     @Test
     @Order(1)
     public void createInvalidReviewsBadRating() {
-        ReviewCreationDto dto = new ReviewCreationDto(9999999, comment, date, playerID, boardGameID);
+        ReviewCreationDto dto = new ReviewCreationDto(9999999, COMMENT, DATE, playerID, boardGameID);
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
@@ -137,7 +137,7 @@ public class ReviewIntegrationTests {
     @Order(2)
     public void createInvalidReviewNoPlayer() {
         //test nonexistent player
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, invalidID, boardGameID);
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, DATE, INVALID_ID, boardGameID);
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
@@ -152,7 +152,7 @@ public class ReviewIntegrationTests {
     @Order(3)
     public void createInvalidReviewNoBoardGame() {
         //test nonexistent player
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, playerID, invalidID);
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, DATE, playerID, INVALID_ID);
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
@@ -166,7 +166,7 @@ public class ReviewIntegrationTests {
     @Test
     @Order(4)
     public void findExistingReviewById() {
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
         ResponseEntity<ReviewResponseDto> createResponse = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(createResponse.getBody());
@@ -189,7 +189,7 @@ public class ReviewIntegrationTests {
     @Test
     @Order(5)
     public void findNonExistingReviewById() {
-        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/reviews/" + invalidID, ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> response = client.getForEntity("/reviews/" + INVALID_ID, ReviewResponseDto.class);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -201,9 +201,9 @@ public class ReviewIntegrationTests {
     @Test
     @Order(6)
     public void findAllReviews() {
-        client.postForEntity("/reviews", new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
-        client.postForEntity("/reviews", new ReviewCreationDto(rating + 1, comment + "2", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
-        client.postForEntity("/reviews", new ReviewCreationDto(rating + 2, comment + "3", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
+        client.postForEntity("/reviews", new ReviewCreationDto(RATING, COMMENT, LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
+        client.postForEntity("/reviews", new ReviewCreationDto(RATING + 1, COMMENT + "2", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
+        client.postForEntity("/reviews", new ReviewCreationDto(RATING + 2, COMMENT + "3", LocalDate.now(), player.getPlayerID(), boardGame.getGameID()), ReviewResponseDto.class);
 
 
         ResponseEntity<List<ReviewResponseDto>> response = client.exchange(
@@ -245,7 +245,7 @@ public class ReviewIntegrationTests {
     @Test
     @Order(8)
     public void updateReview() {
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, date, playerID, boardGameID);
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, DATE, playerID, boardGameID);
 
         ResponseEntity<ReviewResponseDto> response = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
@@ -254,9 +254,9 @@ public class ReviewIntegrationTests {
 
         ReviewResponseDto createdReview = response.getBody();
         assertTrue(createdReview.getReviewID() > 0);
-        assertEquals(rating, createdReview.getRating());
-        assertEquals(comment, createdReview.getComment());
-        assertEquals(date, createdReview.getCommentDate());
+        assertEquals(RATING, createdReview.getRating());
+        assertEquals(COMMENT, createdReview.getComment());
+        assertEquals(DATE, createdReview.getCommentDate());
         assertEquals(player.getPlayerID(), createdReview.getAuthor().getPlayerID());
         assertEquals(boardGameID, createdReview.getBoardGame().getGameID());
 
@@ -284,7 +284,7 @@ public class ReviewIntegrationTests {
     public void updateNonExistentReview() {
         ReviewCreationDto updatedDto = new ReviewCreationDto(1, "new comment", LocalDate.now(), playerID, boardGameID);
 
-        ResponseEntity<ReviewResponseDto> updatedResponse = client.exchange("/reviews/" + invalidID, HttpMethod.PUT, new HttpEntity<>(updatedDto), ReviewResponseDto.class);
+        ResponseEntity<ReviewResponseDto> updatedResponse = client.exchange("/reviews/" + INVALID_ID, HttpMethod.PUT, new HttpEntity<>(updatedDto), ReviewResponseDto.class);
 
         assertNotNull(updatedResponse.getBody());
         assertEquals(HttpStatus.NOT_FOUND, updatedResponse.getStatusCode());
@@ -296,7 +296,7 @@ public class ReviewIntegrationTests {
     @Test
     @Order(10)
     public void deleteReview() {
-        ReviewCreationDto dto = new ReviewCreationDto(rating, comment, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
+        ReviewCreationDto dto = new ReviewCreationDto(RATING, COMMENT, LocalDate.now(), player.getPlayerID(), boardGame.getGameID());
         ResponseEntity<ReviewResponseDto> createResponse = client.postForEntity("/reviews", dto, ReviewResponseDto.class);
 
         assertNotNull(createResponse.getBody());
@@ -318,9 +318,9 @@ public class ReviewIntegrationTests {
     @Test
     @Order(11)
     public void deleteNonExistentReview() {
-        client.delete("/reviews/" + invalidID);
+        client.delete("/reviews/" + INVALID_ID);
 
-        ResponseEntity<String> response = client.getForEntity("/reviews/" + invalidID, String.class);
+        ResponseEntity<String> response = client.getForEntity("/reviews/" + INVALID_ID, String.class);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }

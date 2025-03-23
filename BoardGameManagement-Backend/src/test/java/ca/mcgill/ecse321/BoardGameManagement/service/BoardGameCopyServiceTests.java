@@ -71,7 +71,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testCreateInvalidBoardGameCopy_nonexistentPlayerId() {
+    public void testCreateInvalidBoardGameCopyNonexistentPlayerId() {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
@@ -87,7 +87,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testCreateInvalidBoardGameCopy_nonexistentBoardGameId() {
+    public void testCreateInvalidBoardGameCopyNonexistentBoardGameId() {
 
         // Arrange
         BoardGameCopyCreationDto boardGameCopyCreationDto = new BoardGameCopyCreationDto(SPECIFICATION,
@@ -283,7 +283,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testUpdateInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
+    public void testUpdateInvalidBoardGameCopyNonexistentBoardGameCopyId() {
 
         //Arrange
         when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null); // Mocking nonexistent board game copy
@@ -295,7 +295,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testUpdaeInvalidBoardGameCopy_emptySpecification() {
+    public void testUpdaeInvalidBoardGameCopyEmptySpecification() {
 
         //Arrange
         Player player = new Player("Tingyi", "tingyi.chen@mail.mcgill.ca", "12345", true);
@@ -327,7 +327,7 @@ public class BoardGameCopyServiceTests {
     }
 
     @Test
-    public void testDeleteInvalidBoardGameCopy_nonexistentBoardGameCopyId() {
+    public void testDeleteInvalidBoardGameCopyNonexistentBoardGameCopyId() {
 
         //Arrange
         when(boardGameCopyRepository.findBySpecificGameID(1)).thenReturn(null); // Mocking nonexistent board game copy
