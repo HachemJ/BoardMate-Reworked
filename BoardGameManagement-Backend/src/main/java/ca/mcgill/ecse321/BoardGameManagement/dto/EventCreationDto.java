@@ -33,6 +33,7 @@ public class EventCreationDto {
   @Positive(message = "Board Game ID must be a positive number.")
   private int boardGameId;
 
+  @SuppressWarnings("unused")
   public EventCreationDto() {}
 
   public EventCreationDto(String name, String description, String maxSpot, Date eventDate, Time startTime, Time endTime, String location, int ownerId, int boardGameId) {

@@ -46,8 +46,8 @@ public class BorrowRequestIntegrationTests {
     @SuppressWarnings("unused")
     private BoardGameCopyRepository boardGameCopyRepository;
 
-    private static final Date startDate = Date.valueOf(LocalDate.now().plusDays(3));
-    private static final Date endDate = Date.valueOf(LocalDate.now().plusDays(5));
+    private static final Date START_DATE = Date.valueOf(LocalDate.now().plusDays(3));
+    private static final Date END_DATE = Date.valueOf(LocalDate.now().plusDays(5));
 
     private Player requester1;
     private Player owner1;
@@ -67,6 +67,7 @@ public class BorrowRequestIntegrationTests {
         boardGameRepository.deleteAll();
         playerRepository.deleteAll();
 
+        //create necessary objects for testing
 
         requester1 = new Player("requester1", "requester1@mail", "PPassword1", false);
         Player requester2 = new Player("requester2", "requester2@mail", "PPassword2", false);
@@ -100,10 +101,8 @@ public class BorrowRequestIntegrationTests {
     @AfterAll
     public void teardown() {
         borrowRequestRepository.deleteAll();
-
         boardGameCopyRepository.deleteAll();
         boardGameRepository.deleteAll();
-
         playerRepository.deleteAll();
 
     }
@@ -111,10 +110,10 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(0)
-    public void createValidBorrowRequest() {
+    public void testCreateValidBorrowRequest() {
         //arrange
         BorrowRequestCreationDTO body = new BorrowRequestCreationDTO(
-                startDate, endDate, requester1.getPlayerID(), boardGameCopy.getSpecificGameID());
+                START_DATE, END_DATE, requester1.getPlayerID(), boardGameCopy.getSpecificGameID());
 
         // Act
         ResponseEntity<BorrowRequestResponseDTO> response = client.postForEntity(
@@ -128,8 +127,8 @@ public class BorrowRequestIntegrationTests {
         assertEquals(requester1.getName(), responseDTO.getBorrowerName());
         assertEquals(requester1.getEmail(), responseDTO.getBorrowerEmail());
         assertEquals(BorrowRequest.RequestStatus.Pending.toString(), responseDTO.getRequestStatus());
-        assertEquals(endDate.toLocalDate(), responseDTO.getEndOfLoan());
-        assertEquals(startDate.toLocalDate(), responseDTO.getStartOfLoan());
+        assertEquals(END_DATE.toLocalDate(), responseDTO.getEndOfLoan());
+        assertEquals(START_DATE.toLocalDate(), responseDTO.getStartOfLoan());
         assertEquals(boardGameCopy.getSpecificGameID(), responseDTO.getSpecificGameCopyId());
         assertEquals(boardGame.getName(), responseDTO.getSpecificGameName());
         assertTrue(responseDTO.getRequestId() > 0, "request must have > 0 id number");
@@ -140,7 +139,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(1)
-    public void createInvalidBorrowRequest_nullInputs() {
+    public void testCreateInvalidBorrowRequestNullInputs() {
         BorrowRequestCreationDTO body = new BorrowRequestCreationDTO(null, null, 0, 0);
 
         ResponseEntity<ErrorDto> response = client.postForEntity(
@@ -151,7 +150,6 @@ public class BorrowRequestIntegrationTests {
         assertNotNull(response.getBody());
         ErrorDto responseDTO = response.getBody();
 
-        // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals(4, responseDTO.getErrors().size());
         assertTrue(responseDTO.getErrors().contains("loan start date must not be null"));
@@ -165,7 +163,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(2)
-    public void createInvalidBorrowRequest_invalidInputs() {
+    public void testCreateInvalidBorrowRequestInvalidInputs() {
         BorrowRequestCreationDTO body = new BorrowRequestCreationDTO(
                 Date.valueOf(LocalDate.now().minusDays(1)),
                 Date.valueOf(LocalDate.now()), -2, -100);
@@ -188,7 +186,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(3)
-    public void getValidBorrowRequestsByOwner() {
+    public void testGetValidBorrowRequestsByOwner() {
 
         String url = "/borrowrequests?ownerId=" + owner1.getPlayerID();
 
@@ -199,16 +197,17 @@ public class BorrowRequestIntegrationTests {
         BorrowRequestResponseDTO[] responseDTOs = response.getBody();
         assertEquals(2, responseDTOs.length);
 
+        //check that retrieved games all belong to this owner
         for (BorrowRequestResponseDTO responseDTO : responseDTOs) {
             assertEquals(owner1.getPlayerID(),
-                    boardGameCopyRepository.findBySpecificGameID(responseDTO.getSpecificGameCopyId())
-                            .getPlayer().getPlayerID());
+                    boardGameCopyRepository.findBySpecificGameID(
+                            responseDTO.getSpecificGameCopyId()).getPlayer().getPlayerID());
         }
     }
 
     @Test
     @Order(4)
-    public void getInvalidBorrowRequestsByOwner_InvalidInputs() {
+    public void testGetInvalidBorrowRequestsByOwnerInvalidInputs() {
 
         String url = "/borrowrequests?ownerId=999";
         ResponseEntity<ErrorDto> response =  client.getForEntity(url, ErrorDto.class);
@@ -223,7 +222,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(5)
-    public void getValidBorrowRequest(){
+    public void testGetValidBorrowRequest(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId;
         ResponseEntity<BorrowRequestResponseDTO> response = client.getForEntity(url, BorrowRequestResponseDTO.class);
@@ -236,8 +235,8 @@ public class BorrowRequestIntegrationTests {
         assertEquals(requester1.getPlayerID(), responseDTO.getBorrowerId());
         assertEquals(requester1.getEmail(), responseDTO.getBorrowerEmail());
         assertEquals(BorrowRequest.RequestStatus.Pending.toString(), responseDTO.getRequestStatus());
-        assertEquals(endDate.toLocalDate(), responseDTO.getEndOfLoan());
-        assertEquals(startDate.toLocalDate(), responseDTO.getStartOfLoan());
+        assertEquals(END_DATE.toLocalDate(), responseDTO.getEndOfLoan());
+        assertEquals(START_DATE.toLocalDate(), responseDTO.getStartOfLoan());
         assertEquals(boardGameCopy.getSpecificGameID(), responseDTO.getSpecificGameCopyId());
         assertEquals(boardGame.getName(), responseDTO.getSpecificGameName());
 
@@ -245,7 +244,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(6)
-    public void acceptValidBorrowRequest(){
+    public void testAcceptValidBorrowRequest(){
         String url = "/borrowrequests/" + createdBorrowRequestId + "?action=accept";
 
         ResponseEntity<BorrowRequestResponseDTO> request = client.exchange(url, HttpMethod.PUT, null, BorrowRequestResponseDTO.class);
@@ -256,8 +255,8 @@ public class BorrowRequestIntegrationTests {
         assertEquals(requester1.getPlayerID(), responseDTO.getBorrowerId());
         assertEquals(requester1.getEmail(), responseDTO.getBorrowerEmail());
         assertEquals(BorrowRequest.RequestStatus.Accepted.toString(), responseDTO.getRequestStatus());
-        assertEquals(endDate.toLocalDate(), responseDTO.getEndOfLoan());
-        assertEquals(startDate.toLocalDate(), responseDTO.getStartOfLoan());
+        assertEquals(END_DATE.toLocalDate(), responseDTO.getEndOfLoan());
+        assertEquals(START_DATE.toLocalDate(), responseDTO.getStartOfLoan());
         assertEquals(boardGameCopy.getSpecificGameID(), responseDTO.getSpecificGameCopyId());
         assertEquals(boardGame.getName(), responseDTO.getSpecificGameName());
 
@@ -265,7 +264,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(7)
-    public void declineValidBorrowRequest(){
+    public void testDeclineValidBorrowRequest(){
         String url = "/borrowrequests/" + borrowRequest2.getRequestID() + "?action=decline";
 
         ResponseEntity<BorrowRequestResponseDTO> request = client.exchange(url, HttpMethod.PUT, null, BorrowRequestResponseDTO.class);
@@ -287,7 +286,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(8)
-    public void doInvalidBorrowRequest_emptyAction() {
+    public void testDoInvalidBorrowRequestEmptyAction() {
         String url = "/borrowrequests/" + borrowRequest.getRequestID() ;
 
         ResponseEntity<ErrorDto> request = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
@@ -302,7 +301,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(8)
-    public void doInvalidBorrowRequest_InvalidAction() {
+    public void testDoInvalidBorrowRequestInvalidAction() {
         String url = "/borrowrequests/" + borrowRequest.getRequestID() + "?action=Done";
 
         ResponseEntity<ErrorDto> request = client.exchange(url, HttpMethod.PUT, null, ErrorDto.class);
@@ -318,7 +317,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(9)
-    public void confirmValidBorrowing(){
+    public void testConfirmValidBorrowing(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=confirm";
 
@@ -330,7 +329,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(10)
-    public void cancelValidBorrowing(){
+    public void testCancelValidBorrowing(){
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=cancel";
 
         ResponseEntity<Void> response = client.exchange(url, HttpMethod.PUT, null, Void.class);
@@ -342,7 +341,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(11)
-    public void confirmInvalidBorrowing_invalidAction(){
+    public void testConfirmInvalidBorrowingInvalidAction(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy?confirmOrCancel=accept";
 
@@ -357,7 +356,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(11)
-    public void confirmInvalidBorrowing_emptyAction(){
+    public void testConfirmInvalidBorrowingEmptyAction(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId + "/boardGameCopy";
 
@@ -372,7 +371,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(13)
-    public void deleteValidBorrowRequest(){
+    public void testDeleteValidBorrowRequest(){
 
         String url = "/borrowrequests/" + createdBorrowRequestId;
 
@@ -385,7 +384,7 @@ public class BorrowRequestIntegrationTests {
 
     @Test
     @Order(14) /// SET TO LAST
-    public void getValidBorrowRequestsByOwner_noGames() {
+    public void testGetValidBorrowRequestsByOwnerNoGames() {
 
         //delete all remaining borrowRequests of owner1
         String url = "/borrowrequests/" + borrowRequest.getRequestID();

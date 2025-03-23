@@ -5,7 +5,7 @@ import java.util.List;
 public class ErrorDto {
   private List<String> errors;
 
-  private ErrorDto() {
+  public ErrorDto() {
   }
 
   public ErrorDto(List<String> errors) {

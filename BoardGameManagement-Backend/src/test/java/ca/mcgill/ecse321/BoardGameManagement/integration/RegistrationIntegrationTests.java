@@ -1,10 +1,8 @@
 package ca.mcgill.ecse321.BoardGameManagement.integration;
 
+import ca.mcgill.ecse321.BoardGameManagement.dto.*;
 import ca.mcgill.ecse321.BoardGameManagement.model.*;
 import ca.mcgill.ecse321.BoardGameManagement.repository.*;
-import ca.mcgill.ecse321.BoardGameManagement.dto.ErrorDto;
-import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationCreationDto;
-import ca.mcgill.ecse321.BoardGameManagement.dto.RegistrationResponseDto;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,37 +23,38 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestInstance(Lifecycle.PER_CLASS)
 public class RegistrationIntegrationTests {
     @Autowired
-    @SuppressWarnings("unused")
     private TestRestTemplate client;
 
     @Autowired
-    @SuppressWarnings("unused")
     private PlayerRepository playerRepository;
 
     @Autowired
-    @SuppressWarnings("unused")
     private EventRepository eventRepository;
 
     @Autowired
-    @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
 
     @Autowired
-    @SuppressWarnings("unused")
     private RegistrationRepository registrationRepository;
 
-    private Player player;
-    private Player player2;
-    private Event event;
-    private Event event2;
-    private static final String eventName = "Clue Event";
-    private static final String eventDescription = "Clue Event Description";
-    private static final Date eventDate = Date.valueOf(LocalDate.now().plusDays(7));
-    private static final Date eventDate2 = Date.valueOf(LocalDate.now().plusDays(10));
-    private static final Time startTime = Time.valueOf("17:00:00");
-    private static final Time endTime = Time.valueOf("20:00:00");
-    private static final String maxLimit = "6";
-    private static final String location = "Trottier";
+    
+    public int CREATED_EVENT_ID;
+    public int CREATED_PLAYER_ID;
+    private Player PLAYER;
+    private Player PLAYER_2;
+    private BoardGame GAME;
+    private Event EVENT;
+    private Event EVENT_2;
+    private Registration REGISTRATION_2;
+    private Registration REGISTRATION_3;
+    private static final String EVENT_NAME = "Clue Event";
+    private static final String EVENT_DESCRIPTION = "Clue Event Description";
+    private static final Date EVENT_DATE = Date.valueOf(LocalDate.now().plusDays(7));
+    private static final Date EVENT_DATE_2 = Date.valueOf(LocalDate.now().plusDays(10));
+    private static final Time START_TIME = Time.valueOf("17:00:00");
+    private static final Time END_TIME = Time.valueOf("20:00:00");
+    private static final String MAX_LIMIT = "6";
+    private static final String LOCATION = "Trottier";
 
     @BeforeAll
     public void setup() {
@@ -64,23 +63,23 @@ public class RegistrationIntegrationTests {
         boardGameRepository.deleteAll(); 
         playerRepository.deleteAll();
 
-        player = new Player("Alice", "alice@mail.com", "password123", true);
-        playerRepository.save(player); 
-        player2 = new Player("John", "john@mail.com", "password456", true);
-        playerRepository.save(player2);
+        PLAYER = new Player("Alice", "alice@mail.com", "password123", true);
+        playerRepository.save(PLAYER); 
+        PLAYER_2 = new Player("John", "john@mail.com", "password456", true);
+        playerRepository.save(PLAYER_2); 
 
-        BoardGame game = new BoardGame(2, 6, "Clue", "A strategy game");
-        boardGameRepository.save(game);
+        GAME = new BoardGame(2, 6, "Clue", "A strategy game");
+        boardGameRepository.save(GAME);
 
-        event = new Event(eventName, eventDescription, maxLimit, eventDate, startTime, endTime, location, player, game);
-        eventRepository.save(event);
-        event2 = new Event(eventName, eventDescription, maxLimit, eventDate2, startTime, endTime, location, player, game);
-        eventRepository.save(event2);
-
-        Registration registration2 = new Registration(new Registration.Key(player, event2));
-        registrationRepository.save(registration2);
-        Registration registration3 = new Registration(new Registration.Key(player2, event2));
-        registrationRepository.save(registration3);
+        EVENT = new Event(EVENT_NAME, EVENT_DESCRIPTION, MAX_LIMIT, EVENT_DATE, START_TIME, END_TIME, LOCATION, PLAYER, GAME);
+        eventRepository.save(EVENT);
+        EVENT_2 = new Event(EVENT_NAME, EVENT_DESCRIPTION, MAX_LIMIT, EVENT_DATE_2, START_TIME, END_TIME, LOCATION, PLAYER, GAME);
+        eventRepository.save(EVENT_2);
+        
+        REGISTRATION_2 = new Registration(new Registration.Key(PLAYER, EVENT_2));
+        registrationRepository.save(REGISTRATION_2);
+        REGISTRATION_3 = new Registration(new Registration.Key(PLAYER_2, EVENT_2));
+        registrationRepository.save(REGISTRATION_3);
     }
 
     @AfterAll
@@ -98,9 +97,8 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(0)
     public void testCreateAndFindRegistration() {
-        //Arrange
-        RegistrationCreationDto
-            registrationBody = new RegistrationCreationDto(player.getPlayerID(), event.getEventID());
+        // Arrange
+        RegistrationCreationDto registrationBody = new RegistrationCreationDto(PLAYER.getPlayerID(), EVENT.getEventID());
         
         // Act
         ResponseEntity<RegistrationResponseDto> response = client.postForEntity("/registrations", registrationBody, RegistrationResponseDto.class);
@@ -108,19 +106,19 @@ public class RegistrationIntegrationTests {
         // Assert
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(player.getPlayerID(), response.getBody().getplayerID());
-        assertEquals(event.getEventID(), response.getBody().geteventID());
+        assertEquals(PLAYER.getPlayerID(), response.getBody().getplayerID());
+        assertEquals(EVENT.getEventID(), response.getBody().geteventID());
         assertTrue(response.getBody().geteventID() > 0, "Event ID must be a positive number.");
         assertTrue(response.getBody().getplayerID() > 0, "Player ID must be a positive number.");
-        //Validate registration in database 
+        // Validate registration in database 
         assertEquals(3, registrationRepository.count());
-        Registration retrievedRegistration = registrationRepository.findRegistrationByKey(new Registration.Key(player, event));
+        Registration retrievedRegistration = registrationRepository.findRegistrationByKey(new Registration.Key(PLAYER, EVENT));
         assertNotNull(retrievedRegistration);
-        assertEquals(player.getPlayerID(), retrievedRegistration.getKey().getRegistrant().getPlayerID());
-        assertEquals(event.getEventID(), retrievedRegistration.getKey().getEvent().getEventID());
+        assertEquals(PLAYER.getPlayerID(), retrievedRegistration.getKey().getRegistrant().getPlayerID());
+        assertEquals(EVENT.getEventID(), retrievedRegistration.getKey().getEvent().getEventID());
 
-        response.getBody().geteventID();
-        response.getBody().getplayerID();
+        CREATED_EVENT_ID = response.getBody().geteventID();
+        CREATED_PLAYER_ID = response.getBody().getplayerID();
     }
 
      /**
@@ -130,14 +128,14 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(1)
     public void testCreateRegistartionWithInvalidPlayerId() {
-        //Arrange
-        RegistrationCreationDto registrationBody = new RegistrationCreationDto(99999999, event2.getEventID());
+        // Arrange
+        RegistrationCreationDto registrationBody = new RegistrationCreationDto(99999999, EVENT_2.getEventID());
         
         // Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/registrations", registrationBody, ErrorDto.class);
 
         // Assert
-        assertSame(response.getStatusCode(), HttpStatus.NOT_FOUND);
+        assertTrue(response.getStatusCode() == HttpStatus.NOT_FOUND); 
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getErrors().contains("Player not found with ID: 99999999"));
         assertEquals(3, registrationRepository.count()); //Validate registration in database 
@@ -150,14 +148,14 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(2)
     public void testCreateRegistartionWithInvalidEventId() {
-        //Arrange
-        RegistrationCreationDto registrationBody = new RegistrationCreationDto(player2.getPlayerID(),99999999 );
+        // Arrange
+        RegistrationCreationDto registrationBody = new RegistrationCreationDto(PLAYER_2.getPlayerID(),99999999 );
     
         // Act
         ResponseEntity<ErrorDto> response = client.postForEntity("/registrations", registrationBody, ErrorDto.class);
     
         // Assert
-        assertSame(response.getStatusCode(), HttpStatus.NOT_FOUND);
+        assertTrue(response.getStatusCode() == HttpStatus.NOT_FOUND);
         assertNotNull(response.getBody());
         assertTrue(response.getBody().getErrors().contains("Event not found with ID: 99999999"));
         assertEquals(3, registrationRepository.count()); //Validate registration in database 
@@ -170,8 +168,8 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(3)
     public void testFindRegistrationByValidKey() {
-        //Arrange
-        String url = String.format("/registrations/%d/%d", player.getPlayerID(), event.getEventID());
+        // Arrange
+        String url = String.format("/registrations/%d/%d", PLAYER.getPlayerID(), EVENT.getEventID());
 
         // Act
         ResponseEntity<RegistrationResponseDto> response = client.getForEntity(url, RegistrationResponseDto.class);
@@ -179,8 +177,8 @@ public class RegistrationIntegrationTests {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(event.getEventID(), response.getBody().geteventID());
-        assertEquals(player.getPlayerID(), response.getBody().getplayerID());
+        assertEquals(EVENT.getEventID(), response.getBody().geteventID());
+        assertEquals(PLAYER.getPlayerID(), response.getBody().getplayerID());
     }
 
     /**
@@ -206,8 +204,8 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(5)
     public void testFindAllRegistrationsForPlayer() {
-        //Arrange
-        String url = String.format("/registrations/players/%d", player.getPlayerID());
+        // Arrange
+        String url = String.format("/registrations/players/%d", PLAYER.getPlayerID());
 
         // Act
         ResponseEntity<RegistrationResponseDto[]> response = client.getForEntity(url, RegistrationResponseDto[].class);
@@ -215,7 +213,7 @@ public class RegistrationIntegrationTests {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(registrationRepository.findRegistrationByPlayer(player).size(), response.getBody().length);
+        assertEquals(registrationRepository.findRegistrationByPlayer(PLAYER).size(), response.getBody().length);
     }
 
     /**
@@ -225,8 +223,8 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(6)
     public void testFindAllRegistrationsForEvent() {
-        //Arrange
-        String url = String.format("/registrations/events/%d", event2.getEventID());
+        // Arrange
+        String url = String.format("/registrations/events/%d", EVENT_2.getEventID());
 
         // Act
         ResponseEntity<RegistrationResponseDto[]> response = client.getForEntity(url, RegistrationResponseDto[].class);
@@ -234,7 +232,7 @@ public class RegistrationIntegrationTests {
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(registrationRepository.findRegistrationByEvent(event2).size(), response.getBody().length);
+        assertEquals(registrationRepository.findRegistrationByEvent(EVENT_2).size(), response.getBody().length);
     }
 
     /**
@@ -243,14 +241,14 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(7)
     public void testDeleteRegistrationSuccess() {
-        //Arrange
-        String url = String.format("/registrations/%d/%d", player.getPlayerID(), event.getEventID());
+        // Arrange
+        String url = String.format("/registrations/%d/%d", PLAYER.getPlayerID(), EVENT.getEventID());
 
-        //Act
+        // Act
         ResponseEntity<Void> response = client.exchange(url, HttpMethod.DELETE, null, Void.class);
         ResponseEntity<RegistrationResponseDto> getResponse = client.getForEntity(url, RegistrationResponseDto.class);
 
-        //Assert
+        // Assert
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode()); //checks delete process
         assertEquals(HttpStatus.NOT_FOUND, getResponse.getStatusCode()); //checks that it no longer exists
         assertEquals(2, registrationRepository.count());
@@ -263,13 +261,13 @@ public class RegistrationIntegrationTests {
     @Test
     @Order(8)
     public void testFindRegistrationThatDoesNotExist() {
-        //Arrange
-        String url = String.format("/registrations/%d/%d", player2.getPlayerID(), event.getEventID()); //non-exist registration
+        // Arrange
+        String url = String.format("/registrations/%d/%d", PLAYER_2.getPlayerID(), EVENT.getEventID()); //non-exist registration
 
-        //Act
+        // Act
         ResponseEntity<ErrorDto> response = client.getForEntity(url, ErrorDto.class);
 
-        //Assert
+        // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
         assertIterableEquals(List.of("No registration has been found."),
@@ -284,7 +282,7 @@ public class RegistrationIntegrationTests {
     @Order(9)
     public void testDeleteRegistrationThatDoesNotExist() {
         // Arrange
-        String url = String.format("/registrations/%d/%d", player2.getPlayerID(), event.getEventID()); //non-exist registration
+        String url = String.format("/registrations/%d/%d", PLAYER_2.getPlayerID(), EVENT.getEventID()); //non-exist registration
         // Act
         ResponseEntity<ErrorDto> response = client.exchange(url, HttpMethod.DELETE, null, ErrorDto.class);
 
