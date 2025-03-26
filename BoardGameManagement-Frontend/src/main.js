@@ -1,11 +1,17 @@
-import './assets/main.css'
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import App from "./App.vue";
+import router from "./router";
 
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
+// Nucleo Icons
+import "./assets/css/nucleo-icons.css";
+import "./assets/css/nucleo-svg.css";
 
-const app = createApp(App)
+import materialKit from "./material-kit";
 
-app.use(router)
+const app = createApp(App);
 
-app.mount('#app')
+app.use(createPinia());
+app.use(router);
+app.use(materialKit);
+app.mount("#app");
