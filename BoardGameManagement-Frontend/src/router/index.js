@@ -23,6 +23,9 @@ import ElDropdowns from "../layouts/sections/elements/dropdowns/DropdownsView.vu
 import ElProgressBars from "../layouts/sections/elements/progress-bars/ProgressBarsView.vue";
 import ElToggles from "../layouts/sections/elements/toggles/TogglesView.vue";
 import ElTypography from "../layouts/sections/elements/typography/TypographyView.vue";
+import OwnerBorrowRequestManagement from "@/views/OwnerBorrowRequestManagement.vue";
+import PlayerBorrowRequestManagement from "@/views/PlayerBorrowRequestManagement.vue";
+import CreateNewBorrowRequest from "@/views/CreateNewBorrowRequest.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -46,6 +49,24 @@ const router = createRouter({
       name: "event",
       component: EventView,
     },
+    {
+      path: "/pages/ownerborrowrequests",
+      name: "owner borrow request",
+      component: OwnerBorrowRequestManagement,
+    },
+
+    {
+      path: "/pages/playerborrowrequests",
+      name: "player borrow request",
+      component: PlayerBorrowRequestManagement,
+    },
+
+    {
+      path: "/pages/newborrowrequest",
+      name: "create borrow request",
+      component: CreateNewBorrowRequest,
+    },
+
     {
       path: "/pages/landing-pages/basic",
       name: "signin",

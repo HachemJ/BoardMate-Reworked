@@ -88,7 +88,15 @@ watch(
     }
   }
 );
+
+//constant that will need to be linked with whether user is an owner or not
+const isOwner = ref(false);  // This will control if the RouterLink is shown or not
+
+
 </script>
+
+
+
 <template>
   <nav
     class="navbar navbar-expand-lg top-0"
@@ -112,30 +120,11 @@ watch(
       class="navbar-brand d-none d-md-block bg-dark text-white font-weight-bolder fs-4 ms-sm-1 px-5 py-1 rounded"
       :to="{ name: 'presentation' }"
       rel="tooltip"
-      title="Designed and Coded by Creative Tim"
+      title="Click to navigate to home page"
       data-placement="bottom"
     >
       BGM
     </RouterLink>
-      <RouterLink
-        class="navbar-brand d-block d-md-none"
-        :class="
-          props.transparent || props.dark
-            ? 'text-white'
-            : 'font-weight-bolder ms-sm-3'
-        "
-        to="/"
-        rel="tooltip"
-        title="Designed and Coded by Creative Tim"
-        data-placement="bottom"
-      >
-        Material Design
-      </RouterLink>
-      <a
-        href="https://www.creative-tim.com/product/vue-material-kit-pro"
-        class="btn btn-sm bg-gradient-success mb-0 ms-auto d-lg-none d-block"
-        >Buy Now</a
-      >
       <button
         class="navbar-toggler shadow-none ms-2"
         type="button"
@@ -193,8 +182,23 @@ watch(
                 <span>Event Menu</span>
               </RouterLink>
 
-            </div>
+              <RouterLink
+                  v-if="isOwner"
+                  :to="{ name: 'owner borrow request' }"
+                  class="dropdown-item border-radius-md"
+              >
+                <span>Manage Incoming Borrow Requests</span>
+              </RouterLink>
 
+              <RouterLink
+                  v-if="!isOwner"
+                  :to="{ name: 'player borrow request' }"
+                  class="dropdown-item border-radius-md"
+              >
+                <span>See my Borrow Requests</span>
+              </RouterLink>
+
+            </div>
           </li>
           <li class="nav-item mx-2">
             <RouterLink
@@ -246,4 +250,7 @@ watch(
     </div>
   </nav>
   <!-- End Navbar -->
+
 </template>
+
+
