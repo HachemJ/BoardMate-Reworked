@@ -193,6 +193,14 @@ watch(
                 <span>Event Menu</span>
               </RouterLink>
 
+              <RouterLink
+                :to="{ name: 'profile' }"
+                class="dropdown-item border-radius-md"
+              >
+                <span>profile Menu</span>
+              </RouterLink>
+
+
             </div>
 
           </li>
