@@ -1,0 +1,214 @@
+<script setup>
+
+import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
+import {ref, computed} from "vue";
+import {useRoute} from "vue-router";
+import axios from "axios";
+
+const axiosClient = axios.create({
+  baseURL: "http://localhost:8080"
+});
+
+//const gameDetails = ref({ minPlayers: 0, maxPlayers: 0, description: "" });
+//const boardGameCopies = ref({});
+//const reviews = ref({});
+
+const gameDetails = ref({ // This is a dummy data for now
+  minPlayers: 2,
+  maxPlayers: 4,
+  description: "This is a game description."
+});
+
+const boardGameCopies = ref([ // This is a dummy data for now
+  { specification: "Game 1", playerName: "John Doe", boardGameCopyId: 1 },
+  { specification: "This is game 2", playerName: "Tingyi", boardGameCopyId: 2 },
+  { specification: "I don't know what to say", playerName: "Someone", boardGameCopyId: 3 },
+]);
+
+const reviews = ref([ // This is a dummy data for now
+  { comment: "Fine", rating: "2", playerName: "CCC" },
+  { comment: "Very good", rating: "4", playerName: "BBB" },
+  { comment: "Okay", rating: "2", playerName: "AAA" },
+  { comment: "This is a very very very very very very very very very very very very very very very very very very very very very long comment.", rating: "5", playerName: "John Doe" },
+]);
+
+const route = useRoute();
+const gameName = route.params.gamename;
+
+const reviewRoute = computed(() => {
+  const pathSegments = route.path.split("/");
+  console.log("Path segments:", pathSegments);
+
+  const roleSegment = pathSegments[2]; // Extract "playerboardgame" or "ownerboardgame"
+  console.log("Role segment:", roleSegment);
+
+  return roleSegment === "playerboardgame" ? "playerAddReview" : "ownerAddReview";
+});
+
+function borrowGame(id) {
+  console.log("Borrowing game");
+  alert("Borrow request sent!");
+}
+
+</script>
+
+<template>
+  <div>
+    <!-- Top Navigation Bar -->
+    <DefaultNavbar />
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+
+        <!-- Content Area -->
+        <div class="col-md-12">
+          <!-- Page Title -->
+          <h2 class="mb-3 text-center">{{ gameName }}</h2>
+
+          <!-- Game Details -->
+          <div class="mb-4 text-center">
+            <p><strong>Minimum Players:</strong> {{ gameDetails.minPlayers }}</p>
+            <p><strong>Maximum Players:</strong> {{ gameDetails.maxPlayers }}</p>
+            <p><strong>Description:</strong> {{ gameDetails.description }}</p>
+          </div>
+
+          <!-- First Table -->
+          <div class="mb-4">
+            <h4 class="text-center">Board Game Copies</h4>
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Copy Number</th>
+                <th>Specification</th>
+                <th>Owner</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(game, index) in boardGameCopies">
+                <td>{{ index + 1 }}</td>
+                <td>{{ game.specification }}</td>
+                <td>{{ game.playerName }}</td>
+                <td>
+                  <button class="btn btn-info me-2"
+                          @click="borrowGame(game.boardGameCopyId)"
+                          >
+                    Borrow
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Second Table -->
+          <div>
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="text-center flex-grow-1">Reviews</h4>
+              <router-link :to="{ name: reviewRoute }">
+                <button class="btn btn-info">Add Review</button>
+              </router-link>
+            </div>
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Comment</th>
+                <th>Rating</th>
+                <th>Reviewer</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="game in reviews">
+                <td>{{ game.comment }}</td>
+                <td>
+                  <div class="stars">
+                    <span v-for="n in 5" :key="n" class="star">
+                      <span v-if="n <= game.rating">★</span>
+                      <span v-else>☆</span>
+                    </span>
+                  </div>
+                </td>
+                <td>{{ game.playerName }}</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+
+.nav-link {
+  cursor: pointer;
+  margin-bottom: 5px;
+  padding: 10px;
+  text-align: center;
+  color: white !important;
+}
+.bg-secondary {
+  background-color: grey !important;
+}
+.bg-success {
+  background-color: green !important;
+}
+
+/* Input, Textarea, and Select Styles */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {  /* Added select here */
+  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
+  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
+  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+textarea:focus,
+select:focus {  /* Added select here */
+  border-color: #80bdff; /* Bootstrap's default focus border color */
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
+}
+
+/* Label Styles */
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #495057; /* Bootstrap's default text color for labels */
+}
+
+/* Button Styles */
+button.btn {
+  margin-top: 1rem; /* Add some top margin for the button */
+}
+
+/* Board game name style in the table */
+.table td a {
+  font-size: 20px;
+  color: blue;
+  text-decoration: none;
+}
+
+.table td a:hover {
+  text-decoration: underline;
+  color: darkblue;
+}
+
+.stars {
+  font-size: 1.5rem;
+  color: gold; /* Gold color for stars */
+}
+
+.star {
+  margin-right: 2px; /* Adds space between stars */
+}
+
+</style>
