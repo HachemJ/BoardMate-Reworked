@@ -29,7 +29,8 @@ import CreateNewBorrowRequest from "@/views/CreateNewBorrowRequest.vue";
 import PlayerBoardGameMenuView from "@/views/PlayerBoardGameMenuView.vue";
 import OwnerBoardGameMenuView from "@/views/OwnerBoardGameMenuView.vue";
 import BoardGameDetailView from "@/views/BoardGameDetailView.vue";
-import UpdateBoardGameCopyView from "@/views/UpdateBoardGameCopyView.vue";
+import AddBoardGameCopyView from "@/views/AddBoardGameCopyView.vue";
+import AddBoardGameReviewView from "@/views/AddBoardGameReviewView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -96,9 +97,21 @@ const router = createRouter({
     },
 
     {
-      path:"/pages/ownerboardgame/:boardgamecopyid",
-      name: "updateBoardGameCopy",
-      component: UpdateBoardGameCopyView,
+      path: "/pages/ownerboardgame/addboardgamecopy",
+      name: "addBoardGameCopy",
+      component: AddBoardGameCopyView,
+    },
+
+    {
+      path: "/pages/playerboardgame/:gamename/addreview",
+      name: "playerAddReview",
+      component: AddBoardGameReviewView,
+    },
+
+    {
+      path: "/pages/ownerboardgame/:gamename/addreview",
+      name: "ownerAddReview",
+      component: AddBoardGameReviewView,
     },
 
     {
