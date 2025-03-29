@@ -1,7 +1,7 @@
 <script setup>
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {ref} from "vue";
+import {ref, computed} from "vue";
 import {useRoute} from "vue-router";
 import axios from "axios";
 
@@ -34,6 +34,16 @@ const reviews = ref([ // This is a dummy data for now
 
 const route = useRoute();
 const gameName = route.params.gamename;
+
+const reviewRoute = computed(() => {
+  const pathSegments = route.path.split("/");
+  console.log("Path segments:", pathSegments);
+
+  const roleSegment = pathSegments[2]; // Extract "playerboardgame" or "ownerboardgame"
+  console.log("Role segment:", roleSegment);
+
+  return roleSegment === "playerboardgame" ? "playerAddReview" : "ownerAddReview";
+});
 
 function borrowGame(id) {
   console.log("Borrowing game");
@@ -92,7 +102,12 @@ function borrowGame(id) {
 
           <!-- Second Table -->
           <div>
-            <h4 class="text-center">Reviews</h4>
+            <div class="d-flex justify-content-between align-items-center">
+              <h4 class="text-center flex-grow-1">Reviews</h4>
+              <router-link :to="{ name: reviewRoute }">
+                <button class="btn btn-info">Add Review</button>
+              </router-link>
+            </div>
             <table class="table">
               <thead>
               <tr>

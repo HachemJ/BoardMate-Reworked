@@ -105,7 +105,12 @@ const filteredGames = computed(() => {
           </div>
 
           <div v-if="selectedTab === 'My Board Game Copies'">
-            <h4>My Collection</h4>
+            <div class="d-flex justify-content-between align-items-center">
+              <h4>My Collection</h4>
+              <router-link :to="{ name: 'addBoardGameCopy' }">
+                <button class="btn btn-info">Add Board Game Copy</button>
+              </router-link>
+            </div>
             <table class="table">
               <thead>
               <tr>
