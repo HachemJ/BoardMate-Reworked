@@ -123,11 +123,9 @@ const filteredGames = computed(() => {
                 <td>{{ game.boardGameName }}</td>
                 <td>{{ game.specification }}</td>
                 <td>
-                  <router-link :to="{ name: 'updateBoardGameCopy', params: { boardgamecopyid: game.boardGameCopyId }}">
-                    <button class="btn btn-info me-2">
+                  <button class="btn btn-info me-2">
                       Update
-                    </button>
-                  </router-link>
+                  </button>
                 </td>
                 <td>
                   <button class="btn btn-info me-2"
