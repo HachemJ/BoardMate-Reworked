@@ -198,6 +198,22 @@ const isOwner = ref(false);  // This will control if the RouterLink is shown or 
                 <span>See my Borrow Requests</span>
               </RouterLink>
 
+              <RouterLink
+                v-if="isOwner"
+                :to="{ name: 'ownerBoardGameMenu' }"
+                class="dropdown-item border-radius-md"
+              >
+                <span>Board Game Menu</span>
+              </RouterLink>
+
+              <RouterLink
+                  v-if="!isOwner"
+                  :to="{ name: 'playerBoardGameMenu' }"
+                  class="dropdown-item border-radius-md"
+              >
+                <span>Board Game Menu</span>
+              </RouterLink>
+
             </div>
           </li>
           <li class="nav-item mx-2">
