@@ -1,0 +1,145 @@
+<template>
+  <div>
+    <!-- Top Navigation Bar -->
+    <DefaultNavbar />
+
+    <div class="container-fluid mt-4">
+      <div class="row">
+
+        <!-- Right Content Area -->
+        <div class="col-md-9">
+
+          <div>
+            <h1>See my borrow requests</h1>
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Game requested</th>
+                <th>Start of loan</th>
+                <th>End of loan</th>
+                <th>Status</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(request, index) in requests" :key="request.id" >
+                <td>{{ request.requestedGame }}</td>
+                <td>{{ request.startDate }}</td>
+                <td>{{ request.endDate}}</td>
+                <td>{{ request.status}}</td>
+                <td>
+                  <button class="btn btn-info me-2"
+                          @click="confirmRequest(request.requestedGame)"
+                  >
+                    Confirm
+                  </button>
+                </td>
+                <td>
+                  <button class="btn btn-info me-2"
+                          @click="cancelRequest(request.requestedGame)"
+                  >
+                    Cancel
+                  </button>
+                </td>
+
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
+
+const requests = ref([])  // This will hold the array of requests of this player fetched from the database
+
+requests.value = [
+  {
+    requestedGame: 'Game name',
+    startDate: '2023-08-20',
+    endDate: '2023-09-20',
+    status: 'pending'
+  },
+  {
+    requestedGame: 'other game',
+    startDate: '2025-03-03',
+    endDate: '2025-03-04',
+    status: 'accepted'
+  }
+];
+
+
+function confirmRequest(name) {
+
+  console.log('Confirm received game: ', name)
+  alert(`Confirm received game: ${name}`)
+}
+
+
+function cancelRequest(name) {
+
+  console.log('Request denied from ', name)
+  alert(`Successfully cancelled borrowing for game: ${name}`)
+}
+
+</script>
+
+
+
+
+<style scoped>
+.nav-link {
+  cursor: pointer;
+  margin-bottom: 5px;
+  padding: 10px;
+  text-align: center;
+  color: white !important;
+}
+.bg-secondary {
+  background-color: grey !important;
+}
+.bg-success {
+  background-color: green !important;
+}
+
+/* Input, Textarea, and Select Styles */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+textarea,
+select {  /* Added select here */
+  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
+  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
+  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+textarea:focus,
+select:focus {  /* Added select here */
+  border-color: #80bdff; /* Bootstrap's default focus border color */
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
+}
+
+/* Label Styles */
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #495057; /* Bootstrap's default text color for labels */
+}
+
+/* Button Styles */
+button.btn {
+  margin-top: 1rem; /* Add some top margin for the button */
+}
+
+</style>
+
