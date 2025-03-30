@@ -73,12 +73,6 @@ const router = createRouter({
     },
 
     {
-      path: "/pages/newborrowrequest",
-      name: "create borrow request",
-      component: CreateNewBorrowRequest,
-    },
-
-    {
       path: "/pages/playerboardgame",
       name: "playerBoardGameMenu",
       component: PlayerBoardGameMenuView,
