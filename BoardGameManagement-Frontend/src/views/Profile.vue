@@ -140,9 +140,9 @@
           </div>
         </div>
 
-        <!-- Borrowed Games Tab (Player only) -->
+        <!-- Borrowed Games Tab (Both Owner and Player) -->
         <div 
-          v-if="selectedTab === 'borrowed' && userProfile.status === 'player'" 
+          v-if="selectedTab === 'borrowed'" 
           class="tab-pane fade show active"
         >
           <div class="table-responsive">
@@ -277,6 +277,7 @@ export default {
         return [
           { id: 'boardgames', name: 'My Boardgames' },
           { id: 'borrow', name: 'Borrow Request' },
+          { id: 'borrowed', name: 'Borrowed Games' },
           { id: 'events', name: 'Events' }
         ];
       } else {
