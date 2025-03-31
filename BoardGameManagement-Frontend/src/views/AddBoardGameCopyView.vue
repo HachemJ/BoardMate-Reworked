@@ -1,21 +1,66 @@
 <script setup>
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {reactive, ref} from "vue";
+import {reactive, ref, onMounted} from "vue";
+import axios from "axios";
 
-const boardGames = ref([ // This is a dummy data for now
-  { name: "Catan", minPlayer: 4, maxPlayer: 8 },
-  { name: "Ticket to Ride", minPlayer: 2, maxPlayer: 5 },
-  { name: "Carcassonne", minPlayer: 2, maxPlayer: 2 },
-  { name: "Dominion", minPlayer: 1, maxPlayer: 3 },
-]);
+const axiosClient = axios.create({
+  baseURL: "http://localhost:8080"
+});
+
+const boardGames = ref([]);
+
+onMounted(async () => {
+  try {
+    const response = await axiosClient.get("/boardgames");
+    boardGames.value = response.data;
+  } catch (error) {
+    console.error(error);
+  }
+})
 
 const boardGameCopyData = reactive({
+  name: "",
   specification: "",
-})
+});
+
+async function fetchBoardGameID(name) {
+  console.log("Game name is:", name); // Log the game name
+  try {
+    const response = await axiosClient.get("/boardgames");
+    const game = response.data.find(game => game.name === name);
+    if (game) {
+      return game.gameID;
+    }
+    
+    return null; // Return null if game ID is not found
+  } catch (error) {
+    console.error("Error fetching game ID:", error);
+  }
+}
+
+async function createBoardGameCopy(name, specification) {
+  const gameId = await fetchBoardGameID(name);
+  //console.log("Game ID is:", gameId); // Log the game ID
+  //console.log("Specification is:", specification); // Log the specification
+  const newBoardGameCopy = {
+    specification: specification,
+    isAvailable: true,
+    playerId: Number(6245), //TODO PLACEHOLDER
+    boardGameId: gameId,
+  }
+
+  try {
+    await axiosClient.post("/boardgamecopies", newBoardGameCopy);
+  } catch (e) {
+    console.error(e);
+  }
+
+}
 
 function submitBoardGameCopy() {
   console.log('Created Board Game Copy:', boardGameCopyData)
+  createBoardGameCopy(boardGameCopyData.name, boardGameCopyData.specification);
   alert('Board Game Copy Created Successfully!')
   // Reset form after submission
   Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = key === 'maxSpot' ? null : '')

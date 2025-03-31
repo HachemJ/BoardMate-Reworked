@@ -3,6 +3,11 @@
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {useRoute} from "vue-router";
 import {reactive} from "vue";
+import axios from "axios";
+
+const axiosClient = axios.create({
+   baseURL: "http://localhost:8080"
+ });
 
 const route = useRoute();
 const gameName = route.params.gamename;
@@ -12,8 +17,23 @@ const reviewData = reactive({
   rating: "",
 })
 
+async function createReview() {
+    const newReview = {
+        comment: reviewData.comment,
+        rating: Number(reviewData.rating),
+    }
+
+    try {
+        await axiosClient.post("/reviews", newReview);
+    } catch (e) {
+        console.error(e);
+    }
+
+}
+
 function submitReview() {
   console.log('Created Review:', boardGameCopyData)
+  createReview();
   alert('Review Created Successfully!')
   // Reset form after submission
   Object.keys(reviewData).forEach(key => reviewData[key] = key === 'maxSpot' ? null : '')
