@@ -14,6 +14,7 @@ import java.util.ArrayList;
  * This class is the controller for the Review entity. It is responsible for handling requests related to Reviews.
  */
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @SuppressWarnings("unused")
 public class ReviewController {
 
