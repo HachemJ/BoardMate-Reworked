@@ -32,6 +32,7 @@ import OwnerBoardGameMenuView from "@/views/OwnerBoardGameMenuView.vue";
 import BoardGameDetailView from "@/views/BoardGameDetailView.vue";
 import AddBoardGameCopyView from "@/views/AddBoardGameCopyView.vue";
 import AddBoardGameReviewView from "@/views/AddBoardGameReviewView.vue";
+import AddBoardGameView from "@/views/AddBoardGameView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -112,6 +113,18 @@ const router = createRouter({
       path: "/pages/ownerboardgame/:gamename/addreview",
       name: "ownerAddReview",
       component: AddBoardGameReviewView,
+    },
+
+    {
+      path: "/pages/playerboardgame/addboardgame",
+      name: "playerAddBoardGame",
+      component: AddBoardGameView,
+    },
+
+    {
+      path: "/pages/ownerboardgame/addboardgame",
+      name: "ownerAddBoardGame",
+      component: AddBoardGameView,
     },
 
     {

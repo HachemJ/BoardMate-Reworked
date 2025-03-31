@@ -13,6 +13,7 @@ import java.util.ArrayList;
 
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("players")
 @SuppressWarnings("unused")
 public class PlayerController {

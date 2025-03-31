@@ -9,7 +9,7 @@ const axiosClient = axios.create({
 });
 
 const searchQuery = ref("");
-//const boardGames = ref([]);
+const boardGames = ref([]);
 
 onMounted(async () => {
   try {
@@ -19,13 +19,6 @@ onMounted(async () => {
     console.error(error);
   }
 })
-
-const boardGames = ref([ // This is a dummy data for now
-  { name: "Catan", minPlayer: 4, maxPlayer: 8 },
-  { name: "Ticket to Ride", minPlayer: 2, maxPlayer: 5 },
-  { name: "Carcassonne", minPlayer: 2, maxPlayer: 2 },
-  { name: "Dominion", minPlayer: 1, maxPlayer: 3 },
-]);
 
 const filteredGames = computed(() => {
   return boardGames.value.filter(game =>
@@ -46,8 +39,13 @@ const filteredGames = computed(() => {
         <!-- Content Area -->
         <div class="col-md-9">
 
-          <!-- Page Title -->
-          <h2 class="mb-3">Browse all Board Games or Search</h2>
+          <!-- Page Title and Add Board Game Button-->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0">Browse all Board Games or Search</h2>
+            <router-link :to="{ name: 'playerAddBoardGame' }">
+              <button class="btn btn-primary">Add Board Game</button>
+            </router-link>
+          </div>
 
           <!-- Search Bar -->
           <div class="mb-3">
