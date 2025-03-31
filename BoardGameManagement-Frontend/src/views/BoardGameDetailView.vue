@@ -45,6 +45,10 @@ onMounted(async () => {
     const gameId = await fetchBoardGameID();
     const response = await axiosClient.get("/boardgamecopies/byboardgame/" + gameId);
     boardGameCopies.value = response.data;
+
+    const response2 = await axiosClient.get("/reviews/");
+    console.log("Reviews:", response2.data); // Log the reviews data
+    reviews.value = response2.data;
   } catch (error) {
     console.error(error);
   }
@@ -56,6 +60,7 @@ const reviews = ref([ // This is a dummy data for now
   { comment: "Okay", rating: "2", playerName: "AAA" },
   { comment: "This is a very very very very very very very very very very very very very very very very very very very very very long comment.", rating: "5", playerName: "John Doe" },
 ]);
+
 
 const route = useRoute();
 const gameName = route.params.gamename;
