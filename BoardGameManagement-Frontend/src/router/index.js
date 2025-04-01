@@ -4,6 +4,7 @@ import AboutView from "../views/LandingPages/AboutUs/AboutView.vue";
 import ContactView from "../views/LandingPages/ContactUs/ContactView.vue";
 import EventView from "../views/EventView.vue";
 import SignInBasicView from "../views/LandingPages/SignIn/BasicView.vue";
+import ProfileView from "../views/Profile.vue";
 import PageHeaders from "../layouts/sections/page-sections/page-headers/HeadersView.vue";
 import PageFeatures from "../layouts/sections/page-sections/features/FeaturesView.vue";
 import NavigationNavbars from "../layouts/sections/navigation/navbars/NavbarsView.vue";
@@ -25,7 +26,6 @@ import ElToggles from "../layouts/sections/elements/toggles/TogglesView.vue";
 import ElTypography from "../layouts/sections/elements/typography/TypographyView.vue";
 import OwnerBorrowRequestManagement from "@/views/OwnerBorrowRequestManagement.vue";
 import PlayerBorrowRequestManagement from "@/views/PlayerBorrowRequestManagement.vue";
-import CreateNewBorrowRequest from "@/views/CreateNewBorrowRequest.vue";
 import PlayerBoardGameMenuView from "@/views/PlayerBoardGameMenuView.vue";
 import OwnerBoardGameMenuView from "@/views/OwnerBoardGameMenuView.vue";
 import BoardGameDetailView from "@/views/BoardGameDetailView.vue";
@@ -39,6 +39,11 @@ const router = createRouter({
       path: "/",
       name: "presentation",
       component: PresentationView,
+    },
+    {
+      path: "/profile",
+      name: "profile",
+      component: ProfileView,
     },
     {
       path: "/pages/landing-pages/about-us",
@@ -65,12 +70,6 @@ const router = createRouter({
       path: "/pages/playerborrowrequests",
       name: "player borrow request",
       component: PlayerBorrowRequestManagement,
-    },
-
-    {
-      path: "/pages/newborrowrequest",
-      name: "create borrow request",
-      component: CreateNewBorrowRequest,
     },
 
     {

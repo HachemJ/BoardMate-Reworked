@@ -183,12 +183,21 @@ const isOwner = ref(false);  // This will control if the RouterLink is shown or 
               </RouterLink>
 
               <RouterLink
+                :to="{ name: 'profile' }"
+                class="dropdown-item border-radius-md"
+              >
+                <span>profile Menu</span>
+              </RouterLink>
+
+
+              <RouterLink
                   v-if="isOwner"
                   :to="{ name: 'owner borrow request' }"
                   class="dropdown-item border-radius-md"
               >
                 <span>Manage Incoming Borrow Requests</span>
               </RouterLink>
+ 
 
               <RouterLink
                   v-if="!isOwner"
