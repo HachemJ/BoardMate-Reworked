@@ -8,7 +8,7 @@
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.therapi/therapi-runtime-javadoc-scribe/0.13.0/4167e2d40bd312de3e7a80bc8e3997394e314685/therapi-runtime-javadoc-scribe-0.13.0.jar" />
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.therapi/therapi-runtime-javadoc/0.13.0/971082ad068aef0398e91a03f2c03acc2fe0498a/therapi-runtime-javadoc-0.13.0.jar" />
         </processorPath>
-        <module name="BoardGameManagement.main" />
+        <module name="ca.mcgill.ecse321.BoardGameManagement.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="21" />
