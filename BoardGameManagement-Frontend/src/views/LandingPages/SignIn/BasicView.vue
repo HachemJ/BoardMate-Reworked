@@ -23,15 +23,16 @@ const authStore = useAuthStore();
 
 async function handleLogin() {
   try {
-    console.log("Login request:", email.value, password.value);
     const res = await axiosClient.post("/players/login", {
       email: email.value,
       password: password.value,
     });
 
     const user = res.data;
-    authStore.login(user.name, user.email);
+    authStore.login(user.name, user.email, user.isAOwner);
+
     alert("Logged in successfully!");
+    console.log("Logged in user:", authStore.user);
     router.push("/profile");
   } catch (error) {
     alert("Login failed: " + (error.response?.data?.message || error.message));
