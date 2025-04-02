@@ -29,6 +29,7 @@ public class ReviewRepositoryTests {
     @AfterEach
     public void clearDatabase() {
         reviewRepository.deleteAll();
+        playerRepository.deleteAll();
     }
 
     @Test
