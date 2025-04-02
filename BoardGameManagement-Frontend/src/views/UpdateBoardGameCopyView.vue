@@ -17,7 +17,7 @@ const boardGameCopyData = reactive({
 
 async function getBoardGameCopiesForId() {
   try {
-    const playerId = 7642; // Replace with the actual player ID TODO PLACEHOLDER
+    const playerId = 6842; // Replace with the actual player ID TODO PLACEHOLDER
     const response = await axiosClient.get("/boardgamecopies/byplayer/" + playerId);
     console.log("Data:", response.data);
     boardGameCopies.splice(0, boardGameCopies.length, ...response.data);
@@ -28,13 +28,13 @@ async function getBoardGameCopiesForId() {
 
 
 async function updateBGC(specification) {
-  const updatedBoardGameCopy = {
-    newSpecification: specification,
-  }
-
   const boardGameCopyId = boardGameCopyData.boardGameCopyId;
   try {
-    await axiosClient.put("/boardgamecopies/" + boardGameCopyId, specification);
+    await axiosClient.put("/boardgamecopies/" + boardGameCopyId, specification, {
+      headers: {
+        'Content-Type': 'text/plain'
+      }
+    });
   } catch (e) {
     console.error(e);
   }
