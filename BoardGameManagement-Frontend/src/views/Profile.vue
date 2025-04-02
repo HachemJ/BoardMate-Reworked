@@ -1,18 +1,16 @@
 <template>
   <div>
-    <!-- Top Navigation Bar -->
     <DefaultNavbar />
 
     <div class="container-fluid mt-4">
-      <!-- User Profile Header -->
       <div class="row mb-4">
         <div class="col-md-3 text-center">
-          <img 
-            :src="userProfile.profilePicture || '/default-avatar.png'" 
+          <img
+            :src="userProfile.profilePicture || '/default-avatar.png'"
             class="rounded-circle"
             style="width: 150px; height: 150px; object-fit: cover;"
             alt="Profile Picture"
-          >
+          />
         </div>
         <div class="col-md-9">
           <div class="d-flex justify-content-between align-items-start">
@@ -23,20 +21,20 @@
               </template>
               <template v-else>
                 <div class="mb-3">
-                  <input 
-                    type="text" 
-                    class="form-control" 
+                  <input
+                    type="text"
+                    class="form-control"
                     v-model="editedProfile.name"
                     placeholder="Name"
-                  >
+                  />
                 </div>
                 <div class="mb-3">
-                  <input 
-                    type="email" 
-                    class="form-control" 
+                  <input
+                    type="email"
+                    class="form-control"
                     v-model="editedProfile.email"
                     placeholder="Email"
-                  >
+                  />
                 </div>
               </template>
             </div>
@@ -64,11 +62,10 @@
         </div>
       </div>
 
-      <!-- Tabs Navigation -->
       <ul class="nav nav-tabs mb-4">
         <li class="nav-item" v-for="tab in tabs" :key="tab.id">
-          <a 
-            class="nav-link" 
+          <a
+            class="nav-link"
             :class="{ active: selectedTab === tab.id }"
             href="#"
             @click.prevent="selectedTab = tab.id"
@@ -78,11 +75,9 @@
         </li>
       </ul>
 
-      <!-- Tab Content -->
       <div class="tab-content">
-        <!-- My Boardgames Tab (Owner only) -->
-        <div 
-          v-if="selectedTab === 'boardgames' && userProfile.status === 'owner'" 
+        <div
+          v-if="selectedTab === 'boardgames' && userProfile.status === 'owner'"
           class="tab-pane fade show active"
         >
           <div class="row">
@@ -101,9 +96,8 @@
           </div>
         </div>
 
-        <!-- Borrow Request Tab (Owner only) -->
-        <div 
-          v-if="selectedTab === 'borrow' && userProfile.status === 'owner'" 
+        <div
+          v-if="selectedTab === 'borrow' && userProfile.status === 'owner'"
           class="tab-pane fade show active"
         >
           <div class="table-responsive">
@@ -126,7 +120,7 @@
                   </td>
                   <td>{{ formatDate(request.requestDate) }}</td>
                   <td>
-                    <button 
+                    <button
                       v-if="request.status === 'pending'"
                       class="btn btn-sm btn-danger"
                       @click="cancelRequest(request.id)"
@@ -140,9 +134,8 @@
           </div>
         </div>
 
-        <!-- Borrowed Games Tab (Both Owner and Player) -->
-        <div 
-          v-if="selectedTab === 'borrowed'" 
+        <div
+          v-if="selectedTab === 'borrowed'"
           class="tab-pane fade show active"
         >
           <div class="table-responsive">
@@ -171,9 +164,8 @@
           </div>
         </div>
 
-        <!-- Events Tab (Both Owner and Player) -->
-        <div 
-          v-if="selectedTab === 'events'" 
+        <div
+          v-if="selectedTab === 'events'"
           class="tab-pane fade show active"
         >
           <div class="row">
@@ -187,7 +179,7 @@
                       <small class="text-muted">
                         <i class="fas fa-calendar"></i> {{ formatDate(event.date) }}
                       </small>
-                      <br>
+                      <br />
                       <small class="text-muted">
                         <i class="fas fa-clock"></i> {{ event.startTime }} - {{ event.endTime }}
                       </small>
@@ -208,82 +200,90 @@
 
 <script>
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
+import { useAuthStore } from "@/stores/authStore";
 
 export default {
   name: "UserProfileView",
   components: {
     DefaultNavbar,
   },
+  setup() {
+    const authStore = useAuthStore();
+    return { authStore };
+  },
   data() {
     return {
       isEditing: false,
       editedProfile: {
-        name: '',
-        email: ''
+        name: "",
+        email: "",
       },
-      _selectedTab: 'borrowed',
-      userProfile: {
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        status: 'owner',
-        profilePicture: 'https://dis-prod.assetful.loblaw.ca/content/dam/loblaw-companies-limited/creative-assets/grocery/2023/wk17/cs-11614_wk17_nf-wont-be-beat/cta-banner/wk17-20_nf_cta_banner_noname_omni_en.png'
-      },
+      _selectedTab: "borrowed",
       userBoardgames: [
         {
           id: 1,
-          name: 'Catan',
-          description: 'A strategy board game',
-          status: 'Available'
+          name: "Catan",
+          description: "A strategy board game",
+          status: "Available",
         },
-      {
+        {
           id: 2,
-          name: 'Go',
-          description: 'An interesting board game',
-          status: 'Available'
-        }],
+          name: "Go",
+          description: "An interesting board game",
+          status: "Available",
+        },
+      ],
       borrowRequests: [
         {
           id: 1,
-          gameName: 'Monopoly',
-          status: 'pending',
-          requestDate: '2024-03-27'
+          gameName: "Monopoly",
+          status: "pending",
+          requestDate: "2024-03-27",
         },
       ],
       userEvents: [
         {
           id: 1,
-          name: 'Game Night',
-          description: 'Monthly board game gathering',
-          date: '2024-04-01',
-          startTime: '18:00',
-          endTime: '22:00',
-          status: 'upcoming'
+          name: "Game Night",
+          description: "Monthly board game gathering",
+          date: "2024-04-01",
+          startTime: "18:00",
+          endTime: "22:00",
+          status: "upcoming",
         },
       ],
       borrowedGames: [
         {
           id: 1,
-          name: 'Risk',
-          borrowedDate: '2024-03-20',
-          returnDate: '2024-04-20',
-          status: 'active'
-        }
-      ]
+          name: "Risk",
+          borrowedDate: "2024-03-20",
+          returnDate: "2024-04-20",
+          status: "active",
+        },
+      ],
     };
   },
   computed: {
+    userProfile() {
+      return {
+        name: this.authStore.user.username,
+        email: this.authStore.user.email,
+        status: this.authStore.user.isAOwner ? "owner" : "player",
+        profilePicture: null,
+      };
+    },
     tabs() {
-      if (this.userProfile.status === 'owner') {
+      if (this.userProfile.status === "owner") {
         return [
-          { id: 'boardgames', name: 'My Boardgames' },
-          { id: 'borrow', name: 'Borrow Request' },
-          { id: 'borrowed', name: 'Borrowed Games' },
-          { id: 'events', name: 'Events' }
+          { id: "boardgames", name: "My Boardgames" },
+          { id: "borrow", name: "Borrow Request" },
+          { id: "borrowed", name: "Borrowed Games" },
+          { id: "events", name: "Events" },
         ];
       } else {
         return [
-          { id: 'borrowed', name: 'Borrowed Games' },
-          { id: 'events', name: 'Events' }
+          { id: "borrowed", name: "Borrowed Games" },
+          { id: "events", name: "Events" },
         ];
       }
     },
@@ -293,25 +293,23 @@ export default {
       },
       set(value) {
         this._selectedTab = value;
-      }
-    }
+      },
+    },
   },
   created() {
-    // Set initial tab based on user role
-    this._selectedTab = this.userProfile.status === 'owner' ? 'boardgames' : 'borrowed';
+    this._selectedTab = this.userProfile.status === "owner" ? "boardgames" : "borrowed";
   },
   methods: {
     startEditing() {
       this.editedProfile = {
         name: this.userProfile.name,
-        email: this.userProfile.email
+        email: this.userProfile.email,
       };
       this.isEditing = true;
     },
     saveProfile() {
-      // Here you would typically make an API call to update the profile
-      this.userProfile.name = this.editedProfile.name;
-      this.userProfile.email = this.editedProfile.email;
+      this.authStore.user.username = this.editedProfile.name;
+      this.authStore.user.email = this.editedProfile.email;
       this.isEditing = false;
     },
     cancelEditing() {
@@ -319,30 +317,29 @@ export default {
     },
     getStatusBadgeClass(status) {
       const classes = {
-        pending: 'bg-warning',
-        approved: 'bg-success',
-        rejected: 'bg-danger',
-        completed: 'bg-info'
+        pending: "bg-warning",
+        approved: "bg-success",
+        rejected: "bg-danger",
+        completed: "bg-info",
       };
-      return classes[status] || 'bg-secondary';
+      return classes[status] || "bg-secondary";
     },
     getEventStatusBadgeClass(status) {
       const classes = {
-        upcoming: 'bg-primary',
-        ongoing: 'bg-success',
-        completed: 'bg-secondary',
-        cancelled: 'bg-danger'
+        upcoming: "bg-primary",
+        ongoing: "bg-success",
+        completed: "bg-secondary",
+        cancelled: "bg-danger",
       };
-      return classes[status] || 'bg-secondary';
+      return classes[status] || "bg-secondary";
     },
     formatDate(date) {
       return new Date(date).toLocaleDateString();
     },
     cancelRequest(requestId) {
-      // Implement cancel request logic
-      console.log('Cancelling request:', requestId);
-    }
-  }
+      console.log("Cancelling request:", requestId);
+    },
+  },
 };
 </script>
 
@@ -353,24 +350,20 @@ export default {
   border-bottom: 2px solid transparent;
   padding: 0.5rem 1rem;
 }
-
 .nav-tabs .nav-link.active {
   color: #0d6efd;
   border-bottom: 2px solid #0d6efd;
   background: none;
 }
-
 .card {
   transition: transform 0.2s;
 }
-
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
-
 .badge {
   font-size: 0.8rem;
   padding: 0.5em 0.8em;
 }
-</style> 
+</style>

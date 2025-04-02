@@ -1,3 +1,110 @@
+
+<script setup>
+import {ref, onMounted, watchEffect} from 'vue'
+import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
+import axios from "axios";
+import {useRoute} from "vue-router";
+
+
+const axiosClient = axios.create({
+  // NOTE: it's baseURL, not baseUrl
+  baseURL: "http://localhost:8080"
+});
+
+const requests = ref([]);  // This will hold the array of events fetched from the database
+const requestUpdated = ref(false); // keep track whether requests have been updated
+const playerId = useRoute().params.playerId;
+const date = new Date();
+const today = date.getFullYear() + '-'
+    + (date.getMonth() + 1).toString().padStart(2, '0') + '-'
+    + date.getDate().toString().padStart(2, '0');
+
+
+
+const fetchRequests = async () => {
+  try {
+    const response = await axiosClient.get(`/players/${playerId}/borrowrequests`);
+    console.log(response.data);
+    requests.value = response.data;
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+  }
+
+};
+
+
+// Fetch data when component is mounted
+onMounted(fetchRequests);
+
+// Automatically refresh when `requestUpdated` changes
+watchEffect(() => {
+  if (requestUpdated.value) {
+    fetchRequests();
+    requestUpdated.value = false; // Reset the state after fetching
+  }
+});
+
+
+async function confirmRequest(id, gameName) {
+  try {
+    await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=confirm`);
+    alert(`Borrow time started: confirmed ${gameName} was received`);
+    // Trigger a refresh after the request is accepted
+    requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
+
+  } catch (error) {
+    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    console.error("Error declining request:", error);
+  }
+}
+
+
+async function cancelRequest(id, gameName) {
+  try {
+    await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
+    alert(`Premature Cancelling: confirms ${gameName} borrowing was cancelled and returned`);
+    // Trigger a refresh after the request is accepted
+    requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
+
+  } catch (error) {
+    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    console.error("Error declining request:", error);
+  }
+}
+
+
+function canConfirmGotGame(status, startDate, endDate){
+  console.log(today, status, status === "Accepted" , today >= startDate, today < endDate);
+  return status === "Accepted" & today >= startDate & today <= endDate
+}
+
+function canCancelRequest(status, startDate){
+  return status === "InProgress" & today >= startDate
+
+}
+
+function isRequestInactive(status, startDate){
+  return status === "Done" | status === "Denied" | today < startDate
+}
+
+
+function getStatusBadgeClass(status) {
+  const classes = {
+    Pending: 'bg-warning',
+    Accepted: 'bg-success',
+    Denied: 'bg-danger',
+    Done: 'bg-info'
+  };
+  return classes[status] || 'bg-secondary';
+}
+
+</script>
+
+
+
+
+
+
 <template>
   <div>
     <!-- Top Navigation Bar -->
@@ -11,6 +118,7 @@
 
           <div>
             <h1>See my borrow requests</h1>
+            <br>
             <table class="table">
               <thead>
               <tr>
@@ -21,21 +129,30 @@
               </tr>
               </thead>
               <tbody>
-              <tr v-for="(request, index) in requests" :key="request.id" >
-                <td>{{ request.requestedGame }}</td>
-                <td>{{ request.startDate }}</td>
-                <td>{{ request.endDate}}</td>
-                <td>{{ request.status}}</td>
+              <tr v-for="(request, index) in requests" :key="request.requestId"
+                  :style="{color: isRequestInactive(request.requestStatus, request.startOfLoan) ? 'lightGrey' : 'grey'}"
+              >
+                <td>{{ request.specificGameName }}</td>
+                <td>{{ request.startOfLoan }}</td>
+                <td>{{ request.endOfLoan}}</td>
                 <td>
-                  <button class="btn btn-info me-2"
-                          @click="confirmRequest(request.requestedGame)"
-                  >
-                    Confirm
-                  </button>
+                  <span class="badge" :class="getStatusBadgeClass(requests.requestStatus)">
+                      {{ request.requestStatus}}
+                  </span>
                 </td>
                 <td>
                   <button class="btn btn-info me-2"
-                          @click="cancelRequest(request.requestedGame)"
+                          v-if="canConfirmGotGame(request.requestStatus, request.startOfLoan, request.endOfLoan)"
+                          style="bottom: 20px;"
+                          @click="confirmRequest(request.requestId, request.specificGameName)"
+                  >
+                    Confirm
+                  </button>
+
+                  <button class="btn btn-info me-2"
+                          v-if="canCancelRequest(request.requestStatus, request.startOfLoan)"
+                          style="bottom: 20px;"
+                          @click="cancelRequest(request.requestId, request.specificGameName)"
                   >
                     Cancel
                   </button>
@@ -50,43 +167,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue'
-import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
-
-const requests = ref([])  // This will hold the array of requests of this player fetched from the database
-
-requests.value = [
-  {
-    requestedGame: 'Game name',
-    startDate: '2023-08-20',
-    endDate: '2023-09-20',
-    status: 'pending'
-  },
-  {
-    requestedGame: 'other game',
-    startDate: '2025-03-03',
-    endDate: '2025-03-04',
-    status: 'accepted'
-  }
-];
-
-
-function confirmRequest(name) {
-
-  console.log('Confirm received game: ', name)
-  alert(`Confirm received game: ${name}`)
-}
-
-
-function cancelRequest(name) {
-
-  console.log('Request denied from ', name)
-  alert(`Successfully cancelled borrowing for game: ${name}`)
-}
-
-</script>
 
 
 

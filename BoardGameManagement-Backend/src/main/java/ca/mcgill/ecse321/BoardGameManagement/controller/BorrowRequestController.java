@@ -50,6 +50,21 @@ public class BorrowRequestController {
     }
 
     /**
+     * Controller method to get all the requests made by a specific player
+     * @param playerId id of the player
+     * @return list of all the requests that player made
+     */
+    @GetMapping("/players/{playerId}/borrowrequests")
+    public List<BorrowRequestResponseDTO> getAllBorrowRequestsByPlayerId(@PathVariable int playerId) {
+
+        List<BorrowRequest> requests = borrowRequestService.getBorrowRequestsByPlayerId(playerId);
+        return requests.stream()
+                .map(BorrowRequestResponseDTO::create) // Converts BorrowRequests to DTOs
+                .collect(Collectors.toList());
+
+    }
+
+    /**
      * get the borrow request with that specific id
      * @param requestId borrow request to find's id
      * @return the response dto of that object

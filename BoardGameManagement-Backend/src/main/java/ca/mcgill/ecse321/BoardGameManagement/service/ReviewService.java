@@ -113,6 +113,27 @@ public class ReviewService {
         }
         return reviewRepository.findByReviewID(reviewId);
     }
+
+    /**
+     * Gets all the reviews for a given board game, based on its id
+     * @param boardGameId the id of the board game
+     * @return all reviews for that board game
+     */
+
+    public ArrayList<Review> getReviewsByBoardGameId(int boardGameID) {
+        if (!boardGameRepository.existsById(boardGameID)) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, "Board game not found with ID: " + boardGameID);
+        }
+        ArrayList<Review> allReviews = getAllReviews();
+        ArrayList<Review> output = new ArrayList<>();
+        for (Review r : allReviews) {
+            if (r.getBoardGame().getGameID() == boardGameID) {
+                output.add(r);
+            }
+        }
+
+        return output;
+    }
     
     /**
      * Deletes a review from the database, based on its ID

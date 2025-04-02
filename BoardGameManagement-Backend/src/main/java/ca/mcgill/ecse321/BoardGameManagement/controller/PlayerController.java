@@ -109,6 +109,7 @@ public class PlayerController {
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
     public PlayerRespDto login(@RequestBody LoginRequestDto loginRequestDto) {
+        System.out.println("Received login for: " + loginRequestDto);
         Player loggedInPlayer = playerService.login(loginRequestDto);
         return new PlayerRespDto(loggedInPlayer);
     }
