@@ -1,6 +1,6 @@
 
 <script setup>
-import {ref, onMounted, watchEffect} from 'vue'
+import {ref, onMounted, watchEffect, onUnmounted} from 'vue'
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
 import {useRoute} from "vue-router";
@@ -13,8 +13,9 @@ const axiosClient = axios.create({
 
 const requests = ref([]);  // This will hold the array of events fetched from the database
 const requestUpdated = ref(false); // keep track whether requests have been updated
-const selectedRequest = ref();
 const ownerId = useRoute().query.ownerId;
+
+let intervalId = null;
 
 const fetchRequests = async () => {
   try {
@@ -28,9 +29,13 @@ const fetchRequests = async () => {
 };
 
 
-// Fetch data when component is mounted
-onMounted(fetchRequests);
+// Fetch data when the component mounts
+onMounted(() => {
+  fetchRequests(); // Fetch data immediately
 
+  // Refresh data every 10 seconds
+  intervalId = setInterval(fetchRequests, 10000);
+});
 // Automatically refresh when `requestUpdated` changes
 watchEffect(() => {
   if (requestUpdated.value) {
@@ -39,6 +44,10 @@ watchEffect(() => {
   }
 });
 
+// Cleanup interval when component is unmounted
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId);
+});
 
 async function acceptRequest(id, name) {
   try {
@@ -49,7 +58,7 @@ async function acceptRequest(id, name) {
     requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    alert(`Error encounteed type ${error.response.status}: ${error.response.request.response}`);
     console.error("Error accepting request:", error);
   }
 }
