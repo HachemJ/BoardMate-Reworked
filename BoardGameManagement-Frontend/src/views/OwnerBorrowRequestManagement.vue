@@ -1,3 +1,86 @@
+
+<script setup>
+import {ref, onMounted, watchEffect} from 'vue'
+
+import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
+import axios from "axios";
+import {useRoute} from "vue-router";
+
+
+const axiosClient = axios.create({
+  // NOTE: it's baseURL, not baseUrl
+  baseURL: "http://localhost:8080"
+});
+
+const requests = ref([]);  // This will hold the array of events fetched from the database
+const requestUpdated = ref(false); // keep track whether requests have been updated
+const ownerId = useRoute().query.ownerId;
+
+const fetchRequests = async () => {
+  try {
+    const response = await axiosClient.get(`/borrowrequests?ownerId=${ownerId}`);
+    console.log("this is a test");
+    console.log(response.data);
+    requests.value = response.data;
+  } catch (error) {
+    console.error("Error fetching requests:", error);
+  }
+
+};
+
+
+// Fetch data when component is mounted
+onMounted(fetchRequests);
+
+// Automatically refresh when `requestUpdated` changes
+watchEffect(() => {
+  if (requestUpdated.value) {
+    fetchRequests();
+    requestUpdated.value = false; // Reset the state after fetching
+  }
+});
+
+
+async function acceptRequest(id, name) {
+  try {
+    await axiosClient.put(`/borrowrequests/${id}?action=accept`);
+    alert(`Request from ${name} accepted successfully`);
+
+    // Trigger a refresh after the request is accepted
+    requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
+
+  } catch (error) {
+    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    console.error("Error accepting request:", error);
+  }
+}
+
+async function declineRequest(id, name) {
+
+  try {
+    await axiosClient.put(`/borrowrequests/${id}?action=decline`);
+    alert(`Request from ${name} denied successfully!`);
+    // Trigger a refresh after the request is accepted
+    requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
+
+  } catch (error) {
+
+    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    console.error("Error declining request:", error);
+  }
+}
+
+function shouldShowButton(status){
+  console.log(status);
+  console.log(status === `Pending`);
+  return status === `Pending`
+}
+
+
+
+</script>
+
+
 <template>
   <div>
     <!-- Top Navigation Bar -->
@@ -11,6 +94,7 @@
 
           <div>
             <h1>Manage my borrow requests</h1>
+            <br>
             <table class="table">
               <thead>
               <tr>
@@ -19,28 +103,37 @@
                 <th>Borrower email</th>
                 <th>Start of loan</th>
                 <th>End of loan</th>
+                <th>Action</th>
               </tr>
               </thead>
-              <tbody>
-              <tr v-for="(request, index) in requests" :key="request.id" >
-                <td>{{ request.requestedGame }}</td>
+              <tbody >
+              <tr v-for="(request, index) in requests" key="request.requestId" >
+                <td>{{ request.specificGameName }}</td>
                 <td>{{ request.borrowerName }}</td>
                 <td>{{ request.borrowerEmail }}</td>
-                <td>{{ request.startDate }}</td>
-                <td>{{ request.endDate}}</td>
-                <td>
+                <td>{{ request.startOfLoan }}</td>
+                <td>{{ request.endOfLoan}}</td>
+                <td v-if="shouldShowButton(request.requestStatus)">
                   <button class="btn btn-info me-2"
-                            @click="acceptRequest(request.borrowerName)"
-                            >
+                          id="acceptRequestButton"
+                          style="bottom: 20px;"
+                          @click="acceptRequest(request.requestId, request.borrowerName)"
+                          >
                   Accept
                   </button>
-                </td>
-                <td>
-                  <button class="btn btn-info me-2"
-                          @click="declineRequest(request.borrowerName)"
+
+                  <button class="btn btn-info me-2 "
+                          id="declineRequestButton"
+                          style="bottom: 20px;"
+                          @click="declineRequest(request.requestId, request.borrowerName)"
                           >
                     Deny
                   </button>
+                </td>
+                <td v-else>
+                  <span>
+                      request {{ request.requestStatus }}
+                    </span>
                 </td>
 
 
@@ -54,50 +147,6 @@
   </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
-import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
-
-
-const requests = ref([])  // This will hold the array of events fetched from the database
-
-requests.value = [
-  {
-    id: '1',
-    requestedGame: 'Game name',
-    borrowerName: 'person name',
-    borrowerEmail: 'their email',
-    startDate: '2023-08-20',
-    endDate: '2023-09-20'
-  },
-  {
-    id: '2',
-    requestedGame: 'other game',
-    borrowerName: 'name person',
-    borrowerEmail: 'email@email',
-    startDate: '2025-03-03',
-    endDate: '2025-03-04'
-  }
-];
-
-
-const selectedRequestId = ref("")
-
-
-function acceptRequest(name) {
-
-  console.log('Request accepted from ', name)
-  alert(`Successfully accepted request from ${name}`)
-}
-
-
-function declineRequest(name) {
-
-  console.log('Request denied from ', name)
-  alert(`Successfully denied request from ${name}`)
-}
-
-</script>
 
 
 

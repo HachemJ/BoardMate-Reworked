@@ -61,7 +61,7 @@ const router = createRouter({
       component: EventView,
     },
     {
-      path: "/pages/ownerborrowrequests",
+      path: "/borrowrequests",
       name: "owner borrow request",
       component: OwnerBorrowRequestManagement,
     },
