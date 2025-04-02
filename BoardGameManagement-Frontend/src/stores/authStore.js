@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 
 export const useAuthStore = defineStore("auth", () => {
   const storedUser = JSON.parse(localStorage.getItem("authUser")) || {
+    id: null,
     username: null,
     email: null,
     isAOwner: false,
@@ -11,7 +12,8 @@ export const useAuthStore = defineStore("auth", () => {
 
   const user = ref(storedUser);
 
-  function login(username, email, isAOwner) {
+  function login(id, username, email, isAOwner) {
+    user.value.id = id;
     user.value.username = username;
     user.value.email = email;
     user.value.isAOwner = isAOwner;
@@ -19,6 +21,7 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   function logout() {
+    user.value.id = null;
     user.value.username = null;
     user.value.email = null;
     user.value.isAOwner = false;

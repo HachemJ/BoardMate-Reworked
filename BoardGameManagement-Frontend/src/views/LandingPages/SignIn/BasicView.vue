@@ -29,7 +29,7 @@ async function handleLogin() {
     });
 
     const user = res.data;
-    authStore.login(user.name, user.email, user.isAOwner);
+    authStore.login(user.playerID, user.name, user.email, user.isAOwner);
 
     alert("Logged in successfully!");
     console.log("Logged in user:", authStore.user);
