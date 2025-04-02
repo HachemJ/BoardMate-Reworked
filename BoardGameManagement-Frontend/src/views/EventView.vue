@@ -137,6 +137,7 @@
                   <th>End Time</th>
                   <th>Location</th>
                   <th>Max Spots</th>
+                  <th>Registration Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -148,6 +149,10 @@
                   <td>{{ event.endTime }}</td>
                   <td>{{ event.location }}</td>
                   <td>{{ event.maxSpot }}</td>
+                    <td>
+                    <span v-if="registrationStatus[event.eventID] === undefined">Loading...</span>
+                    <span v-else>{{ registrationStatus[event.eventID] }}</span>
+                    </td>
                 </tr>
               </tbody>
             </table>
@@ -202,12 +207,16 @@ const events = ref([])  // This will hold the array of events fetched from the d
 const selectedEventId = ref("")
 const boardGames = ref([]) // Will hold available board games
 const selectedBoardGame = ref(null)
+const registrationStatus = ref({}) // To hold registration status for each event
 
 // Fetch all events
 async function fetchEvents() {
   try {
     const response = await axiosClient.get("/events");
     events.value = response.data;
+    for (const event of events.value) {
+      await getRegistrationStatus(event.eventID);
+    }
   } catch (error) {
     console.error("Error fetching events:", error);
     alert('Failed to fetch events. Please try again.');
@@ -376,6 +385,9 @@ async function registerForEvent() {
     } catch (e) {
         console.error(e);
     }
+  for (const event of events.value) {
+    await getRegistrationStatus(event.eventID);
+  }
   alert('Registration successful!')
 }
 
@@ -393,15 +405,30 @@ async function cancelRegistration() {
   }
 
   console.log("Cancelled registration for Event ID:", selectedEventId.value);
+  for (const event of events.value) {
+    await getRegistrationStatus(event.eventID);
+  }
   alert("Registration canceled!");
 }
 
-function submitEvent() {
-  console.log('Created Event Data:', eventData)
-  alert('Event Created Successfully! Check the console for details.')
-  // Reset form after submission
-  Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '')
+async function getRegistrationStatus(id) {
+  try {
+    const response = await axiosClient.get(`/registrations/${authStore.user.id}/${id}`);
+    if (response.data === null) {
+      registrationStatus.value[id] = "Not Registered";
+    } else {
+      registrationStatus.value[id] = "Registered";
+    }
+  } catch (error) {
+    if (error.response?.status === 404) {
+      registrationStatus.value[id] = "Not Registered";
+    } else {
+      registrationStatus.value[id] = "Error";
+    }
+  }
 }
+
+
 </script>
 
 <style scoped>
