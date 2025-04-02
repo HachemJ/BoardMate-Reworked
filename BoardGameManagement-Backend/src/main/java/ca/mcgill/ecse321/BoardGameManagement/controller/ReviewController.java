@@ -1,14 +1,23 @@
 package ca.mcgill.ecse321.BoardGameManagement.controller;
 
+import java.util.ArrayList;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
 import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.ReviewResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.model.Review;
 import ca.mcgill.ecse321.BoardGameManagement.service.ReviewService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
 
 /**
  * This class is the controller for the Review entity. It is responsible for handling requests related to Reviews.
@@ -64,6 +73,17 @@ public class ReviewController {
             reviewResponseDtos.add(new ReviewResponseDto(review));
         }
 
+        return reviewResponseDtos;
+    }
+
+    @GetMapping("/reviews/byboardgame/{boardGameId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ArrayList<ReviewResponseDto> getAllReviewsForBoardGame(@PathVariable int boardGameID) {
+        ArrayList<Review> reviewsForBoardGame = reviewService.getReviewsByBoardGameId(boardGameID);
+        ArrayList<ReviewResponseDto> reviewResponseDtos = new ArrayList<>();
+        for (Review review : reviewsForBoardGame) {
+            reviewResponseDtos.add(new ReviewResponseDto(review));
+        }
         return reviewResponseDtos;
     }
 
