@@ -2,9 +2,10 @@
 import { ref } from "vue";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore.js";
+import { useRouter } from "vue-router";
+const router = useRouter();
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import MaterialInput from "@/components/MaterialInput.vue";
 import MaterialSwitch from "@/components/MaterialSwitch.vue";
 import MaterialButton from "@/components/MaterialButton.vue";
 
@@ -15,14 +16,14 @@ const password = ref("");
 const confirmPassword = ref("");
 
 const axiosClient = axios.create({
-    baseURL: "http://localhost:8080"
+  baseURL: "http://localhost:8080",
 });
 
 const authStore = useAuthStore();
-const BASE_URL = "http://localhost:8080/players";
 
 async function handleLogin() {
   try {
+    console.log("Login request:", email.value, password.value);
     const res = await axiosClient.post("/players/login", {
       email: email.value,
       password: password.value,
@@ -31,6 +32,7 @@ async function handleLogin() {
     const user = res.data;
     authStore.login(user.name, user.email);
     alert("Logged in successfully!");
+    router.push("/profile");
   } catch (error) {
     alert("Login failed: " + (error.response?.data?.message || error.message));
   }
@@ -63,38 +65,45 @@ async function handleLogin() {
 
               <div class="card-body">
                 <form role="form" class="text-start">
-                  <MaterialInput
-                    v-if="isSignUp"
-                    v-model="fullName"
-                    class="input-group-static mb-4"
-                    label="Name"
-                    placeholder="Enter Full Name"
-                  />
+                  <div class="mb-4" v-if="isSignUp">
+                    <label>Name</label>
+                    <input
+                      v-model="fullName"
+                      type="text"
+                      class="form-control"
+                      placeholder="Enter Full Name"
+                    />
+                  </div>
 
-                  <MaterialInput
-                    v-model="email"
-                    class="input-group-static mb-4"
-                    type="email"
-                    label="Email"
-                    placeholder="Email"
-                  />
+                  <div class="mb-4">
+                    <label>Email</label>
+                    <input
+                      v-model="email"
+                      type="email"
+                      class="form-control"
+                      placeholder="Email"
+                    />
+                  </div>
 
-                  <MaterialInput
-                    v-model="password"
-                    class="input-group-static mb-4"
-                    type="password"
-                    label="Password"
-                    placeholder="Password"
-                  />
+                  <div class="mb-4">
+                    <label>Password</label>
+                    <input
+                      v-model="password"
+                      type="password"
+                      class="form-control"
+                      placeholder="Password"
+                    />
+                  </div>
 
-                  <MaterialInput
-                    v-if="isSignUp"
-                    v-model="confirmPassword"
-                    class="input-group-static mb-4"
-                    type="password"
-                    label="Confirm Password"
-                    placeholder="Confirm Password"
-                  />
+                  <div class="mb-4" v-if="isSignUp">
+                    <label>Confirm Password</label>
+                    <input
+                      v-model="confirmPassword"
+                      type="password"
+                      class="form-control"
+                      placeholder="Confirm Password"
+                    />
+                  </div>
 
                   <MaterialSwitch
                     v-if="!isSignUp"
@@ -102,7 +111,9 @@ async function handleLogin() {
                     id="rememberMe"
                     labelClass="mb-0 ms-3"
                     checked
-                  >Remember me</MaterialSwitch>
+                  >
+                    Remember me
+                  </MaterialSwitch>
 
                   <div class="text-center">
                     <MaterialButton
