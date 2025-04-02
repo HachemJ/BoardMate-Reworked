@@ -266,7 +266,7 @@ async function createEvent() {
       startTime: eventData.startTime,
       endTime: eventData.endTime,
       location: eventData.location,
-      ownerId: authStore.user.email,
+      ownerId: authStore.user.id,
       boardGameId: selectedBoardGame.value
     };
 
