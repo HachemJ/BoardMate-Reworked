@@ -36,6 +36,7 @@ export const useAuthStore = defineStore("auth", () => {
       isAuthenticated: false,
     };
     localStorage.removeItem("authUser");
+    localStorage.clear();
   }
 
   watch(
