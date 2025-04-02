@@ -71,6 +71,9 @@ function deleteBoardGameCopy(id) {
               <router-link :to="{ name: 'playerAddBoardGame' }">
                 <button class="btn btn-primary">Add Board Game</button>
               </router-link>
+              <router-link :to="{ name: 'ownerUpdateBoardGame' }">
+                <button class="btn btn-primary">Update Board Game</button>
+              </router-link>
             </div>
 
             <!-- Search Bar -->
