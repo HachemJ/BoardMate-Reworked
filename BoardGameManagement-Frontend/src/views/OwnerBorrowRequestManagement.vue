@@ -1,7 +1,6 @@
 
 <script setup>
 import {ref, onMounted, watchEffect} from 'vue'
-
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
 import {useRoute} from "vue-router";
@@ -14,12 +13,12 @@ const axiosClient = axios.create({
 
 const requests = ref([]);  // This will hold the array of events fetched from the database
 const requestUpdated = ref(false); // keep track whether requests have been updated
+const selectedRequest = ref();
 const ownerId = useRoute().query.ownerId;
 
 const fetchRequests = async () => {
   try {
     const response = await axiosClient.get(`/borrowrequests?ownerId=${ownerId}`);
-    console.log("this is a test");
     console.log(response.data);
     requests.value = response.data;
   } catch (error) {
@@ -98,7 +97,7 @@ function isRequestEndDate(endDate, status){
 
   console.log(today, today === endDate)
   //const today = "2025-01-03"; // for testing only, use line above in real code
-  return today === endDate & status === "Accepted"
+  return today === endDate & status === "InProgress"
 }
 
 function isRequestDone(status){
@@ -136,7 +135,7 @@ function isRequestDone(status){
               </tr>
               </thead>
               <tbody >
-              <tr v-for="(request, index) in requests" key="request.requestId"
+              <tr v-for="(request, index) in requests" :key="request.requestId"
                   :style="{color: isRequestDone(request.requestStatus) ? 'lightGrey' : 'grey'}"
               >
                 <td>{{ request.specificGameName }}</td>
