@@ -6,7 +6,7 @@
       <div class="row mb-4">
         <div class="col-md-3 text-center">
           <img
-            :src="userProfile.profilePicture || '/default-avatar.png'"
+            :src="userProfile.profilePicture || '/default_avatar.jpg'"
             class="rounded-circle"
             style="width: 150px; height: 150px; object-fit: cover;"
             alt="Profile Picture"

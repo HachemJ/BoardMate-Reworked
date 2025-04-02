@@ -1,40 +1,18 @@
-import { ref, watch } from "vue";
-import { defineStore } from "pinia";
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-export const useAuthStore = defineStore("auth", () => {
-  const storedUser = JSON.parse(localStorage.getItem("authUser")) || {
-    id: null,
-    username: null,
-    email: null,
-    isAOwner: false,
-    isAuthenticated: false,
-  };
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref(JSON.parse(localStorage.getItem("user")) || null);
 
-  const user = ref(storedUser);
-
-  function login(id, username, email, isAOwner) {
-    user.value.id = id;
-    user.value.username = username;
-    user.value.email = email;
-    user.value.isAOwner = isAOwner;
-    user.value.isAuthenticated = true;
+  function login(name, email, isAOwner) {
+    user.value = { name, email, isAOwner };
+    localStorage.setItem("user", JSON.stringify(user.value)); // Persist
   }
 
   function logout() {
-    user.value.id = null;
-    user.value.username = null;
-    user.value.email = null;
-    user.value.isAOwner = false;
-    user.value.isAuthenticated = false;
+    user.value = null;
+    localStorage.removeItem("user"); // Clear persisted user
   }
-
-  watch(
-    user,
-    (newVal) => {
-      localStorage.setItem("authUser", JSON.stringify(newVal));
-    },
-    { deep: true }
-  );
 
   return { user, login, logout };
 });

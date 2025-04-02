@@ -76,7 +76,7 @@ public class ReviewController {
         return reviewResponseDtos;
     }
 
-    @GetMapping("/reviews/byboardgame/{boardGameId}")
+    @GetMapping("/reviews/byboardgame/{boardGameID}")
     @ResponseStatus(HttpStatus.OK)
     public ArrayList<ReviewResponseDto> getAllReviewsForBoardGame(@PathVariable int boardGameID) {
         ArrayList<Review> reviewsForBoardGame = reviewService.getReviewsByBoardGameId(boardGameID);

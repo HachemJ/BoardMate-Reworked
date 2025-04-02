@@ -4,18 +4,20 @@ import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {ref, computed, onMounted, reactive} from "vue";
 import {useRoute} from "vue-router";
 import axios from "axios";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+const authStore = useAuthStore();
 const reviews = ref([]);
 const boardGameCopies = ref([]);
 const selectedGameId = ref(null);
 const borrowRequestData = reactive({
   startOfLoan: "",
   endOfLoan: "",
-  borrowerID: 7642, // TODO Placeholder
+  borrowerID: authStore.user.id,
   specificGameID: "",
 });
 const gameDetails = ref({
@@ -47,7 +49,7 @@ onMounted(async () => {
     const response = await axiosClient.get("/boardgamecopies/byboardgame/" + gameId);
     boardGameCopies.value = response.data;
 
-    const response2 = await axiosClient.get("/reviews/"); // TODO This is getting all the reviews
+    const response2 = await axiosClient.get("/reviews/byboardgame/" + gameId);
     console.log("Reviews:", response2.data); // Log the reviews data
     reviews.value = response2.data;
 
