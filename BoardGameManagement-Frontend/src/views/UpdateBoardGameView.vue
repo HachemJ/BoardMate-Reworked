@@ -12,6 +12,7 @@ const boardGames = reactive([]);
 
 const boardGameData = reactive({
   name: "",
+  newName: "", // Initialize newName
   minPlayers: "",
   maxPlayers: "",
   description: "",
@@ -20,7 +21,7 @@ const boardGameData = reactive({
 async function getBoardGames() {
   try {
     const response = await axiosClient.get("/boardgames");
-    boardGames.push(...response.data);
+    boardGames.splice(0, boardGames.length, ...response.data);
   } catch (error) {
     console.error(error);
   }
@@ -101,7 +102,14 @@ function updateBoardGame() {
 
             <div class="mb-3">
               <label for="name" class="form-label">New Board Game Name</label>
-              <input type="text" class="form-control" id="name" v-model="boardGameData.newName" :placeholder="boardGameData.name" required>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="name" 
+                v-model="boardGameData.newName" 
+                :placeholder="boardGameData.name" 
+                @blur="boardGameData.newName = boardGameData.newName || boardGameData.name" 
+                required>
             </div>
 
             <div class="mb-3">

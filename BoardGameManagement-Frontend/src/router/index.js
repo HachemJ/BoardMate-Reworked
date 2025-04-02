@@ -33,6 +33,7 @@ import AddBoardGameCopyView from "@/views/AddBoardGameCopyView.vue";
 import AddBoardGameReviewView from "@/views/AddBoardGameReviewView.vue";
 import AddBoardGameView from "@/views/AddBoardGameView.vue";
 import UpdateBoardGameView from "@/views/UpdateBoardGameView.vue";
+import UpdateBoardGameCopyView from "@/views/UpdateBoardGameCopyView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -125,6 +126,12 @@ const router = createRouter({
       path: "/pages/ownerboardgame/updateboardgame",
       name: "ownerUpdateBoardGame",
       component: UpdateBoardGameView,
+    },
+
+    {
+      path: "/pages/ownerboardgame/updateboardgamecopy",
+      name: "ownerUpdateBoardGameCopy",
+      component: UpdateBoardGameCopyView,
     },
 
     {

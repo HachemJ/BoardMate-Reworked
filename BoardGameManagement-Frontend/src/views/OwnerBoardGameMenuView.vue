@@ -117,6 +117,9 @@ function deleteBoardGameCopy(id) {
               <router-link :to="{ name: 'addBoardGameCopy' }">
                 <button class="btn btn-info">Add Board Game Copy</button>
               </router-link>
+              <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
+                <button class="btn btn-info">Update Board Game Copy</button>
+              </router-link>
             </div>
             <table class="table">
               <thead>
