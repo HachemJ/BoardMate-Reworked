@@ -288,4 +288,45 @@ public class BorrowRequestRepositoryTests {
         assertEquals(0, requests.size());
     }
 
+    @Test
+    public void findBorrowRequestByPlayerIdTest() {
+
+        //create players
+        Player requester = new Player("PlayerName", "player@email.com", "aPassword", false);
+        requester = playerRepository.save(requester);
+
+        Player owner = new Player("Owner", "owner@email.com", "aPassword", true);
+        owner = playerRepository.save(owner);
+
+        Player owner2 = new Player("Owner2", "owner2@email.com", "aPassword2", true);
+        owner2 = playerRepository.save(owner2);
+
+        //Create a board game
+        BoardGame boardGame = new BoardGame(2, 4, "TheGame", "A game description");
+        boardGame = boardGameRepository.save(boardGame);
+
+        BoardGameCopy boardGameCopy = new BoardGameCopy("Test game", true, owner, boardGame);
+        boardGameCopy = boardGameCopyRepository.save(boardGameCopy);
+
+        BoardGameCopy boardGameCopy2 = new BoardGameCopy("Test game 2", true, owner2, boardGame);
+        boardGameCopyRepository.save(boardGameCopy2);
+
+        //create borrow request
+        Date startDate = Date.valueOf("2024-08-20");
+        Date endDate = Date.valueOf("2024-08-30");
+
+        BorrowRequest borrowRequest = new BorrowRequest(startDate, endDate, BorrowRequest.RequestStatus.Pending, requester, boardGameCopy);
+        borrowRequestRepository.save(borrowRequest);
+
+
+        ArrayList<BorrowRequest> requests = borrowRequestRepository.findBorrowRequestsByRequester_PlayerID(requester.getPlayerID());
+
+        //verification
+        assertEquals(1, requests.size());
+        for (BorrowRequest request : requests) {
+            assertEquals(requester.getPlayerID(), request.getRequester().getPlayerID());
+        }
+
+    }
+
 }

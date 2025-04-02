@@ -8,6 +8,12 @@ const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+const filteredGames = computed(() => {
+  return boardGames.value.filter(game =>
+      game.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
+});
+
 const searchQuery = ref("");
 const boardGames = ref([]);
 
@@ -19,12 +25,6 @@ onMounted(async () => {
     console.error(error);
   }
 })
-
-const filteredGames = computed(() => {
-  return boardGames.value.filter(game =>
-      game.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
 
 </script>
 
@@ -41,7 +41,7 @@ const filteredGames = computed(() => {
 
           <!-- Page Title and Add Board Game Button-->
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0">Browse all Board Games or Search</h2>
+            <h2 class="mb-0">Search and Browse Board Games</h2>
             <router-link :to="{ name: 'playerAddBoardGame' }">
               <button class="btn btn-primary">Add Board Game</button>
             </router-link>
@@ -74,8 +74,8 @@ const filteredGames = computed(() => {
                       {{ game.name }}
                     </router-link>
                   </td>
-                  <td>{{ game.minPlayer }}</td>
-                  <td>{{ game.maxPlayer }}</td>
+                  <td>{{ game.minPlayers }}</td>
+                  <td>{{ game.maxPlayers }}</td>
                 </tr>
               </tbody>
             </table>

@@ -1,67 +1,57 @@
 <script setup>
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {reactive, ref, onMounted} from "vue";
+import {reactive} from "vue";
 import axios from "axios";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
-const boardGames = ref([]);
+const boardGameCopies = reactive([]);
 
-onMounted(async () => {
+const boardGameCopyData = reactive({
+    boardGameCopyId: "",
+    specification: "",
+})
+
+async function getBoardGameCopiesForId() {
   try {
-    const response = await axiosClient.get("/boardgames");
-    boardGames.value = response.data;
+    const playerId = 6842; // Replace with the actual player ID TODO PLACEHOLDER
+    const response = await axiosClient.get("/boardgamecopies/byplayer/" + playerId);
+    console.log("Data:", response.data);
+    boardGameCopies.splice(0, boardGameCopies.length, ...response.data);
   } catch (error) {
     console.error(error);
   }
-})
-
-const boardGameCopyData = reactive({
-  boardGameName: "",
-  specification: "",
-});
-
-async function fetchBoardGameID(boardGameName) {
-  console.log("Game name is:", boardGameName); // Log the game name
-  try {
-    const response = await axiosClient.get("/boardgames");
-    const game = response.data.find(game => game.name === boardGameName);
-    if (game) {
-      return game.gameID;
-    }
-    
-    return null; // Return null if game ID is not found
-  } catch (error) {
-    console.error("Error fetching game ID:", error);
-  }
 }
 
-async function createBoardGameCopy(boardGameName, specification) {
-  const gameId = await fetchBoardGameID(boardGameName);
-  const newBoardGameCopy = {
-    specification: specification,
-    isAvailable: true,
-    playerId: Number(7642), //TODO PLACEHOLDER
-    boardGameId: gameId,
-  }
 
+async function updateBGC(specification) {
+  const boardGameCopyId = boardGameCopyData.boardGameCopyId;
   try {
-    await axiosClient.post("/boardgamecopies", newBoardGameCopy);
+    await axiosClient.put("/boardgamecopies/" + boardGameCopyId, specification, {
+      headers: {
+        'Content-Type': 'text/plain'
+      }
+    });
   } catch (e) {
     console.error(e);
   }
 
+  // Find the updated item and update it
+  // const existingCopy = boardGameCopies.find(copy => copy.boardGameCopyId === boardGameCopyId);
+  // if (existingCopy) {
+  //   existingCopy.specification = boardGameCopyData.specification;
+  // }
 }
 
-function submitBoardGameCopy() {
-  console.log('Created Board Game Copy:', boardGameCopyData)
-  createBoardGameCopy(boardGameCopyData.boardGameName, boardGameCopyData.specification);
-  alert('Board Game Copy Created Successfully!')
+function updateBoardGame() {
+  updateBGC(boardGameCopyData.specification);
+  console.log('Updated Board Game:', boardGameCopyData)
+  alert('Board Game Updated Successfully!')
   // Reset form after submission
-  Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = key === 'maxSpot' ? null : '')
+  Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = '')
 }
 
 </script>
@@ -78,19 +68,19 @@ function submitBoardGameCopy() {
         <div class="col-md-12">
 
           <!-- Page Title -->
-          <h2 class="mb-3">Complete the Form Below to Add a New Board Game Copy</h2>
+          <h2 class="mb-3">Complete the Form Below to Update a Board Game</h2>
 
           <!-- Form -->
-          <form @submit.prevent="submitBoardGameCopy">
+          <form @submit.prevent="updateBoardGame">
 
             <div class="mb-3">
-              <label for="boardGame" class="form-label">Select Board Game</label>
-              <select class="form-control" id="boardGame" v-model="boardGameCopyData.boardGameName" required>
-                <option value="" disabled>Select a game</option>
-                <option v-for="game in boardGames">
-                  {{ game.name }}
-                </option>
-              </select>
+                <label for="boardGameSelect" class="form-label">Select Board Game Copy to Update</label>
+                <select id="boardGameSelect" class="form-select" v-model="boardGameCopyData.boardGameCopyId" required @focus="getBoardGameCopiesForId">
+                    <option value="" disabled>Select Board Game Copy...</option>
+                    <option v-for="copy in boardGameCopies" :key="copy.boardGameCopyId" :value="copy.boardGameCopyId">
+                        {{ copy.boardGameName }} - {{ copy.specification }}
+                    </option>
+                </select>
             </div>
 
             <div class="mb-3">
@@ -98,7 +88,7 @@ function submitBoardGameCopy() {
               <textarea class="form-control" id="specification" v-model="boardGameCopyData.specification" required></textarea>
             </div>
 
-            <button type="submit" class="btn btn-info">Create Board Game Copy</button>
+            <button type="submit" class="btn btn-info">Update Board Game Copy</button>
 
           </form>
 

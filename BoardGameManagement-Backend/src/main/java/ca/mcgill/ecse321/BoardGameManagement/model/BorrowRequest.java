@@ -9,7 +9,7 @@ import java.sql.Date;
 @Entity
 public class BorrowRequest {
 
-  public enum RequestStatus { Pending, Accepted, Denied, Done }
+  public enum RequestStatus { Pending, Accepted, Denied, InProgress, Done }
 
   @Id
   @GeneratedValue

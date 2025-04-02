@@ -3,6 +3,11 @@
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {useRoute} from "vue-router";
 import {reactive} from "vue";
+import axios from "axios";
+
+const axiosClient = axios.create({
+   baseURL: "http://localhost:8080"
+ });
 
 const route = useRoute();
 const gameName = route.params.gamename;
@@ -12,8 +17,42 @@ const reviewData = reactive({
   rating: "",
 })
 
+async function fetchBoardGameID(name) {
+  console.log("Game name is:", name); // Log the game name
+  try {
+    const response = await axiosClient.get("/boardgames");
+    const game = response.data.find(game => game.name === name);
+    if (game) {
+      return game.gameID;
+    }
+    
+    return null; // Return null if game ID is not found
+  } catch (error) {
+    console.error("Error fetching game ID:", error);
+  }
+}
+
+async function createReview(comment, rating) {
+    const gameId = await fetchBoardGameID(gameName);
+    const newReview = {
+        comment: comment,
+        rating: Number(rating),
+        commentDate: new Date().toISOString().split('T')[0], // Produces '2025-03-31'
+        playerID: Number(7642), //TODO PLACEHOLDER
+        boardGameID: gameId,
+    }
+
+    try {
+        await axiosClient.post("/reviews", newReview);
+    } catch (e) {
+        console.error(e);
+    }
+
+}
+
 function submitReview() {
-  console.log('Created Review:', boardGameCopyData)
+  console.log('Created Review:', reviewData)
+  createReview(reviewData.comment, reviewData.rating);
   alert('Review Created Successfully!')
   // Reset form after submission
   Object.keys(reviewData).forEach(key => reviewData[key] = key === 'maxSpot' ? null : '')
@@ -36,7 +75,7 @@ function submitReview() {
           <h2 class="mb-3">Complete the Form Below to Add a Review for {{ gameName }}</h2>
 
           <!-- Form -->
-          <form @submit.prevent="submitBoardGameCopy">
+          <form @submit.prevent="submitReview">
 
             <div class="mb-3">
               <label for="comment" class="form-label">Comment</label>
