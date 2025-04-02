@@ -28,7 +28,7 @@
             <form @submit.prevent="createEvent">
               <div class="mb-3">
                 <label for="eventName" class="form-label">Event Name</label>
-                <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" required>
+                <input type="text" class="form-control" id="eventName" v-model="eventData.name" required>
               </div>
               <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
@@ -40,7 +40,7 @@
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="date" v-model="eventData.date" required>
+                <input type="date" class="form-control" id="date" v-model="eventData.eventDate" required>
               </div>
               <div class="mb-3">
                 <label for="startTime" class="form-label">Start Time</label>
@@ -80,7 +80,7 @@
 
               <div class="mb-3">
                 <label for="eventName" class="form-label">Event Name</label>
-                <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" required>
+                <input type="text" class="form-control" id="eventName" v-model="eventData.name" required>
               </div>
               <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
@@ -92,7 +92,7 @@
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="date" v-model="eventData.date" required>
+                <input type="date" class="form-control" id="date" v-model="eventData.eventDate" required>
               </div>
               <div class="mb-3">
                 <label for="startTime" class="form-label">Start Time</label>
@@ -105,6 +105,15 @@
               <div class="mb-3">
                 <label for="location" class="form-label">Location</label>
                 <input type="text" class="form-control" id="location" v-model="eventData.location" required>
+              </div>
+              <div class="mb-3">
+                <label for="boardGame" class="form-label">Select Board Game</label>
+                <select class="form-control" id="boardGame" v-model="selectedBoardGame" required>
+                  <option disabled value="">Choose a board game</option>
+                  <option v-for="game in boardGames" :key="game.gameID" :value="game.gameID">
+                    {{ game.name }}
+                  </option>
+                </select>
               </div>
               <button
                 type="submit"
@@ -179,7 +188,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import {useAuthStore} from "@/stores/authStore.js";
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
@@ -192,15 +201,15 @@ const authStore = useAuthStore();
 const tabs = ['Create an Event', 'Update/Delete My Events', 'Browse Available Events']
 const selectedTab = ref(tabs[0])
 const eventData = reactive({
-  eventName: '',
+  name: '',
   description: '',
   maxSpot: '',
-  date: '',
+  eventDate: '',
   startTime: '',
   endTime: '',
   location: '',
-  ownerId: null, // Will be set from logged-in user? not sure how to do that
-  boardGameId: null // Will be set from selected board game; the sys fetches all boardgame and put them in dropdown list for user to select
+  ownerId: null,
+  boardGameId: null
 })
 
 const events = ref([])  // This will hold the array of events fetched from the database
@@ -235,17 +244,20 @@ async function fetchBoardGames() {
 }
 
 // Get logged-in user ID
-//async function getCurrentUserId() {
-  //try {
-    //// Assuming you have a user endpoint that returns the current user
-    //const user_id = authStore.user.id;
-    //const response = await axiosClient.get("/users/user_id");
-    //eventData.ownerId = response.data.playerID;
-  //} catch (error) {
-    //console.error("Error fetching user ID:", error);
-    //alert('Failed to get user information. Please try again.');
-  //}
-//}
+async function getCurrentUserId() {
+  try {
+    // Get the user ID from the auth store
+    const userId = authStore.user.id;
+    if (!userId) {
+      throw new Error('User not logged in');
+    }
+    eventData.ownerId = userId;
+    console.log('Using logged-in user ID:', eventData.ownerId);
+  } catch (error) {
+    console.error("Error getting user ID:", error);
+    alert('Failed to get user information. Please make sure you are logged in.');
+  }
+}
 
 // Initialize data when component is mounted
 async function initializeData() {
@@ -257,143 +269,252 @@ async function initializeData() {
 }
 
 // Call initializeData when component is mounted
-initializeData();
+onMounted(initializeData);
 
 // Create new event
 async function createEvent() {
   try {
-    if (!selectedBoardGame.value) {
-      alert('Please select a board game');
+    // Validate required fields
+    if (!eventData.name || !eventData.description || !eventData.maxSpot || 
+        !eventData.eventDate || !eventData.startTime || !eventData.endTime || 
+        !eventData.location || !selectedBoardGame.value) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Validate maxSpot is a positive number
+    if (parseInt(eventData.maxSpot) <= 0) {
+      alert('Maximum spots must be a positive number');
+      return;
+    }
+
+    // Ensure we have a user ID before proceeding
+    await getCurrentUserId();
+
+    // Format date and time
+    const eventDate = new Date(eventData.eventDate);
+    const startTime = new Date(`1970-01-01T${eventData.startTime}`);
+    const endTime = new Date(`1970-01-01T${eventData.endTime}`);
+
+    // Validate date is not in the past
+    if (eventDate < new Date()) {
+      alert('Event date cannot be in the past');
+      return;
+    }
+
+    // Validate end time is after start time
+    if (endTime <= startTime) {
+      alert('End time must be after start time');
       return;
     }
 
     const eventDto = {
-      name: eventData.eventName,
-      description: eventData.description,
+      name: eventData.name.trim(),
+      description: eventData.description.trim(),
       maxSpot: eventData.maxSpot.toString(),
-      eventDate: eventData.date, // format: "yyyy-MM-dd" (from input type="date")
-      startTime: `${eventData.startTime}:00`, // format: "HH:mm:ss"
-      endTime: `${eventData.endTime}:00`,
-      location: eventData.location,
-      ownerId: authStore.user.id,
+      eventDate: eventDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
+      startTime: `${eventData.startTime}:00`, // Format: HH:mm:ss
+      endTime: `${eventData.endTime}:00`, // Format: HH:mm:ss
+      location: eventData.location.trim(),
+      ownerId: eventData.ownerId,
       boardGameId: selectedBoardGame.value
     };
 
-    await axiosClient.post("/events", eventDto);
-    alert('Event Created Successfully!');
+    console.log('Sending event data:', eventDto);
 
-    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
-    selectedBoardGame.value = null;
-
-    await fetchEvents();
+    const response = await axiosClient.post("/events", eventDto);
+    
+    if (response.status === 201) {
+      alert('Event Created Successfully!');
+      
+      // Reset form
+      Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
+      selectedBoardGame.value = null;
+      
+      // Refresh events list
+      await fetchEvents();
+    }
   } catch (error) {
     console.error("Error creating event:", error);
-    console.log("Full error:", error.response?.data);
-    alert('Failed to create event. Please try again.');
+    if (error.response) {
+      const errorMessage = error.response.data.errors?.join('\n') || 'Failed to create event. Please try again.';
+      alert(errorMessage);
+    } else if (error.request) {
+      alert('No response from server. Please check your connection.');
+    } else {
+      alert('Error setting up the request. Please try again.');
+    }
   }
 }
 
 // Update existing event
 async function updateEvent() {
   if (!selectedEventId.value) {
-    alert('Please select an event to update.');
+    alert('Please select an event to update');
     return;
   }
 
   try {
+    // Validate required fields
+    if (!eventData.name || !eventData.description || !eventData.maxSpot || 
+        !eventData.eventDate || !eventData.startTime || !eventData.endTime || 
+        !eventData.location || !selectedBoardGame.value) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Validate maxSpot is a positive number
+    if (parseInt(eventData.maxSpot) <= 0) {
+      alert('Maximum spots must be a positive number');
+      return;
+    }
+
+    // Validate board game ID is a positive number
+    if (!selectedBoardGame.value || selectedBoardGame.value <= 0) {
+      alert('Please select a valid board game');
+      return;
+    }
+
+    // Format date and time
+    const eventDate = new Date(eventData.eventDate);
+    const startTime = new Date(`1970-01-01T${eventData.startTime}`);
+    const endTime = new Date(`1970-01-01T${eventData.endTime}`);
+
+    // Validate end time is after start time
+    if (endTime <= startTime) {
+      alert('End time must be after start time');
+      return;
+    }
+
     const eventDto = {
-      name: eventData.eventName,
-      description: eventData.description,
-      maxSpot: eventData.maxSpot,
-      eventDate: eventData.date,
-      startTime: eventData.startTime,
-      endTime: eventData.endTime,
-      location: eventData.location,
+      name: eventData.name.trim(),
+      description: eventData.description.trim(),
+      maxSpot: eventData.maxSpot.toString(),
+      eventDate: eventDate.toISOString().split('T')[0], // Format: YYYY-MM-DD
+      startTime: `${eventData.startTime}:00`, // Format: HH:mm:ss
+      endTime: `${eventData.endTime}:00`, // Format: HH:mm:ss
+      location: eventData.location.trim(),
       ownerId: eventData.ownerId,
-      boardGameId: eventData.boardGameId
+      boardGameId: parseInt(selectedBoardGame.value) // Ensure it's a number
     };
 
-    await axiosClient.put(`/events/${selectedEventId.value}`, eventDto);
-    alert('Event Updated Successfully!');
+    const response = await axiosClient.put(`/events/${selectedEventId.value}`, eventDto);
     
-    // Reset form
-    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
-    selectedEventId.value = "";
-    
-    // Refresh events list
-    await fetchEvents();
+    if (response.status === 200) {
+      alert('Event Updated Successfully!');
+      await fetchEvents();
+    }
   } catch (error) {
     console.error("Error updating event:", error);
-    alert('Failed to update event. Please try again.');
+    if (error.response) {
+      const errorMessage = error.response.data.errors?.join('\n') || 'Failed to update event. Please try again.';
+      alert(errorMessage);
+    } else if (error.request) {
+      alert('No response from server. Please check your connection.');
+    } else {
+      alert('Error setting up the request. Please try again.');
+    }
   }
 }
 
 // Delete event
 async function deleteEvent() {
   if (!selectedEventId.value) {
-    alert('Please select an event to delete.');
+    alert('Please select an event to delete');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to delete this event?')) {
     return;
   }
 
   try {
-    await axiosClient.delete(`/events/${selectedEventId.value}`);
-    alert('Event Deleted Successfully!');
+    const response = await axiosClient.delete(`/events/${selectedEventId.value}`);
     
-    // Reset form
-    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
-    selectedEventId.value = "";
-    
-    // Refresh events list
-    await fetchEvents();
+    if (response.status === 200) {
+      alert('Event Deleted Successfully!');
+      selectedEventId.value = "";
+      await fetchEvents();
+    }
   } catch (error) {
     console.error("Error deleting event:", error);
-    alert('Failed to delete event. Please try again.');
+    if (error.response) {
+      const errorMessage = error.response.data.errors?.join('\n') || 'Failed to delete event. Please try again.';
+      alert(errorMessage);
+    } else if (error.request) {
+      alert('No response from server. Please check your connection.');
+    } else {
+      alert('Error setting up the request. Please try again.');
+    }
   }
 }
 
-function selectEvent(id) {
-  selectedEventId.value = id;
-  // Find the selected event and populate the form
-  const event = events.value.find(e => e.eventID === id);
-  if (event) {
-    eventData.eventName = event.name;
+// Load event data when an event is selected
+async function loadEventData(eventId) {
+  try {
+    const response = await axiosClient.get(`/events/${eventId}`);
+    const event = response.data;
+    
+    // Update form data
+    eventData.name = event.name;
     eventData.description = event.description;
     eventData.maxSpot = event.maxSpot;
-    eventData.date = event.eventDate;
-    eventData.startTime = event.startTime;
-    eventData.endTime = event.endTime;
+    eventData.eventDate = event.eventDate;
+    eventData.startTime = event.startTime.substring(0, 5); // Format HH:mm
+    eventData.endTime = event.endTime.substring(0, 5); // Format HH:mm
     eventData.location = event.location;
-    eventData.ownerId = event.ownerId;
-    eventData.boardGameId = event.boardGameId;
+    selectedBoardGame.value = event.boardGameId;
+    
+    console.log('Loaded event data:', event);
+    console.log('Selected board game:', selectedBoardGame.value);
+  } catch (error) {
+    console.error("Error loading event data:", error);
+    alert('Failed to load event data. Please try again.');
   }
 }
 
-//original functions by Niz
-async function registerForEvent() {
+// Handle event selection
+function selectEvent(id) {
+  selectedEventId.value = id;
+  loadEventData(id);
+}
+
+// Register for an event
+async async function registerForEvent() {
   if (!selectedEventId.value) {
-    alert('Please select an event to register.')
-    return
+    alert('Please select an event to register.');
+    return;
   }
-  console.log('Registered for Event ID:', selectedEventId.value)
 
-  const registration = {
-    playerID: Number(authStore.user.id),
-    eventID: selectedEventId.value,
-  }
-    try {
-        await axiosClient.post("/registrations", registration);
-    } catch (e) {
-        console.error(e);
+  try {
+    // Ensure we have a user ID
+    await getCurrentUserId();
+
+    const response = await axiosClient.post(`/events/${selectedEventId.value}/register`, {
+      playerId: eventData.ownerId
+    });
+
+    if (response.status === 201) {
+      alert('Registration successful!');
+      await fetchEvents(); // Refresh the events list
     }
-  for (const event of events.value) {
-    await getRegistrationStatus(event.eventID);
+  } catch (error) {
+    console.error("Error registering for event:", error);
+    if (error.response) {
+      const errorMessage = error.response.data.errors?.join('\n') || 'Failed to register for event. Please try again.';
+      alert(errorMessage);
+    } else if (error.request) {
+      alert('No response from server. Please check your connection.');
+    } else {
+      alert('Error setting up the request. Please try again.');
+    }
   }
-  alert('Registration successful!')
 }
 
+// Cancel registration for an event
 async function cancelRegistration() {
   if (!selectedEventId.value) {
-    alert("Please select an event to cancel.");
+    alert("Please select an event to cancel registration.");
     return;
   }
 
@@ -404,31 +525,30 @@ async function cancelRegistration() {
     alert("Failed to cancel registration. Please try again.");
   }
 
-  console.log("Cancelled registration for Event ID:", selectedEventId.value);
-  for (const event of events.value) {
-    await getRegistrationStatus(event.eventID);
-  }
-  alert("Registration canceled!");
-}
-
-async function getRegistrationStatus(id) {
   try {
-    const response = await axiosClient.get(`/registrations/${authStore.user.id}/${id}`);
-    if (response.data === null) {
-      registrationStatus.value[id] = "Not Registered";
-    } else {
-      registrationStatus.value[id] = "Registered";
+    // Ensure we have a user ID
+    await getCurrentUserId();
+
+    const response = await axiosClient.delete(`/events/${selectedEventId.value}/register`, {
+      data: { playerId: eventData.ownerId }
+    });
+
+    if (response.status === 200) {
+      alert("Registration cancelled successfully!");
+      await fetchEvents(); // Refresh the events list
     }
   } catch (error) {
-    if (error.response?.status === 404) {
-      registrationStatus.value[id] = "Not Registered";
+    console.error("Error cancelling registration:", error);
+    if (error.response) {
+      const errorMessage = error.response.data.errors?.join('\n') || 'Failed to cancel registration. Please try again.';
+      alert(errorMessage);
+    } else if (error.request) {
+      alert('No response from server. Please check your connection.');
     } else {
-      registrationStatus.value[id] = "Error";
+      alert('Error setting up the request. Please try again.');
     }
   }
 }
-
-
 </script>
 
 <style scoped>
@@ -481,4 +601,5 @@ button.btn {
   margin-top: 1rem; /* Add some top margin for the button */
 }
 </style>
+
 
