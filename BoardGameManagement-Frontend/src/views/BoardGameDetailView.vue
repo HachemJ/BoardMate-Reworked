@@ -1,7 +1,7 @@
 <script setup>
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {ref, computed, onMounted} from "vue";
+import {ref, computed, onMounted, reactive} from "vue";
 import {useRoute} from "vue-router";
 import axios from "axios";
 
@@ -9,17 +9,20 @@ const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
-//const gameDetails = ref({ minPlayers: 0, maxPlayers: 0, description: "" });
-//const boardGameCopies = ref({});
-//const reviews = ref({});
-
-const gameDetails = ref({ // This is a dummy data for now
-  minPlayers: 2,
-  maxPlayers: 4,
-  description: "This is a game description."
-});
-
+const reviews = ref([]);
 const boardGameCopies = ref([]);
+const selectedGameId = ref(null);
+const borrowRequestData = reactive({
+  startOfLoan: "",
+  endOfLoan: "",
+  borrowerID: 7642, // TODO Placeholder
+  specificGameID: "",
+});
+const gameDetails = ref({
+  minPlayers: "",
+  maxPlayers: "",
+  description: "",
+});
 
 async function fetchBoardGameID() {
   const gameName = route.params.gamename;
@@ -27,13 +30,11 @@ async function fetchBoardGameID() {
   try {
     const response = await axiosClient.get("/boardgames");
     //console.log("Response data:", response.data); // Log the response data
-    var gameId;
     const game = response.data.find(game => game.name === gameName);
     if (game) {
       console.log("Gaaaaame ID:", game.gameID); // Log the game ID
       return game.gameID;
     }
-    
     return null; // Return null if game ID is not found
   } catch (error) {
     console.error("Error fetching game ID:", error);
@@ -46,21 +47,16 @@ onMounted(async () => {
     const response = await axiosClient.get("/boardgamecopies/byboardgame/" + gameId);
     boardGameCopies.value = response.data;
 
-    const response2 = await axiosClient.get("/reviews/");
+    const response2 = await axiosClient.get("/reviews/"); // TODO This is getting all the reviews
     console.log("Reviews:", response2.data); // Log the reviews data
     reviews.value = response2.data;
+
+    const response3 = await axiosClient.get("/boardgames/" + gameId);
+    gameDetails.value = response3.data;
   } catch (error) {
     console.error(error);
   }
 })
-
-const reviews = ref([ // This is a dummy data for now
-  { comment: "Fine", rating: "2", playerName: "CCC" },
-  { comment: "Very good", rating: "4", playerName: "BBB" },
-  { comment: "Okay", rating: "2", playerName: "AAA" },
-  { comment: "This is a very very very very very very very very very very very very very very very very very very very very very long comment.", rating: "5", playerName: "John Doe" },
-]);
-
 
 const route = useRoute();
 const gameName = route.params.gamename;
@@ -75,9 +71,17 @@ const reviewRoute = computed(() => {
   return roleSegment === "playerboardgame" ? "playerAddReview" : "ownerAddReview";
 });
 
-function borrowGame(id) {
-  console.log("Borrowing game");
-  alert("Borrow request sent!");
+function selectGame(gameId) {
+  selectedGameId.value = gameId;
+}
+
+function confirmBorrow() {
+  if (!selectedGameId.value) {
+    alert("Please select a board game copy first.");
+    return;
+  }
+
+  alert(`Borrow request sent for board game copy!`);
 }
 
 </script>
@@ -114,20 +118,41 @@ function borrowGame(id) {
               </tr>
               </thead>
               <tbody>
-              <tr v-for="(game, index) in boardGameCopies">
+              <tr v-for="(game, index) in boardGameCopies"
+                  :key="game.boardGameCopyId"
+                  :class="{ 'table-active': selectedGameId === game.boardGameCopyId }"
+                  @click="selectGame(game.boardGameCopyId)"
+                  style="cursor: pointer;">
                 <td>{{ index + 1 }}</td>
                 <td>{{ game.specification }}</td>
                 <td>{{ game.playerName }}</td>
-                <td>
-                  <button class="btn btn-info me-2"
-                          @click="borrowGame(game.boardGameCopyId)"
-                          >
-                    Borrow
-                  </button>
-                </td>
               </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Borrow Button -->
+          <div class="text-center">
+            <h4>Select Borrow Dates</h4>
+            <div class="d-flex justify-content-center align-items-center gap-3">
+
+              <!-- Start Date -->
+              <div class="d-flex flex-column">
+                <label for="start-date" class="form-label">Start Date</label>
+                <input type="date" id="start-date" v-model="borrowRequestData.startOfLoan" class="form-control w-auto" />
+              </div>
+
+              <!-- End Date -->
+              <div class="d-flex flex-column">
+                <label for="end-date" class="form-label">End Date</label>
+                <input type="date" id="end-date" v-model="borrowRequestData.endOfLoan" class="form-control w-auto" />
+              </div>
+
+              <!-- Borrow Button -->
+              <button class="btn btn-info mt-4" @click="confirmBorrow" :disabled="!selectedGameId">
+                Borrow
+              </button>
+            </div>
           </div>
 
           <!-- Second Table -->
@@ -147,17 +172,17 @@ function borrowGame(id) {
               </tr>
               </thead>
               <tbody>
-              <tr v-for="game in reviews">
-                <td>{{ game.comment }}</td>
+              <tr v-for="review in reviews">
+                <td>{{ review.comment }}</td>
                 <td>
                   <div class="stars">
                     <span v-for="n in 5" :key="n" class="star">
-                      <span v-if="n <= game.rating">★</span>
+                      <span v-if="n <= review.rating">★</span>
                       <span v-else>☆</span>
                     </span>
                   </div>
                 </td>
-                <td>{{ game.playerName }}</td>
+                <td>{{ review.author.name }}</td>
               </tr>
               </tbody>
             </table>
@@ -239,6 +264,10 @@ button.btn {
 
 .star {
   margin-right: 2px; /* Adds space between stars */
+}
+
+.table-active {
+  background-color: lightgreen !important; /* Light green background for selected row */
 }
 
 </style>

@@ -2,41 +2,40 @@
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import axios from "axios";
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
-
-const tabs = ['View All Board Games', 'My Board Game Copies']
-const selectedTab = ref(tabs[0])
-
-const searchQuery = ref("");
-//const boardGames = ref([]);  This will hold the array of board games fetched from the database
-const boardGames = ref([ // This is a dummy data for now
-  { name: "Catan", minPlayer: 4, maxPlayer: 8 },
-  { name: "Ticket to Ride", minPlayer: 2, maxPlayer: 5 },
-  { name: "Carcassonne", minPlayer: 2, maxPlayer: 2 },
-  { name: "Dominion", minPlayer: 1, maxPlayer: 3 },
-]);
-
-//const myBoardGameCopies = ref({});
-const myBoardGameCopies = ref([ // This is a dummy data for now
-  { boardGameName: "Game1", specification: "Game 1", boardGameCopyId: 1 },
-  { boardGameName: "Game1", specification: "This is game 2", boardGameCopyId: 2 },
-  { boardGameName: "Game2", specification: "I don't know what to say", boardGameCopyId: 3 },
-]);
-
-function deleteBoardGameCopy(id) {
-  console.log("Deleting board game copy with id: " + id);
-  alert("Board game copy deleted!");
-}
 
 const filteredGames = computed(() => {
   return boardGames.value.filter(game =>
       game.name.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
+
+const tabs = ['View All Board Games', 'My Board Game Copies']
+const selectedTab = ref(tabs[0])
+const searchQuery = ref("");
+const boardGames = ref([]);
+const myBoardGameCopies = ref({});
+
+onMounted(async () => {
+  try {
+    const response = await axiosClient.get("/boardgames");
+    boardGames.value = response.data;
+
+    const response2 = await axiosClient.get("/boardgamecopies/byplayer/7642"); // TODO need to find the player ID
+    myBoardGameCopies.value = response2.data;
+  } catch (error) {
+    console.error(error);
+  }
+})
+
+function deleteBoardGameCopy(id) {
+  console.log("Deleting board game copy with id: " + id);
+  alert("Board game copy deleted!");
+}
 
 </script>
 
@@ -69,6 +68,17 @@ const filteredGames = computed(() => {
 
           <div v-if="selectedTab === 'View All Board Games'">
 
+            <!-- Page Title and Add Board Game Button-->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="mb-0">Search and Browse Board Games</h2>
+              <router-link :to="{ name: 'playerAddBoardGame' }">
+                <button class="btn btn-primary">Add Board Game</button>
+              </router-link>
+              <router-link :to="{ name: 'ownerUpdateBoardGame' }">
+                <button class="btn btn-primary">Update Board Game</button>
+              </router-link>
+            </div>
+
             <!-- Search Bar -->
             <div class="mb-3">
               <input
@@ -96,8 +106,8 @@ const filteredGames = computed(() => {
                       {{ game.name }}
                     </router-link>
                   </td>
-                  <td>{{ game.minPlayer }}</td>
-                  <td>{{ game.maxPlayer }}</td>
+                  <td>{{ game.minPlayers }}</td>
+                  <td>{{ game.maxPlayers }}</td>
                 </tr>
                 </tbody>
               </table>
@@ -109,6 +119,9 @@ const filteredGames = computed(() => {
               <h4>My Collection</h4>
               <router-link :to="{ name: 'addBoardGameCopy' }">
                 <button class="btn btn-info">Add Board Game Copy</button>
+              </router-link>
+              <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
+                <button class="btn btn-info">Update Board Game Copy</button>
               </router-link>
             </div>
             <table class="table">

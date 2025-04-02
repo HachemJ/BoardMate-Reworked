@@ -38,11 +38,9 @@ async function createReview(comment, rating) {
         comment: comment,
         rating: Number(rating),
         commentDate: new Date().toISOString().split('T')[0], // Produces '2025-03-31'
-        playerID: Number(6245), //TODO PLACEHOLDER
+        playerID: Number(7642), //TODO PLACEHOLDER
         boardGameID: gameId,
     }
-
-    //console.log("New Review:", newReview); // Log the new review data
 
     try {
         await axiosClient.post("/reviews", newReview);
