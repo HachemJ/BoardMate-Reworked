@@ -4,11 +4,13 @@ import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {useRoute} from "vue-router";
 import {reactive} from "vue";
 import axios from "axios";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const axiosClient = axios.create({
    baseURL: "http://localhost:8080"
  });
 
+const authStore = useAuthStore();
 const route = useRoute();
 const gameName = route.params.gamename;
 
@@ -38,7 +40,7 @@ async function createReview(comment, rating) {
         comment: comment,
         rating: Number(rating),
         commentDate: new Date().toISOString().split('T')[0], // Produces '2025-03-31'
-        playerID: Number(7642), //TODO PLACEHOLDER
+        playerID: Number(authStore.user.id),
         boardGameID: gameId,
     }
 
@@ -86,7 +88,7 @@ function submitReview() {
               <label for="rating" class="form-label">Rating</label>
               <select id="rating" v-model="reviewData.rating" class="form-control" required>
                 <option value="" disabled selected>Select a rating</option>
-                <option v-for="n in 6" :key="n" :value="n - 1">{{ n - 1 }}</option>
+                <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
               </select>
             </div>
 
