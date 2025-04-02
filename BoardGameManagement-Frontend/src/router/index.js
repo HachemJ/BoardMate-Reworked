@@ -26,6 +26,7 @@ import ElToggles from "../layouts/sections/elements/toggles/TogglesView.vue";
 import ElTypography from "../layouts/sections/elements/typography/TypographyView.vue";
 import OwnerBorrowRequestManagement from "@/views/OwnerBorrowRequestManagement.vue";
 import PlayerBorrowRequestManagement from "@/views/PlayerBorrowRequestManagement.vue";
+import CreateNewBorrowRequest from "@/views/CreateNewBorrowRequest.vue";
 import PlayerBoardGameMenuView from "@/views/PlayerBoardGameMenuView.vue";
 import OwnerBoardGameMenuView from "@/views/OwnerBoardGameMenuView.vue";
 import BoardGameDetailView from "@/views/BoardGameDetailView.vue";

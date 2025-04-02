@@ -1,7 +1,7 @@
 <script setup>
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {ref, computed} from "vue";
+import {ref, computed, onMounted} from "vue";
 import {useRoute} from "vue-router";
 import axios from "axios";
 
@@ -19,11 +19,40 @@ const gameDetails = ref({ // This is a dummy data for now
   description: "This is a game description."
 });
 
-const boardGameCopies = ref([ // This is a dummy data for now
-  { specification: "Game 1", playerName: "John Doe", boardGameCopyId: 1 },
-  { specification: "This is game 2", playerName: "Tingyi", boardGameCopyId: 2 },
-  { specification: "I don't know what to say", playerName: "Someone", boardGameCopyId: 3 },
-]);
+const boardGameCopies = ref([]);
+
+async function fetchBoardGameID() {
+  const gameName = route.params.gamename;
+  //console.log("Game name from route:", gameName); // Log the game name
+  try {
+    const response = await axiosClient.get("/boardgames");
+    //console.log("Response data:", response.data); // Log the response data
+    var gameId;
+    const game = response.data.find(game => game.name === gameName);
+    if (game) {
+      console.log("Gaaaaame ID:", game.gameID); // Log the game ID
+      return game.gameID;
+    }
+    
+    return null; // Return null if game ID is not found
+  } catch (error) {
+    console.error("Error fetching game ID:", error);
+  }
+}
+
+onMounted(async () => {
+  try {
+    const gameId = await fetchBoardGameID();
+    const response = await axiosClient.get("/boardgamecopies/byboardgame/" + gameId);
+    boardGameCopies.value = response.data;
+
+    const response2 = await axiosClient.get("/reviews/");
+    console.log("Reviews:", response2.data); // Log the reviews data
+    reviews.value = response2.data;
+  } catch (error) {
+    console.error(error);
+  }
+})
 
 const reviews = ref([ // This is a dummy data for now
   { comment: "Fine", rating: "2", playerName: "CCC" },
@@ -31,6 +60,7 @@ const reviews = ref([ // This is a dummy data for now
   { comment: "Okay", rating: "2", playerName: "AAA" },
   { comment: "This is a very very very very very very very very very very very very very very very very very very very very very long comment.", rating: "5", playerName: "John Doe" },
 ]);
+
 
 const route = useRoute();
 const gameName = route.params.gamename;
