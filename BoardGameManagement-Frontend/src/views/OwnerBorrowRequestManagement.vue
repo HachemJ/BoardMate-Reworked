@@ -3,9 +3,10 @@
 import {ref, onMounted, watchEffect, onUnmounted} from 'vue'
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
-import {useRoute} from "vue-router";
+import {useAuthStore} from "@/stores/authStore.js";
 
 
+const authStore = useAuthStore();
 const axiosClient = axios.create({
   // NOTE: it's baseURL, not baseUrl
   baseURL: "http://localhost:8080"
@@ -13,7 +14,7 @@ const axiosClient = axios.create({
 
 const requests = ref([]);  // This will hold the array of events fetched from the database
 const requestUpdated = ref(false); // keep track whether requests have been updated
-const ownerId = useRoute().query.ownerId;
+const ownerId = authStore.user.id;
 
 let intervalId = null;
 
