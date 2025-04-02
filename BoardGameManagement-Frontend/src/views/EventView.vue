@@ -360,19 +360,36 @@ function selectEvent(id) {
 }
 
 //original functions by Niz
-function registerForEvent() {
+async function registerForEvent() {
   if (!selectedEventId.value) {
     alert('Please select an event to register.')
     return
   }
   console.log('Registered for Event ID:', selectedEventId.value)
+
+  const registration = {
+    playerID: Number(authStore.user.id),
+    eventID: selectedEventId.value,
+  }
+    try {
+        await axiosClient.post("/registrations", registration);
+    } catch (e) {
+        console.error(e);
+    }
   alert('Registration successful!')
 }
 
-function cancelRegistration() {
+async function cancelRegistration() {
   if (!selectedEventId.value) {
     alert("Please select an event to cancel.");
     return;
+  }
+
+  try {
+    await axiosClient.delete("/registrations/" + authStore.user.id + "/" + selectedEventId.value);
+  } catch (e) {
+    console.error(e);
+    alert("Failed to cancel registration. Please try again.");
   }
 
   console.log("Cancelled registration for Event ID:", selectedEventId.value);
