@@ -234,7 +234,7 @@ public class BorrowRequestService {
                             gameToMakeAvailable.getPlayer().getName()));
         }
 
-        if(!request.getRequestStatus().equals(BorrowRequest.RequestStatus.InProgress)){
+        if(request.getRequestStatus().equals(BorrowRequest.RequestStatus.Done)){
             throw new GlobalException(HttpStatus.CONFLICT,
                     String.format("The request %d is not borrowed by you: cannot cancel its borrow", requestId));
         }

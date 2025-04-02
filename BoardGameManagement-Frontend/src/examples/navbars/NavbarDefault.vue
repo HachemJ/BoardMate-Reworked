@@ -2,12 +2,13 @@
 import { RouterLink, useRouter } from "vue-router";
 import { ref, watch } from "vue";
 import { useWindowsWidth } from "../../assets/js/useWindowsWidth";
-import { useAuthStore } from "@/stores/authStore.js";
+import {useAuthStore} from "@/stores/authStore.js";
 
 // images
 import ArrDark from "@/assets/img/down-arrow-dark.svg";
 import downArrow from "@/assets/img/down-arrow.svg";
 import DownArrWhite from "@/assets/img/down-arrow-white.svg";
+
 
 const props = defineProps({
   action: {
@@ -75,6 +76,8 @@ const getTextColor = () => {
   return color;
 };
 
+// set nav color on mobile && desktop
+
 let textDark = ref(props.darkText);
 const { type } = useWindowsWidth();
 
@@ -95,8 +98,13 @@ watch(
   }
 );
 
-const isOwner = ref(true);
+//constant that will need to be linked with whether user is an owner or not
+const isOwner = ref(authStore.user.isAOwner);  // This will control if the RouterLink is shown or not
+
+
 </script>
+
+
 
 <template>
   <nav
@@ -159,19 +167,25 @@ const isOwner = ref(true);
               <RouterLink :to="{ name: 'profile' }" class="dropdown-item border-radius-md">
                 <span>Profile Menu</span>
               </RouterLink>
+
+
               <RouterLink
-                v-if="isOwner"
-                :to="{ name: 'owner borrow request', query: { ownerId: 3500 } }"
-                class="dropdown-item border-radius-md"
+                  v-if="isOwner"
+                  :to="{ name: 'owner borrow request'}"
+                  class="dropdown-item border-radius-md"
+
               >
                 <span>Manage Incoming Borrow Requests</span>
               </RouterLink>
+ 
+
               <RouterLink
-                :to="{ name: 'player borrow request', params: { playerId: 3500 } }"
-                class="dropdown-item border-radius-md"
+                  :to="{ name: 'player borrow request'}"
+                  class="dropdown-item border-radius-md"
               >
                 <span>See my Borrow Requests</span>
               </RouterLink>
+
               <RouterLink
                 v-if="isOwner"
                 :to="{ name: 'ownerBoardGameMenu' }"
@@ -179,6 +193,7 @@ const isOwner = ref(true);
               >
                 <span>Board Game Menu</span>
               </RouterLink>
+
               <RouterLink
                 v-if="!isOwner"
                 :to="{ name: 'playerBoardGameMenu' }"
@@ -186,6 +201,7 @@ const isOwner = ref(true);
               >
                 <span>Board Game Menu</span>
               </RouterLink>
+
             </div>
           </li>
           <li class="nav-item mx-2">
@@ -197,7 +213,9 @@ const isOwner = ref(true);
               <i class="material-icons opacity-6 me-2 text-md" :class="getTextColor()">article</i>
               Contact Us
             </RouterLink>
+
           </li>
+
           <li class="nav-item dropdown dropdown-hover mx-2">
             <RouterLink
               :to="{ name: 'about' }"
@@ -213,11 +231,12 @@ const isOwner = ref(true);
                 :fill="props.transparent && '#fff'"
               >
                 <path
-                  d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76  3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"
+                  d="M12 1.27a11 11 0 00-3.48 21.46c.55.09.73-.28.73-.55v-1.84c-3.03.64-3.67-1.46-3.67-1.46-.55-1.29-1.28-1.65-1.28-1.65-.92-.65.1-.65.1-.65 1.1 0 1.73 1.1 1.73 1.1.92 1.65 2.57 1.2 3.21.92a2 2 0 01.64-1.47c-2.47-.27-5.04-1.19-5.04-5.5 0-1.1.46-2.1 1.2-2.84a3.76 3.76 0 010-2.93s.91-.28 3.11 1.1c1.8-.49 3.7-.49 5.5 0 2.1-1.38 3.02-1.1 3.02-1.1a3.76 3.76 0 010 2.93c.83.74 1.2 1.74 1.2 2.94 0 4.21-2.57 5.13-5.04 5.4.45.37.82.92.82 2.02v3.03c0 .27.1.64.73.55A11 11 0 0012 1.27"
                 ></path>
               </svg>
               About Us
             </RouterLink>
+
           </li>
         </ul>
         <ul class="navbar-nav d-lg-block d-none">
@@ -240,4 +259,8 @@ const isOwner = ref(true);
       </div>
     </div>
   </nav>
+  <!-- End Navbar -->
+
 </template>
+
+
