@@ -21,24 +21,49 @@ const axiosClient = axios.create({
 
 const authStore = useAuthStore();
 
-async function handleLogin() {
-  try {
-    const res = await axiosClient.post("/players/login", {
-      email: email.value,
-      password: password.value,
-    });
+async function handleAuth() {
+  if (isSignUp.value) {
+    // --- SIGNUP MODE ---
+    if (password.value !== confirmPassword.value) {
+      alert("Passwords do not match.");
+      return;
+    }
 
-    const user = res.data;
-    authStore.login(user.playerID, user.name, user.email, user.isAOwner);
+    try {
+      const res = await axiosClient.post("/players", {
+        name: fullName.value,
+        email: email.value,
+        password: password.value,
+        isAOwner: false // always starts as a regular player
+      });
 
-    alert("Logged in successfully!");
-    console.log("Logged in user:", authStore.user);
-    router.push("/profile");
-  } catch (error) {
-    alert("Login failed: " + (error.response?.data?.message || error.message));
+      alert("Signup successful! Please log in.");
+      isSignUp.value = false; // Switch back to login view
+    } catch (error) {
+      console.error("Signup failed:", error);
+      alert("Signup failed: " + (error.response?.data?.message || error.message));
+    }
+  } else {
+    // --- LOGIN MODE ---
+    try {
+      const res = await axiosClient.post("/players/login", {
+        email: email.value,
+        password: password.value,
+      });
+
+      const user = res.data;
+      authStore.login(user.name, user.email, user.isAOwner);
+
+      alert("Logged in successfully!");
+      console.log("Logged in user:", authStore.user);
+      router.push("/profile");
+    } catch (error) {
+      alert("Login failed: " + (error.response?.data?.message || error.message));
+    }
   }
 }
 </script>
+
 
 <template>
   <DefaultNavbar transparent />
@@ -117,15 +142,15 @@ async function handleLogin() {
                   </MaterialSwitch>
 
                   <div class="text-center">
-                    <MaterialButton
-                      class="my-4 mb-2"
-                      variant="gradient"
-                      color="success"
-                      fullWidth
-                      @click.prevent="handleLogin"
-                    >
-                      {{ isSignUp ? "Sign up" : "Sign in" }}
-                    </MaterialButton>
+                     <MaterialButton
+                       class="my-4 mb-2"
+                       variant="gradient"
+                       color="success"
+                       fullWidth
+                       @click.prevent="handleAuth"
+                     >
+                       {{ isSignUp ? "Sign up" : "Sign in" }}
+                     </MaterialButton>
                   </div>
 
                   <p class="mt-4 text-sm text-center">
