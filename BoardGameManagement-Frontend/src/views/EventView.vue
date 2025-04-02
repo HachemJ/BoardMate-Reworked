@@ -25,7 +25,7 @@
         <div class="col-md-9">
           <div v-if="selectedTab === 'Create an Event'">
             <h4>Complete the Form Below to Create a New Event</h4>
-            <form @submit.prevent="submitEvent">
+            <form @submit.prevent="createEvent">
               <div class="mb-3">
                 <label for="eventName" class="form-label">Event Name</label>
                 <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" required>
@@ -54,6 +54,15 @@
                 <label for="location" class="form-label">Location</label>
                 <input type="text" class="form-control" id="location" v-model="eventData.location" required>
               </div>
+              <div class="mb-3">
+                <label for="boardGame" class="form-label">Select Board Game</label>
+                <select class="form-control" id="boardGame" v-model="selectedBoardGame" required>
+                  <option disabled value="">Choose a board game</option>
+                  <option v-for="game in boardGames" :key="game.gameID" :value="game.gameID">
+                    {{ game.name }}
+                  </option>
+                </select>
+              </div>
               <button type="submit" class="btn btn-info">Create Event</button>
             </form>
           </div>
@@ -65,7 +74,7 @@
               <div class="mb-3">
                 <select class="form-control" id="selectedEvent" v-model="selectedEventId">
                   <option disabled value="">Select the Event to be Updated/Deleted</option>
-                  <option v-for="event in events" :value="event.id" :key="event.id">{{ event.name }}</option>
+                  <option v-for="event in events" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
                 </select>
               </div>
 
@@ -97,24 +106,22 @@
                 <label for="location" class="form-label">Location</label>
                 <input type="text" class="form-control" id="location" v-model="eventData.location" required>
               </div>
-                <button
-                  type="submit"
-                  class="btn btn-info me-2"
-                  :disabled="!selectedEventId"
-                >
-                  Update Event
-                </button>
+              <button
+                type="submit"
+                class="btn btn-info me-2"
+                :disabled="!selectedEventId"
+              >
+                Update Event
+              </button>
 
-                <button
-                  type="button"
-                  class="btn btn-danger"
-                  :disabled="!selectedEventId"
-                  @click="deleteEvent"
-                >
-                  Delete Event
-                </button>
-
-
+              <button
+                type="button"
+                class="btn btn-danger"
+                :disabled="!selectedEventId"
+                @click="deleteEvent"
+              >
+                Delete Event
+              </button>
             </form>
           </div>
 
@@ -133,10 +140,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(event, index) in events" :key="event.id" @click="selectEvent(event.id)" :class="{ 'table-active': selectedEventId === event.id }">
-                  <td>{{ event.eventName }}</td>
+                <tr v-for="event in events" :key="event.eventID" @click="selectEvent(event.eventID)" :class="{ 'table-active': selectedEventId === event.eventID }">
+                  <td>{{ event.name }}</td>
                   <td>{{ event.description }}</td>
-                  <td>{{ event.date }}</td>
+                  <td>{{ event.eventDate }}</td>
                   <td>{{ event.startTime }}</td>
                   <td>{{ event.endTime }}</td>
                   <td>{{ event.location }}</td>
@@ -159,7 +166,6 @@
             >
               Cancel Registration
             </button>
-
           </div>
         </div>
       </div>
@@ -170,6 +176,11 @@
 <script setup>
 import { ref, reactive } from 'vue'
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
+import axios from "axios";
+
+const axiosClient = axios.create({
+  baseURL: "http://localhost:8080"
+});
 
 const tabs = ['Create an Event', 'Update/Delete My Events', 'Browse Available Events']
 const selectedTab = ref(tabs[0])
@@ -180,17 +191,173 @@ const eventData = reactive({
   date: '',
   startTime: '',
   endTime: '',
-  location: ''
+  location: '',
+  ownerId: null, // Will be set from logged-in user? not sure how to do that
+  boardGameId: null // Will be set from selected board game; the sys fetches all boardgame and put them in dropdown list for user to select
 })
+
 const events = ref([])  // This will hold the array of events fetched from the database
-
-
 const selectedEventId = ref("")
+const boardGames = ref([]) // Will hold available board games
+const selectedBoardGame = ref(null)
 
-function selectEvent(id) {
-  selectedEventId.value = id
+// Fetch all events
+async function fetchEvents() {
+  try {
+    const response = await axiosClient.get("/events");
+    events.value = response.data;
+  } catch (error) {
+    console.error("Error fetching events:", error);
+    alert('Failed to fetch events. Please try again.');
+  }
 }
 
+// Fetch available board games
+async function fetchBoardGames() {
+  try {
+    const response = await axiosClient.get("/boardgames");
+    boardGames.value = response.data;
+  } catch (error) {
+    console.error("Error fetching board games:", error);
+    alert('Failed to fetch board games. Please try again.');
+  }
+}
+
+// Get logged-in user ID
+async function getCurrentUserId() {
+  try {
+    // Assuming you have a user endpoint that returns the current user
+    const response = await axiosClient.get("/users/current");
+    eventData.ownerId = response.data.playerID;
+  } catch (error) {
+    console.error("Error fetching user ID:", error);
+    alert('Failed to get user information. Please try again.');
+  }
+}
+
+// Initialize data when component is mounted
+async function initializeData() {
+  await Promise.all([
+    fetchEvents(),
+    fetchBoardGames(),
+    getCurrentUserId()
+  ]);
+}
+
+// Call initializeData when component is mounted
+initializeData();
+
+// Create new event
+async function createEvent() {
+  try {
+    if (!selectedBoardGame.value) {
+      alert('Please select a board game');
+      return;
+    }
+
+    const eventDto = {
+      name: eventData.eventName,
+      description: eventData.description,
+      maxSpot: eventData.maxSpot,
+      eventDate: eventData.date,
+      startTime: eventData.startTime,
+      endTime: eventData.endTime,
+      location: eventData.location,
+      ownerId: eventData.ownerId,
+      boardGameId: selectedBoardGame.value
+    };
+
+    await axiosClient.post("/events", eventDto);
+    alert('Event Created Successfully!');
+    
+    // Reset form
+    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
+    selectedBoardGame.value = null;
+    
+    // Refresh events list
+    await fetchEvents();
+  } catch (error) {
+    console.error("Error creating event:", error);
+    alert('Failed to create event. Please try again.');
+  }
+}
+
+// Update existing event
+async function updateEvent() {
+  if (!selectedEventId.value) {
+    alert('Please select an event to update.');
+    return;
+  }
+
+  try {
+    const eventDto = {
+      name: eventData.eventName,
+      description: eventData.description,
+      maxSpot: eventData.maxSpot,
+      eventDate: eventData.date,
+      startTime: eventData.startTime,
+      endTime: eventData.endTime,
+      location: eventData.location,
+      ownerId: eventData.ownerId,
+      boardGameId: eventData.boardGameId
+    };
+
+    await axiosClient.put(`/events/${selectedEventId.value}`, eventDto);
+    alert('Event Updated Successfully!');
+    
+    // Reset form
+    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
+    selectedEventId.value = "";
+    
+    // Refresh events list
+    await fetchEvents();
+  } catch (error) {
+    console.error("Error updating event:", error);
+    alert('Failed to update event. Please try again.');
+  }
+}
+
+// Delete event
+async function deleteEvent() {
+  if (!selectedEventId.value) {
+    alert('Please select an event to delete.');
+    return;
+  }
+
+  try {
+    await axiosClient.delete(`/events/${selectedEventId.value}`);
+    alert('Event Deleted Successfully!');
+    
+    // Reset form
+    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
+    selectedEventId.value = "";
+    
+    // Refresh events list
+    await fetchEvents();
+  } catch (error) {
+    console.error("Error deleting event:", error);
+    alert('Failed to delete event. Please try again.');
+  }
+}
+
+function selectEvent(id) {
+  selectedEventId.value = id;
+  // Find the selected event and populate the form
+  const event = events.value.find(e => e.eventID === id);
+  if (event) {
+    eventData.eventName = event.name;
+    eventData.description = event.description;
+    eventData.maxSpot = event.maxSpot;
+    eventData.date = event.eventDate;
+    eventData.startTime = event.startTime;
+    eventData.endTime = event.endTime;
+    eventData.location = event.location;
+    eventData.ownerId = event.ownerId;
+    eventData.boardGameId = event.boardGameId;
+  }
+}
+
+//original functions by Niz
 function registerForEvent() {
   if (!selectedEventId.value) {
     alert('Please select an event to register.')
@@ -208,13 +375,6 @@ function cancelRegistration() {
 
   console.log("Cancelled registration for Event ID:", selectedEventId.value);
   alert("Registration canceled!");
-}
-
-
-function updateEvent() {
-  console.log('Updated Event Data:', eventData)
-  alert('Event Updated Successfully! Check the console for details.')
-  // Add actual update logic here later
 }
 
 function submitEvent() {
