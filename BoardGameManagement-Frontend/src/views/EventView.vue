@@ -226,17 +226,17 @@ async function fetchBoardGames() {
 }
 
 // Get logged-in user ID
-async function getCurrentUserId() {
-  try {
-    // Assuming you have a user endpoint that returns the current user
-    const user_id = authStore.user.id;
-    const response = await axiosClient.get("/users/user_id");
-    eventData.ownerId = response.data.playerID;
-  } catch (error) {
-    console.error("Error fetching user ID:", error);
-    alert('Failed to get user information. Please try again.');
-  }
-}
+//async function getCurrentUserId() {
+  //try {
+    //// Assuming you have a user endpoint that returns the current user
+    //const user_id = authStore.user.id;
+    //const response = await axiosClient.get("/users/user_id");
+    //eventData.ownerId = response.data.playerID;
+  //} catch (error) {
+    //console.error("Error fetching user ID:", error);
+    //alert('Failed to get user information. Please try again.');
+  //}
+//}
 
 // Initialize data when component is mounted
 async function initializeData() {
@@ -261,10 +261,10 @@ async function createEvent() {
     const eventDto = {
       name: eventData.eventName,
       description: eventData.description,
-      maxSpot: eventData.maxSpot,
-      eventDate: eventData.date,
-      startTime: eventData.startTime,
-      endTime: eventData.endTime,
+      maxSpot: eventData.maxSpot.toString(),
+      eventDate: eventData.date, // format: "yyyy-MM-dd" (from input type="date")
+      startTime: `${eventData.startTime}:00`, // format: "HH:mm:ss"
+      endTime: `${eventData.endTime}:00`,
       location: eventData.location,
       ownerId: authStore.user.id,
       boardGameId: selectedBoardGame.value
@@ -272,15 +272,14 @@ async function createEvent() {
 
     await axiosClient.post("/events", eventDto);
     alert('Event Created Successfully!');
-    
-    // Reset form
+
     Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
     selectedBoardGame.value = null;
-    
-    // Refresh events list
+
     await fetchEvents();
   } catch (error) {
     console.error("Error creating event:", error);
+    console.log("Full error:", error.response?.data);
     alert('Failed to create event. Please try again.');
   }
 }
