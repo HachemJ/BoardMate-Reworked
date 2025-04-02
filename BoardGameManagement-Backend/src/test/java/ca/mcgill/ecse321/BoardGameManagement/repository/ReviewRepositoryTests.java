@@ -4,8 +4,6 @@ import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.model.Review;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.*;
@@ -29,6 +27,7 @@ public class ReviewRepositoryTests {
     @AfterEach
     public void clearDatabase() {
         reviewRepository.deleteAll();
+        playerRepository.deleteAll();
     }
 
     @Test
