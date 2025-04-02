@@ -3,7 +3,7 @@
 import {ref, onMounted, watchEffect} from 'vue'
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
-import {useRoute} from "vue-router";
+import {useAuthStore} from "@/stores/authStore.js";
 
 
 const axiosClient = axios.create({
@@ -11,9 +11,10 @@ const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+const authStore = useAuthStore();
+const playerId = authStore.user.id;
 const requests = ref([]);  // This will hold the array of events fetched from the database
 const requestUpdated = ref(false); // keep track whether requests have been updated
-const playerId = useRoute().params.playerId;
 const date = new Date();
 const today = date.getFullYear() + '-'
     + (date.getMonth() + 1).toString().padStart(2, '0') + '-'
@@ -79,8 +80,7 @@ function canConfirmGotGame(status, startDate, endDate){
 }
 
 function canCancelRequest(status, startDate){
-  return status === "InProgress" & today >= startDate
-
+  return (status === "Accepted" | status === "InProgress") & today >= startDate
 }
 
 function isRequestInactive(status, startDate){

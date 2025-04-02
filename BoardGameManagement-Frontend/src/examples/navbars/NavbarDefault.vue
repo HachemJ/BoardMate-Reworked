@@ -7,6 +7,9 @@ import { useWindowsWidth } from "../../assets/js/useWindowsWidth";
 import ArrDark from "@/assets/img/down-arrow-dark.svg";
 import downArrow from "@/assets/img/down-arrow.svg";
 import DownArrWhite from "@/assets/img/down-arrow-white.svg";
+import {useAuthStore} from "@/stores/authStore.js";
+
+const authStore = useAuthStore();
 
 const props = defineProps({
   action: {
@@ -90,7 +93,7 @@ watch(
 );
 
 //constant that will need to be linked with whether user is an owner or not
-const isOwner = ref(true);  // This will control if the RouterLink is shown or not
+const isOwner = ref(authStore.user.isAOwner);  // This will control if the RouterLink is shown or not
 
 
 </script>
@@ -192,7 +195,7 @@ const isOwner = ref(true);  // This will control if the RouterLink is shown or n
 
               <RouterLink
                   v-if="isOwner"
-                  :to="{ name: 'owner borrow request', query: {ownerId: 3500}}"
+                  :to="{ name: 'owner borrow request'}"
                   class="dropdown-item border-radius-md"
 
               >
@@ -201,7 +204,7 @@ const isOwner = ref(true);  // This will control if the RouterLink is shown or n
  
 
               <RouterLink
-                  :to="{ name: 'player borrow request', params: {playerId: 3500}}"
+                  :to="{ name: 'player borrow request'}"
                   class="dropdown-item border-radius-md"
               >
                 <span>See my Borrow Requests</span>

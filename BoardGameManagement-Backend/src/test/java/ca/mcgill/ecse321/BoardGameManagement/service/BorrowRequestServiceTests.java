@@ -565,7 +565,7 @@ public class BorrowRequestServiceTests {
      */
     public void testSuccessfulCancelBorrowing(){
         boardGameCopy.setIsAvailable(false);
-        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.InProgress);
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID())).thenReturn(boardGameCopy);
         when(borrowRequestRepository.save(any(BorrowRequest.class))).thenAnswer((InvocationOnMock iom) -> iom.getArgument(0));
@@ -607,6 +607,8 @@ public class BorrowRequestServiceTests {
     @Test
     public void testUnsuccessfulCancelBorrowingRequestNotInProgress() {
         boardGameCopy.setIsAvailable(false);
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Done);
+
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID())).thenReturn(boardGameCopy);
 

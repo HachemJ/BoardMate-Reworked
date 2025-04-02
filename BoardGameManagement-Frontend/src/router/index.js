@@ -63,13 +63,13 @@ const router = createRouter({
       component: EventView,
     },
     {
-      path: "/borrowrequests",
+      path: "/owner/borrowrequests",
       name: "owner borrow request",
       component: OwnerBorrowRequestManagement,
     },
 
     {
-      path: "/players/:playerId/borrowrequests",
+      path: "/players/borrowrequests",
       name: "player borrow request",
       component: PlayerBorrowRequestManagement,
     },
