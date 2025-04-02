@@ -70,15 +70,44 @@ async function declineRequest(id, name) {
   }
 }
 
+
+async function cancelBorrowRequest(id, gameName){
+  try {
+    await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
+    alert(`Borrow time over: confirmed ${gameName} was returned`);
+    // Trigger a refresh after the request is accepted
+    requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
+
+  } catch (error) {
+    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    console.error("Error declining request:", error);
+  }
+}
+
 function shouldShowButton(status){
   console.log(status);
   console.log(status === `Pending`);
   return status === `Pending`
 }
 
+function isRequestEndDate(endDate, status){
+  const date = new Date();
+  const today = date.getFullYear() + '-'
+      + (date.getMonth() + 1).toString().padStart(2, '0') + '-'
+      + date.getDate().toString().padStart(2, '0');
+
+  console.log(today, today === endDate)
+  //const today = "2025-01-03"; // for testing only, use line above in real code
+  return today === endDate & status === "Accepted"
+}
+
+function isRequestDone(status){
+  return status === "Done" | status === "Denied"
+}
 
 
 </script>
+
 
 
 <template>
@@ -107,7 +136,9 @@ function shouldShowButton(status){
               </tr>
               </thead>
               <tbody >
-              <tr v-for="(request, index) in requests" key="request.requestId" >
+              <tr v-for="(request, index) in requests" key="request.requestId"
+                  :style="{color: isRequestDone(request.requestStatus) ? 'lightGrey' : 'grey'}"
+              >
                 <td>{{ request.specificGameName }}</td>
                 <td>{{ request.borrowerName }}</td>
                 <td>{{ request.borrowerEmail }}</td>
@@ -135,7 +166,14 @@ function shouldShowButton(status){
                       request {{ request.requestStatus }}
                     </span>
                 </td>
-
+                <td v-if="isRequestEndDate(request.endOfLoan, request.requestStatus)">
+                  <button class="btn btn-info me-2"
+                          @click="cancelBorrowRequest(request.requestId, request.specificGameName)"
+                          style="bottom: 20px;"
+                  >
+                    confirm game returned
+                  </button>
+                </td>
 
               </tr>
               </tbody>
