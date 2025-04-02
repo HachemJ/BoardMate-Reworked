@@ -369,6 +369,21 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
+    public void testGetSuccessfulBorrowRequestByPlayerIdSingle() {
+        ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
+        borrowRequests.add(borrowRequest);
+        when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
+        when(borrowRequestRepository.findBorrowRequestsByRequester_PlayerID(222)).thenReturn(borrowRequests);
+
+        assertDoesNotThrow(() -> borrowRequestService.getBorrowRequestsByPlayerId(222));
+        verify(borrowRequestRepository, times(1)).findBorrowRequestsByRequester_PlayerID(222);
+
+        ArrayList<BorrowRequest> request = borrowRequestService.getBorrowRequestsByPlayerId(222);
+        assertEquals(1, request.size());
+        assertEquals(borrowRequest.getRequestID(), request.getFirst().getRequestID());
+    }
+
+    @Test
     public void testGetSuccessfulBorrowRequest() {
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
 
@@ -550,7 +565,7 @@ public class BorrowRequestServiceTests {
      */
     public void testSuccessfulCancelBorrowing(){
         boardGameCopy.setIsAvailable(false);
-        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.InProgress);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID())).thenReturn(boardGameCopy);
         when(borrowRequestRepository.save(any(BorrowRequest.class))).thenAnswer((InvocationOnMock iom) -> iom.getArgument(0));
@@ -590,14 +605,14 @@ public class BorrowRequestServiceTests {
     }
 
     @Test
-    public void testUnsuccessfulCancelBorrowingRequestNotAccepted() {
+    public void testUnsuccessfulCancelBorrowingRequestNotInProgress() {
         boardGameCopy.setIsAvailable(false);
         when(borrowRequestRepository.findByRequestID(222)).thenReturn(borrowRequest);
         when(boardGameCopyRepository.findBySpecificGameID(boardGameCopy.getSpecificGameID())).thenReturn(boardGameCopy);
 
         GlobalException e =  assertThrows(GlobalException.class, ()-> borrowRequestService.cancelBorrowing(222));
         assertEquals(HttpStatus.CONFLICT, e.getStatus());
-        assertEquals("The request 222 is not in accepted state: cannot cancel its borrow", e.getMessage());
+        assertEquals("The request 222 is not borrowed by you: cannot cancel its borrow", e.getMessage());
         assertFalse(boardGameCopy.getIsAvailable());
     }
 
