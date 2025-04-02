@@ -175,6 +175,7 @@
 
 <script setup>
 import { ref, reactive } from 'vue'
+import {useAuthStore} from "@/stores/authStore.js";
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
 
@@ -182,6 +183,7 @@ const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+const authStore = useAuthStore();
 const tabs = ['Create an Event', 'Update/Delete My Events', 'Browse Available Events']
 const selectedTab = ref(tabs[0])
 const eventData = reactive({
@@ -227,7 +229,8 @@ async function fetchBoardGames() {
 async function getCurrentUserId() {
   try {
     // Assuming you have a user endpoint that returns the current user
-    const response = await axiosClient.get("/users/current");
+    const user_id = authStore.user.id;
+    const response = await axiosClient.get("/users/user_id");
     eventData.ownerId = response.data.playerID;
   } catch (error) {
     console.error("Error fetching user ID:", error);
