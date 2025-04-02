@@ -328,28 +328,41 @@ async function updateEvent() {
   }
 }
 
-// Delete event
-async function deleteEvent() {
+const deleteEvent = async () => {
   if (!selectedEventId.value) {
-    alert('Please select an event to delete.');
+    alert("Please select an event to delete.");
+    return;
+  }
+
+  if (!confirm("Are you sure you want to delete this event?")) {
     return;
   }
 
   try {
-    await axiosClient.delete(`/events/${selectedEventId.value}`);
-    alert('Event Deleted Successfully!');
-    
-    // Reset form
-    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
-    selectedEventId.value = "";
-    
-    // Refresh events list
-    await fetchEvents();
-  } catch (error) {
-    console.error("Error deleting event:", error);
-    alert('Failed to delete event. Please try again.');
+    console.log("Attempting to delete event:", selectedEventId.value);
+    const response = await axiosClient.delete(`/events/${selectedEventId.value}`);
+
+    if (response.status === 200 || response.status === 204) {
+      alert("Event deleted successfully!");
+      selectedEventId.value = "";
+      await fetchEvents();
+
+      // Clear the form
+      Object.keys(eventData).forEach(
+        key => (eventData[key] = key === "maxSpot" ? null : "")
+      );
+      selectedBoardGame.value = null;
+    } else {
+      alert("Unexpected response. Please check the console.");
+      console.log("Response:", response);
+    }
+  } catch (err) {
+    console.error("Delete error", err);
+    alert("Failed to delete event. Please try again.");
   }
-}
+};
+
+
 
 function selectEvent(id) {
   selectedEventId.value = id;
