@@ -3,11 +3,13 @@
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {reactive, ref, onMounted} from "vue";
 import axios from "axios";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+const authStore = useAuthStore();
 const boardGames = ref([]);
 
 onMounted(async () => {
@@ -44,7 +46,7 @@ async function createBoardGameCopy(boardGameName, specification) {
   const newBoardGameCopy = {
     specification: specification,
     isAvailable: true,
-    playerId: Number(7642), //TODO PLACEHOLDER
+    playerId: Number(authStore.user.id),
     boardGameId: gameId,
   }
 

@@ -3,11 +3,13 @@
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {reactive} from "vue";
 import axios from "axios";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+const authStore = useAuthStore();
 const boardGameCopies = reactive([]);
 
 const boardGameCopyData = reactive({
@@ -17,7 +19,7 @@ const boardGameCopyData = reactive({
 
 async function getBoardGameCopiesForId() {
   try {
-    const playerId = 6842; // Replace with the actual player ID TODO PLACEHOLDER
+    const playerId = authStore.user.id;
     const response = await axiosClient.get("/boardgamecopies/byplayer/" + playerId);
     console.log("Data:", response.data);
     boardGameCopies.splice(0, boardGameCopies.length, ...response.data);
@@ -25,7 +27,6 @@ async function getBoardGameCopiesForId() {
     console.error(error);
   }
 }
-
 
 async function updateBGC(specification) {
   const boardGameCopyId = boardGameCopyData.boardGameCopyId;

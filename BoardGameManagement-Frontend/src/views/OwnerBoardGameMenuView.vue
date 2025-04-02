@@ -3,6 +3,7 @@
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import axios from "axios";
 import {computed, onMounted, ref} from "vue";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
@@ -14,6 +15,7 @@ const filteredGames = computed(() => {
   );
 });
 
+const authStore = useAuthStore();
 const tabs = ['View All Board Games', 'My Board Game Copies']
 const selectedTab = ref(tabs[0])
 const searchQuery = ref("");
@@ -25,7 +27,7 @@ onMounted(async () => {
     const response = await axiosClient.get("/boardgames");
     boardGames.value = response.data;
 
-    const response2 = await axiosClient.get("/boardgamecopies/byplayer/7642"); // TODO need to find the player ID
+    const response2 = await axiosClient.get("/boardgamecopies/byplayer/" + authStore.user.id);
     myBoardGameCopies.value = response2.data;
   } catch (error) {
     console.error(error);
