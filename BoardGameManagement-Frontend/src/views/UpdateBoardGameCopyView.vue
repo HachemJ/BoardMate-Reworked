@@ -17,7 +17,7 @@ const boardGameCopyData = reactive({
 
 async function getBoardGameCopiesForId() {
   try {
-    const playerId = 6692; // Replace with the actual player ID TODO PLACEHOLDER
+    const playerId = 7642; // Replace with the actual player ID TODO PLACEHOLDER
     const response = await axiosClient.get("/boardgamecopies/byplayer/" + playerId);
     console.log("Data:", response.data);
     boardGameCopies.splice(0, boardGameCopies.length, ...response.data);
@@ -27,29 +27,29 @@ async function getBoardGameCopiesForId() {
 }
 
 
-async function updateBGC() {
+async function updateBGC(specification) {
   const updatedBoardGameCopy = {
-    specification: boardGameCopyData.specification,
+    newSpecification: specification,
   }
 
   const boardGameCopyId = boardGameCopyData.boardGameCopyId;
   try {
-    await axiosClient.put("/boardgamecopies/" + boardGameCopyId, updatedBoardGameCopy);
+    await axiosClient.put("/boardgamecopies/" + boardGameCopyId, specification);
   } catch (e) {
     console.error(e);
   }
 
   // Find the updated item and update it
-  const existingCopy = boardGameCopies.find(copy => copy.boardGameCopyId === boardGameCopyId);
-  if (existingCopy) {
-    existingCopy.specification = boardGameCopyData.specification;
-  }
+  // const existingCopy = boardGameCopies.find(copy => copy.boardGameCopyId === boardGameCopyId);
+  // if (existingCopy) {
+  //   existingCopy.specification = boardGameCopyData.specification;
+  // }
 }
 
 function updateBoardGame() {
-  updateBGC();
+  updateBGC(boardGameCopyData.specification);
   console.log('Updated Board Game:', boardGameCopyData)
-  alert('Board Game Created Successfully!')
+  alert('Board Game Updated Successfully!')
   // Reset form after submission
   Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = '')
 }

@@ -9,7 +9,7 @@ const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
-const reviews = ref({});
+const reviews = ref([]);
 const boardGameCopies = ref([]);
 const selectedGameId = ref(null);
 const borrowRequestData = reactive({
@@ -172,17 +172,17 @@ function confirmBorrow() {
               </tr>
               </thead>
               <tbody>
-              <tr v-for="game in reviews">
-                <td>{{ game.comment }}</td>
+              <tr v-for="review in reviews">
+                <td>{{ review.comment }}</td>
                 <td>
                   <div class="stars">
                     <span v-for="n in 5" :key="n" class="star">
-                      <span v-if="n <= game.rating">★</span>
+                      <span v-if="n <= review.rating">★</span>
                       <span v-else>☆</span>
                     </span>
                   </div>
                 </td>
-                <td>{{ game.playerName }}</td>
+                <td>{{ review.author.name }}</td>
               </tr>
               </tbody>
             </table>

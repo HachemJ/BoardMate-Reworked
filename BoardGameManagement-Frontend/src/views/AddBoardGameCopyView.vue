@@ -44,7 +44,7 @@ async function createBoardGameCopy(boardGameName, specification) {
   const newBoardGameCopy = {
     specification: specification,
     isAvailable: true,
-    playerId: Number(6692), //TODO PLACEHOLDER
+    playerId: Number(7642), //TODO PLACEHOLDER
     boardGameId: gameId,
   }
 

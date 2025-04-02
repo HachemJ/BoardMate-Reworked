@@ -24,6 +24,9 @@ onMounted(async () => {
   try {
     const response = await axiosClient.get("/boardgames");
     boardGames.value = response.data;
+
+    const response2 = await axiosClient.get("/boardgamecopies/byplayer/7642"); // TODO need to find the player ID
+    myBoardGameCopies.value = response2.data;
   } catch (error) {
     console.error(error);
   }
