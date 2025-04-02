@@ -47,7 +47,7 @@ onMounted(async () => {
     const response = await axiosClient.get("/boardgamecopies/byboardgame/" + gameId);
     boardGameCopies.value = response.data;
 
-    const response2 = await axiosClient.get("/reviews/"); // TODO This is getting all the reviews
+    const response2 = await axiosClient.get("/reviews/byboardgame/" + gameId);
     console.log("Reviews:", response2.data); // Log the reviews data
     reviews.value = response2.data;
 
