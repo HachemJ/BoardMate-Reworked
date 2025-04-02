@@ -134,8 +134,10 @@ function confirmBorrow() {
           </div>
 
           <!-- Borrow Button -->
-          <div class="text-center">
-            <h4>Select Borrow Dates</h4>
+          <div class="text-center"
+               v-if="selectedGameId"
+          >
+            <h6>Select Borrow Dates</h6>
             <div class="d-flex justify-content-center align-items-center gap-3">
 
               <!-- Start Date -->
