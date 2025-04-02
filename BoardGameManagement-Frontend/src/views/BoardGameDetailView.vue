@@ -10,8 +10,7 @@ const axiosClient = axios.create({
 });
 
 //const gameDetails = ref({ minPlayers: 0, maxPlayers: 0, description: "" });
-//const boardGameCopies = ref({});
-//const reviews = ref({});
+const reviews = ref({});
 
 const gameDetails = ref({ // This is a dummy data for now
   minPlayers: 2,
@@ -27,13 +26,11 @@ async function fetchBoardGameID() {
   try {
     const response = await axiosClient.get("/boardgames");
     //console.log("Response data:", response.data); // Log the response data
-    var gameId;
     const game = response.data.find(game => game.name === gameName);
     if (game) {
       console.log("Gaaaaame ID:", game.gameID); // Log the game ID
       return game.gameID;
     }
-    
     return null; // Return null if game ID is not found
   } catch (error) {
     console.error("Error fetching game ID:", error);
@@ -46,21 +43,13 @@ onMounted(async () => {
     const response = await axiosClient.get("/boardgamecopies/byboardgame/" + gameId);
     boardGameCopies.value = response.data;
 
-    const response2 = await axiosClient.get("/reviews/");
+    const response2 = await axiosClient.get("/reviews/"); // TODO This is getting all the reviews
     console.log("Reviews:", response2.data); // Log the reviews data
     reviews.value = response2.data;
   } catch (error) {
     console.error(error);
   }
 })
-
-const reviews = ref([ // This is a dummy data for now
-  { comment: "Fine", rating: "2", playerName: "CCC" },
-  { comment: "Very good", rating: "4", playerName: "BBB" },
-  { comment: "Okay", rating: "2", playerName: "AAA" },
-  { comment: "This is a very very very very very very very very very very very very very very very very very very very very very long comment.", rating: "5", playerName: "John Doe" },
-]);
-
 
 const route = useRoute();
 const gameName = route.params.gamename;

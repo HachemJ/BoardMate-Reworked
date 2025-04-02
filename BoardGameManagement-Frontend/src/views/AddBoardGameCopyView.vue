@@ -20,15 +20,15 @@ onMounted(async () => {
 })
 
 const boardGameCopyData = reactive({
-  name: "",
+  boardGameName: "",
   specification: "",
 });
 
-async function fetchBoardGameID(name) {
-  console.log("Game name is:", name); // Log the game name
+async function fetchBoardGameID(boardGameName) {
+  console.log("Game name is:", boardGameName); // Log the game name
   try {
     const response = await axiosClient.get("/boardgames");
-    const game = response.data.find(game => game.name === name);
+    const game = response.data.find(game => game.name === boardGameName);
     if (game) {
       return game.gameID;
     }
@@ -39,14 +39,12 @@ async function fetchBoardGameID(name) {
   }
 }
 
-async function createBoardGameCopy(name, specification) {
-  const gameId = await fetchBoardGameID(name);
-  //console.log("Game ID is:", gameId); // Log the game ID
-  //console.log("Specification is:", specification); // Log the specification
+async function createBoardGameCopy(boardGameName, specification) {
+  const gameId = await fetchBoardGameID(boardGameName);
   const newBoardGameCopy = {
     specification: specification,
     isAvailable: true,
-    playerId: Number(6245), //TODO PLACEHOLDER
+    playerId: Number(7642), //TODO PLACEHOLDER
     boardGameId: gameId,
   }
 
@@ -60,7 +58,7 @@ async function createBoardGameCopy(name, specification) {
 
 function submitBoardGameCopy() {
   console.log('Created Board Game Copy:', boardGameCopyData)
-  createBoardGameCopy(boardGameCopyData.name, boardGameCopyData.specification);
+  createBoardGameCopy(boardGameCopyData.boardGameName, boardGameCopyData.specification);
   alert('Board Game Copy Created Successfully!')
   // Reset form after submission
   Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = key === 'maxSpot' ? null : '')
@@ -87,7 +85,7 @@ function submitBoardGameCopy() {
 
             <div class="mb-3">
               <label for="boardGame" class="form-label">Select Board Game</label>
-              <select class="form-control" id="boardGame" v-model="boardGameCopyData.name" required>
+              <select class="form-control" id="boardGame" v-model="boardGameCopyData.boardGameName" required>
                 <option value="" disabled>Select a game</option>
                 <option v-for="game in boardGames">
                   {{ game.name }}
