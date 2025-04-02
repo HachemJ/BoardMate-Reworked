@@ -118,6 +118,22 @@ public class BorrowRequestService {
     }
 
     /**
+     * Get the borrow requests for games belonging to a player
+     * @param playerId the id of the player to find requests for
+     * @return the list of borrow requests for that player
+     */
+    public ArrayList<BorrowRequest> getBorrowRequestsByPlayerId(int playerId) {
+        checkValidId(playerId, "playerId");
+
+        Player player = playerRepository.findByPlayerID(playerId);
+        if (player == null) {
+            throw new GlobalException(HttpStatus.NOT_FOUND, String.format("The player %d does not exist", playerId));
+        }
+
+        return borrowRequestRepository.findBorrowRequestsByRequester_PlayerID(playerId);
+    }
+
+    /**
      * get the borrow request with the given request id
      * @param requestId the id to find
      * @return the borrow request
@@ -191,6 +207,8 @@ public class BorrowRequestService {
 
         gameNowAvailable.setIsAvailable(false);
         boardGameCopyRepository.save(gameNowAvailable);
+        request.setRequestStatus(BorrowRequest.RequestStatus.InProgress);
+        borrowRequestRepository.save(request);
     }
 
 
@@ -216,9 +234,9 @@ public class BorrowRequestService {
                             gameToMakeAvailable.getPlayer().getName()));
         }
 
-        if(!request.getRequestStatus().equals(BorrowRequest.RequestStatus.Accepted)){
+        if(!request.getRequestStatus().equals(BorrowRequest.RequestStatus.InProgress)){
             throw new GlobalException(HttpStatus.CONFLICT,
-                    String.format("The request %d is not in accepted state: cannot cancel its borrow", requestId));
+                    String.format("The request %d is not borrowed by you: cannot cancel its borrow", requestId));
         }
 
         gameToMakeAvailable.setIsAvailable(true);

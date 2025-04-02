@@ -90,7 +90,7 @@ watch(
 );
 
 //constant that will need to be linked with whether user is an owner or not
-const isOwner = ref(false);  // This will control if the RouterLink is shown or not
+const isOwner = ref(true);  // This will control if the RouterLink is shown or not
 
 
 </script>
@@ -192,16 +192,16 @@ const isOwner = ref(false);  // This will control if the RouterLink is shown or 
 
               <RouterLink
                   v-if="isOwner"
-                  :to="{ name: 'owner borrow request' }"
+                  :to="{ name: 'owner borrow request', query: {ownerId: 3500}}"
                   class="dropdown-item border-radius-md"
+
               >
                 <span>Manage Incoming Borrow Requests</span>
               </RouterLink>
  
 
               <RouterLink
-                  v-if="!isOwner"
-                  :to="{ name: 'player borrow request' }"
+                  :to="{ name: 'player borrow request', params: {playerId: 3500}}"
                   class="dropdown-item border-radius-md"
               >
                 <span>See my Borrow Requests</span>
