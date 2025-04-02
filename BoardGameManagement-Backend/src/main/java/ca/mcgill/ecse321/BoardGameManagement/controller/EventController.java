@@ -28,6 +28,16 @@ public class EventController {
   @PostMapping
   @ResponseStatus(HttpStatus.CREATED)
   public EventResponseDto createEvent(@RequestBody EventCreationDto eventDto) {
+    System.out.println("Received JSON:");
+    System.out.println("Name: " + eventDto.getName());
+    System.out.println("Description: " + eventDto.getDescription());
+    System.out.println("Max Spot: " + eventDto.getMaxSpot());
+    System.out.println("Date: " + eventDto.getEventDate());
+    System.out.println("Start: " + eventDto.getStartTime());
+    System.out.println("End: " + eventDto.getEndTime());
+    System.out.println("Location: " + eventDto.getLocation());
+    System.out.println("Owner ID: " + eventDto.getOwnerId());
+    System.out.println("BoardGame ID: " + eventDto.getBoardGameId());
     Event createdEvent = eventService.createEvent(eventDto);
     return EventResponseDto.create(createdEvent);
   }
