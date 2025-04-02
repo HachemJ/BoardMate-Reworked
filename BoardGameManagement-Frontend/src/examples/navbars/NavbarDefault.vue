@@ -151,6 +151,7 @@ const isOwner = ref(authStore.user.isAOwner);  // This will control if the Route
               id="dropdownMenuPages"
               data-bs-toggle="dropdown"
               aria-expanded="false"
+              v-if="authStore.user.isAuthenticated"
             >
               <i class="material-icons opacity-6 me-2 text-md" :class="getTextColor()">dashboard</i>
               Menu
