@@ -90,7 +90,7 @@ watch(
 );
 
 //constant that will need to be linked with whether user is an owner or not
-const isOwner = ref(false);  // This will control if the RouterLink is shown or not
+const isOwner = ref(true);  // This will control if the RouterLink is shown or not
 
 
 </script>
