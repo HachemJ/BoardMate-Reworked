@@ -86,11 +86,8 @@ async function confirmBorrow() {
     borrowRequestData.specificGameID = selectedGameId.value;
     const response = await axiosClient.post("/borrowrequests", borrowRequestData);
 
-    if(authStore.user.isAOwner){
-      await router.push(`/pages/ownerboardgame/`);
-    }else {
-      await router.push(`/pages/playerboardgame`);
-    }
+    selectedGameId.value = null;
+
 
     alert(`Borrow request sent for board game copy!`);
   }catch (error){
