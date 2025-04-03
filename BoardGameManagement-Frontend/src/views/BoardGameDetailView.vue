@@ -77,13 +77,19 @@ function selectGame(gameId) {
   selectedGameId.value = gameId;
 }
 
-function confirmBorrow() {
+async function confirmBorrow() {
   if (!selectedGameId.value) {
     alert("Please select a board game copy first.");
     return;
   }
-
-  alert(`Borrow request sent for board game copy!`);
+  try {
+    borrowRequestData.specificGameID = selectedGameId.value;
+    const response = await axiosClient.post("/borrowrequests", borrowRequestData);
+    alert(`Borrow request sent for board game copy!`);
+  }catch (error){
+    console.log("Error: ", error);
+    alert("Error arised", response.status)
+  }
 }
 
 </script>

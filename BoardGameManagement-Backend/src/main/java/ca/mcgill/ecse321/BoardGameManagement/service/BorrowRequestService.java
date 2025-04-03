@@ -59,6 +59,8 @@ public class BorrowRequestService {
     @Transactional
     public BorrowRequest createBorrowRequest(@Valid BorrowRequestCreationDTO requestDTO) {
         checkNotNull(requestDTO);
+        System.out.println("******************************");
+        System.out.println( requestDTO.getStartOfLoan().toString() + requestDTO.getEndOfLoan().toString());
 
         Player borrower = playerRepository.findByPlayerID(requestDTO.getBorrowerID());
         if (borrower == null) {
@@ -83,9 +85,17 @@ public class BorrowRequestService {
         ArrayList<BorrowRequest> requests = borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
 
         for (BorrowRequest request : requests) {
+            System.out.println("-__________________________________");
+            System.out.println(request.getStartOfLoan().toString());
+            System.out.println(request.getEndOfLoan().toString());
+            System.out.println(requestDTO.getStartOfLoan().toString());
+            System.out.println(requestDTO.getEndOfLoan().toString());
+
             //there is an existing borrowRequest overlapping with the request time
-            if (!request.getStartOfLoan().after(requestDTO.getEndOfLoan()) &&
-                    !requestDTO.getStartOfLoan().after(request.getEndOfLoan())){
+            if ((request.getRequestStatus().equals(BorrowRequest.RequestStatus.Accepted) ||
+                    request.getRequestStatus().equals(BorrowRequest.RequestStatus.InProgress)) &&
+                    (!request.getStartOfLoan().after(requestDTO.getEndOfLoan())) &&
+                    (!requestDTO.getStartOfLoan().after(request.getEndOfLoan()))){
                 throw new GlobalException(HttpStatus.CONFLICT, "A request exists that uses this time");
             }
         }

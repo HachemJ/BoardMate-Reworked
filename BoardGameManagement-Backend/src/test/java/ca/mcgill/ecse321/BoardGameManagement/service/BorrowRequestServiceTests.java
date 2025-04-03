@@ -190,6 +190,7 @@ public class BorrowRequestServiceTests {
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
         when(boardGameCopyRepository.findBySpecificGameID(333)).thenReturn(boardGameCopy);
         ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         borrowRequests.add(borrowRequest);
         when(borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner1)).thenReturn(borrowRequests);
 
@@ -212,6 +213,7 @@ public class BorrowRequestServiceTests {
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
         when(boardGameCopyRepository.findBySpecificGameID(333)).thenReturn(boardGameCopy);
         ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         borrowRequests.add(borrowRequest);
         when(borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner1)).thenReturn(borrowRequests);
 
@@ -234,6 +236,7 @@ public class BorrowRequestServiceTests {
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
         when(boardGameCopyRepository.findBySpecificGameID(333)).thenReturn(boardGameCopy);
         ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         borrowRequests.add(borrowRequest);
         when(borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner1)).thenReturn(borrowRequests);
 
@@ -256,6 +259,7 @@ public class BorrowRequestServiceTests {
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
         when(boardGameCopyRepository.findBySpecificGameID(333)).thenReturn(boardGameCopy);
         ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         borrowRequests.add(borrowRequest);
         when(borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner1)).thenReturn(borrowRequests);
 
@@ -278,6 +282,7 @@ public class BorrowRequestServiceTests {
         when(playerRepository.findByPlayerID(222)).thenReturn(requester1);
         when(boardGameCopyRepository.findBySpecificGameID(333)).thenReturn(boardGameCopy);
         ArrayList<BorrowRequest> borrowRequests = new ArrayList<>();
+        borrowRequest.setRequestStatus(BorrowRequest.RequestStatus.Accepted);
         borrowRequests.add(borrowRequest);
         when(borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner1)).thenReturn(borrowRequests);
 
