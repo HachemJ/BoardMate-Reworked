@@ -34,7 +34,7 @@ async function handleAuth() {
         name: fullName.value,
         email: email.value,
         password: password.value,
-        isAOwner: false // always starts as a regular player
+        isAOwner: document.getElementById("isAOwner").checked
       });
 
       alert("Signup successful! Please log in.");
@@ -132,11 +132,22 @@ async function handleAuth() {
                   </div>
 
                   <MaterialSwitch
+                      v-if="isSignUp"
+                      v-model="isAOwner"
+                      class="d-flex align-items-center mb-3"
+                      id="isAOwner"
+                      labelClass="mb-0 ms-3"
+                      unchecked
+                  >
+                    I want to be an owner
+                  </MaterialSwitch>
+
+                  <MaterialSwitch
                     v-if="!isSignUp"
                     class="d-flex align-items-center mb-3"
                     id="rememberMe"
                     labelClass="mb-0 ms-3"
-                    checked
+                    unchecked
                   >
                     Remember me
                   </MaterialSwitch>
