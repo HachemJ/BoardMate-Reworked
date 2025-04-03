@@ -23,6 +23,8 @@ onMounted(async () => {
     boardGames.value = response.data;
   } catch (error) {
     console.error(error);
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
   }
 })
 

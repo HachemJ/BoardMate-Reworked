@@ -54,7 +54,8 @@ async function confirmRequest(id, gameName) {
     requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
+    console.error("Error accepting request:", error);
     console.error("Error declining request:", error);
   }
 }
@@ -68,8 +69,8 @@ async function cancelRequest(id, gameName) {
     requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
-    console.error("Error declining request:", error);
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
+    console.error("Error accepting request:", error);
   }
 }
 
@@ -84,7 +85,7 @@ function canCancelRequest(status, startDate){
 }
 
 function isRequestInactive(status, startDate){
-  return status === "Done" | status === "Denied" | today < startDate
+  return status === "Done" | status === "Denied"
 }
 
 

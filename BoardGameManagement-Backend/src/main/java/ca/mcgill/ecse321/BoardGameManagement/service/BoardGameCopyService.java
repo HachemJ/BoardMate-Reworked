@@ -4,9 +4,11 @@ import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCopyCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
+import ca.mcgill.ecse321.BoardGameManagement.model.BorrowRequest;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameCopyRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
+import ca.mcgill.ecse321.BoardGameManagement.repository.BorrowRequestRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -32,6 +34,8 @@ public class BoardGameCopyService {
     @Autowired
     @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
+    @Autowired
+    private BorrowRequestRepository borrowRequestRepository;
 
     /**
      * Creates a new BoardGameCopy
@@ -107,6 +111,14 @@ public class BoardGameCopyService {
         if (boardGameCopy == null) {
             throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGameCopy not found with ID: " + boardGameCopyId);
         }
+        ArrayList<BorrowRequest> borrowRequests =
+                borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(boardGameCopy.getPlayer());
+        for (BorrowRequest borrowRequest : borrowRequests) {
+            if (borrowRequest.getBoardGameCopy().getSpecificGameID() == boardGameCopyId){
+                borrowRequestRepository.delete(borrowRequest);
+            }
+        }
+
         boardGameCopyRepository.delete(boardGameCopy);
     }
 

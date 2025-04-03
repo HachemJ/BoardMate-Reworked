@@ -3,13 +3,15 @@
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {reactive} from "vue";
 import axios from "axios";
+import {useAuthStore} from "@/stores/authStore";
+import {useRouter} from "vue-router";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
 const boardGames = reactive([]);
-
+const router = useRouter();
 const boardGameData = reactive({
   name: "",
   newName: "", // Initialize newName
@@ -56,11 +58,18 @@ async function updateBG() {
 
   try {
     await axiosClient.put("/boardgames/" + gameId, newBoardGame);
+
   } catch (e) {
     console.error(e);
   }
-
   boardGames.push(newBoardGame);
+
+  if(useAuthStore().user.isAOwner){
+    await router.push("/pages/ownerboardgame");
+  }else {
+    await router.push("/pages/playerboardgame");
+  }
+
 }
 
 function updateBoardGame() {
@@ -85,51 +94,52 @@ function updateBoardGame() {
         <div class="col-md-12">
 
           <!-- Page Title -->
-          <h2 class="mb-3">Complete the Form Below to Update a Board Game</h2>
+          <h2 class="d-flex justify-content-center">Complete the Form Below to Update a Board Game</h2>
+          <div class="col row-cols-md-2 d-flex justify-content-center bg-outline-secondary">
+            <!-- Form -->
+            <form @submit.prevent="updateBoardGame">
 
-          <!-- Form -->
-          <form @submit.prevent="updateBoardGame">
+              <div class="mb-3">
+                  <label for="boardGameSelect" class="form-label">Select Board Game to Update</label>
+                  <select id="boardGameSelect" class="form-select" v-model="boardGameData.name" required @focus="getBoardGames">
+                      <option value="" disabled>Select Board Game...</option>
+                      <option v-for="game in boardGames" :key="game.gameID" :value="game.name">
+                          {{ game.name }}
+                      </option>
+                  </select>
+              </div>
 
-            <div class="mb-3">
-                <label for="boardGameSelect" class="form-label">Select Board Game to Update</label>
-                <select id="boardGameSelect" class="form-select" v-model="boardGameData.name" required @focus="getBoardGames">
-                    <option value="" disabled>Select Board Game...</option>
-                    <option v-for="game in boardGames" :key="game.gameID" :value="game.name">
-                        {{ game.name }}
-                    </option>
-                </select>
-            </div>
+              <div class="mb-3">
+                <label for="name" class="form-label">New Board Game Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  v-model="boardGameData.newName"
+                  :placeholder="boardGameData.name"
+                  @blur="boardGameData.newName = boardGameData.newName || boardGameData.name"
+                  required>
+              </div>
 
-            <div class="mb-3">
-              <label for="name" class="form-label">New Board Game Name</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                id="name" 
-                v-model="boardGameData.newName" 
-                :placeholder="boardGameData.name" 
-                @blur="boardGameData.newName = boardGameData.newName || boardGameData.name" 
-                required>
-            </div>
+              <div class="mb-3">
+                <label for="minPlayers" class="form-label">Minimum Number of Players</label>
+                <input type="number" class="form-control" id="minPlayers" v-model="boardGameData.minPlayers" required>
+              </div>
 
-            <div class="mb-3">
-              <label for="minPlayers" class="form-label">Minimum Number of Players</label>
-              <input type="number" class="form-control" id="minPlayers" v-model="boardGameData.minPlayers" required>
-            </div>
+              <div class="mb-3">
+                <label for="maxPlayers" class="form-label">Maximum Number of Players</label>
+                <input type="number" class="form-control" id="maxPlayers" v-model="boardGameData.maxPlayers" required>
+              </div>
 
-            <div class="mb-3">
-              <label for="maxPlayers" class="form-label">Maximum Number of Players</label>
-              <input type="number" class="form-control" id="maxPlayers" v-model="boardGameData.maxPlayers" required>
-            </div>
+              <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" id="description" v-model="boardGameData.description" required></textarea>
+              </div>
 
-            <div class="mb-3">
-              <label for="description" class="form-label">Description</label>
-              <textarea class="form-control" id="description" v-model="boardGameData.description" required></textarea>
-            </div>
+              <button type="submit" class="btn btn-info">Update Board Game</button>
 
-            <button type="submit" class="btn btn-info">Update Board Game</button>
-
-          </form>
+            </form>
+          </div>
 
         </div>
       </div>
