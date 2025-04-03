@@ -14,6 +14,8 @@ const authStore = useAuthStore();
 const reviews = ref([]);
 const boardGameCopies = ref([]);
 const selectedGameId = ref(null);
+const tabs = ['Board Game Copies', 'Reviews'];
+const selectedTab = ref(tabs[0]);
 const borrowRequestData = reactive({
   startOfLoan: "",
   endOfLoan: "",
@@ -119,88 +121,107 @@ async function confirmBorrow() {
             <p><strong>Description:</strong> {{ gameDetails.description }}</p>
           </div>
 
-          <!-- First Table -->
-          <div class="mb-4">
-            <h4 class="text-center">Board Game Copies</h4>
-            <table class="table">
-              <thead>
-              <tr>
-                <th>Copy Number</th>
-                <th>Specification</th>
-                <th>Owner</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="(game, index) in boardGameCopies"
-                  :key="game.boardGameCopyId"
-                  :class="{ 'table-active': selectedGameId === game.boardGameCopyId }"
-                  @click="selectGame(game.boardGameCopyId)"
-                  style="cursor: pointer;">
-                <td>{{ index + 1 }}</td>
-                <td>{{ game.specification }}</td>
-                <td>{{ game.playerName }}</td>
-              </tr>
-              </tbody>
-            </table>
-          </div>
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-4">
+            <li class="nav-item" v-for="(tab, index) in tabs" :key="index">
+              <a
+                  class="nav-link"
+                  :class="{ active: selectedTab === tab }"
+                  href="#"
+                  @click.prevent="selectedTab = tab"
+              >
+                {{ tab }}
+              </a>
+            </li>
+          </ul>
 
-          <!-- Borrow Button -->
-          <div class="text-center"
-               v-if="selectedGameId"
-          >
-            <h6>Select Borrow Dates</h6>
-            <div class="d-flex justify-content-center align-items-center gap-3">
+          <!-- Tab Content -->
+          <div v-if="selectedTab === 'Board Game Copies'">
+            <!-- First Table -->
+            <div class="mb-4">
+              <h4 class="text-center">Board Game Copies</h4>
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>Copy Number</th>
+                  <th>Specification</th>
+                  <th>Owner</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="(game, index) in boardGameCopies"
+                    :key="game.boardGameCopyId"
+                    :class="{ 'table-active': selectedGameId === game.boardGameCopyId }"
+                    @click="selectGame(game.boardGameCopyId)"
+                    style="cursor: pointer;">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ game.specification }}</td>
+                  <td>{{ game.playerName }}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
 
-              <!-- Start Date -->
-              <div class="d-flex flex-column">
-                <label for="start-date" class="form-label">Start Date</label>
-                <input type="date" id="start-date" v-model="borrowRequestData.startOfLoan" class="form-control w-auto" />
+            <!-- Borrow Button -->
+            <div class="text-center"
+                 v-if="selectedGameId"
+            >
+              <h6>Select Borrow Dates</h6>
+              <div class="d-flex justify-content-center align-items-center gap-3">
+
+                <!-- Start Date -->
+                <div class="d-flex flex-column">
+                  <label for="start-date" class="form-label">Start Date</label>
+                  <input type="date" id="start-date" v-model="borrowRequestData.startOfLoan" class="form-control w-auto" />
+                </div>
+
+                <!-- End Date -->
+                <div class="d-flex flex-column">
+                  <label for="end-date" class="form-label">End Date</label>
+                  <input type="date" id="end-date" v-model="borrowRequestData.endOfLoan" class="form-control w-auto" />
+                </div>
+
+                <!-- Borrow Button -->
+                <button class="btn btn-info mt-4" @click="confirmBorrow" :disabled="!selectedGameId">
+                  Borrow
+                </button>
               </div>
-
-              <!-- End Date -->
-              <div class="d-flex flex-column">
-                <label for="end-date" class="form-label">End Date</label>
-                <input type="date" id="end-date" v-model="borrowRequestData.endOfLoan" class="form-control w-auto" />
-              </div>
-
-              <!-- Borrow Button -->
-              <button class="btn btn-info mt-4" @click="confirmBorrow" :disabled="!selectedGameId">
-                Borrow
-              </button>
             </div>
           </div>
 
-          <!-- Second Table -->
-          <div>
-            <div class="d-flex justify-content-between align-items-center">
-              <h4 class="text-center flex-grow-1">Reviews</h4>
-              <router-link :to="{ name: reviewRoute }">
-                <button class="btn btn-info">Add Review</button>
-              </router-link>
-            </div>
-            <table class="table">
-              <thead>
-              <tr>
-                <th>Comment</th>
-                <th>Rating</th>
-                <th>Reviewer</th>
-              </tr>
-              </thead>
-              <tbody>
-              <tr v-for="review in reviews">
-                <td>{{ review.comment }}</td>
-                <td>
-                  <div class="stars">
+          <div v-if="selectedTab === 'Reviews'">
+            <!-- Second Table -->
+            <div>
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="text-center flex-grow-1">Reviews</h4>
+                <router-link :to="{ name: reviewRoute }">
+                  <button class="btn btn-info">Add Review</button>
+                </router-link>
+              </div>
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>Comment</th>
+                  <th>Rating</th>
+                  <th>Reviewer</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="review in reviews">
+                  <td>{{ review.comment }}</td>
+                  <td>
+                    <div class="stars">
                     <span v-for="n in 5" :key="n" class="star">
                       <span v-if="n <= review.rating">★</span>
                       <span v-else>☆</span>
                     </span>
-                  </div>
-                </td>
-                <td>{{ review.author.name }}</td>
-              </tr>
-              </tbody>
-            </table>
+                    </div>
+                  </td>
+                  <td>{{ review.author.name }}</td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
@@ -216,7 +237,7 @@ async function confirmBorrow() {
   margin-bottom: 5px;
   padding: 10px;
   text-align: center;
-  color: white !important;
+  color: black !important;
 }
 .bg-secondary {
   background-color: grey !important;
