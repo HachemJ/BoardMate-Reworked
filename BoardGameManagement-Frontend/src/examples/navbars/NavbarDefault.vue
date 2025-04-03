@@ -221,7 +221,7 @@ const isOwner = ref(authStore.user.isAOwner);  // This will control if the Route
               class="nav-link ps-2 d-flex cursor-pointer align-items-center"
               :class="getTextColor()"
             >
-              <i class="material-icons opacity-6 me-2 text-md" :class="getTextColor()">article</i>
+              <i class="material-icons opacity-6 me-2 text-md" :class="getTextColor()">mail</i>
               Contact Us
             </RouterLink>
           </li>
