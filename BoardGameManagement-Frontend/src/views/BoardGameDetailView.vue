@@ -2,7 +2,7 @@
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {ref, computed, onMounted, reactive} from "vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import axios from "axios";
 import {useAuthStore} from "@/stores/authStore.js";
 
@@ -59,7 +59,7 @@ onMounted(async () => {
     console.error(error);
   }
 })
-
+const router = useRouter();
 const route = useRoute();
 const gameName = route.params.gamename;
 
@@ -85,10 +85,18 @@ async function confirmBorrow() {
   try {
     borrowRequestData.specificGameID = selectedGameId.value;
     const response = await axiosClient.post("/borrowrequests", borrowRequestData);
+
+    if(authStore.user.isAOwner){
+      await router.push(`/pages/ownerboardgame/`);
+    }else {
+      await router.push(`/pages/playerboardgame`);
+    }
+
     alert(`Borrow request sent for board game copy!`);
   }catch (error){
     console.log("Error: ", error);
-    alert("Error arised", response.status)
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
   }
 }
 

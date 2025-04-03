@@ -25,6 +25,8 @@ const fetchRequests = async () => {
     requests.value = response.data;
   } catch (error) {
     console.error("Error fetching requests:", error);
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
   }
 
 };
@@ -59,7 +61,8 @@ async function acceptRequest(id, name) {
     requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    alert(`Error encounteed type ${error.response.status}: ${error.response.request.response}`);
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error accepting request:", error);
   }
 }
@@ -74,7 +77,8 @@ async function declineRequest(id, name) {
 
   } catch (error) {
 
-    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error declining request:", error);
   }
 }
@@ -88,7 +92,8 @@ async function cancelBorrowRequest(id, gameName){
     requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    alert(`Error encountered type ${error.response.status}: ${error.response.request.response}`);
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error declining request:", error);
   }
 }

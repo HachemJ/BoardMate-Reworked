@@ -28,6 +28,7 @@ public class ReviewRepositoryTests {
     public void clearDatabase() {
         reviewRepository.deleteAll();
         playerRepository.deleteAll();
+        boardGameRepository.deleteAll();
     }
 
     @Test

@@ -41,7 +41,8 @@ async function handleAuth() {
       isSignUp.value = false; // Switch back to login view
     } catch (error) {
       console.error("Signup failed:", error);
-      alert("Signup failed: " + (error.response?.data?.message || error.message));
+      const errors = error.response.data.errors; // Extract the errors array
+      alert(`SignUp Failed with status ${error.response.status}:\n${errors.join("\n")}`);
     }
   } else {
     // --- LOGIN MODE ---
@@ -58,7 +59,9 @@ async function handleAuth() {
       console.log("Logged in user:", authStore.user);
       router.push("/profile");
     } catch (error) {
-      alert("Login failed: " + (error.response?.data?.message || error.message));
+      console.log(error);
+      const errors = error.response.data.errors; // Extract the errors array
+      alert(`Login Failed with status ${error.response.status} :\n${errors.join("\n")}`);
     }
   }
 }

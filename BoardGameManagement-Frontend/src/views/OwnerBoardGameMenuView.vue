@@ -22,7 +22,8 @@ const searchQuery = ref("");
 const boardGames = ref([]);
 const myBoardGameCopies = ref({});
 
-onMounted(async () => {
+
+async function fetchBoardGames(){
   try {
     const response = await axiosClient.get("/boardgames");
     boardGames.value = response.data;
@@ -32,11 +33,17 @@ onMounted(async () => {
   } catch (error) {
     console.error(error);
   }
+}
+
+onMounted(async () => {
+  await fetchBoardGames()
 })
 
-function deleteBoardGameCopy(id) {
+async function deleteBoardGameCopy(id) {
+  await axiosClient.delete(`boardgamecopies/${id}` );
   console.log("Deleting board game copy with id: " + id);
   alert("Board game copy deleted!");
+  await fetchBoardGames();
 }
 
 </script>
@@ -74,10 +81,10 @@ function deleteBoardGameCopy(id) {
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h2 class="mb-0">Search and Browse Board Games</h2>
               <router-link :to="{ name: 'playerAddBoardGame' }">
-                <button class="btn btn-primary">Add Board Game</button>
+                <button class="btn btn-info">Add Board Game</button>
               </router-link>
               <router-link :to="{ name: 'ownerUpdateBoardGame' }">
-                <button class="btn btn-primary">Update Board Game</button>
+                <button class="btn btn-info">Update Board Game</button>
               </router-link>
             </div>
 
@@ -118,7 +125,9 @@ function deleteBoardGameCopy(id) {
 
           <div v-if="selectedTab === 'My Board Game Copies'">
             <div class="d-flex justify-content-between align-items-center">
-              <h4>My Collection</h4>
+              <h2>My Collection</h2>
+              <br>
+              <br>
               <router-link :to="{ name: 'addBoardGameCopy' }">
                 <button class="btn btn-info">Add Board Game Copy</button>
               </router-link>
@@ -126,7 +135,7 @@ function deleteBoardGameCopy(id) {
                 <button class="btn btn-info">Update Board Game Copy</button>
               </router-link>
             </div>
-            <table class="table">
+            <table class="table table-responsive-ms">
               <thead>
               <tr>
                 <th>Game Name</th>
@@ -138,12 +147,8 @@ function deleteBoardGameCopy(id) {
                 <td>{{ game.boardGameName }}</td>
                 <td>{{ game.specification }}</td>
                 <td>
-                  <button class="btn btn-info me-2">
-                      Update
-                  </button>
-                </td>
-                <td>
                   <button class="btn btn-info me-2"
+                          style="bottom: 20px;"
                           @click="deleteBoardGameCopy(game.boardGameCopyId)"
                   >
                     Delete

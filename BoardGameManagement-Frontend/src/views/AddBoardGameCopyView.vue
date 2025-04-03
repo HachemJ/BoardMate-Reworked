@@ -4,11 +4,13 @@ import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {reactive, ref, onMounted} from "vue";
 import axios from "axios";
 import {useAuthStore} from "@/stores/authStore.js";
+import {useRouter} from "vue-router";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+const router = useRouter();
 const authStore = useAuthStore();
 const boardGames = ref([]);
 
@@ -56,6 +58,12 @@ async function createBoardGameCopy(boardGameName, specification) {
     console.error(e);
   }
 
+  if(useAuthStore().user.isAOwner){
+    await router.push("/pages/ownerboardgame");
+  }else {
+    await router.push("/pages/playerboardgame");
+  }
+
 }
 
 function submitBoardGameCopy() {
@@ -77,33 +85,39 @@ function submitBoardGameCopy() {
       <div class="row">
 
         <!-- Content Area -->
-        <div class="col-md-12">
+        <div class="row-cols-md-auto">
+          <h2 class="d-flex justify-content-center">Complete the Form Below to Add a New Board Game Copy</h2>
+          <br>
 
-          <!-- Page Title -->
-          <h2 class="mb-3">Complete the Form Below to Add a New Board Game Copy</h2>
+          <div class="col row-cols-md-2 d-flex justify-content-center bg-outline-secondary">
+            <!-- Page Title -->
 
-          <!-- Form -->
-          <form @submit.prevent="submitBoardGameCopy">
+            <!-- Form -->
+            <form @submit.prevent="submitBoardGameCopy">
 
-            <div class="mb-3">
-              <label for="boardGame" class="form-label">Select Board Game</label>
-              <select class="form-control" id="boardGame" v-model="boardGameCopyData.boardGameName" required>
-                <option value="" disabled>Select a game</option>
-                <option v-for="game in boardGames">
-                  {{ game.name }}
-                </option>
-              </select>
-            </div>
+              <div class="mb-3">
+                <label for="boardGame" class="form-label">Select Board Game</label>
+                <select class="form-control" id="boardGame" v-model="boardGameCopyData.boardGameName" required>
+                  <option value="" disabled>Select a game</option>
+                  <option v-for="game in boardGames">
+                    {{ game.name }}
+                  </option>
+                </select>
+              </div>
 
-            <div class="mb-3">
-              <label for="specification" class="form-label">Specification</label>
-              <textarea class="form-control" id="specification" v-model="boardGameCopyData.specification" required></textarea>
-            </div>
+              <div class="mb-3">
+                <label for="specification" class="form-label">Specification</label>
+                <textarea class="form-control" id="specification" v-model="boardGameCopyData.specification" required></textarea>
+              </div>
 
-            <button type="submit" class="btn btn-info">Create Board Game Copy</button>
+              <button type="submit"
+                      class="btn btn-info">
+                Create Board Game Copy
+              </button>
 
-          </form>
+            </form>
 
+          </div>
         </div>
       </div>
     </div>

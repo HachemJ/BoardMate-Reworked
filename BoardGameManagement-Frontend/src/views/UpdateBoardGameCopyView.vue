@@ -4,11 +4,12 @@ import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {reactive} from "vue";
 import axios from "axios";
 import {useAuthStore} from "@/stores/authStore.js";
+import {useRouter} from "vue-router";
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
-
+const router = useRouter();
 const authStore = useAuthStore();
 const boardGameCopies = reactive([]);
 
@@ -36,6 +37,12 @@ async function updateBGC(specification) {
         'Content-Type': 'text/plain'
       }
     });
+
+    if(useAuthStore().user.isAOwner){
+      await router.push("/pages/ownerboardgame");
+    }else {
+      await router.push("/pages/playerboardgame");
+    }
   } catch (e) {
     console.error(e);
   }
@@ -69,8 +76,8 @@ function updateBoardGame() {
         <div class="col-md-12">
 
           <!-- Page Title -->
-          <h2 class="mb-3">Complete the Form Below to Update a Board Game</h2>
-
+          <h2 class="d-flex justify-content-center">Complete the Form Below to Update a Board Game</h2>
+          <div class="col row-cols-md-2 d-flex justify-content-center bg-outline-secondary">
           <!-- Form -->
           <form @submit.prevent="updateBoardGame">
 
@@ -92,7 +99,7 @@ function updateBoardGame() {
             <button type="submit" class="btn btn-info">Update Board Game Copy</button>
 
           </form>
-
+          </div>
         </div>
       </div>
     </div>
