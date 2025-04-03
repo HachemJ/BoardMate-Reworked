@@ -242,7 +242,7 @@ const isOwner = ref(authStore.user.isAOwner);  // This will control if the Route
         <ul class="navbar-nav d-lg-block d-none">
           <li class="nav-item" v-if="authStore.user.isAuthenticated">
             <div class="d-flex align-items-center gap-3">
-              <span class="text-black fw-bold">Hello, {{ authStore.user.username }}</span>
+              <span class="fw-bold" style="color: #000000;">Hello, {{ authStore.user.username }}</span>
               <button class="btn btn-sm btn-danger mb-0" @click="logout">Sign Out</button>
             </div>
           </li>
