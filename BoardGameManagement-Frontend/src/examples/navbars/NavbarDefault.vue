@@ -124,7 +124,7 @@ const isOwner = ref(authStore.user.isAOwner);  // This will control if the Route
         title="Click to navigate to home page"
         data-placement="bottom"
       >
-        BGM
+        BoardMate
       </RouterLink>
       <button
         class="navbar-toggler shadow-none ms-2"
