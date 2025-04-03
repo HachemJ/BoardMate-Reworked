@@ -34,7 +34,7 @@ onUnmounted(() => {
     <!-- Dark overlay -->
     <div
       class="position-absolute top-0 start-0 w-100 h-100"
-      style="background-color: rgba(0, 0, 0, 0.7); z-index: 1;"
+      style="background-color: rgba(0, 0, 0, 0.6); z-index: 1;"
     ></div>
 
     <!-- Content goes here, above the overlay -->
