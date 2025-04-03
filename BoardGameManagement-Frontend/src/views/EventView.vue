@@ -56,9 +56,13 @@
               </div>
               <div class="mb-3">
                 <label for="boardGame" class="form-label">Select Board Game</label>
-                <select class="form-control" id="boardGame" v-model="selectedBoardGame" required>
+                <select class="form-control" v-model="eventData.boardGameId" required>
                   <option disabled value="">Choose a board game</option>
-                  <option v-for="game in boardGames" :key="game.gameID" :value="game.gameID">
+                  <option
+                    v-for="game in boardGames"
+                    :key="game.gameID"
+                    :value="game.gameID"
+                  >
                     {{ game.name }}
                   </option>
                 </select>
@@ -105,6 +109,15 @@
               <div class="mb-3">
                 <label for="location" class="form-label">Location</label>
                 <input type="text" class="form-control" id="location" v-model="eventData.location" required>
+              </div>
+              <div class="mb-3">
+                <label for="boardGameUpdate" class="form-label">Select Board Game</label>
+                <select class="form-control" id="boardGameUpdate" v-model="eventData.boardGameId" required>
+                  <option disabled value="">Choose a board game</option>
+                  <option v-for="game in boardGames" :key="game.gameID" :value="game.gameID">
+                    {{ game.name }}
+                  </option>
+                </select>
               </div>
               <button
                 type="submit"
@@ -309,7 +322,7 @@ async function updateEvent() {
       startTime: eventData.startTime,
       endTime: eventData.endTime,
       location: eventData.location,
-      ownerId: eventData.ownerId,
+      ownerId: authStore.user.id,
       boardGameId: eventData.boardGameId
     };
 
