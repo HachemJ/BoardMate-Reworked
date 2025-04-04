@@ -10,9 +10,33 @@ import image from "@/assets/contactus.jpg";
 //material components
 import MaterialInput from "@/components/MaterialInput.vue";
 import MaterialTextArea from "@/components/MaterialTextArea.vue";
-import MaterialButton from "@/components/MaterialButton.vue";
 
+async function sendMessage() {
+  const form = document.getElementById("contact-form");
+  const inputs = form.querySelectorAll("input, textarea");
+  let emailValid = true;
 
+  for (const input of inputs) {
+    if (!input.value.trim()) {
+      alert("Please fill out all fields before submitting.");
+      return;
+    }
+    if (input.type === "email" && !input.value.includes("@")) {
+      emailValid = false;
+    }
+  }
+
+  if (!emailValid) {
+    alert("Please enter a valid email address.");
+    return;
+  }
+
+  if (form) {
+    form.reset();
+  }
+  alert("Your message has been sent! We will get back to you as soon as possible.");
+  console.log("Message sent!");
+}
 </script>
 <template>
 
@@ -87,12 +111,13 @@ import MaterialButton from "@/components/MaterialButton.vue";
                     </div>
                     <div class="row">
                       <div class="col-md-12 text-center">
-                        <MaterialButton
-                          variant="gradient"
-                          color="success"
-                          class="mt-3 mb-0"
-                          >Send Message</MaterialButton
+                        <button
+                          type="button"
+                          class="btn btn-success mt-3 mb-0"
+                          @click="sendMessage"
                         >
+                          Send Message
+                        </button>
                       </div>
                     </div>
                   </div>
