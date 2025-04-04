@@ -187,12 +187,8 @@
               <thead>
                 <tr>
                   <th>Event Name</th>
-                  <th>Description</th>
                   <th>Date</th>
-                  <th>Start Time</th>
-                  <th>End Time</th>
                   <th>Location</th>
-                  <th>Max Spots</th>
                   <th>Registration Status</th>
                 </tr>
               </thead>
@@ -203,12 +199,8 @@
                       {{ event.name }}
                     </router-link>
                   </td>
-                  <td>{{ event.description }}</td>
                   <td>{{ event.eventDate }}</td>
-                  <td>{{ event.startTime }}</td>
-                  <td>{{ event.endTime }}</td>
                   <td>{{ event.location }}</td>
-                  <td>{{ event.maxSpot }}</td>
                     <td>
                     <span v-if="registrationStatus[event.eventID] === undefined">Loading...</span>
                     <span v-else>{{ registrationStatus[event.eventID] }}</span>
@@ -631,4 +623,15 @@ label {
 button.btn {
   margin-top: 1rem;
 }
+
+.table td a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.table td a:hover {
+  text-decoration: underline;
+  color: darkblue;
+}
+
 </style>

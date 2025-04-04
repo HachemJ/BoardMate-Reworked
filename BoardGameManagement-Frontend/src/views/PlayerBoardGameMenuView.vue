@@ -142,8 +142,7 @@ button.btn {
 
 /* Board game name style in the table */
 .table td a {
-  font-size: 20px;
-  color: blue;
+  color: #0d6efd;
   text-decoration: none;
 }
 
