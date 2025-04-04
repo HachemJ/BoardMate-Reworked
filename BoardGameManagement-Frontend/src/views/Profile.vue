@@ -18,6 +18,7 @@
               <template v-if="!isEditing">
                 <h2>{{ userProfile.name }}</h2>
                 <p class="text-muted">{{ userProfile.email }}</p>
+                <span class="badge bg-success">{{ userProfile.status.toUpperCase() }}</span>
               </template>
               <template v-else>
                 <div class="mb-3">
@@ -36,6 +37,20 @@
                     placeholder="Email"
                   />
                 </div>
+                <div class="mb-3">
+                  <input
+                    type="password"
+                    class="form-control"
+                    v-model="editedProfile.password"
+                    placeholder="Password"
+                  />
+                </div>
+                <div class="mb-3">
+                  <select v-model="editedProfile.isAOwner" class="form-control">
+                    <option :value="false">Player</option>
+                    <option :value="true">Owner</option>
+                  </select>
+                </div>
               </template>
             </div>
             <div>
@@ -53,11 +68,6 @@
                 </button>
               </template>
             </div>
-          </div>
-          <div class="d-flex align-items-center mb-2">
-            <span class="badge" :class="userProfile.status === 'owner' ? 'bg-primary' : 'bg-success'">
-              {{ userProfile.status }}
-            </span>
           </div>
         </div>
       </div>
@@ -96,78 +106,7 @@
           </div>
         </div>
 
-        <div
-          v-if="selectedTab === 'borrow' && userProfile.status === 'owner'"
-          class="tab-pane fade show active"
-        >
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Game</th>
-                  <th>Status</th>
-                  <th>Request Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="request in borrowRequests" :key="request.id">
-                  <td>{{ request.gameName }}</td>
-                  <td>
-                    <span class="badge" :class="getStatusBadgeClass(request.status)">
-                      {{ request.status }}
-                    </span>
-                  </td>
-                  <td>{{ formatDate(request.requestDate) }}</td>
-                  <td>
-                    <button
-                      v-if="request.status === 'pending'"
-                      class="btn btn-sm btn-danger"
-                      @click="cancelRequest(request.id)"
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div
-          v-if="selectedTab === 'borrowed'"
-          class="tab-pane fade show active"
-        >
-          <div class="table-responsive">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Game</th>
-                  <th>Borrowed Date</th>
-                  <th>Return Date</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="game in borrowedGames" :key="game.id">
-                  <td>{{ game.name }}</td>
-                  <td>{{ formatDate(game.borrowedDate) }}</td>
-                  <td>{{ formatDate(game.returnDate) }}</td>
-                  <td>
-                    <span class="badge" :class="getStatusBadgeClass(game.status)">
-                      {{ game.status }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div
-          v-if="selectedTab === 'events'"
-          class="tab-pane fade show active"
-        >
+        <div v-if="selectedTab === 'events'" class="tab-pane fade show active">
           <div class="row">
             <div v-for="event in userEvents" :key="event.id" class="col-md-6 mb-4">
               <div class="card">
@@ -201,90 +140,48 @@
 <script>
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import { useAuthStore } from "@/stores/authStore";
+import axios from "axios";
+
+const axiosClient = axios.create({
+  baseURL: "http://localhost:8080",
+});
 
 export default {
   name: "UserProfileView",
   components: {
     DefaultNavbar,
   },
-  setup() {
-    const authStore = useAuthStore();
-    return { authStore };
-  },
   data() {
     return {
+      authStore: null,
       isEditing: false,
       editedProfile: {
         name: "",
         email: "",
+        password: "",
+        isAOwner: false,
       },
-      _selectedTab: "borrowed",
-      userBoardgames: [
-        {
-          id: 1,
-          name: "Catan",
-          description: "A strategy board game",
-          status: "Available",
-        },
-        {
-          id: 2,
-          name: "Go",
-          description: "An interesting board game",
-          status: "Available",
-        },
-      ],
-      borrowRequests: [
-        {
-          id: 1,
-          gameName: "Monopoly",
-          status: "pending",
-          requestDate: "2024-03-27",
-        },
-      ],
-      userEvents: [
-        {
-          id: 1,
-          name: "Game Night",
-          description: "Monthly board game gathering",
-          date: "2024-04-01",
-          startTime: "18:00",
-          endTime: "22:00",
-          status: "upcoming",
-        },
-      ],
-      borrowedGames: [
-        {
-          id: 1,
-          name: "Risk",
-          borrowedDate: "2024-03-20",
-          returnDate: "2024-04-20",
-          status: "active",
-        },
-      ],
+      _selectedTab: "events",
+      userProfile: {
+        name: "",
+        email: "",
+        status: "",
+        profilePicture: null,
+        id: null,
+      },
+      userBoardgames: [],
+      userEvents: [],
     };
   },
   computed: {
-    userProfile() {
-      return {
-        name: this.authStore.user.username,
-        email: this.authStore.user.email,
-        status: this.authStore.user.isAOwner ? "owner" : "player",
-        profilePicture: null,
-      };
-    },
     tabs() {
       if (this.userProfile.status === "owner") {
         return [
           { id: "boardgames", name: "My Boardgames" },
-          { id: "borrow", name: "Borrow Request" },
-          { id: "borrowed", name: "Borrowed Games" },
           { id: "events", name: "Events" },
         ];
       } else {
-        return [
-          { id: "borrowed", name: "Borrowed Games" },
-          { id: "events", name: "Events" },
-        ];
+        return [{ id: "events", name: "Events" }];
       }
     },
     selectedTab: {
@@ -297,32 +194,74 @@ export default {
     },
   },
   created() {
-    this._selectedTab = this.userProfile.status === "owner" ? "boardgames" : "borrowed";
+    this.authStore = useAuthStore();
+    this.fetchUserData();
+    this._selectedTab = this.authStore.user.isAOwner ? "boardgames" : "events";
   },
   methods: {
+    async fetchUserData() {
+      try {
+        const userId = this.authStore.user.id;
+        const response = await axiosClient.get(`/players/${userId}`);
+        this.userProfile = {
+          name: response.data.name,
+          email: response.data.email,
+          status: response.data.isAOwner ? "owner" : "player",
+          profilePicture: null,
+          id: response.data.id,
+        };
+        this.editedProfile = {
+          name: response.data.name,
+          email: response.data.email,
+          password: "",
+          isAOwner: response.data.isAOwner,
+        };
+        await this.fetchUserEvents(userId);
+        if (response.data.isAOwner) {
+          await this.fetchOwnedGames(userId);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    },
+    async fetchUserEvents(userId) {
+      const res = await axiosClient.get(`/registrations/players/${userId}`);
+      this.userEvents = res.data;
+    },
+    async fetchOwnedGames(userId) {
+      const res = await axiosClient.get(`/boardgamecopies/byplayer/${userId}`);
+      this.userBoardgames = res.data;
+    },
     startEditing() {
-      this.editedProfile = {
-        name: this.userProfile.name,
-        email: this.userProfile.email,
-      };
       this.isEditing = true;
     },
-    saveProfile() {
-      this.authStore.user.username = this.editedProfile.name;
-      this.authStore.user.email = this.editedProfile.email;
-      this.isEditing = false;
+    async saveProfile() {
+      try {
+        const dto = {
+          name: this.editedProfile.name,
+          email: this.editedProfile.email,
+          password: this.editedProfile.password,
+          isAOwner: this.editedProfile.isAOwner,
+        };
+        await axiosClient.put(`/players/${this.userProfile.id}`, dto);
+        this.userProfile.name = dto.name;
+        this.userProfile.email = dto.email;
+        this.userProfile.status = dto.isAOwner ? "owner" : "player";
+        this.authStore.user.username = dto.name;
+        this.authStore.user.email = dto.email;
+        this.authStore.user.isAOwner = dto.isAOwner;
+        this.isEditing = false;
+        this.editedProfile.password = "";
+      } catch (error) {
+        console.error("Failed to update profile:", error);
+      }
     },
     cancelEditing() {
+      this.editedProfile.name = this.userProfile.name;
+      this.editedProfile.email = this.userProfile.email;
+      this.editedProfile.password = "";
+      this.editedProfile.isAOwner = this.userProfile.status === "owner";
       this.isEditing = false;
-    },
-    getStatusBadgeClass(status) {
-      const classes = {
-        pending: "bg-warning",
-        approved: "bg-success",
-        rejected: "bg-danger",
-        completed: "bg-info",
-      };
-      return classes[status] || "bg-secondary";
     },
     getEventStatusBadgeClass(status) {
       const classes = {
@@ -335,9 +274,6 @@ export default {
     },
     formatDate(date) {
       return new Date(date).toLocaleDateString();
-    },
-    cancelRequest(requestId) {
-      console.log("Cancelling request:", requestId);
     },
   },
 };
