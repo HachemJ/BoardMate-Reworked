@@ -316,6 +316,7 @@ async function createEvent() {
 
     Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
     await fetchEvents();
+    await fetchMyEvents();
   } catch (error) {
     console.error("Error creating event:", error);
     console.log("Full error:", error.response?.data);
