@@ -78,7 +78,7 @@
               <div class="mb-3">
                 <select class="form-control" id="selectedEvent" v-model="selectedEventId">
                   <option disabled value="">Select the Event to be Updated/Deleted</option>
-                  <option v-for="event in events" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
+                  <option v-for="event in myEvents" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
                 </select>
               </div>
 
@@ -230,6 +230,7 @@ const eventData = reactive({
 })
 
 const events = ref([])  // This will hold the array of events fetched from the database
+const myEvents = ref([])
 const selectedEventId = ref("")
 const boardGames = ref([]) // Will hold available board games
 const selectedBoardGame = ref(null)
@@ -247,12 +248,24 @@ async function fetchEvents() {
   try {
     const response = await axiosClient.get("/events");
     events.value = response.data;
+    
     for (const event of events.value) {
+      //console.log("Event owner ID:", event.ownerName);
       await getRegistrationStatus(event.eventID);
     }
   } catch (error) {
     console.error("Error fetching events:", error);
     alert('Failed to fetch events. Please try again.');
+  }
+}
+
+async function fetchMyEvents() {
+  try {
+    const response = await axiosClient.get("/events/owner/" + authStore.user.id);
+    myEvents.value = response.data;
+  } catch (error) {
+    console.error("Error fetching my events:", error);
+    alert('Failed to fetch your events. Please try again.');
   }
 }
 
@@ -273,6 +286,7 @@ async function initializeData() {
   await Promise.all([
     fetchEvents(),
     fetchBoardGames(),
+    fetchMyEvents(),
   ]);
 }
 
@@ -295,15 +309,18 @@ async function createEvent() {
       startTime: `${eventData.startTime}:00`,
       endTime: `${eventData.endTime}:00`,
       location: eventData.location,
-      ownerId: authStore.user.id,
+      ownerId: Number(authStore.user.id), 
       boardGameId: eventData.boardGameId
     };
+  
+    console.log("Creating event, owenr ID is: ", eventDto.ownerId);
 
     await axiosClient.post("/events", eventDto);
     alert('Event Created Successfully!');
 
     Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
     await fetchEvents();
+    await fetchMyEvents();
   } catch (error) {
     console.error("Error creating event:", error);
     console.log("Full error:", error.response?.data);
