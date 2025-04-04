@@ -86,7 +86,10 @@ function submitBoardGame() {
 
               <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" v-model="boardGameData.description" required></textarea>
+                <textarea maxlength="255" class="form-control" id="description" v-model="boardGameData.description" required></textarea>
+                <small :style="{color: boardGameData.description.length >= 255 ? 'red' : 'gray'}">
+                  {{ boardGameData.description.length }} / 255 characters
+                </small>
               </div>
 
               <button type="submit" class="btn btn-info">Create Board Game</button>

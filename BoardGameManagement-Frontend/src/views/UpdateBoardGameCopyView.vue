@@ -93,13 +93,16 @@ function updateBoardGame() {
 
             <div class="mb-3">
               <label for="specification" class="form-label">Specification</label>
-              <textarea 
-              class="form-control" 
-              id="specification" 
-              v-model="boardGameCopyData.specification" 
-              :placeholder="boardGameCopies.find(copy => copy.boardGameCopyId === boardGameCopyData.boardGameCopyId)?.specification || 'Enter specification'" 
-              required>
-              </textarea>
+              <textarea
+                  maxlength="255"
+                  class="form-control"
+                  id="specification"
+                  v-model="boardGameCopyData.specification"
+                  :placeholder="boardGameCopies.find(copy => copy.boardGameCopyId === boardGameCopyData.boardGameCopyId)?.specification || 'Enter specification'"
+                  required></textarea>
+              <small :style="{color: boardGameCopyData.specification.length >= 255 ? 'red' : 'gray'}">
+                {{ boardGameCopyData.specification.length }} / 255 characters
+              </small>
             </div>
 
             <button type="submit" class="btn btn-info">Update Board Game Copy</button>
