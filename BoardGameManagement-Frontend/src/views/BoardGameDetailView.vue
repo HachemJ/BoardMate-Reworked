@@ -2,7 +2,7 @@
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {ref, computed, onMounted, reactive} from "vue";
-import {useRoute, useRouter} from "vue-router";
+import {useRoute} from "vue-router";
 import axios from "axios";
 import {useAuthStore} from "@/stores/authStore.js";
 
@@ -21,6 +21,7 @@ const borrowRequestData = reactive({
   endOfLoan: "",
   borrowerID: authStore.user.id,
   specificGameID: "",
+  playerName: "",
 });
 const gameDetails = ref({
   minPlayers: "",
@@ -61,7 +62,6 @@ onMounted(async () => {
     console.error(error);
   }
 })
-const router = useRouter();
 const route = useRoute();
 const gameName = route.params.gamename;
 
@@ -149,14 +149,15 @@ async function confirmBorrow() {
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="(game, index) in boardGameCopies"
-                    :key="game.boardGameCopyId"
-                    :class="{ 'table-active': selectedGameId === game.boardGameCopyId }"
-                    @click="selectGame(game.boardGameCopyId)"
-                    style="cursor: pointer;">
+                <tr v-for="(game, index) in boardGameCopies">
                   <td>{{ index + 1 }}</td>
                   <td>{{ game.specification }}</td>
                   <td>{{ game.playerName }}</td>
+                  <td>
+                    <button class="btn btn-info" @click="selectGame(game.boardGameCopyId)">
+                      Borrow
+                    </button>
+                  </td>
                 </tr>
                 </tbody>
               </table>
@@ -183,7 +184,7 @@ async function confirmBorrow() {
 
                 <!-- Borrow Button -->
                 <button class="btn btn-info mt-4" @click="confirmBorrow" :disabled="!selectedGameId">
-                  Borrow
+                  Confirm Borrow
                 </button>
               </div>
             </div>
