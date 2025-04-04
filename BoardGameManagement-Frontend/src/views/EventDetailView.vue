@@ -20,7 +20,7 @@ const eventDetails = ref({
   endTime: '',
   location: '',
   ownerName: '',
-  boardGameId: '',
+  boardGameName: '',
 });
 
 async function fetchEventID() {
@@ -55,37 +55,43 @@ onMounted(async () => {
     <!-- Top Navigation Bar -->
     <DefaultNavbar />
 
-    <div class="container-fluid mt-4">
-      <div class="row">
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-md-10">
 
-        <!-- Content Area -->
-        <div class="col-md-12">
+          <!-- Event Card -->
+          <div class="card p-5 mb-4 shadow rounded-4">
+            <div class="row align-items-start justify-content-between">
 
-          <div class="card p-4 mb-4 shadow-sm">
-            <div class="row justify-content-center align-items-start">
-              <!-- Left: Game Name -->
+              <!-- Left: Event Name & Board Game -->
               <div class="col-md-6 text-start">
-                <h1 class="fw-bold">{{ eventName }}</h1>
+                <h1 class="fw-bold display-4">{{ eventName }}</h1>
+
+                <p class="mt-3 text-muted" style="font-size: 1.1rem;">
+                  <strong>Board Game:</strong>
+                  {{ eventDetails.boardGameName }}
+                </p>
               </div>
 
-              <!-- Right: Game Details Split into Two Columns -->
+              <!-- Right: Event Info & Description -->
               <div class="col-md-6 text-start">
                 <div class="row">
-                  <!-- Column 1: Date and Time -->
+                  <!-- Date & Time -->
                   <div class="col-md-6">
                     <p><strong>Date:</strong> {{ eventDetails.eventDate }}</p>
                     <p><strong>Start Time:</strong> {{ eventDetails.startTime }}</p>
                     <p><strong>End Time:</strong> {{ eventDetails.endTime }}</p>
                   </div>
 
-                  <!-- Column 2: Location, Host, Description -->
+                  <!-- Description -->
                   <div class="col-md-6">
-                    <p><strong>Location:</strong> {{ eventDetails.location }}</p>
-                    <p><strong>Host:</strong> {{ eventDetails.ownerName }}</p>
-                    <p><strong>Description:</strong> {{ eventDetails.description }}</p>
+                    <p><strong>Description:</strong><br />
+                      {{ eventDetails.description }}
+                    </p>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
 
