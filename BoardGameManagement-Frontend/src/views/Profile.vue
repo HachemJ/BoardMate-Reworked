@@ -243,7 +243,7 @@ export default {
           password: this.editedProfile.password,
           isAOwner: this.editedProfile.isAOwner,
         };
-        await axiosClient.put(`/players/${this.userProfile.id}`, dto);
+        await axiosClient.put(`/players/${this.authStore.user.id}`, dto);
         this.userProfile.name = dto.name;
         this.userProfile.email = dto.email;
         this.userProfile.status = dto.isAOwner ? "owner" : "player";
