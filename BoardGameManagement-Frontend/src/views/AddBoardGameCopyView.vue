@@ -107,7 +107,10 @@ function submitBoardGameCopy() {
 
               <div class="mb-3">
                 <label for="specification" class="form-label">Specification</label>
-                <textarea class="form-control" id="specification" v-model="boardGameCopyData.specification" required></textarea>
+                <textarea maxlength="255" class="form-control" id="specification" v-model="boardGameCopyData.specification" required></textarea>
+                <small :style="{color: boardGameCopyData.specification.length >= 255 ? 'red' : 'gray'}">
+                  {{ boardGameCopyData.specification.length }} / 255 characters
+                </small>
               </div>
 
               <button type="submit"

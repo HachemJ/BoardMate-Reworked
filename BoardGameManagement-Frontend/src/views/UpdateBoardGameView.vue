@@ -143,13 +143,17 @@ function updateBoardGame() {
 
                 <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea 
+                <textarea
+                    maxlength="255"
                   class="form-control" 
                   id="description" 
                   v-model="boardGameData.description" 
                   :placeholder="boardGames.find(game => game.name === boardGameData.name)?.description || ''" 
                   required>
                 </textarea>
+                  <small :style="{color: boardGameData.description.length >= 255 ? 'red' : 'gray'}">
+                    {{ boardGameData.description.length }} / 255 characters
+                  </small>
                 </div>
 
               <button type="submit" class="btn btn-info">Update Board Game</button>
