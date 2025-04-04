@@ -109,7 +109,7 @@ function updateBoardGame() {
                   </select>
               </div>
 
-              <div class="mb-3">
+                <div class="mb-3">
                 <label for="name" class="form-label">New Board Game Name</label>
                 <input
                   type="text"
@@ -117,24 +117,40 @@ function updateBoardGame() {
                   id="name"
                   v-model="boardGameData.newName"
                   :placeholder="boardGameData.name"
-                  @blur="boardGameData.newName = boardGameData.newName || boardGameData.name"
                   required>
-              </div>
-
-              <div class="mb-3">
+                </div>
+                <div class="mb-3">
                 <label for="minPlayers" class="form-label">Minimum Number of Players</label>
-                <input type="number" class="form-control" id="minPlayers" v-model="boardGameData.minPlayers" required>
-              </div>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="minPlayers" 
+                  v-model="boardGameData.minPlayers" 
+                  :placeholder="boardGames.find(game => game.name === boardGameData.name)?.minPlayers || ''" 
+                  required>
+                </div>
 
-              <div class="mb-3">
+                <div class="mb-3">
                 <label for="maxPlayers" class="form-label">Maximum Number of Players</label>
-                <input type="number" class="form-control" id="maxPlayers" v-model="boardGameData.maxPlayers" required>
-              </div>
+                <input 
+                  type="number" 
+                  class="form-control" 
+                  id="maxPlayers" 
+                  v-model="boardGameData.maxPlayers" 
+                  :placeholder="boardGames.find(game => game.name === boardGameData.name)?.maxPlayers || ''" 
+                  required>
+                </div>
 
-              <div class="mb-3">
+                <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" v-model="boardGameData.description" required></textarea>
-              </div>
+                <textarea 
+                  class="form-control" 
+                  id="description" 
+                  v-model="boardGameData.description" 
+                  :placeholder="boardGames.find(game => game.name === boardGameData.name)?.description || ''" 
+                  required>
+                </textarea>
+                </div>
 
               <button type="submit" class="btn btn-info">Update Board Game</button>
 
