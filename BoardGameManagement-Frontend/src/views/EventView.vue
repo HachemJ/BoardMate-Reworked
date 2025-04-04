@@ -204,6 +204,7 @@ import { ref, reactive } from 'vue'
 import {useAuthStore} from "@/stores/authStore.js";
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
+import { watch } from 'vue';
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
@@ -230,6 +231,13 @@ const boardGames = ref([]) // Will hold available board games
 const selectedBoardGame = ref(null)
 const registrationStatus = ref({}) // To hold registration status for each event
 
+//auto-fill with the values from the selected event.
+watch(selectedEventId, (newId) => {
+  if (newId) {
+    selectEvent(newId);
+  }
+});
+
 // Fetch all events
 async function fetchEvents() {
   try {
@@ -255,25 +263,12 @@ async function fetchBoardGames() {
   }
 }
 
-// Get logged-in user ID
-//async function getCurrentUserId() {
-  //try {
-    //// Assuming you have a user endpoint that returns the current user
-    //const user_id = authStore.user.id;
-    //const response = await axiosClient.get("/users/user_id");
-    //eventData.ownerId = response.data.playerID;
-  //} catch (error) {
-    //console.error("Error fetching user ID:", error);
-    //alert('Failed to get user information. Please try again.');
-  //}
-//}
 
 // Initialize data when component is mounted
 async function initializeData() {
   await Promise.all([
     fetchEvents(),
     fetchBoardGames(),
-    getCurrentUserId()
   ]);
 }
 
@@ -283,7 +278,7 @@ initializeData();
 // Create new event
 async function createEvent() {
   try {
-    if (!selectedBoardGame.value) {
+    if (!eventData.boardGameId) {
       alert('Please select a board game');
       return;
     }
@@ -292,20 +287,18 @@ async function createEvent() {
       name: eventData.eventName,
       description: eventData.description,
       maxSpot: eventData.maxSpot.toString(),
-      eventDate: eventData.date, // format: "yyyy-MM-dd" (from input type="date")
-      startTime: `${eventData.startTime}:00`, // format: "HH:mm:ss"
+      eventDate: eventData.date,
+      startTime: `${eventData.startTime}:00`,
       endTime: `${eventData.endTime}:00`,
       location: eventData.location,
       ownerId: authStore.user.id,
-      boardGameId: selectedBoardGame.value
+      boardGameId: eventData.boardGameId
     };
 
     await axiosClient.post("/events", eventDto);
     alert('Event Created Successfully!');
 
     Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
-    selectedBoardGame.value = null;
-
     await fetchEvents();
   } catch (error) {
     console.error("Error creating event:", error);
@@ -313,6 +306,7 @@ async function createEvent() {
     alert('Failed to create event. Please try again.');
   }
 }
+
 
 // Update existing event
 async function updateEvent() {
@@ -399,6 +393,7 @@ function selectEvent(id) {
     eventData.location = event.location;
     eventData.ownerId = event.ownerId;
     eventData.boardGameId = event.boardGameId;
+
   }
 }
 
