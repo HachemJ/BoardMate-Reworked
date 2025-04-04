@@ -163,7 +163,11 @@
               </thead>
               <tbody>
                 <tr v-for="event in events" :key="event.eventID" @click="selectEvent(event.eventID)" :class="{ 'table-active': selectedEventId === event.eventID }">
-                  <td>{{ event.name }}</td>
+                  <td>
+                    <router-link :to="{ name: 'eventDetail', params: { eventname: event.name }}">
+                      {{ event.name }}
+                    </router-link>
+                  </td>
                   <td>{{ event.description }}</td>
                   <td>{{ event.eventDate }}</td>
                   <td>{{ event.startTime }}</td>

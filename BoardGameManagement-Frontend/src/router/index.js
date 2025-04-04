@@ -34,6 +34,7 @@ import AddBoardGameReviewView from "@/views/AddBoardGameReviewView.vue";
 import AddBoardGameView from "@/views/AddBoardGameView.vue";
 import UpdateBoardGameView from "@/views/UpdateBoardGameView.vue";
 import UpdateBoardGameCopyView from "@/views/UpdateBoardGameCopyView.vue";
+import EventDetailView from "@/views/EventDetailView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -144,6 +145,12 @@ const router = createRouter({
       path: "/pages/landing-pages/basic",
       name: "signin",
       component: SignInBasicView,
+    },
+
+    {
+      path: "/pages/event/:eventname",
+      name: "eventDetail",
+      component: EventDetailView,
     },
     {
       path: "/sections/page-sections/page-headers",
