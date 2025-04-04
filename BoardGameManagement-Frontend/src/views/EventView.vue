@@ -298,6 +298,23 @@ watch(selectedEventId, (newId) => {
   }
 });
 
+function resetEventData() {
+  eventData.eventName = '';
+  eventData.description = '';
+  eventData.maxSpot = '';
+  eventData.date = '';
+  eventData.startTime = '';
+  eventData.endTime = '';
+  eventData.location = '';
+  eventData.boardGameId = null;
+}
+
+watch(selectedTab, (newTab) => {
+  if (newTab === 'Create an Event') {
+    resetEventData();
+  }
+});
+
 // Fetch all events
 async function fetchEvents() {
   try {
