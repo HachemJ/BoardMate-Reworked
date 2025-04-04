@@ -37,7 +37,25 @@ async function handleAuth() {
         isAOwner: document.getElementById("isAOwner").checked
       });
 
-      alert("Signup successful! Please log in.");
+      alert("Signup successful!");
+
+      try {
+      const res = await axiosClient.post("/players/login", {
+        email: email.value,
+        password: password.value,
+      });
+
+      const user = res.data;
+      authStore.login(user.playerID, user.name, user.email, user.isAOwner);
+
+      alert("Logged in successfully!");
+      console.log("Logged in user:", authStore.user);
+      router.push("/profile");
+    } catch (error) {
+      console.log(error);
+      const errors = error.response.data.errors; // Extract the errors array
+      alert(`Login Failed with status ${error.response.status} :\n${errors.join("\n")}`);
+    }
       isSignUp.value = false; // Switch back to login view
     } catch (error) {
       console.error("Signup failed:", error);
