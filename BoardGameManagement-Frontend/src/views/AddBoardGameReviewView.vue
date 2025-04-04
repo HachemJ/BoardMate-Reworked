@@ -5,6 +5,10 @@ import {useRoute} from "vue-router";
 import {reactive} from "vue";
 import axios from "axios";
 import {useAuthStore} from "@/stores/authStore.js";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
 
 const axiosClient = axios.create({
    baseURL: "http://localhost:8080"
@@ -52,12 +56,23 @@ async function createReview(comment, rating) {
 
 }
 
+
 function submitReview() {
-  console.log('Created Review:', reviewData)
-  createReview(reviewData.comment, reviewData.rating);
-  alert('Review Created Successfully!')
-  // Reset form after submission
-  Object.keys(reviewData).forEach(key => reviewData[key] = key === 'maxSpot' ? null : '')
+  console.log('Created Review:', reviewData);
+  createReview(reviewData.comment, reviewData.rating).then(() => {
+    alert('Review Created Successfully!');
+    // Reset form after submission
+    Object.keys(reviewData).forEach(key => reviewData[key] = key === 'maxSpot' ? null : '');
+    // Redirect to the board game page
+    if (useAuthStore().user.isAOwner) {
+      router.push(`/pages/ownerboardgame/${gameName}`);
+    } else {
+      router.push(`/pages/playerboardgame/${gameName}`);
+    }
+  }).catch(error => {
+    console.error('Error creating review:', error);
+    alert('Failed to create review. Please try again.');
+  });
 }
 
 </script>

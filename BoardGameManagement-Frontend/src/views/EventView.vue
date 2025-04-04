@@ -84,15 +84,21 @@
 
               <div class="mb-3">
                 <label for="eventName" class="form-label">Event Name</label>
-                <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" required>
+                <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" 
+                :placeholder="events.find(event => event.eventID === selectedEventId)?.name || 'Event Name'" 
+                required>
               </div>
               <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" v-model="eventData.description" required></textarea>
+                <textarea class="form-control" id="description" v-model="eventData.description"
+                :placeholder="events.find(event => event.eventID === selectedEventId)?.description || 'Description'" 
+                  required></textarea>
               </div>
               <div class="mb-3">
                 <label for="maxSpot" class="form-label">Maximum Spots</label>
-                <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot" required>
+                <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot" 
+                :placeholder="events.find(event => event.eventID === selectedEventId)?.maxSpot || 'Maximum Spots'" 
+                required>
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
@@ -108,7 +114,9 @@
               </div>
               <div class="mb-3">
                 <label for="location" class="form-label">Location</label>
-                <input type="text" class="form-control" id="location" v-model="eventData.location" required>
+                <input type="text" class="form-control" id="location" v-model="eventData.location" 
+                :placeholder="events.find(event => event.eventID === selectedEventId)?.location || 'Location'" 
+                required>
               </div>
               <div class="mb-3">
                 <label for="boardGameUpdate" class="form-label">Select Board Game</label>
