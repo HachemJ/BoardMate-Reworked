@@ -7,6 +7,7 @@ import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameCopyRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
+import ca.mcgill.ecse321.BoardGameManagement.repository.BorrowRequestRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -35,6 +36,9 @@ public class BoardGameCopyServiceTests {
 
     @Mock
     private PlayerRepository playerRepository;
+
+    @Mock
+    private BorrowRequestRepository borrowRequestRepository;
 
     @InjectMocks
     private BoardGameCopyService boardGameCopyService;
