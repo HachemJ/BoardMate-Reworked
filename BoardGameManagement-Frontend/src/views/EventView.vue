@@ -200,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import {useAuthStore} from "@/stores/authStore.js";
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
@@ -252,28 +252,40 @@ async function fetchEvents() {
   }
 }
 
-// Fetch available board games
-async function fetchBoardGames() {
+// Fetch board games owned by the current user
+async function fetchBoardGamesOwned() {
   try {
-    const response = await axiosClient.get("/boardgames");
-    boardGames.value = response.data;
+    const userId = authStore.user.id;
+    if (!userId) {
+      throw new Error('User not logged in');
+    }
+    console.log('Fetching board games for user:', userId);
+    const response = await axiosClient.get(`/boardgamecopies/byplayer/${userId}`);
+    console.log('Board games response:', response.data);
+    
+    // Transform the response data to match the expected format
+    boardGames.value = response.data.map(game => ({
+      gameID: game.boardGameCopyId || game.id, // Handle both possible ID field names
+      name: game.boardGameName || game.name, // Handle both possible name field names
+      description: game.description || '',
+      status: game.status || 'Available'
+    }));
+    
+    console.log('Transformed board games:', boardGames.value);
   } catch (error) {
-    console.error("Error fetching board games:", error);
-    alert('Failed to fetch board games. Please try again.');
+    console.error("Error fetching owned board games:", error);
+    alert('Failed to fetch your board games. Please try again.');
   }
 }
 
-
 // Initialize data when component is mounted
-async function initializeData() {
+onMounted(async () => {
   await Promise.all([
     fetchEvents(),
-    fetchBoardGames(),
+    fetchBoardGamesOwned(),
+    getCurrentUserId()
   ]);
-}
-
-// Call initializeData when component is mounted
-initializeData();
+});
 
 // Create new event
 async function createEvent() {
