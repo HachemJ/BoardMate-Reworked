@@ -40,7 +40,16 @@
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="date" v-model="eventData.date" required>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="date"
+                  v-model="eventData.date"
+                  :min="minDate"
+                  required
+                  @keydown.prevent
+                />
+
               </div>
               <div class="mb-3">
                 <label for="startTime" class="form-label">Start Time</label>
@@ -48,7 +57,15 @@
               </div>
               <div class="mb-3">
                 <label for="endTime" class="form-label">End Time</label>
-                <input type="time" class="form-control" id="endTime" v-model="eventData.endTime" required>
+                <input
+                  type="time"
+                  class="form-control"
+                  id="endTime"
+                  v-model="eventData.endTime"
+                  :min="formattedStartTime"
+                  required
+                />
+
               </div>
               <div class="mb-3">
                 <label for="location" class="form-label">Location</label>
@@ -102,7 +119,16 @@
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="date" v-model="eventData.date" required>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="date"
+                  v-model="eventData.date"
+                  :min="minDate"
+                  required
+                  @keydown.prevent
+                />
+
               </div>
               <div class="mb-3">
                 <label for="startTime" class="form-label">Start Time</label>
@@ -110,7 +136,16 @@
               </div>
               <div class="mb-3">
                 <label for="endTime" class="form-label">End Time</label>
-                <input type="time" class="form-control" id="endTime" v-model="eventData.endTime" required>
+                <input
+                  type="time"
+                  class="form-control"
+                  id="endTime"
+                  v-model="eventData.endTime"
+                  :min="formattedStartTime"
+                  required
+                />
+
+
               </div>
               <div class="mb-3">
                 <label for="location" class="form-label">Location</label>
@@ -209,14 +244,23 @@ import {useAuthStore} from "@/stores/authStore.js";
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
 import { watch } from 'vue';
+import { computed } from 'vue';
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
+
+const today = new Date();
+const formatDate = (date) => date.toISOString().split("T")[0];
+
+const minDate = formatDate(today); // today in YYYY-MM-DD format
+const eventDate = ref(minDate); // default to today or leave empty if preferred
+
 const authStore = useAuthStore();
 const tabs = ['Create an Event', 'Update/Delete My Events', 'Browse Available Events']
 const selectedTab = ref(tabs[0])
+
 const eventData = reactive({
   eventName: '',
   description: '',
@@ -225,9 +269,20 @@ const eventData = reactive({
   startTime: '',
   endTime: '',
   location: '',
-  ownerId: null, // Will be set from logged-in user? not sure how to do that
-  boardGameId: null // Will be set from selected board game; the sys fetches all boardgame and put them in dropdown list for user to select
-})
+  ownerId: null,
+  boardGameId: null
+});
+
+const formattedStartTime = computed(() => {
+  const time = eventData.startTime;
+  return time && /^\d{2}:\d{2}$/.test(time) ? time : '00:00';
+});
+
+watch(() => eventData.startTime, () => {
+  if (eventData.endTime && eventData.endTime < eventData.startTime) {
+    eventData.endTime = '';
+  }
+});
 
 const events = ref([])  // This will hold the array of events fetched from the database
 const myEvents = ref([])
@@ -497,38 +552,66 @@ async function getRegistrationStatus(id) {
 }
 
 /* Input, Textarea, and Select Styles */
+/* General input styles */
 input[type="text"],
 input[type="number"],
 input[type="date"],
 input[type="time"],
 textarea,
-select {  /* Added select here */
-  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
-  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
-  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
+select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  color: #495057;
+  background-color: #fff;
+  border: 1.5px solid #ced4da;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
 }
 
+/* Glow on focus */
 input[type="text"]:focus,
 input[type="number"]:focus,
 input[type="date"]:focus,
 input[type="time"]:focus,
 textarea:focus,
-select:focus {  /* Added select here */
-  border-color: #80bdff; /* Bootstrap's default focus border color */
+select:focus {
+  border-color: #28a745;
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Green glow */
 }
 
-/* Label Styles */
+/* Custom dropdown arrow */
+select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20fill%3D'%23333'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%20width%3D'24'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M7%2010l5%205%205-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2rem; /* Make space for the arrow */
+}
+
+/* Remove inner arrows in time input (Chrome) */
+input[type="time"]::-webkit-inner-spin-button,
+input[type="time"]::-webkit-calendar-picker-indicator,
+select::-ms-expand {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Label spacing */
 label {
   display: block;
   margin-bottom: 0.5rem;
-  color: #495057; /* Bootstrap's default text color for labels */
+  font-weight: 500;
+  color: #343a40;
 }
 
-/* Button Styles */
+/* Button spacing */
 button.btn {
-  margin-top: 1rem; /* Add some top margin for the button */
+  margin-top: 1rem;
 }
 </style>
-
