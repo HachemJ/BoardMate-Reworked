@@ -111,14 +111,21 @@ async function confirmBorrow() {
 
         <!-- Content Area -->
         <div class="col-md-12">
-          <!-- Page Title -->
-          <h2 class="mb-3 text-center">{{ gameName }}</h2>
 
-          <!-- Game Details -->
-          <div class="mb-4 text-center">
-            <p><strong>Minimum Players:</strong> {{ gameDetails.minPlayers }}</p>
-            <p><strong>Maximum Players:</strong> {{ gameDetails.maxPlayers }}</p>
-            <p><strong>Description:</strong> {{ gameDetails.description }}</p>
+          <div class="card p-4 mb-4 shadow-sm">
+            <div class="row justify-content-center align-items-start">
+              <!-- Left: Game Name -->
+              <div class="col-md-6 text-start">
+                <h1 class="fw-bold">{{ gameName }}</h1>
+              </div>
+
+              <!-- Right: Game Details -->
+              <div class="col-md-6 text-start">
+                <p><strong>Minimum Players:</strong> {{ gameDetails.minPlayers }}</p>
+                <p><strong>Maximum Players:</strong> {{ gameDetails.maxPlayers }}</p>
+                <p><strong>Description:</strong> {{ gameDetails.description }}</p>
+              </div>
+            </div>
           </div>
 
           <!-- Tabs -->
@@ -233,20 +240,6 @@ async function confirmBorrow() {
 
 <style scoped>
 
-.nav-link {
-  cursor: pointer;
-  margin-bottom: 5px;
-  padding: 10px;
-  text-align: center;
-  color: black !important;
-}
-.bg-secondary {
-  background-color: grey !important;
-}
-.bg-success {
-  background-color: green !important;
-}
-
 /* Input, Textarea, and Select Styles */
 input[type="text"],
 input[type="number"],
@@ -303,8 +296,22 @@ button.btn {
   margin-right: 2px; /* Adds space between stars */
 }
 
-.table-active {
-  background-color: lightgreen !important; /* Light green background for selected row */
+/* Table Styles */
+.nav-tabs {
+  border-bottom: none;
+}
+
+.nav-tabs .nav-link {
+  border: none;
+  color: #495057;
+  transition: color 0.2s ease;
+}
+
+.nav-tabs .nav-link.active {
+  border-bottom: 2px solid #0d6efd;
+  background-color: transparent;
+  color: #0d6efd;
+  font-weight: bold;
 }
 
 </style>
