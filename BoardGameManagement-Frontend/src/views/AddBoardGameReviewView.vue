@@ -96,7 +96,10 @@ function submitReview() {
 
             <div class="mb-3">
               <label for="comment" class="form-label">Comment</label>
-              <textarea class="form-control" id="comment" v-model="reviewData.comment" required></textarea>
+              <textarea maxlength="255" class="form-control" id="comment" v-model="reviewData.comment" required></textarea>
+              <small :style="{color: reviewData.comment.length >= 255 ? 'red' : 'gray'}">
+                {{ reviewData.comment.length }} / 255 characters
+              </small>
             </div>
 
             <div class="mb-3">
