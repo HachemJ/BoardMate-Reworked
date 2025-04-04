@@ -34,6 +34,7 @@ public class BoardGameCopyService {
     @Autowired
     @SuppressWarnings("unused")
     private BoardGameRepository boardGameRepository;
+
     @Autowired
     private BorrowRequestRepository borrowRequestRepository;
 
