@@ -40,7 +40,16 @@
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="date" v-model="eventData.date" required>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="date"
+                  v-model="eventData.date"
+                  :min="minDate"
+                  required
+                  @keydown.prevent
+                />
+
               </div>
               <div class="mb-3">
                 <label for="startTime" class="form-label">Start Time</label>
@@ -102,7 +111,16 @@
               </div>
               <div class="mb-3">
                 <label for="date" class="form-label">Date</label>
-                <input type="date" class="form-control" id="date" v-model="eventData.date" required>
+                <input
+                  type="date"
+                  class="form-control"
+                  id="date"
+                  v-model="eventData.date"
+                  :min="minDate"
+                  required
+                  @keydown.prevent
+                />
+
               </div>
               <div class="mb-3">
                 <label for="startTime" class="form-label">Start Time</label>
@@ -213,6 +231,12 @@ import { watch } from 'vue';
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
+
+const today = new Date();
+const formatDate = (date) => date.toISOString().split("T")[0];
+
+const minDate = formatDate(today); // today in YYYY-MM-DD format
+const eventDate = ref(minDate); // default to today or leave empty if preferred
 
 const authStore = useAuthStore();
 const tabs = ['Create an Event', 'Update/Delete My Events', 'Browse Available Events']
