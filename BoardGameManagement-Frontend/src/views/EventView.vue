@@ -78,7 +78,7 @@
               <div class="mb-3">
                 <select class="form-control" id="selectedEvent" v-model="selectedEventId">
                   <option disabled value="">Select the Event to be Updated/Deleted</option>
-                  <option v-for="event in events" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
+                  <option v-for="event in myEvents" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
                 </select>
               </div>
 
@@ -200,7 +200,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive } from 'vue'
 import {useAuthStore} from "@/stores/authStore.js";
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
@@ -226,6 +226,7 @@ const eventData = reactive({
 })
 
 const events = ref([])  // This will hold the array of events fetched from the database
+const myEvents = ref([])
 const selectedEventId = ref("")
 const boardGames = ref([]) // Will hold available board games
 const selectedBoardGame = ref(null)
@@ -243,7 +244,9 @@ async function fetchEvents() {
   try {
     const response = await axiosClient.get("/events");
     events.value = response.data;
+    
     for (const event of events.value) {
+      //console.log("Event owner ID:", event.ownerName);
       await getRegistrationStatus(event.eventID);
     }
   } catch (error) {
@@ -252,40 +255,39 @@ async function fetchEvents() {
   }
 }
 
-// Fetch board games owned by the current user
-async function fetchBoardGamesOwned() {
+async function fetchMyEvents() {
   try {
-    const userId = authStore.user.id;
-    if (!userId) {
-      throw new Error('User not logged in');
-    }
-    console.log('Fetching board games for user:', userId);
-    const response = await axiosClient.get(`/boardgamecopies/byplayer/${userId}`);
-    console.log('Board games response:', response.data);
-    
-    // Transform the response data to match the expected format
-    boardGames.value = response.data.map(game => ({
-      gameID: game.boardGameCopyId || game.id, // Handle both possible ID field names
-      name: game.boardGameName || game.name, // Handle both possible name field names
-      description: game.description || '',
-      status: game.status || 'Available'
-    }));
-    
-    console.log('Transformed board games:', boardGames.value);
+    const response = await axiosClient.get("/events/owner/" + authStore.user.id);
+    myEvents.value = response.data;
   } catch (error) {
-    console.error("Error fetching owned board games:", error);
-    alert('Failed to fetch your board games. Please try again.');
+    console.error("Error fetching my events:", error);
+    alert('Failed to fetch your events. Please try again.');
   }
 }
 
+// Fetch available board games
+async function fetchBoardGames() {
+  try {
+    const response = await axiosClient.get("/boardgames");
+    boardGames.value = response.data;
+  } catch (error) {
+    console.error("Error fetching board games:", error);
+    alert('Failed to fetch board games. Please try again.');
+  }
+}
+
+
 // Initialize data when component is mounted
-onMounted(async () => {
+async function initializeData() {
   await Promise.all([
     fetchEvents(),
-    fetchBoardGamesOwned(),
-    getCurrentUserId()
+    fetchBoardGames(),
+    fetchMyEvents(),
   ]);
-});
+}
+
+// Call initializeData when component is mounted
+initializeData();
 
 // Create new event
 async function createEvent() {
@@ -303,15 +305,18 @@ async function createEvent() {
       startTime: `${eventData.startTime}:00`,
       endTime: `${eventData.endTime}:00`,
       location: eventData.location,
-      ownerId: authStore.user.id,
+      ownerId: Number(authStore.user.id), 
       boardGameId: eventData.boardGameId
     };
+  
+    console.log("Creating event, owenr ID is: ", eventDto.ownerId);
 
     await axiosClient.post("/events", eventDto);
     alert('Event Created Successfully!');
 
     Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
     await fetchEvents();
+    await fetchMyEvents();
   } catch (error) {
     console.error("Error creating event:", error);
     console.log("Full error:", error.response?.data);
