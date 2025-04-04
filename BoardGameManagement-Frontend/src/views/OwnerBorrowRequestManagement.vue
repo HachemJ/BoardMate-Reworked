@@ -161,7 +161,6 @@ function isRequestDone(status){
                 <td v-if="shouldShowButton(request.requestStatus)">
                   <button class="btn btn-info me-2"
                           id="acceptRequestButton"
-                          style="bottom: 20px;"
                           @click="acceptRequest(request.requestId, request.borrowerName)"
                           >
                   Accept
@@ -169,7 +168,6 @@ function isRequestDone(status){
 
                   <button class="btn btn-info me-2 "
                           id="declineRequestButton"
-                          style="bottom: 20px;"
                           @click="declineRequest(request.requestId, request.borrowerName)"
                           >
                     Deny
@@ -251,6 +249,10 @@ label {
 /* Button Styles */
 button.btn {
   margin-top: 1rem; /* Add some top margin for the button */
+}
+
+table td, table th {
+  vertical-align: middle;
 }
 
 </style>

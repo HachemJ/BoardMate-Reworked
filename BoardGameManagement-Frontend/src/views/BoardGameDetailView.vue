@@ -150,14 +150,12 @@ async function confirmBorrow() {
               <table class="table">
                 <thead>
                 <tr>
-                  <th>Copy Number</th>
                   <th>Specification</th>
                   <th>Owner</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr v-for="(game, index) in boardGameCopies">
-                  <td>{{ index + 1 }}</td>
+                <tr v-for="game in boardGameCopies">
                   <td>{{ game.specification }}</td>
                   <td>{{ game.playerName }}</td>
                   <td>
@@ -312,6 +310,10 @@ button.btn {
   background-color: transparent;
   color: #0d6efd;
   font-weight: bold;
+}
+
+table td, table th {
+  vertical-align: middle;
 }
 
 </style>

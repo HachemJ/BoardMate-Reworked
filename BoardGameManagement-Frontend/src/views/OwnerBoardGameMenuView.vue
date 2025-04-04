@@ -143,12 +143,11 @@ async function deleteBoardGameCopy(id) {
               </tr>
               </thead>
               <tbody>
-              <tr v-for="game in myBoardGameCopies">
+              <tr v-for="game in myBoardGameCopies" :key="game.boardGameCopyId">
                 <td>{{ game.boardGameName }}</td>
-                <td>{{ game.specification }}</td>
-                <td>
+                <td class="specification-cell">{{ game.specification }}</td>
+                <td class="button-cell">
                   <button class="btn btn-info me-2"
-                          style="bottom: 20px;"
                           @click="deleteBoardGameCopy(game.boardGameCopyId)"
                   >
                     Delete
@@ -230,6 +229,22 @@ table {
 .table td a:hover {
   text-decoration: underline;
   color: darkblue;
+}
+
+.table td {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.specification-cell {
+  word-wrap: break-word;
+  white-space: normal;
+  max-width: 200px;
+  overflow-wrap: break-word;
+}
+
+table td, table th {
+  vertical-align: middle;
 }
 
 </style>
