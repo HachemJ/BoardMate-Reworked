@@ -65,7 +65,7 @@ onMounted(async () => {
 
               <!-- Left: Event Name & Board Game -->
               <div class="col-md-6 text-start">
-                <h1 class="fw-bold display-4">{{ eventName }}</h1>
+                <h1 class="fw-bold display-4" style="font-size: 3rem;">{{ eventName }}</h1>
 
                 <p class="mt-3 text-muted" style="font-size: 1.1rem;">
                   <strong>Board Game:</strong>
@@ -81,6 +81,8 @@ onMounted(async () => {
                     <p><strong>Date:</strong> {{ eventDetails.eventDate }}</p>
                     <p><strong>Start Time:</strong> {{ eventDetails.startTime }}</p>
                     <p><strong>End Time:</strong> {{ eventDetails.endTime }}</p>
+                    <p><strong>Location:</strong> {{ eventDetails.location }}</p>
+                    <p><strong>Max Spots:</strong> {{ eventDetails.maxSpot }}</p>
                   </div>
 
                   <!-- Description -->
