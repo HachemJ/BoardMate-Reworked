@@ -26,64 +26,72 @@
           <div v-if="selectedTab === 'Create an Event'">
             <h4>Complete the Form Below to Create a New Event</h4>
             <form @submit.prevent="createEvent">
-              <div class="mb-3">
-                <label for="eventName" class="form-label">Event Name</label>
-                <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" required>
-              </div>
-              <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" v-model="eventData.description" required></textarea>
-              </div>
-              <div class="mb-3">
-                <label for="maxSpot" class="form-label">Maximum Spots</label>
-                <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot" required>
-              </div>
-              <div class="mb-3">
-                <label for="date" class="form-label">Date</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  id="date"
-                  v-model="eventData.date"
-                  :min="minDate"
-                  required
-                  @keydown.prevent
-                />
+              <div class="row">
+                <!-- Left column -->
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="eventName" class="form-label">Event Name</label>
+                    <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="maxSpot" class="form-label">Maximum Spots</label>
+                    <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input
+                        type="date"
+                        class="form-control"
+                        id="date"
+                        v-model="eventData.date"
+                        :min="minDate"
+                        required
+                        @keydown.prevent
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" v-model="eventData.description" required></textarea>
+                  </div>
+                </div>
 
+                <!-- Right column -->
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="boardGame" class="form-label">Select Board Game</label>
+                    <select class="form-control" v-model="eventData.boardGameId" required>
+                      <option disabled value="">Choose a board game</option>
+                      <option
+                          v-for="game in boardGames"
+                          :key="game.gameID"
+                          :value="game.gameID"
+                      >
+                        {{ game.name }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="startTime" class="form-label">Start Time</label>
+                    <input type="time" class="form-control" id="startTime" v-model="eventData.startTime" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="endTime" class="form-label">End Time</label>
+                    <input
+                        type="time"
+                        class="form-control"
+                        id="endTime"
+                        v-model="eventData.endTime"
+                        :min="formattedStartTime"
+                        required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" v-model="eventData.location" required>
+                  </div>
+                </div>
               </div>
-              <div class="mb-3">
-                <label for="startTime" class="form-label">Start Time</label>
-                <input type="time" class="form-control" id="startTime" v-model="eventData.startTime" required>
-              </div>
-              <div class="mb-3">
-                <label for="endTime" class="form-label">End Time</label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="endTime"
-                  v-model="eventData.endTime"
-                  :min="formattedStartTime"
-                  required
-                />
 
-              </div>
-              <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input type="text" class="form-control" id="location" v-model="eventData.location" required>
-              </div>
-              <div class="mb-3">
-                <label for="boardGame" class="form-label">Select Board Game</label>
-                <select class="form-control" v-model="eventData.boardGameId" required>
-                  <option disabled value="">Choose a board game</option>
-                  <option
-                    v-for="game in boardGames"
-                    :key="game.gameID"
-                    :value="game.gameID"
-                  >
-                    {{ game.name }}
-                  </option>
-                </select>
-              </div>
               <button type="submit" class="btn btn-info">Create Event</button>
             </form>
           </div>
@@ -91,94 +99,103 @@
           <div v-else-if="selectedTab === 'Update/Delete My Events'">
             <h4>Update/Delete an Existing Event</h4>
             <form @submit.prevent="updateEvent">
-              <!-- Dropdown Menu for Selecting an Event -->
-              <div class="mb-3">
-                <select class="form-control" id="selectedEvent" v-model="selectedEventId">
-                  <option disabled value="">Select the Event to be Updated/Deleted</option>
-                  <option v-for="event in myEvents" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
-                </select>
-              </div>
+              <div class="row">
+                <!-- Left Column -->
+                <div class="col-md-6">
+                  <!-- Dropdown Menu for Selecting an Event -->
+                  <div class="mb-3">
+                    <label for="eventName" class="form-label">Select Event to be Updated/Deleted</label>
+                    <select class="form-control" id="selectedEvent" v-model="selectedEventId">
+                      <option v-for="event in myEvents" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
+                    </select>
+                  </div>
 
-              <div class="mb-3">
-                <label for="eventName" class="form-label">Event Name</label>
-                <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" 
-                :placeholder="events.find(event => event.eventID === selectedEventId)?.name || 'Event Name'" 
-                required>
-              </div>
-              <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" id="description" v-model="eventData.description"
-                :placeholder="events.find(event => event.eventID === selectedEventId)?.description || 'Description'" 
-                  required></textarea>
-              </div>
-              <div class="mb-3">
-                <label for="maxSpot" class="form-label">Maximum Spots</label>
-                <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot" 
-                :placeholder="events.find(event => event.eventID === selectedEventId)?.maxSpot || 'Maximum Spots'" 
-                required>
-              </div>
-              <div class="mb-3">
-                <label for="date" class="form-label">Date</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  id="date"
-                  v-model="eventData.date"
-                  :min="minDate"
-                  required
-                  @keydown.prevent
-                />
+                  <div class="mb-3">
+                    <label for="eventName" class="form-label">Event Name</label>
+                    <input type="text" class="form-control" id="eventName" v-model="eventData.eventName"
+                           :placeholder="events.find(event => event.eventID === selectedEventId)?.name || 'Event Name'"
+                           required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="maxSpot" class="form-label">Maximum Spots</label>
+                    <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot"
+                           :placeholder="events.find(event => event.eventID === selectedEventId)?.maxSpot || 'Maximum Spots'"
+                           required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="date" class="form-label">Date</label>
+                    <input
+                        type="date"
+                        class="form-control"
+                        id="date"
+                        v-model="eventData.date"
+                        :min="minDate"
+                        required
+                        @keydown.prevent
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" v-model="eventData.description"
+                              :placeholder="events.find(event => event.eventID === selectedEventId)?.description || 'Description'"
+                              required></textarea>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <button
+                        type="submit"
+                        class="btn btn-info me-2"
+                        :disabled="!selectedEventId"
+                    >
+                      Update Event
+                    </button>
 
-              </div>
-              <div class="mb-3">
-                <label for="startTime" class="form-label">Start Time</label>
-                <input type="time" class="form-control" id="startTime" v-model="eventData.startTime" required>
-              </div>
-              <div class="mb-3">
-                <label for="endTime" class="form-label">End Time</label>
-                <input
-                  type="time"
-                  class="form-control"
-                  id="endTime"
-                  v-model="eventData.endTime"
-                  :min="formattedStartTime"
-                  required
-                />
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        :disabled="!selectedEventId"
+                        @click="deleteEvent"
+                    >
+                      Delete Event
+                    </button>
+                  </div>
+                </div>
 
-
+                <!-- Right Column -->
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="startTime" class="form-label">Start Time</label>
+                    <input type="time" class="form-control" id="startTime" v-model="eventData.startTime" required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="endTime" class="form-label">End Time</label>
+                    <input
+                        type="time"
+                        class="form-control"
+                        id="endTime"
+                        v-model="eventData.endTime"
+                        :min="formattedStartTime"
+                        required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="location" class="form-label">Location</label>
+                    <input type="text" class="form-control" id="location" v-model="eventData.location"
+                           :placeholder="events.find(event => event.eventID === selectedEventId)?.location || 'Location'"
+                           required>
+                  </div>
+                  <div class="mb-3">
+                    <label for="boardGameUpdate" class="form-label">Select Board Game</label>
+                    <select class="form-control" id="boardGameUpdate" v-model="eventData.boardGameId" required>
+                      <option disabled value="">Choose a board game</option>
+                      <option v-for="game in boardGames" :key="game.gameID" :value="game.gameID">
+                        {{ game.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
               </div>
-              <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <input type="text" class="form-control" id="location" v-model="eventData.location" 
-                :placeholder="events.find(event => event.eventID === selectedEventId)?.location || 'Location'" 
-                required>
-              </div>
-              <div class="mb-3">
-                <label for="boardGameUpdate" class="form-label">Select Board Game</label>
-                <select class="form-control" id="boardGameUpdate" v-model="eventData.boardGameId" required>
-                  <option disabled value="">Choose a board game</option>
-                  <option v-for="game in boardGames" :key="game.gameID" :value="game.gameID">
-                    {{ game.name }}
-                  </option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                class="btn btn-info me-2"
-                :disabled="!selectedEventId"
-              >
-                Update Event
-              </button>
-
-              <button
-                type="button"
-                class="btn btn-danger"
-                :disabled="!selectedEventId"
-                @click="deleteEvent"
-              >
-                Delete Event
-              </button>
             </form>
+
           </div>
 
           <div v-else-if="selectedTab === 'Browse Available Events'">
@@ -632,6 +649,10 @@ button.btn {
 .table td a:hover {
   text-decoration: underline;
   color: darkblue;
+}
+
+.form-control {
+  max-width: 500px;
 }
 
 </style>
