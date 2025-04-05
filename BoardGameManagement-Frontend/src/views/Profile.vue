@@ -42,7 +42,7 @@
                     type="password"
                     class="form-control"
                     v-model="editedProfile.password"
-                    placeholder="Password"
+                    placeholder="Confirm Password"
                   />
                 </div>
                 <div class="mb-3">
@@ -90,15 +90,26 @@
           v-if="selectedTab === 'boardgames' && userProfile.status === 'owner'"
           class="tab-pane fade show active"
         >
+          <div class="d-flex justify-content-between mb-4">
+            <h3>My Board Games</h3>
+            <button class="btn btn-success">
+              <i class="fas fa-plus"></i> Add New Game
+            </button>
+          </div>
           <div class="row">
+            <div v-if="userBoardgames.length === 0" class="col-12 text-center">
+              <p class="text-muted">You don't have any board games yet.</p>
+            </div>
             <div v-for="game in userBoardgames" :key="game.id" class="col-md-4 mb-4">
-              <div class="card">
+              <div class="card h-100">
                 <div class="card-body">
                   <h5 class="card-title">{{ game.name }}</h5>
                   <p class="card-text">{{ game.description }}</p>
                   <div class="d-flex justify-content-between align-items-center">
-                    <span class="badge bg-info">{{ game.status }}</span>
-                    <button class="btn btn-sm btn-outline-primary">View Details</button>
+                    <span class="badge" :class="game.isAvailable ? 'bg-success' : 'bg-danger'">
+                      {{ game.status }}
+                    </span>
+                   <!-- <button class="btn btn-sm btn-outline-primary">View Details</button> -->
                   </div>
                 </div>
               </div>
@@ -225,12 +236,85 @@ export default {
       }
     },
     async fetchUserEvents(userId) {
-      const res = await axiosClient.get(`/registrations/players/${userId}`);
-      this.userEvents = res.data;
+      try {
+        console.log("Fetching events for user:", userId);
+        // First, get all registrations for this user
+        const registrationsRes = await axiosClient.get(`/registrations/players/${userId}`);
+        console.log("Registrations API response:", registrationsRes.data);
+        
+        if (!registrationsRes.data || registrationsRes.data.length === 0) {
+          console.log("No registrations found for this user");
+          this.userEvents = [];
+          return;
+        }
+        
+        // For each registration, fetch the full event details
+        const events = [];
+        for (const registration of registrationsRes.data) {
+          const eventId = registration.eventID;
+          try {
+            const eventRes = await axiosClient.get(`/events/${eventId}`);
+            console.log("Event data:", eventRes.data);
+            
+            events.push({
+              id: eventRes.data.eventID,
+              name: eventRes.data.name,
+              description: eventRes.data.description,
+              date: eventRes.data.eventDate,
+              startTime: eventRes.data.startTime,
+              endTime: eventRes.data.endTime,
+              status: this.determineEventStatus(eventRes.data),
+              maxSpot: eventRes.data.maxSpot
+            });
+          } catch (error) {
+            console.error(`Error fetching event ${eventId}:`, error);
+          }
+        }
+        
+        this.userEvents = events;
+      } catch (error) {
+        console.error("Error fetching user events:", error);
+        this.userEvents = [];
+      }
+    },
+    determineEventStatus(event) {
+      const eventDate = new Date(event.eventDate);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      
+      if (eventDate < today) {
+        return "completed";
+      } else if (eventDate.getTime() === today.getTime()) {
+        return "ongoing";
+      } else {
+        return "upcoming";
+      }
     },
     async fetchOwnedGames(userId) {
-      const res = await axiosClient.get(`/boardgamecopies/byplayer/${userId}`);
-      this.userBoardgames = res.data;
+      try {
+        console.log("Fetching board games for owner:", userId);
+        const res = await axiosClient.get(`/boardgamecopies/byplayer/${userId}`);
+        console.log("Board games API response:", res.data);
+        
+        if (!res.data || res.data.length === 0) {
+          console.log("No board games found for this user");
+          this.userBoardgames = [];
+          return;
+        }
+        
+        this.userBoardgames = res.data.map(gameCopy => {
+          return {
+            id: gameCopy.boardGameCopyId,
+            name: gameCopy.boardGameName,
+            description: gameCopy.specification,
+            status: gameCopy.isAvailable ? "Available" : "Unavailable",
+            isAvailable: gameCopy.isAvailable
+          };
+        });
+      } catch (error) {
+        console.error("Error fetching owned games:", error);
+        this.userBoardgames = [];
+      }
     },
     startEditing() {
       this.isEditing = true;
