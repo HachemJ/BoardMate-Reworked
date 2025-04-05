@@ -159,7 +159,7 @@ async function confirmBorrow() {
                   <td>{{ game.specification }}</td>
                   <td>{{ game.playerName }}</td>
                   <td>
-                    <button class="btn btn-info" @click="selectGame(game.boardGameCopyId)">
+                    <button class="btn btn-info" @click="selectGame(game.boardGameCopyId)" v-if="authStore.user.username !== game.playerName">
                       Borrow
                     </button>
                   </td>
