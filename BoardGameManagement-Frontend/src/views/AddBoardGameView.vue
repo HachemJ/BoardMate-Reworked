@@ -42,12 +42,17 @@ async function createBoardGame() {
   }
 }
 
-function submitBoardGame() {
-  createBoardGame();
-  console.log('Created Board Game:', boardGameData)
-  alert('Board Game Created Successfully!')
+async function submitBoardGame() {
+  if (Number(boardGameData.minPlayers) >= Number(boardGameData.maxPlayers)) {
+    alert("Minimum number of players must be less than maximum number of players.");
+    return;
+  }
+  
+  await createBoardGame();
+  console.log('Created Board Game:', boardGameData);
+  alert('Board Game Created Successfully!');
   // Reset form after submission
-  Object.keys(boardGameData).forEach(key => boardGameData[key] = '')
+  Object.keys(boardGameData).forEach(key => boardGameData[key] = '');
 }
 
 </script>

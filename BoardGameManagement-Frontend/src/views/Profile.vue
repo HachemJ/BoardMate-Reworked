@@ -42,7 +42,7 @@
                     type="password"
                     class="form-control"
                     v-model="editedProfile.password"
-                    placeholder="Confirm Password"
+                    placeholder="confirm/alter password"
                   />
                 </div>
                 <div class="mb-3">
@@ -92,9 +92,7 @@
         >
           <div class="d-flex justify-content-between mb-4">
             <h3>My Board Games</h3>
-            <button class="btn btn-success">
-              <i class="fas fa-plus"></i> Add New Game
-            </button>
+            <!-- Removed the Add New Game button -->
           </div>
           <div class="row">
             <div v-if="userBoardgames.length === 0" class="col-12 text-center">
