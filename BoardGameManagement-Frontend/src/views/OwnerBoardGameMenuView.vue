@@ -100,6 +100,7 @@ async function deleteBoardGameCopy(id) {
 
             <!-- Board Game Table -->
             <div>
+              <small> Notice: Click on the board game name to view more details</small>
               <table class="table">
                 <thead>
                 <tr>
@@ -156,7 +157,9 @@ async function deleteBoardGameCopy(id) {
               </tr>
               </tbody>
             </table>
-            <small v-if="myBoardGameCopies.length > 0" class="d-flex justify-content-center"> Notice: deleting the board game copy will delete all borrow requests related to it</small>
+            <small v-if="myBoardGameCopies.length > 0" class="d-flex justify-content-center">
+              Notice: deleting the board game copy will delete all borrow requests related to it
+            </small>
           </div>
 
         </div>

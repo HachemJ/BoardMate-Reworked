@@ -29,30 +29,35 @@ async function createBoardGame() {
 
   try {
     await axiosClient.post("/boardgames", newBoardGame);
+    console.log('Created Board Game:', boardGameData);
+    alert('Board Game Created Successfully!');
+
+
+    boardGames.push(newBoardGame);
+    Object.keys(boardGameData).forEach(key => boardGameData[key] = '');
+
+
+    if(useAuthStore().user.isAOwner){
+      await router.push("/pages/ownerboardgame");
+    }else {
+      await router.push("/pages/playerboardgame");
+    }
+
   } catch (e) {
     console.error(e);
+    const errors = e.response.data.errors; // Extract the errors array
+    alert(`Error received with status ${e.response.status} :\n${errors.join("\n")}`);
   }
 
-  boardGames.push(newBoardGame);
 
-  if(useAuthStore().user.isAOwner){
-    await router.push("/pages/ownerboardgame");
-  }else {
-    await router.push("/pages/playerboardgame");
-  }
 }
 
 async function submitBoardGame() {
-  if (Number(boardGameData.minPlayers) >= Number(boardGameData.maxPlayers)) {
-    alert("Minimum number of players must be less than maximum number of players.");
-    return;
-  }
-  
+
   await createBoardGame();
-  console.log('Created Board Game:', boardGameData);
-  alert('Board Game Created Successfully!');
+
   // Reset form after submission
-  Object.keys(boardGameData).forEach(key => boardGameData[key] = '');
+
 }
 
 </script>

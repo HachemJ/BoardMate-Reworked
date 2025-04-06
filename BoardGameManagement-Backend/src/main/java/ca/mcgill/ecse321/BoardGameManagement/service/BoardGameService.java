@@ -32,6 +32,12 @@ public class BoardGameService {
   public BoardGame createBoardGame(@Valid BoardGameCreationDto boardGameDto) {
     validateBoardGameDto(boardGameDto);
 
+    for (BoardGame boardGame : boardGameRepository.findAll()){
+      if (boardGame.getName().trim().equals(boardGameDto.getName().trim())){
+        throw new GlobalException(HttpStatus.CONFLICT, boardGameDto.getName() + " already exists");
+      }
+    }
+
     BoardGame boardGame = new BoardGame(
         boardGameDto.getMinPlayers(),
         boardGameDto.getMaxPlayers(),
@@ -58,6 +64,12 @@ public class BoardGameService {
     }
 
     validateBoardGameDto(boardGameDto);
+
+    for (BoardGame game : boardGameRepository.findAll()){
+      if ( game.getGameID() != boardGameID && game.getName().trim().equals(boardGameDto.getName().trim())){
+        throw new GlobalException(HttpStatus.CONFLICT, boardGameDto.getName() + " already exists");
+      }
+    }
 
     boardGame.setMinPlayers(boardGameDto.getMinPlayers());
     boardGame.setMaxPlayers(boardGameDto.getMaxPlayers());
