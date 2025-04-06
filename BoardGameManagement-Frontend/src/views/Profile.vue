@@ -82,6 +82,7 @@
             class="nav-link"
             :class="{ active: selectedTab === tab.id }"
             href="#"
+            style="color: black !important;"
             @click.prevent="selectedTab = tab.id"
           >
             {{ tab.name }}

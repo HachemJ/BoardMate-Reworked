@@ -20,7 +20,7 @@ const tabs = ['View All Board Games', 'My Board Game Copies']
 const selectedTab = ref(tabs[0])
 const searchQuery = ref("");
 const boardGames = ref([]);
-const myBoardGameCopies = ref({});
+const myBoardGameCopies = ref([]);
 
 
 async function fetchBoardGames(){
@@ -156,6 +156,7 @@ async function deleteBoardGameCopy(id) {
               </tr>
               </tbody>
             </table>
+            <small v-if="myBoardGameCopies.length > 0" class="d-flex justify-content-center"> Notice: deleting the board game copy will delete all borrow requests related to it</small>
           </div>
 
         </div>
