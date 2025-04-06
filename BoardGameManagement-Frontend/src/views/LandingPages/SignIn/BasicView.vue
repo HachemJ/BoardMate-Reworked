@@ -48,7 +48,6 @@ async function handleAuth() {
       const user = res.data;
       authStore.login(user.playerID, user.name, user.email, user.isAOwner);
 
-      alert("Logged in successfully!");
       console.log("Logged in user:", authStore.user);
       router.push("/profile");
     } catch (error) {
@@ -73,7 +72,6 @@ async function handleAuth() {
       const user = res.data;
       authStore.login(user.playerID, user.name, user.email, user.isAOwner);
 
-      alert("Logged in successfully!");
       console.log("Logged in user:", authStore.user);
       router.push("/profile");
     } catch (error) {

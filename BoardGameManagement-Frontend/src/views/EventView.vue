@@ -346,7 +346,6 @@ async function fetchMyEvents() {
     myEvents.value = response.data;
   } catch (error) {
     console.error("Error fetching my events:", error);
-    alert('Failed to fetch your events. Please try again.');
   }
 }
 

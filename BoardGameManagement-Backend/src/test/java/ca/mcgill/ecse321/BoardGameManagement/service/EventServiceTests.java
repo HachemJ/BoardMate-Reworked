@@ -339,6 +339,7 @@ public class EventServiceTests {
     List<Event> events = List.of(event1, event2);
 
     when(eventRepository.findByOwner_PlayerID(VALID_PLAYER_ID)).thenReturn(events);
+    when(playerRepository.existsById(VALID_PLAYER_ID)).thenReturn(true);
 
     // Act
     List<Event> retrievedEvents = eventService.getEventsByOwner(VALID_PLAYER_ID);

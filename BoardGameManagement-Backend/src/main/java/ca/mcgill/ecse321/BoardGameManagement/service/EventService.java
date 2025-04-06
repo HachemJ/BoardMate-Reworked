@@ -150,7 +150,7 @@ public class EventService {
   @Transactional
   public List<Event> getEventsByOwner(int ownerId) {
     List<Event> events = eventRepository.findByOwner_PlayerID(ownerId);
-    if (events.isEmpty()) {
+    if (!playerRepository.existsById(ownerId)) {
       throw new IllegalArgumentException("No events found for owner ID: " + ownerId);
     }
     return events;

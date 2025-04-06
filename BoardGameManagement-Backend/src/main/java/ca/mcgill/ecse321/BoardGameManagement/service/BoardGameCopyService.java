@@ -115,7 +115,13 @@ public class BoardGameCopyService {
         ArrayList<BorrowRequest> borrowRequests =
                 borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(boardGameCopy.getPlayer());
         for (BorrowRequest borrowRequest : borrowRequests) {
+
             if (borrowRequest.getBoardGameCopy().getSpecificGameID() == boardGameCopyId){
+                if (borrowRequest.getRequestStatus().equals(BorrowRequest.RequestStatus.Accepted) ||
+                borrowRequest.getRequestStatus().equals(BorrowRequest.RequestStatus.InProgress)){
+                    throw new GlobalException(HttpStatus.CONFLICT,
+                            "This game is linked to a borrow request that is accepted or in progress");
+                }
                 borrowRequestRepository.delete(borrowRequest);
             }
         }

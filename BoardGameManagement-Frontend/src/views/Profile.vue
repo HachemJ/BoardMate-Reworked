@@ -120,8 +120,15 @@
           </div>
         </div>
 
+
         <div v-if="selectedTab === 'events'" class="tab-pane fade show active">
+          <div class="d-flex justify-content-between mb-4">
+            <h3>My Events</h3>
+          </div>
           <div class="row">
+            <div v-if="userBoardgames.length === 0" class="col-12 text-center">
+              <p class="text-muted">You don't have any events yet.</p>
+            </div>
             <div v-for="event in userEvents" :key="event.id" class="col-md-6 mb-4">
               <div class="card">
                 <div class="card-body">
