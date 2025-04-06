@@ -22,6 +22,7 @@
               </template>
               <template v-else>
                 <div class="mb-3">
+                  <label for="nameInput" class="form-label">Name</label>
                   <input
                     type="text"
                     class="form-control"
@@ -30,6 +31,7 @@
                   />
                 </div>
                 <div class="mb-3">
+                  <label for="emailInput" class="form-label">Email</label>
                   <input
                     type="email"
                     class="form-control"
@@ -38,6 +40,7 @@
                   />
                 </div>
                 <div class="mb-3">
+                  <label for="passwordInput" class="form-label">Password</label>
                   <input
                     type="password"
                     class="form-control"
@@ -46,6 +49,7 @@
                   />
                 </div>
                 <div class="mb-3">
+                  <label for="roleSelect" class="form-label">Account Type</label>
                   <select v-model="editedProfile.isAOwner" class="form-control">
                     <option :value="false">Player</option>
                     <option :value="true">Owner</option>
@@ -383,5 +387,82 @@ export default {
 .badge {
   font-size: 0.8rem;
   padding: 0.5em 0.8em;
+}
+
+.nav-link {
+  cursor: pointer;
+  margin-bottom: 5px;
+  padding: 10px;
+  text-align: center;
+  color: white !important;
+}
+.bg-secondary {
+  background-color: grey !important;
+}
+.bg-success {
+  background-color: green !important;
+}
+
+/* Input, Textarea, and Select Styles */
+/* General input styles */
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  color: #495057;
+  background-color: #fff;
+  border: 1.5px solid #ced4da;
+  border-radius: 0.5rem;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Glow on focus */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+  border-color: #28a745;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Green glow */
+}
+
+/* Custom dropdown arrow */
+select {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20fill%3D'%23333'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%20width%3D'24'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M7%2010l5%205%205-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1rem;
+  padding-right: 2rem; /* Make space for the arrow */
+}
+
+/* Remove inner arrows in time input (Chrome) */
+input[type="time"]::-webkit-inner-spin-button,
+input[type="time"]::-webkit-calendar-picker-indicator,
+select::-ms-expand {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Label spacing */
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #343a40;
 }
 </style>
