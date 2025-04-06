@@ -213,6 +213,13 @@ const isOwner = ref(authStore.user.isAOwner);  // This will control if the Route
                 <span>Board Game Menu</span>
               </RouterLink>
 
+              <RouterLink
+                :to="{ name: 'faqs'}"
+                class="dropdown-item border-radius-md"
+              >
+                <span>FAQs</span>
+              </RouterLink>
+
             </div>
           </li>
           <li class="nav-item mx-2">

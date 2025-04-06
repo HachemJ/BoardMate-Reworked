@@ -35,6 +35,7 @@ import AddBoardGameView from "@/views/AddBoardGameView.vue";
 import UpdateBoardGameView from "@/views/UpdateBoardGameView.vue";
 import UpdateBoardGameCopyView from "@/views/UpdateBoardGameCopyView.vue";
 import EventDetailView from "@/views/EventDetailView.vue";
+import FAQsView from "@/views/FAQsView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -152,6 +153,13 @@ const router = createRouter({
       name: "eventDetail",
       component: EventDetailView,
     },
+
+    {
+      path: "/pages/faqs",
+      name: "faqs",
+      component: FAQsView,
+    },
+
     {
       path: "/sections/page-sections/page-headers",
       name: "page-headers",
