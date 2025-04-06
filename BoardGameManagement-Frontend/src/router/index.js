@@ -119,6 +119,12 @@ const router = createRouter({
     },
 
     {
+      path: "/pages/playerboardgame/addboardgame",
+      name: "playerAddBoardGame",
+      component: AddBoardGameView,
+    },
+
+    {
       path: "/pages/ownerboardgame/updateboardgame",
       name: "ownerUpdateBoardGame",
       component: UpdateBoardGameView,
