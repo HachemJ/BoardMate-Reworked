@@ -61,6 +61,8 @@ onMounted(async () => {
 
           <!-- Board Game Table -->
           <div>
+            <small> Notice: Click on the board game name to view more details</small>
+            <br>
             <table class="table">
             <thead>
               <tr>
