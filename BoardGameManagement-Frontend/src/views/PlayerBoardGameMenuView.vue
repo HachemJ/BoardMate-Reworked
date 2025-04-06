@@ -44,9 +44,6 @@ onMounted(async () => {
           <!-- Page Title and Add Board Game Button-->
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0">Search and Browse Board Games</h2>
-            <router-link :to="{ name: 'playerAddBoardGame' }">
-              <button class="btn btn-primary">Add Board Game</button>
-            </router-link>
           </div>
 
           <!-- Search Bar -->
