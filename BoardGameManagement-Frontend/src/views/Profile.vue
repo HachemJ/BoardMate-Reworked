@@ -346,6 +346,8 @@ export default {
         this.authStore.user.isAOwner = dto.isAOwner;
         this.isEditing = false;
         this.editedProfile.password = "";
+
+        window.location.reload();
       } catch (error) {
         console.error("Failed to update profile:", error);
       }
