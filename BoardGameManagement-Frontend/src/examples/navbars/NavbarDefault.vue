@@ -178,23 +178,8 @@ const isOwner = ref(authStore.user.isAOwner);  // This will control if the Route
                 <span>Event Menu</span>
               </RouterLink>
 
-
-
-              <RouterLink
-                  v-if="isOwner"
-                  :to="{ name: 'owner borrow request'}"
-                  class="dropdown-item border-radius-md"
-
-              >
-                <span>Manage Incoming Borrow Requests</span>
-              </RouterLink>
- 
-
-              <RouterLink
-                  :to="{ name: 'player borrow request'}"
-                  class="dropdown-item border-radius-md"
-              >
-                <span>See my Borrow Requests</span>
+              <RouterLink :to="{ name: 'borrowRequestMenu' }" class="dropdown-item border-radius-md">
+                <span>Borrow Request Menu</span>
               </RouterLink>
 
               <RouterLink
