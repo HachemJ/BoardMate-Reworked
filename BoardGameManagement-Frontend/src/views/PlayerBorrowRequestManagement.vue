@@ -69,6 +69,7 @@ async function cancelRequest(id, gameName) {
     requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
+    const errors = error.response.data.errors; // Extract the errors array
     alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error accepting request:", error);
   }

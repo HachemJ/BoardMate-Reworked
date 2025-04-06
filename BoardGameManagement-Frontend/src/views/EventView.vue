@@ -529,16 +529,18 @@ async function cancelRegistration() {
 
   try {
     await axiosClient.delete("/registrations/" + authStore.user.id + "/" + selectedEventId.value);
-  } catch (e) {
-    console.error(e);
-    alert("Failed to cancel registration. Please try again.");
+    alert("Registration canceled!");
+  } catch (error) {
+    console.error(error);
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
   }
 
   console.log("Cancelled registration for Event ID:", selectedEventId.value);
     for (const event of events.value) {
     await getRegistrationStatus(event.eventID);
   }
-  alert("Registration canceled!");
+
 }
 
 async function getRegistrationStatus(id) {
