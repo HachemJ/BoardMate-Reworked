@@ -200,6 +200,7 @@
 
           <div v-else-if="selectedTab === 'Browse Available Events'">
             <h4>Select an Event from the Table Below</h4>
+            <small> Notice: Click on the event name for further details</small>
             <table class="table">
               <thead>
                 <tr>

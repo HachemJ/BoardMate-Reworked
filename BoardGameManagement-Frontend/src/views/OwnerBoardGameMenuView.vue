@@ -40,10 +40,16 @@ onMounted(async () => {
 })
 
 async function deleteBoardGameCopy(id) {
-  await axiosClient.delete(`boardgamecopies/${id}` );
+  try {
+  await axiosClient.delete(`boardgamecopies/${id}`);
   console.log("Deleting board game copy with id: " + id);
   alert("Board game copy deleted!");
   await fetchBoardGames();
+  }catch(error){
+    console.log(error)
+    const errors = error.response.data.errors; // Extract the errors array
+    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
+  }
 }
 
 </script>
