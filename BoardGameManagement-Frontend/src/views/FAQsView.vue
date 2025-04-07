@@ -18,81 +18,57 @@ import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
           <div class="accordion" id="faqAccordion">
 
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingOne">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+              <h3 class="accordion-header" id="headingOne">
                   1. How can I join an event?
-                </button>
-              </h2>
-              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#faqAccordion">
+              </h3>
                 <div class="accordion-body">
                   To join an event, navigate to Menu -> Event Menu, select the Browse Available Events tab on the left of the page, choose the event in that table that you wish to join, and click on the "Join" button. You will need to log in or create an account if you haven't already.
                 </div>
-              </div>
             </div>
 
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingTwo">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+              <h3 class="accordion-header" id="headingTwo">
                   2. How can I become a game owner?
-                </button>
-              </h2>
-              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#faqAccordion">
+              </h3>
                 <div class="accordion-body">
                   To become a game owner, you need to create an account selecting the option "I want to be an owner". If you already have an account, you can update your profile to become an owner by navigating to My Profile -> EDIT PROFILE. Once you are an owner, you can create and manage your own board game copies.
                 </div>
-              </div>
             </div>
 
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingThree">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+              <h3 class="accordion-header" id="headingThree">
                   3. How can I see all the copies of a board game?
-                </button>
-              </h2>
-              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#faqAccordion">
+              </h3>
                 <div class="accordion-body">
                   To see all the copies of a board game type, navigate to Menu -> Board Game Menu, select the View All Board Games tab on the left of the page, and click on the board game you are interested in. You will see a list of all the copies available for that game.
                 </div>
-              </div>
             </div>
 
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingFour">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour">
+              <h3 class="accordion-header" id="headingFour">
                   4. How can I borrow a board game copy?
-                </button>
-              </h2>
-              <div id="collapseFour" class="accordion-collapse collapse show" aria-labelledby="headingFour" data-bs-parent="#faqAccordion">
+              </h3>
                 <div class="accordion-body">
                   To borrow a board game copy, you need to follow the 3rd instruction above. Once you see a list of board game copies, click the borrow button next to the copy you want to borrow. You will then need to fill out the start and end dates for the borrowing period. If you are the owner of the game, you will not be able to borrow button.
                 </div>
-              </div>
             </div>
 
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingFive">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="true" aria-controls="collapseFive">
+              <h3 class="accordion-header" id="headingFive">
                   5. As an owner, can I borrow a board game copy from another owner?
-                </button>
-              </h2>
-              <div id="collapseFive" class="accordion-collapse collapse show" aria-labelledby="headingFive" data-bs-parent="#faqAccordion">
+              </h3>
                 <div class="accordion-body">
                   Absolutely! As an owner, you can borrow a board game copy from another owner.
                 </div>
-              </div>
             </div>
 
             <div class="accordion-item">
-              <h2 class="accordion-header" id="headingSix">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSix" aria-expanded="true" aria-controls="collapseSix">
+              <h3 class="accordion-header" id="headingSix">
                   6. Can I create a new board game?
-                </button>
-              </h2>
-              <div id="collapseSix" class="accordion-collapse collapse show" aria-labelledby="headingSix" data-bs-parent="#faqAccordion">
+              </h3>
                 <div class="accordion-body">
                   Yes, you can create a new board game by navigating to Menu -> Board Game Menu, selecting the View All Board Games tab on the left of the page, and clicking on the Add Board Game button. You will need to fill out the form with the board game details.
                 </div>
-              </div>
             </div>
 
           </div>
