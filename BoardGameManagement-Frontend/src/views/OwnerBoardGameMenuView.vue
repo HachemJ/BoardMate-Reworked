@@ -225,12 +225,6 @@ button.btn {
   margin-top: 1rem; /* Add some top margin for the button */
 }
 
-/* Board game table style */
-
-table {
-  width: 110%;
-}
-
 .table td a {
   color: #0d6efd;
   text-decoration: none;
@@ -253,8 +247,62 @@ table {
   overflow-wrap: break-word;
 }
 
-table td, table th {
-  vertical-align: middle;
+/* === Clean and aligned table layout === */
+.table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
 }
+
+/* Header and cell alignment */
+.table th,
+.table td {
+  vertical-align: middle;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Optional row hover effect */
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+/* Clean router-links inside the table */
+.table td a {
+  color: #0d6efd;
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+
+.table td a:hover {
+  text-decoration: underline;
+  color: darkblue;
+}
+
+/* Column widths for Game Name, Min Players, Max Players */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 50%;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 25%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 25%;
+}
+
 
 </style>
