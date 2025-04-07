@@ -296,7 +296,6 @@ function getStatusBadgeClass(status) {
                 <tr>
                   <th>Game requested</th>
                   <th>Borrower name</th>
-                  <th>Borrower email</th>
                   <th>Start of loan</th>
                   <th>End of loan</th>
                   <th>Action</th>
@@ -308,7 +307,6 @@ function getStatusBadgeClass(status) {
                 >
                   <td>{{ request.specificGameName }}</td>
                   <td>{{ request.borrowerName }}</td>
-                  <td>{{ request.borrowerEmail }}</td>
                   <td>{{ request.startOfLoan }}</td>
                   <td>{{ request.endOfLoan}}</td>
                   <td v-if="shouldShowButton(request.requestStatus)">
