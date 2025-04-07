@@ -643,8 +643,46 @@ button.btn {
   margin-top: 1rem;
 }
 
+/* Align all table cells properly */
+.table th,
+.table td {
+  vertical-align: middle;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 12px;
+}
+
+/* Column widths */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 35%;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 20%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 25%;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 20%;
+}
+
+/* Make links inside table behave properly */
 .table td a {
   color: #0d6efd;
+  display: inline-block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-decoration: none;
 }
 
@@ -653,8 +691,14 @@ button.btn {
   color: darkblue;
 }
 
+
 .form-control {
   max-width: 500px;
+}
+
+.table {
+  table-layout: fixed;
+  width: 100%;
 }
 
 </style>
