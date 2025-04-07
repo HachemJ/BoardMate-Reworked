@@ -66,7 +66,7 @@ public class BoardGameIntegrationTests {
   @Test
   @Order(0)
   public void testCreateValidBoardGame() {
-    BoardGameCreationDto request = new BoardGameCreationDto(2, 4, "Monopoly", "A trading board game");
+    BoardGameCreationDto request = new BoardGameCreationDto(2, 4, "Monopoly2", "A trading board game");
     ResponseEntity<BoardGameResponseDto> response = client.postForEntity("/boardgames", request, BoardGameResponseDto.class);
 
     assertNotNull(response.getBody());
