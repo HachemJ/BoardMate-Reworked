@@ -728,8 +728,6 @@ button.btn {
   margin: 0;
 }
 
-
-
 .form-control {
   max-width: 100%;
 }
@@ -750,11 +748,6 @@ small {
   border-radius: 0.5rem;
   border: 1px solid #dee2e6;
   transition: background-color 0.3s ease;
-}
-
-.nav-pills .nav-link:hover {
-  background-color: #198754 !important;
-  color: white !important;
 }
 
 .table thead th {
