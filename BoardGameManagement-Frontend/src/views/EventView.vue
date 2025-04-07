@@ -710,9 +710,13 @@ button.btn {
 }
 
 .container-fluid {
-  max-width: 1200px;
-  margin: auto;
+  width: 100%;
+  padding-left: 24px;
+  padding-right: 24px;
+  margin: 0;
 }
+
+
 
 .form-control {
   max-width: 100%;
@@ -748,6 +752,10 @@ small {
   z-index: 1;
 }
 
+.col-lg-3,
+.col-md-4 {
+  padding-left: 0 !important;
+}
 
 
 </style>
