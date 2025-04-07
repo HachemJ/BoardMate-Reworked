@@ -2,14 +2,19 @@
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {onMounted, ref} from "vue";
-import {useRoute} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import axios from "axios";
+import {useAuthStore} from "@/stores/authStore.js";
+
+const authStore = useAuthStore();
 
 const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
 const route = useRoute();
+const router = useRouter();
+
 const eventName = route.params.eventname;
 const eventDetails = ref({
   eventName: '',
@@ -23,6 +28,15 @@ const eventDetails = ref({
   boardGameName: '',
 });
 
+var eventID = null; // Initialize eventID variable
+var registrationStatus = "Loading..."; // Initialize registrationStatus variable
+
+/**
+ * Fetches an event ID given an event's name. Assumes event names are unique.
+ * @param eventName - The name of the event to search for.
+ * @return {Promise<number|null>} - The ID of the event if found, otherwise null.
+ * @throws {Error} - Throws an error if the API request fails.
+ */
 async function fetchEventID() {
   try {
     const response = await axiosClient.get("/events");
@@ -40,6 +54,7 @@ async function fetchEventID() {
 onMounted(async () => {
   try {
     const eventId = await fetchEventID();
+    eventID = eventId;
     const response = await axiosClient.get("/events/" + eventId);
     eventDetails.value = response.data;
     console.log("Event Details:", eventDetails.value); // Log the event details
@@ -47,6 +62,96 @@ onMounted(async () => {
     console.error(error);
   }
 })
+
+async function goBack() {
+  await router.push("/pages/event/");
+}
+
+/**
+ * Function to get the registration status for a user for an event.
+ * @param id - The ID of the event to check registration status for.
+ */
+ async function getRegistrationStatus(id) {
+  try {
+    const response = await axiosClient.get(`/registrations/${authStore.user.id}/${id}`);
+    if (response.data === null) {
+      registrationStatus = "Not Registered";
+    } else {
+      registrationStatus = "Registered";
+    }
+  } catch (error) {
+    if (error.response?.status === 404) {
+      registrationStatus = "Not Registered";
+    } else {
+      registrationStatus = "Error";
+    }
+  }
+}
+
+
+//original functions by Niz
+/**
+ * Function to register for an event.
+ */
+async function registerForEvent() {
+  await getRegistrationStatus(eventID);
+
+  if (registrationStatus.value === "Registered") {
+    alert("You are already registered for this event.");
+    return;
+  }
+
+  const registration = {
+    playerID: Number(authStore.user.id),
+    eventID: eventID,
+  }
+    try {
+        const response = await axiosClient.post("/registrations", registration);
+
+        if (response && response.status === 201) {
+            alert("Registration successful!");
+            console.log("Registration successful:", response.data);
+        } else {
+            alert("Failed to register. Please try again.");
+            console.error("Unexpected response:", response);
+        }
+    } catch (e) {
+        console.error(e);
+        alert("You are already registered for this event.");
+    }
+
+}
+
+async function cancelRegistration() {
+  await getRegistrationStatus(eventID);
+
+  if (registrationStatus === "Not Registered") {
+    alert("You are not registered for this event.");
+    return;
+  }
+
+  try {
+    const response = await axiosClient.delete("/registrations/" + authStore.user.id + "/" + eventID);
+
+    if (response && response.status === 204) {
+      alert("Registration cancelled!");
+      console.log("Registration cancelled successfully:", response.data);
+    } else {
+      alert("Failed to cancel registration. Please try again.");
+      console.error("Unexpected response:", response);
+    }
+  } catch (e) {
+    console.error(e);
+    alert("Failed to cancel registration. Please try again.");
+  }
+
+  console.log("Cancelled registration for Event ID:", selectedEventId.value);
+
+  // update registration status for each event
+  for (const event of events.value) {
+    await getRegistrationStatus(event.eventID);
+  }
+}
 
 </script>
 
@@ -95,6 +200,26 @@ onMounted(async () => {
               </div>
 
             </div>
+          </div>
+
+          
+          <button
+              class="btn btn-info me-2"
+              @click="registerForEvent"
+            >
+              Register
+            </button>
+
+            <button
+              class="btn btn-danger"
+              @click="cancelRegistration"
+            >
+              Cancel Registration
+            </button>
+
+          <!-- Back Button -->
+          <div class="text-center mt-3">
+            <button class="btn btn-primary" @click="goBack">Go Back</button>
           </div>
 
         </div>

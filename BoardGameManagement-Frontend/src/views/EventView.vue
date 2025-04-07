@@ -269,7 +269,7 @@ const eventDate = ref(minDate); // default to today or leave empty if preferred
 
 const authStore = useAuthStore();
 const tabs = ['Create an Event', 'Update/Delete My Events', 'Browse Available Events']
-const selectedTab = ref(tabs[0])
+const selectedTab = ref(tabs[2]); //default view is to browse available events
 
 const eventData = reactive({
   eventName: '',
@@ -503,8 +503,15 @@ function selectEvent(id) {
 async function registerForEvent() {
   if (!selectedEventId.value) {
     alert('Please select an event to register.')
-    return
+    return;
   }
+
+  //if already registered, do nothing
+  if (registrationStatus.value[selectedEventId.value] === "Registered") {
+    alert("You are already registered for this event.");
+    return;
+  }
+
   console.log('Registered for Event ID:', selectedEventId.value)
 
   const registration = {
@@ -513,13 +520,13 @@ async function registerForEvent() {
   }
     try {
         await axiosClient.post("/registrations", registration);
+        alert("Registration successful!");
     } catch (e) {
         console.error(e);
     }
   for (const event of events.value) {
     await getRegistrationStatus(event.eventID);
   }
-  alert('Registration successful!')
 }
 
 async function cancelRegistration() {
@@ -528,13 +535,18 @@ async function cancelRegistration() {
     return;
   }
 
+  //if not registered, do nothing
+  if (registrationStatus.value[selectedEventId.value] === "Not Registered") {
+    alert("You are not registered for this event.");
+    return;
+  }
+
   try {
     await axiosClient.delete("/registrations/" + authStore.user.id + "/" + selectedEventId.value);
-    alert("Registration canceled!");
+    alert("Registration cancelled!");
   } catch (error) {
     console.error(error);
     const errors = error.response.data.errors; // Extract the errors array
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
   }
 
   console.log("Cancelled registration for Event ID:", selectedEventId.value);
