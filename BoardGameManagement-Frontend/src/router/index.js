@@ -34,7 +34,7 @@ import UpdateBoardGameView from "@/views/UpdateBoardGameView.vue";
 import UpdateBoardGameCopyView from "@/views/UpdateBoardGameCopyView.vue";
 import EventDetailView from "@/views/EventDetailView.vue";
 import FAQsView from "@/views/FAQsView.vue";
-import borrowRequestMenuView from "@/views/borrowRequestMenuView.vue";
+import BorrowRequestMenuView from "@/views/BorrowRequestMenuView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -151,7 +151,7 @@ const router = createRouter({
     {
       path: "/pages/borrowrequests",
       name: "borrowRequestMenu",
-      component: borrowRequestMenuView,
+      component: BorrowRequestMenuView,
     },
 
     {
