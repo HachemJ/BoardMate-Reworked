@@ -55,10 +55,23 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ## Tech Stack
 
-- 🌐 Backend: Java, Spring Boot, JPA, PostgreSQL
-- 💾 Database: PostgreSQL
-- 🖥️ Frontend: To be determined
-- 🛠️ Build Tools: Gradle
+### 🌐 Backend
+- **Language**: Java  
+- **Framework**: Spring Boot  
+- **Database Layer**: Spring Data JPA  
+- **REST API**: Implemented via Spring MVC  
+- **Database**: PostgreSQL
+
+### 🖥️ Frontend
+- **Framework**: Vue  
+- **State Management**: Pinia  
+- **Routing**: Vue Router  
+
+### 🛠️ Build & Tooling
+- **Backend Build Tool**: Gradle  
+- **Frontend Dev Tool**: Vite  
+- **Package Manager**: npm  
+- **HTTP Client**: Axios
 
 
 # Deliverables
