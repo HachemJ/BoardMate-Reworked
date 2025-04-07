@@ -225,12 +225,6 @@ button.btn {
   margin-top: 1rem; /* Add some top margin for the button */
 }
 
-/* Board game table style */
-
-table {
-  width: 110%;
-}
-
 .table td a {
   color: #0d6efd;
   text-decoration: none;

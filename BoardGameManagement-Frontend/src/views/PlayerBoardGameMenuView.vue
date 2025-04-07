@@ -150,8 +150,4 @@ button.btn {
   color: darkblue;
 }
 
-table {
-  width: 160%;
-}
-
 </style>
