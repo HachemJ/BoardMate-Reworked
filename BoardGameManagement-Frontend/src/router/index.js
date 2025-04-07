@@ -24,8 +24,6 @@ import ElDropdowns from "../layouts/sections/elements/dropdowns/DropdownsView.vu
 import ElProgressBars from "../layouts/sections/elements/progress-bars/ProgressBarsView.vue";
 import ElToggles from "../layouts/sections/elements/toggles/TogglesView.vue";
 import ElTypography from "../layouts/sections/elements/typography/TypographyView.vue";
-import OwnerBorrowRequestManagement from "@/views/OwnerBorrowRequestManagement.vue";
-import PlayerBorrowRequestManagement from "@/views/PlayerBorrowRequestManagement.vue";
 import PlayerBoardGameMenuView from "@/views/PlayerBoardGameMenuView.vue";
 import OwnerBoardGameMenuView from "@/views/OwnerBoardGameMenuView.vue";
 import BoardGameDetailView from "@/views/BoardGameDetailView.vue";
@@ -36,6 +34,7 @@ import UpdateBoardGameView from "@/views/UpdateBoardGameView.vue";
 import UpdateBoardGameCopyView from "@/views/UpdateBoardGameCopyView.vue";
 import EventDetailView from "@/views/EventDetailView.vue";
 import FAQsView from "@/views/FAQsView.vue";
+import borrowRequestMenuView from "@/views/borrowRequestMenuView.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -63,17 +62,6 @@ const router = createRouter({
       path: "/pages/event",
       name: "event",
       component: EventView,
-    },
-    {
-      path: "/owner/borrowrequests",
-      name: "owner borrow request",
-      component: OwnerBorrowRequestManagement,
-    },
-
-    {
-      path: "/players/borrowrequests",
-      name: "player borrow request",
-      component: PlayerBorrowRequestManagement,
     },
 
     {
@@ -158,6 +146,12 @@ const router = createRouter({
       path: "/pages/faqs",
       name: "faqs",
       component: FAQsView,
+    },
+
+    {
+      path: "/pages/borrowrequests",
+      name: "borrowRequestMenu",
+      component: borrowRequestMenuView,
     },
 
     {
