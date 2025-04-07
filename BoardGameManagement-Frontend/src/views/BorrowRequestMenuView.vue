@@ -406,9 +406,63 @@ button.btn {
   margin-top: 1rem; /* Add some top margin for the button */
 }
 
-table td, table th {
-  vertical-align: middle;
+/* === Clean table layout and alignment === */
+.table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
 }
+
+/* Header + cell styles */
+.table th,
+.table td {
+  vertical-align: middle;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 12px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+/* Optional row hover effect */
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+/* Column widths for 4-column table (See My Borrow Requests) */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 30%;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  width: 20%;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  width: 20%;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  width: 15%;
+}
+
+/* Column widths for 6-column table (Manage Incoming Requests) */
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  width: 10%;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  width: 25%;
+}
+
 
 </style>
 
