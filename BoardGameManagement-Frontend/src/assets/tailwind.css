@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+/* define theme tokens */
+@theme {
+    --color-base: #050505;
+    --color-surface: #0B0B0C;
+    --color-primary: #F7F7FA;
+    --color-secondary: #9A9AA0;
+    --color-accent: #4F7BFF;
+    --color-accent-warm: #FF7043;
+}
+
+/* enable Tailwind’s base, components, and utilities */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
