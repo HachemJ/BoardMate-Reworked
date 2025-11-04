@@ -17,10 +17,17 @@ const password = ref("");
 const confirmPassword = ref("");
 const isAOwner = ref(false);
 
+/* inline error banner */
+const errorMsg = ref(null);
+let errorTimer = null;
+function showError(msg) {
+  errorMsg.value = msg;
+  if (errorTimer) clearTimeout(errorTimer);
+  errorTimer = window.setTimeout(() => (errorMsg.value = null), 5000);
+}
+
 /* axios */
-const axiosClient = axios.create({
-  baseURL: "http://localhost:8080",
-});
+const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
 
 /* landing-style canvas + no scroll */
 const body = document.getElementsByTagName("body")[0];
@@ -37,7 +44,7 @@ onUnmounted(() => {
 async function handleAuth() {
   if (isSignUp.value) {
     if (password.value !== confirmPassword.value) {
-      alert("Passwords do not match.");
+      showError("Passwords don’t match.");
       return;
     }
     try {
@@ -48,39 +55,45 @@ async function handleAuth() {
         isAOwner: isAOwner.value,
       });
 
-      const loginRes = await axiosClient.post("/players/login", {
+      // Auto-login after signup
+      const { data: user } = await axiosClient.post("/players/login", {
         email: email.value,
         password: password.value,
       });
-      const user = loginRes.data;
       authStore.login(user.playerID, user.name, user.email, user.isAOwner);
       router.push("/profile");
     } catch (error) {
-      const errors = error?.response?.data?.errors;
-      if (Array.isArray(errors)) {
-        alert(`Sign up / Login failed (${error.response.status}):\n${errors.join("\n")}`);
+      const status = error?.response?.status;
+      const errs = error?.response?.data?.errors;
+      if (Array.isArray(errs) && errs.length) {
+        showError(errs.join(" · "));
+      } else if (status === 401) {
+        showError("Sign up succeeded but login failed (401). Check your credentials.");
       } else {
-        alert("An error occurred. Check the console.");
+        showError("Something went wrong. Please try again.");
       }
       console.error(error);
     }
     return;
   }
 
+  // LOGIN
   try {
-    const loginRes = await axiosClient.post("/players/login", {
+    const { data: user } = await axiosClient.post("/players/login", {
       email: email.value,
       password: password.value,
     });
-    const user = loginRes.data;
     authStore.login(user.playerID, user.name, user.email, user.isAOwner);
     router.push("/profile");
   } catch (error) {
-    const errors = error?.response?.data?.errors;
-    if (Array.isArray(errors)) {
-      alert(`Login failed (${error.response.status}):\n${errors.join("\n")}`);
+    const status = error?.response?.status;
+    const errs = error?.response?.data?.errors;
+    if (Array.isArray(errs) && errs.length) {
+      showError(errs.join(" · "));
+    } else if (status === 401) {
+      showError("Login failed (401): incorrect email or password.");
     } else {
-      alert("An error occurred. Check the console.");
+      showError("Couldn’t sign you in. Please try again.");
     }
     console.error(error);
   }
@@ -88,24 +101,22 @@ async function handleAuth() {
 </script>
 
 <template>
+  <!-- same navbar as landing page -->
   <NavLanding />
-  <!-- No navbar here on purpose -->
+
   <section class="auth-hero">
-    <!-- background layers (same vibe as landing) -->
+    <!-- background layers -->
     <div class="layer bg-base fade-layer"></div>
     <div class="layer bg-gradient fade-layer"></div>
     <div class="layer bg-noise fade-layer"></div>
     <div class="layer bg-vignette fade-layer"></div>
 
-    <!-- perfectly centered card -->
+    <!-- centered card -->
     <div class="center">
       <div class="auth-card title-fade" style="animation-delay:.12s">
-        <!-- tiny brand row: icon only (no title) -->
         <div class="brand-top">
           <img :src="Logo" alt="BoardMate" class="logo" />
         </div>
-
-        <!-- (no big page title by request) -->
 
         <form class="form" @submit.prevent="handleAuth">
           <!-- SIGN UP extra fields -->
@@ -144,7 +155,6 @@ async function handleAuth() {
                 v-model="password"
                 type="password"
                 class="input"
-                placeholder="••••••••"
                 autocomplete="current-password"
                 required
             />
@@ -158,7 +168,6 @@ async function handleAuth() {
                   v-model="confirmPassword"
                   type="password"
                   class="input"
-                  placeholder="••••••••"
                   required
                   autocomplete="new-password"
               />
@@ -170,20 +179,26 @@ async function handleAuth() {
             </label>
           </template>
 
+          <!-- inline error banner (replaces alert boxes) -->
+          <div v-if="errorMsg" class="alert-banner" role="alert">
+            <div class="alert-dot"></div>
+            <span class="alert-text">{{ errorMsg }}</span>
+            <button class="alert-close" @click.prevent="errorMsg = null" aria-label="Dismiss">×</button>
+          </div>
+
           <button type="submit" class="btn btn-primary btn-raise">
             {{ isSignUp ? "Create account" : "Sign in" }}
           </button>
 
           <div class="alt">
-    <span class="muted">
-      {{ isSignUp ? "Already have an account?" : "Don’t have an account?" }}
-    </span>
+            <span class="muted">
+              {{ isSignUp ? "Already have an account?" : "Don’t have an account?" }}
+            </span>
             <a href="#" class="link" @click.prevent="isSignUp = !isSignUp">
               {{ isSignUp ? "Sign in" : "Create one" }}
             </a>
           </div>
         </form>
-
       </div>
     </div>
   </section>
@@ -237,17 +252,12 @@ async function handleAuth() {
 .brand-top{display:flex; align-items:center; justify-content:center; margin-bottom:6px;}
 .logo{width:40px; height:40px; border-radius:10px; box-shadow: 0 6px 18px rgba(0,0,0,.3);}
 
-/* ===== Form layout (normalized) ===== */
+/* ===== Form layout ===== */
 .form{display:flex; flex-direction:column; gap:14px; margin-top:6px;}
-/* NEW: consistent full-width rows */
 .field{display:flex; flex-direction:column; gap:6px; width:100%;}
-
 .label{font-size:12px; font-weight:700; letter-spacing:.2px; color:#c8cfdb;}
 .input{
-  width:100%;                /* NEW: full width */
-  box-sizing:border-box;     /* NEW: include padding in width */
-  display:block;             /* NEW: avoid inline quirks */
-
+  width:100%; box-sizing:border-box; display:block;
   background:#0c0f13; color:#e7ebf3;
   border:1px solid #202636; border-radius:12px;
   padding:.75rem .9rem; outline:none;
@@ -259,9 +269,30 @@ async function handleAuth() {
   box-shadow: 0 0 0 3px rgba(70,100,255,.12);
   background:#0d1116;
 }
-
 .check{display:flex; align-items:center; gap:8px; margin-top:6px; color:#c4cada; font-size:13px;}
 .check input{accent-color:#ffffff;}
+
+/* inline alert banner */
+.alert-banner{
+  display:flex; align-items:center; gap:10px;
+  background: #1b2029;
+  color:#e9edf5;
+  border:1px solid #2a3140;
+  border-radius:12px;
+  padding:.65rem .75rem;
+  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+  animation: fadeIn .25s ease-out;
+}
+.alert-dot{
+  width:10px; height:10px; border-radius:50%;
+  background:#ff6b6b; box-shadow:0 0 10px rgba(255,107,107,.6);
+  flex: 0 0 auto;
+}
+.alert-text{ flex:1 1 auto; font-size:13px; line-height:1.3; }
+.alert-close{
+  all:unset; cursor:pointer; padding:.2rem .45rem; border-radius:8px; color:#cdd3df;
+}
+.alert-close:hover{ background: rgba(255,255,255,.06); }
 
 /* button */
 .btn{
@@ -293,4 +324,3 @@ async function handleAuth() {
 .fade-layer{opacity:0; animation:fadeIn 1.4s ease-out forwards;}
 @keyframes fadeIn{from{opacity:0; transform:scale(1.01);} to{opacity:1; transform:scale(1);}}
 </style>
-
