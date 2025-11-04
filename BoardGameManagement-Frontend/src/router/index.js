@@ -60,7 +60,7 @@ const router = createRouter({
         { path: "/pages/event/:eventname", name: "eventDetail", component: EventDetailView },
 
         // small QoL aliases too
-        { path: "/pages/landing-pages/basic", name: "signin", component: SignInBasicView, alias: ["/signin"] },
+        { path: "/pages/landing-pages/basic", name: "signin", component: SignInBasicView, alias: ["/signin"], meta: { hidePublicNav: true } },
         { path: "/pages/faqs", name: "faqs", component: FAQsView, alias: ["/faqs"] },
 
         { path: "/pages/borrowrequests", name: "borrowRequestMenu", component: BorrowRequestMenuView },
