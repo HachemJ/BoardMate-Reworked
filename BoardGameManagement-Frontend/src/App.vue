@@ -1,16 +1,12 @@
-<!-- src/App.vue -->
-<script setup>
-import { useRoute } from "vue-router";
-import NavTop from "@/components/NavTop.vue";
-
-const route = useRoute();
-</script>
-
 <template>
-  <!-- Show NavTop on every page EXCEPT the landing and sign-in -->
-  <NavTop v-if="route.name !== 'presentation' && route.name !== 'signin'" />
-
-  <!-- All pages render here -->
   <router-view />
 </template>
 
+<script setup>
+// no global nav imports
+</script>
+
+<style>
+/* optional: make sure the app isn’t reserving space at the top */
+html, body, #app { margin: 0; padding: 0; }
+</style>
