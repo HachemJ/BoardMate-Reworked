@@ -1,39 +1,39 @@
+<!-- src/components/NavLandingSigned.vue -->
 <template>
   <header class="landing-nav">
     <div class="nav-inner">
-      <!-- Brand -->
+      <!-- brand -->
       <router-link to="/" class="brand">
         <img class="brand-icon" src="/src/assets/img/favicon.png" alt="BoardMate" />
         <span class="brand-name">BoardMate</span>
       </router-link>
 
-      <!-- Primary links -->
-      <nav class="nav-links">
-        <router-link to="/about" class="nav-link">About</router-link>
-        <router-link to="/contact" class="nav-link">Contact</router-link>
-        <router-link to="/profile" class="nav-link">Profile</router-link>
-        <router-link to="/pages/playerboardgame" class="nav-link">Player Games</router-link>
-        <router-link to="/pages/event" class="nav-link">Events</router-link>
-        <router-link to="/pages/borrowrequests" class="nav-link">Borrow</router-link>
+      <!-- centered links -->
+      <nav class="links">
+        <router-link
+            v-for="l in links"
+            :key="l.to"
+            :to="l.to"
+            class="link"
+            :class="{ active: isActive(l.to) }"
+            aria-current="page"
+        >
+          {{ l.label }}
+        </router-link>
       </nav>
 
-      <!-- User menu -->
-      <div class="user-area" ref="userArea">
-        <button
-            class="user-chip"
-            @click="menuOpen = !menuOpen"
-            @keydown.down.prevent="menuOpen = true; focusFirst()"
-            aria-haspopup="menu"
-            :aria-expanded="menuOpen ? 'true' : 'false'"
-        >
-          <img class="chip-avatar" :src="avatarUrl" alt="" />
-          <span class="chip-name">{{ shortName }}</span>
-          <svg class="chev" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7l5 6 5-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <!-- user menu -->
+      <div class="user">
+        <button class="user-btn" @click="open = !open">
+          <span class="avatar-dot">👤</span>
+          <span class="user-name">{{ auth.user?.username || 'User' }}</span>
+          <svg class="chev" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M7 10l5 5l5-5z"/></svg>
         </button>
-
-        <div v-if="menuOpen" class="menu" role="menu">
-          <router-link class="menu-item" role="menuitem" to="/profile" @click="close">Profile</router-link>
-          <button class="menu-item danger" role="menuitem" @click="signOut">Sign out</button>
+        <div v-if="open" class="menu" @click.outside="open = false">
+          <router-link class="menu-item" to="/profile">Profile</router-link>
+          <router-link class="menu-item" to="/pages/landing-pages/about-us">About</router-link>
+          <router-link class="menu-item" to="/pages/landing-pages/contact-us">Contact</router-link>
+          <button class="menu-item danger" @click="signOut">Sign out</button>
         </div>
       </div>
     </div>
@@ -41,118 +41,105 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/authStore";
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
-const router = useRouter();
-const auth = useAuthStore();
+const route = useRoute()
+const router = useRouter()
+const auth = useAuthStore()
+const open = ref(false)
 
-const menuOpen = ref(false);
-const userArea = ref(null);
+// Close the menu on ESC or route change
+const onKey = (e) => { if (e.key === 'Escape') open.value = false }
+onMounted(() => window.addEventListener('keydown', onKey))
+onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
-const shortName = computed(() => {
-  const n = auth.user?.username || auth.user?.name || auth.user?.email || "User";
-  return n.length > 14 ? n.slice(0, 12) + "…" : n;
-});
-const avatarUrl = computed(() => "/default_avatar.jpg");
+// Center nav links (adjust / add more anytime)
+const links = computed(() => [
+  { label: 'About',       to: '/about' },
+  { label: 'Contact',     to: '/contact' },
+  { label: 'Profile',     to: '/profile' },
+  { label: 'Player Games',to: '/pages/playerboardgame' },
+  { label: 'Events',      to: '/pages/event' },
+  { label: 'Borrow',      to: '/pages/borrowrequests' },
+])
 
-function close() {
-  menuOpen.value = false;
-}
-function onDocClick(e) {
-  if (!userArea.value) return;
-  if (!userArea.value.contains(e.target)) close();
-}
-function onEsc(e) {
-  if (e.key === "Escape") close();
-}
-function focusFirst() {
-  nextTick(() => {
-    const el = userArea.value?.querySelector(".menu .menu-item");
-    el?.focus?.();
-  });
-}
-async function signOut() {
-  try {
-    auth.logout?.(); // your store’s logout (adjust if named differently)
-  } catch (_) {}
-  close();
-  router.push("/signin");
+/**
+ * Mark a link as active when current path starts with it.
+ * Works for nested pages (e.g., /contact/anything).
+ */
+function isActive(path) {
+  return route.path === path || route.path.startsWith(path + '/')
 }
 
-onMounted(() => {
-  document.addEventListener("click", onDocClick, true);
-  document.addEventListener("keydown", onEsc, true);
-});
-onUnmounted(() => {
-  document.removeEventListener("click", onDocClick, true);
-  document.removeEventListener("keydown", onEsc, true);
-});
+function signOut() {
+  auth.logout?.()
+  router.push('/signin')
+}
 </script>
 
 <style scoped>
+/* shell */
 .landing-nav{
   position: fixed;
-  top: 14px;
-  left: 0; right: 0;
-  z-index: 50;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
+  top: 14px; left: 0; right: 0;
+  z-index: 1000;
+  display:flex; justify-content:center;
 }
 .nav-inner{
-  pointer-events: all;
-  width: min(1180px, calc(100% - 32px));
-  display: flex; align-items: center; justify-content: space-between;
-  background: rgba(18,20,24,0.72);
+  width:min(1180px, calc(100% - 32px));
+  display:flex; align-items:center; justify-content:space-between;
+  background: rgba(18,20,24,0.78);
   border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
   backdrop-filter: blur(10px);
-  border-radius: 14px;
   padding: 10px 14px;
   box-shadow: 0 6px 18px rgba(0,0,0,.22);
 }
 
 /* brand */
-.brand { display: flex; align-items: center; gap:10px; text-decoration:none; }
-.brand-icon{ width:22px; height:22px; border-radius:6px}
-.brand-name{ font-weight: 800; letter-spacing:.2px; color:#ECEFF5; }
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none;}
+.brand-icon{ width:22px; height:22px; border-radius:6px;}
+.brand-name{ color:#ECEFF5; font-weight:800; letter-spacing:.2px; }
 
 /* links */
-.nav-links{ display:flex; align-items:center; gap:10px; }
-.nav-link{
-  text-decoration:none; color:#D9DEE8; font-weight:700;
-  padding:8px 10px; border-radius:10px; transition: background .2s, color .2s, transform .2s;
+.links{display:flex; align-items:center; gap:12px;}
+.link{
+  color:#D9DEE8; text-decoration:none;
+  padding:8px 12px; border-radius:12px; font-weight:800;
+  transition: background .2s ease, color .2s ease, transform .2s ease;
 }
-.nav-link:hover{ background: rgba(255,255,255,0.08); color:#fff; transform: translateY(-1px); }
-.router-link-active{ background: rgba(255,255,255,0.12); color:#fff; }
+.link:hover{ background: rgba(255,255,255,0.08); color:#fff; transform: translateY(-1px); }
+.link.active{
+  background: rgba(255,255,255,0.14);
+  color:#fff;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+}
 
-/* user chip + menu */
-.user-area { position: relative; }
-.user-chip{
+/* user menu */
+.user{ position: relative; }
+.user-btn{
   display:flex; align-items:center; gap:8px;
-  padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.08);
-  background: rgba(255,255,255,.06); color:#E6EBF5; font-weight:800;
-  cursor:pointer; transition: filter .2s, transform .2s;
+  background:#171a20; color:#e9edf5;
+  border:1px solid rgba(255,255,255,.08);
+  padding:8px 10px; border-radius:999px; font-weight:800;
 }
-.user-chip:hover{ filter:brightness(1.03); transform: translateY(-1px); }
-.chip-avatar{ width:22px; height:22px; border-radius:999px; object-fit:cover; background:#12161e; }
-.chip-name{ max-width: 140px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.chev{ width:16px; height:16px; opacity:.8; }
+.user-btn:hover{ filter: brightness(1.05); }
+.avatar-dot{ width:18px; height:18px; }
+.user-name{ max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.chev{ opacity:.8; }
 
 .menu{
-  position:absolute; right:0; top:calc(100% + 8px);
-  min-width: 180px;
-  background:#0f1217; color:#e9edf5; border:1px solid #1f2533; border-radius:12px;
-  box-shadow: 0 12px 32px rgba(0,0,0,.4);
-  padding:6px; display:flex; flex-direction:column;
+  position:absolute; right:0; top:44px; min-width:180px;
+  background:#0f1217; border:1px solid #1f2533; border-radius:14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35); padding:6px;
 }
 .menu-item{
-  display:block; text-align:left; width:100%;
-  background:transparent; border:none; color:#e9edf5; text-decoration:none;
-  padding:10px 12px; border-radius:10px; font-weight:700; cursor:pointer;
+  display:block; width:100%; text-align:left;
+  color:#e9edf5; text-decoration:none; padding:10px 12px; border-radius:10px;
 }
-.menu-item:hover{ background:#171c25; }
-.menu-item.danger{ color:#ffd6db; }
-.menu-item.danger:hover{ background:#25181b; }
+.menu-item:hover{ background:#151a22; }
+.menu-item.danger{ color:#ffd3d7; }
+.menu-item.danger:hover{ background:#24171a; }
 </style>
