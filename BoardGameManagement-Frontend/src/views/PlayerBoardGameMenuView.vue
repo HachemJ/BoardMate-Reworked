@@ -1,87 +1,169 @@
 <script setup>
-
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
-import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {ref, computed, onMounted} from "vue";
+import { computed, onMounted, ref } from "vue";
+import { useAuthStore } from "@/stores/authStore.js";
 
-const axiosClient = axios.create({
-  baseURL: "http://localhost:8080"
-});
+const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
 
-const filteredGames = computed(() => {
-  return boardGames.value.filter(game =>
-      game.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
+const authStore = useAuthStore();
+const tabs = ["View All Board Games", "My Board Game Copies"];
+const selectedTab = ref(tabs[0]);
 
 const searchQuery = ref("");
 const boardGames = ref([]);
+const myBoardGameCopies = ref([]);
 
-onMounted(async () => {
+const filteredGames = computed(() =>
+    boardGames.value.filter((g) =>
+        g.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+);
+
+async function fetchBoardGames() {
   try {
-    const response = await axiosClient.get("/boardgames");
-    boardGames.value = response.data;
+    const [gamesRes, copiesRes] = await Promise.all([
+      axiosClient.get("/boardgames"),
+      axiosClient.get(`/boardgamecopies/byplayer/${authStore.user.id}`),
+    ]);
+    boardGames.value = gamesRes.data ?? [];
+    myBoardGameCopies.value = copiesRes.data ?? [];
+  } catch (error) {
+    console.error("Fetch board games/copies failed", error);
+    alert("Failed to fetch board games or your copies.");
+  }
+}
+
+onMounted(fetchBoardGames);
+
+async function deleteBoardGameCopy(id) {
+  if (!confirm("Delete this board game copy? This will remove related borrow requests.")) return;
+  try {
+    await axiosClient.delete(`/boardgamecopies/${id}`);
+    alert("Board game copy deleted!");
+    await fetchBoardGames();
   } catch (error) {
     console.error(error);
-    const errors = error.response.data.errors; // Extract the errors array
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
+    const errors = error.response?.data?.errors;
+    alert(errors ? errors.join("\n") : "Delete failed.");
   }
-})
-
+}
 </script>
 
 <template>
   <div>
-    <!-- Top Navigation Bar -->
-    <DefaultNavbar />
+    <NavLandingSigned />
 
-    <div class="container-fluid mt-4">
+    <div class="container-fluid page">
       <div class="row">
+        <!-- Left Sidebar: Tabs -->
+        <div class="col-md-3">
+          <ul class="nav flex-column nav-pills">
+            <li v-for="(tab, i) in tabs" :key="i" class="nav-item">
+              <a
+                  href="#"
+                  class="nav-link"
+                  :class="{ active: selectedTab === tab }"
+                  @click.prevent="selectedTab = tab"
+              >
+                {{ tab }}
+              </a>
+            </li>
+          </ul>
+        </div>
 
-        <!-- Content Area -->
+        <!-- Right Content Area -->
         <div class="col-md-9">
+          <!-- View All -->
+          <div v-if="selectedTab === 'View All Board Games'" class="card p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h2 class="mb-0">Search and Browse Board Games</h2>
+              <div class="d-flex gap-2">
+                <router-link :to="{ name: 'playerAddBoardGame' }">
+                  <button class="btn btn-info">Add Board Game</button>
+                </router-link>
+                <router-link :to="{ name: 'ownerUpdateBoardGame' }">
+                  <button class="btn btn-info">Update Board Game</button>
+                </router-link>
+              </div>
+            </div>
 
-          <!-- Page Title and Add Board Game Button-->
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0">Search and Browse Board Games</h2>
-          </div>
+            <div class="mb-3">
+              <input
+                  v-model="searchQuery"
+                  type="text"
+                  class="form-control"
+                  placeholder="Search..."
+                  aria-label="Search board games"
+              />
+            </div>
 
-          <!-- Search Bar -->
-          <div class="mb-3">
-            <input
-                v-model="searchQuery"
-                type="text"
-                class="form-control"
-                placeholder="Search..."
-            />
-          </div>
-
-          <!-- Board Game Table -->
-          <div>
-            <small> Notice: Click on the board game name to view more details</small>
-            <br>
-            <table class="table">
-            <thead>
-              <tr>
-                <th>Game Name</th>
-                <th>Minimum Number of Player</th>
-                <th>Maximum Number of Player</th>
-              </tr>
-            </thead>
-              <tbody>
+            <div>
+              <small>Click a board game name to view more details</small>
+              <table class="table">
+                <thead>
+                <tr>
+                  <th>Game Name</th>
+                  <th>Min Players</th>
+                  <th>Max Players</th>
+                </tr>
+                </thead>
+                <tbody>
                 <tr v-for="game in filteredGames" :key="game.name">
                   <td>
-                    <router-link :to="{ name: 'playerBoardGameDetail', params: { gamename: game.name }}">
+                    <router-link
+                        :to="{ name: 'playerBoardGameDetail', params: { gamename: game.name } }"
+                    >
                       {{ game.name }}
                     </router-link>
                   </td>
                   <td>{{ game.minPlayers }}</td>
                   <td>{{ game.maxPlayers }}</td>
                 </tr>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
 
+          <!-- My Copies -->
+          <div v-else class="card p-4 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center">
+              <h2 class="mb-0">My Collection</h2>
+              <div class="d-flex gap-2">
+                <router-link :to="{ name: 'addBoardGameCopy' }">
+                  <button class="btn btn-info">Add Board Game Copy</button>
+                </router-link>
+                <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
+                  <button class="btn btn-info">Update Board Game Copy</button>
+                </router-link>
+              </div>
+            </div>
+
+            <table class="table table-responsive-ms mt-3">
+              <thead>
+              <tr>
+                <th>Game Name</th>
+                <th>Specification</th>
+                <th class="text-end">Actions</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="game in myBoardGameCopies" :key="game.boardGameCopyId">
+                <td>{{ game.boardGameName }}</td>
+                <td class="specification-cell">{{ game.specification }}</td>
+                <td class="text-end">
+                  <button class="btn btn-danger" @click="deleteBoardGameCopy(game.boardGameCopyId)">
+                    Delete
+                  </button>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+
+            <small v-if="myBoardGameCopies.length > 0" class="d-flex justify-content-center">
+              Notice: deleting a board game copy will delete all borrow requests related to it.
+            </small>
+          </div>
         </div>
       </div>
     </div>
@@ -89,123 +171,16 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
-.nav-link {
-  cursor: pointer;
-  margin-bottom: 5px;
-  padding: 10px;
-  text-align: center;
-  color: white !important;
-}
-.bg-secondary {
-  background-color: grey !important;
-}
-.bg-success {
-  background-color: green !important;
-}
-
-/* Input, Textarea, and Select Styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {  /* Added select here */
-  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
-  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
-  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {  /* Added select here */
-  border-color: #80bdff; /* Bootstrap's default focus border color */
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
-}
-
-/* Label Styles */
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #495057; /* Bootstrap's default text color for labels */
-}
-
-/* Button Styles */
-button.btn {
-  margin-top: 1rem; /* Add some top margin for the button */
-}
-
-/* Board game name style in the table */
-.table td a {
-  color: #0d6efd;
-  text-decoration: none;
-}
-
-.table td a:hover {
-  text-decoration: underline;
-  color: darkblue;
-}
-
-/* === Clean and aligned table layout === */
-.table {
-  table-layout: fixed;
-  width: 100%;
-  border-collapse: collapse;
-}
-
-/* Header and cell alignment */
-.table th,
-.table td {
-  vertical-align: middle;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 12px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-/* Optional row hover effect */
-.table tbody tr:hover {
-  background-color: #f8f9fa;
-  cursor: pointer;
-}
-
-/* Clean router-links inside the table */
-.table td a {
-  color: #0d6efd;
-  display: inline-block;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
-}
-
-.table td a:hover {
-  text-decoration: underline;
-  color: darkblue;
-}
-
-/* Column widths for Game Name, Min Players, Max Players */
-.table th:nth-child(1),
-.table td:nth-child(1) {
-  width: 50%;
-}
-
-.table th:nth-child(2),
-.table td:nth-child(2) {
-  width: 25%;
-}
-
-.table th:nth-child(3),
-.table td:nth-child(3) {
-  width: 25%;
-}
-
-
+.page { margin-top: 96px; }
+.nav-link { cursor: pointer; margin-bottom: 6px; padding: 10px; text-align: center; color: #fff; border: 1px solid #2b3343; }
+.nav-link.active { background: #198754; border-color: #198754; }
+.card { border: 1px solid #293043; border-radius: 1rem; background-color: #0f1217; color: #e9edf5; }
+.table { table-layout: fixed; width: 100%; }
+.table th, .table td { vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 12px; }
+.table th:nth-child(1), .table td:nth-child(1) { width: 50%; }
+.table th:nth-child(2), .table td:nth-child(2),
+.table th:nth-child(3), .table td:nth-child(3) { width: 25%; }
+.table td a { color: #8fb4ff; text-decoration: none; }
+.table td a:hover { text-decoration: underline; }
+.specification-cell { white-space: normal; max-width: 320px; }
 </style>

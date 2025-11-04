@@ -1,166 +1,162 @@
+<!-- src/views/AddBoardGameView.vue -->
 <script setup>
-
-import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {useAuthStore} from "@/stores/authStore.js";
-import {reactive} from "vue";
+import { ref } from "vue";
 import axios from "axios";
-import {useRouter} from "vue-router";
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
 
-const axiosClient = axios.create({
-  baseURL: "http://localhost:8080"
-});
+const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
 
-const boardGames = reactive([]);
-const router = useRouter();
-const boardGameData = reactive({
-  name: "",
-  minPlayers: "",
-  maxPlayers: "",
-  description: "",
-})
+// simple in-app banner
+const banner = ref({ show: false, kind: "success", text: "" });
+const loading = ref(false);
 
-async function createBoardGame() {
-  const newBoardGame = {
-    name: boardGameData.name,
-    minPlayers: Number(boardGameData.minPlayers),
-    maxPlayers: Number(boardGameData.maxPlayers),
-    description: boardGameData.description,
+// form state
+const name = ref("");
+const minPlayers = ref(null);
+const maxPlayers = ref(null);
+const description = ref("");
+
+function showBanner(kind, text) {
+  banner.value = { show: true, kind, text };
+  // auto-hide after 4s
+  setTimeout(() => (banner.value.show = false), 4000);
+}
+
+async function submit() {
+  // front-end guard to avoid server roundtrip for obvious mistakes
+  if (!name.value || !minPlayers.value || !maxPlayers.value) {
+    showBanner("error", "Please fill all required fields.");
+    return;
+  }
+  if (+maxPlayers.value < +minPlayers.value) {
+    showBanner("error", "Maximum players must be greater than or equal to minimum players.");
+    return;
   }
 
+  loading.value = true;
   try {
-    await axiosClient.post("/boardgames", newBoardGame);
-    console.log('Created Board Game:', boardGameData);
-    alert('Board Game Created Successfully!');
+    await axiosClient.post("/boardgames", {
+      name: name.value,
+      minPlayers: +minPlayers.value,
+      maxPlayers: +maxPlayers.value,
+      description: description.value || "",
+    });
 
-
-    boardGames.push(newBoardGame);
-    Object.keys(boardGameData).forEach(key => boardGameData[key] = '');
-
-
-    if(useAuthStore().user.isAOwner){
-      await router.push("/pages/ownerboardgame");
-    }else {
-      await router.push("/pages/playerboardgame");
-    }
-
-  } catch (e) {
-    console.error(e);
-    const errors = e.response.data.errors; // Extract the errors array
-    alert(`Error received with status ${e.response.status} :\n${errors.join("\n")}`);
+    showBanner("success", "Board game created successfully.");
+    // reset the form
+    name.value = "";
+    minPlayers.value = null;
+    maxPlayers.value = null;
+    description.value = "";
+  } catch (err) {
+    const serverErrors =
+        err?.response?.data?.errors && Array.isArray(err.response.data.errors)
+            ? err.response.data.errors.join(" ")
+            : err?.response?.data?.message || "Failed to create board game.";
+    showBanner("error", serverErrors);
+  } finally {
+    loading.value = false;
   }
-
-
 }
-
-async function submitBoardGame() {
-
-  await createBoardGame();
-
-  // Reset form after submission
-
-}
-
 </script>
 
 <template>
   <div>
-    <!-- Top Navigation Bar -->
-    <DefaultNavbar />
+    <NavLandingSigned />
 
-    <div class="container-fluid mt-4">
-      <div class="row">
+    <div class="container page">
+      <div class="card p-4 shadow-sm">
+        <h2 class="mb-3">Complete the Form to Create a Board Game</h2>
 
-        <!-- Content Area -->
-        <div class="col-md-12">
-
-          <!-- Page Title -->
-          <h2 class="d-flex justify-content-center">Complete the Form Below to Add a New Board Game</h2>
-          <div class="col row-cols-md-2 d-flex justify-content-center bg-outline-secondary">
-            <!-- Form -->
-            <form @submit.prevent="submitBoardGame">
-
-              <div class="mb-3">
-                <label for="name" class="form-label">Board Game Name</label>
-                <input type="text" class="form-control" id="name" v-model="boardGameData.name" required>
-              </div>
-
-              <div class="mb-3">
-                <label for="minPlayers" class="form-label">Minimum Number of Players</label>
-                <input type="number" class="form-control" id="minPlayers" v-model="boardGameData.minPlayers" required>
-              </div>
-
-              <div class="mb-3">
-                <label for="maxPlayers" class="form-label">Maximum Number of Players</label>
-                <input type="number" class="form-control" id="maxPlayers" v-model="boardGameData.maxPlayers" required>
-              </div>
-
-              <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea maxlength="255" class="form-control" id="description" v-model="boardGameData.description" required></textarea>
-                <small :style="{color: boardGameData.description.length >= 255 ? 'red' : 'gray'}">
-                  {{ boardGameData.description.length }} / 255 characters
-                </small>
-              </div>
-
-              <button type="submit" class="btn btn-info">Create Board Game</button>
-
-            </form>
-          </div>
+        <!-- in-app banner -->
+        <div
+            v-if="banner.show"
+            class="banner"
+            :class="banner.kind === 'success' ? 'banner-success' : 'banner-error'"
+            role="status"
+        >
+          {{ banner.text }}
         </div>
+
+        <form @submit.prevent="submit" class="form-grid">
+          <label>
+            <span>Board Game Name</span>
+            <input v-model="name" type="text" placeholder="e.g., Catan" required />
+          </label>
+
+          <label>
+            <span>Minimum Number of Players</span>
+            <input v-model.number="minPlayers" type="number" min="1" step="1" required />
+          </label>
+
+          <label>
+            <span>Maximum Number of Players</span>
+            <input v-model.number="maxPlayers" type="number" min="1" step="1" required />
+          </label>
+
+          <label class="full">
+            <span>Description</span>
+            <textarea v-model="description" maxlength="255" placeholder="Optional description..." />
+          </label>
+
+          <div class="actions">
+            <button class="btn btn-info" :disabled="loading">
+              {{ loading ? 'Creating…' : 'Create Board Game' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-
-.nav-link {
-  cursor: pointer;
-  margin-bottom: 5px;
-  padding: 10px;
-  text-align: center;
-  color: white !important;
-}
-.bg-secondary {
-  background-color: grey !important;
-}
-.bg-success {
-  background-color: green !important;
+.page { margin-top: 96px; }
+.card {
+  border: 1px solid #293043;
+  border-radius: 1rem;
+  background-color: #0f1217;
+  color: #e9edf5;
 }
 
-/* Input, Textarea, and Select Styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {  /* Added select here */
-  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
-  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
-  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
+/* banner */
+.banner {
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
+  font-weight: 600;
+}
+.banner-success { background: #0f2a18; border: 1px solid #1a7f46; color: #b9ffd5; }
+.banner-error   { background: #2a1013; border: 1px solid #a53b47; color: #ffd8dd; }
+
+/* form */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+}
+label { display: flex; flex-direction: column; gap: 6px; }
+label.full { grid-column: 1 / -1; }
+
+input, textarea {
+  background: #0b0e13;
+  border: 1px solid #2b3343;
+  color: #e9edf5;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+input:focus, textarea:focus {
+  outline: none;
+  border-color: #4c89ff;
+  box-shadow: 0 0 0 2px rgba(76,137,255,.25);
 }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {  /* Added select here */
-  border-color: #80bdff; /* Bootstrap's default focus border color */
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
-}
+.actions { grid-column: 1 / -1; display: flex; justify-content: flex-start; margin-top: 6px; }
 
-/* Label Styles */
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #495057; /* Bootstrap's default text color for labels */
+/* button look */
+.btn.btn-info {
+  background: #0f6fe5; border: 1px solid #0f6fe5; color: #fff;
+  padding: 10px 14px; border-radius: 10px; font-weight: 700;
 }
-
-/* Button Styles */
-button.btn {
-  margin-top: 1rem; /* Add some top margin for the button */
-}
-
+.btn[disabled] { opacity: .65; cursor: not-allowed; }
 </style>

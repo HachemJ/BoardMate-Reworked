@@ -2,37 +2,48 @@
 <template>
   <header class="landing-nav">
     <div class="nav-inner">
-      <!-- brand -->
+      <!-- Brand -->
       <router-link to="/" class="brand">
         <img class="brand-icon" src="/src/assets/img/favicon.png" alt="BoardMate" />
         <span class="brand-name">BoardMate</span>
       </router-link>
 
-      <!-- centered links -->
-      <nav class="links">
+      <!-- Center links -->
+      <nav class="links center">
         <router-link
-            v-for="l in links"
+            v-for="l in centerLinks"
             :key="l.to"
             :to="l.to"
             class="link"
-            :class="{ active: isActive(l.to) }"
-            aria-current="page"
+            :class="{ active: isActive(l.activeMatch) }"
         >
           {{ l.label }}
         </router-link>
       </nav>
 
-      <!-- user menu -->
+      <!-- Right links (About, Contact) -->
+      <nav class="links right">
+        <router-link
+            v-for="l in rightLinks"
+            :key="l.to"
+            :to="l.to"
+            class="link"
+            :class="{ active: isActive(l.activeMatch) }"
+        >
+          {{ l.label }}
+        </router-link>
+      </nav>
+
+      <!-- User menu -->
       <div class="user">
         <button class="user-btn" @click="open = !open">
           <span class="avatar-dot">👤</span>
-          <span class="user-name">{{ auth.user?.username || 'User' }}</span>
+          <span class="user-name">{{ displayName }}</span>
           <svg class="chev" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M7 10l5 5l5-5z"/></svg>
         </button>
-        <div v-if="open" class="menu" @click.outside="open = false">
-          <router-link class="menu-item" to="/profile">Profile</router-link>
-          <router-link class="menu-item" to="/pages/landing-pages/about-us">About</router-link>
-          <router-link class="menu-item" to="/pages/landing-pages/contact-us">Contact</router-link>
+
+        <div v-if="open" class="menu" @click.self="open=false">
+          <router-link class="menu-item" to="/profile" @click="open=false">Profile details</router-link>
           <button class="menu-item danger" @click="signOut">Sign out</button>
         </div>
       </div>
@@ -50,27 +61,28 @@ const router = useRouter()
 const auth = useAuthStore()
 const open = ref(false)
 
-// Close the menu on ESC or route change
+const displayName = computed(() => auth.user?.username || auth.user?.name || 'User')
+
 const onKey = (e) => { if (e.key === 'Escape') open.value = false }
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
-// Center nav links (adjust / add more anytime)
-const links = computed(() => [
-  { label: 'About',       to: '/about' },
-  { label: 'Contact',     to: '/contact' },
-  { label: 'Profile',     to: '/profile' },
-  { label: 'Player Games',to: '/pages/playerboardgame' },
-  { label: 'Events',      to: '/pages/event' },
-  { label: 'Borrow',      to: '/pages/borrowrequests' },
+// Center of the bar
+const centerLinks = computed(() => [
+  { label: 'Board Games', to: '/boardgames',          activeMatch: ['/boardgames'] },
+  { label: 'Events',      to: '/pages/event',         activeMatch: ['/pages/event'] },
+  { label: 'Borrow',      to: '/pages/borrowrequests',activeMatch: ['/pages/borrowrequests'] },
 ])
 
-/**
- * Mark a link as active when current path starts with it.
- * Works for nested pages (e.g., /contact/anything).
- */
-function isActive(path) {
-  return route.path === path || route.path.startsWith(path + '/')
+// Rightmost of the bar (as requested)
+const rightLinks = computed(() => [
+  { label: 'About',   to: '/about',   activeMatch: ['/about','/pages/landing-pages/about-us'] },
+  { label: 'Contact', to: '/contact', activeMatch: ['/contact','/pages/landing-pages/contact-us'] },
+])
+
+function isActive(matches) {
+  const arr = Array.isArray(matches) ? matches : [matches]
+  return arr.some(p => route.path === p || route.path.startsWith(p + '/'))
 }
 
 function signOut() {
@@ -80,16 +92,16 @@ function signOut() {
 </script>
 
 <style scoped>
-/* shell */
+/* Shell */
 .landing-nav{
-  position: fixed;
-  top: 14px; left: 0; right: 0;
-  z-index: 1000;
+  position: fixed; top: 14px; left: 0; right: 0; z-index: 1000;
   display:flex; justify-content:center;
 }
 .nav-inner{
   width:min(1180px, calc(100% - 32px));
-  display:flex; align-items:center; justify-content:space-between;
+  display:grid; align-items:center;
+  grid-template-columns: auto 1fr auto auto; /* brand | center | right | user */
+  gap: 12px;
   background: rgba(18,20,24,0.78);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
@@ -98,13 +110,15 @@ function signOut() {
   box-shadow: 0 6px 18px rgba(0,0,0,.22);
 }
 
-/* brand */
+/* Brand */
 .brand{display:flex; align-items:center; gap:10px; text-decoration:none;}
 .brand-icon{ width:22px; height:22px; border-radius:6px;}
 .brand-name{ color:#ECEFF5; font-weight:800; letter-spacing:.2px; }
 
-/* links */
+/* Links */
 .links{display:flex; align-items:center; gap:12px;}
+.center{ justify-content:center; }
+.right{ justify-content:flex-end; }
 .link{
   color:#D9DEE8; text-decoration:none;
   padding:8px 12px; border-radius:12px; font-weight:800;
@@ -117,7 +131,7 @@ function signOut() {
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
 }
 
-/* user menu */
+/* User menu */
 .user{ position: relative; }
 .user-btn{
   display:flex; align-items:center; gap:8px;
@@ -129,7 +143,6 @@ function signOut() {
 .avatar-dot{ width:18px; height:18px; }
 .user-name{ max-width:120px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .chev{ opacity:.8; }
-
 .menu{
   position:absolute; right:0; top:44px; min-width:180px;
   background:#0f1217; border:1px solid #1f2533; border-radius:14px;

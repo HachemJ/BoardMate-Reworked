@@ -1,173 +1,162 @@
+<!-- src/views/OwnerBoardGameMenuView.vue -->
 <script setup>
-
-import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
-import {computed, onMounted, ref} from "vue";
-import {useAuthStore} from "@/stores/authStore.js";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
-const axiosClient = axios.create({
-  baseURL: "http://localhost:8080"
+const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+
+const route = useRoute();
+const router = useRouter();
+
+// ---------- lightweight in-app toast ----------
+const toast = ref({
+  show: false,
+  variant: "success", // 'success' | 'error' | 'info'
+  title: "",
+  message: "",
 });
+function showToast({ variant = "success", title = "", message = "" }) {
+  toast.value = { show: true, variant, title, message };
+  // auto-hide after 4s
+  window.clearTimeout(showToast._t);
+  showToast._t = window.setTimeout(() => (toast.value.show = false), 4000);
+}
+function closeToast() {
+  toast.value.show = false;
+}
 
-const filteredGames = computed(() => {
-  return boardGames.value.filter(game =>
-      game.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  );
-});
+// If someone pushed us here with ?toast=...&variant=success
+function readToastFromQuery() {
+  const t = route.query.toast;
+  if (typeof t === "string" && t.trim().length) {
+    const variant = (route.query.variant === "error" ? "error" :
+        route.query.variant === "info" ? "info" : "success");
+    showToast({
+      variant,
+      title: variant === "success" ? "Success" : variant === "error" ? "Error" : "Notice",
+      message: t,
+    });
+    // clean the URL so refresh doesn't re-toast
+    router.replace({ query: { ...route.query, toast: undefined, variant: undefined } });
+  }
+}
+onMounted(readToastFromQuery);
+watch(() => route.query.toast, readToastFromQuery);
 
-const authStore = useAuthStore();
-const tabs = ['View All Board Games', 'My Board Game Copies']
-const selectedTab = ref(tabs[0])
+// ---------- page data ----------
 const searchQuery = ref("");
 const boardGames = ref([]);
-const myBoardGameCopies = ref([]);
 
+const filteredGames = computed(() =>
+    boardGames.value.filter((g) =>
+        g.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+);
 
-async function fetchBoardGames(){
+async function fetchBoardGames() {
   try {
-    const response = await axiosClient.get("/boardgames");
-    boardGames.value = response.data;
-
-    const response2 = await axiosClient.get("/boardgamecopies/byplayer/" + authStore.user.id);
-    myBoardGameCopies.value = response2.data;
+    const { data } = await axiosClient.get("/boardgames");
+    boardGames.value = data ?? [];
   } catch (error) {
-    console.error(error);
+    const msg =
+        error?.response?.data?.errors?.join("\n") ||
+        error?.response?.data?.message ||
+        "Failed to load board games.";
+    showToast({ variant: "error", title: "Load Failed", message: msg });
   }
 }
 
-onMounted(async () => {
-  await fetchBoardGames()
-})
-
-async function deleteBoardGameCopy(id) {
-  try {
-  await axiosClient.delete(`boardgamecopies/${id}`);
-  console.log("Deleting board game copy with id: " + id);
-  alert("Board game copy deleted!");
-  await fetchBoardGames();
-  }catch(error){
-    console.log(error)
-    const errors = error.response.data.errors; // Extract the errors array
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
-  }
-}
-
+onMounted(fetchBoardGames);
 </script>
 
 <template>
   <div>
-    <!-- Top Navigation Bar -->
-    <DefaultNavbar />
+    <NavLandingSigned />
 
-    <div class="container-fluid mt-4">
-      <div class="row">
-
-        <!-- Left Sidebar: Tabs -->
-        <div class="col-md-3">
-          <ul class="nav flex-column nav-pills">
-            <li v-for="(tab, index) in tabs" :key="index" class="nav-item">
-              <a
-                  href="#"
-                  class="nav-link"
-                  :class="{'active bg-success': selectedTab === tab, 'bg-secondary': selectedTab !== tab}"
-                  @click.prevent="selectedTab = tab"
-              >
-                {{ tab }}
-              </a>
-            </li>
-          </ul>
+    <!-- toast -->
+    <transition name="fade">
+      <div
+          v-if="toast.show"
+          class="toast-wrap"
+          role="status"
+          aria-live="polite"
+      >
+        <div
+            class="toast-card"
+            :class="{
+            success: toast.variant === 'success',
+            error: toast.variant === 'error',
+            info: toast.variant === 'info'
+          }"
+        >
+          <div class="toast-head">
+            <strong>{{ toast.title }}</strong>
+            <button class="toast-x" @click="closeToast" aria-label="Close">✕</button>
+          </div>
+          <p class="toast-msg">{{ toast.message }}</p>
         </div>
+      </div>
+    </transition>
 
-        <!-- Right Content Area -->
-        <div class="col-md-9">
-
-          <div v-if="selectedTab === 'View All Board Games'">
-
-            <!-- Page Title and Add Board Game Button-->
+    <div class="container-fluid page">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="card p-4 shadow-sm">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h2 class="mb-0">Search and Browse Board Games</h2>
-              <router-link :to="{ name: 'playerAddBoardGame' }">
-                <button class="btn btn-info">Add Board Game</button>
-              </router-link>
-              <router-link :to="{ name: 'ownerUpdateBoardGame' }">
-                <button class="btn btn-info">Update Board Game</button>
-              </router-link>
+              <div class="d-flex gap-2">
+                <!-- After create/update on those pages, push back here with ?toast=... -->
+                <router-link :to="{ name: 'ownerAddBoardGame' }">
+                  <button class="btn btn-info">Add Board Game</button>
+                </router-link>
+                <router-link :to="{ name: 'ownerUpdateBoardGame' }">
+                  <button class="btn btn-info">Update Board Game</button>
+                </router-link>
+              </div>
             </div>
 
-            <!-- Search Bar -->
             <div class="mb-3">
               <input
                   v-model="searchQuery"
                   type="text"
                   class="form-control"
                   placeholder="Search..."
+                  aria-label="Search board games"
               />
             </div>
 
-            <!-- Board Game Table -->
-            <div>
-              <small> Notice: Click on the board game name to view more details</small>
-              <table class="table">
-                <thead>
-                <tr>
-                  <th>Game Name</th>
-                  <th>Minimum Number of Player</th>
-                  <th>Maximum Number of Player</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="game in filteredGames" :key="game.name">
-                  <td>
-                    <router-link :to="{ name: 'ownerBoardGameDetail', params: { gamename: game.name }}">
-                      {{ game.name }}
-                    </router-link>
-                  </td>
-                  <td>{{ game.minPlayers }}</td>
-                  <td>{{ game.maxPlayers }}</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div v-if="selectedTab === 'My Board Game Copies'">
-            <div class="d-flex justify-content-between align-items-center">
-              <h2>My Collection</h2>
-              <br>
-              <br>
-              <router-link :to="{ name: 'addBoardGameCopy' }">
-                <button class="btn btn-info">Add Board Game Copy</button>
-              </router-link>
-              <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
-                <button class="btn btn-info">Update Board Game Copy</button>
-              </router-link>
-            </div>
-            <table class="table table-responsive-ms">
+            <small>Click a board game name to view more details</small>
+            <table class="table mt-2">
               <thead>
               <tr>
                 <th>Game Name</th>
-                <th>Specification</th>
+                <th>Min Players</th>
+                <th>Max Players</th>
               </tr>
               </thead>
               <tbody>
-              <tr v-for="game in myBoardGameCopies" :key="game.boardGameCopyId">
-                <td>{{ game.boardGameName }}</td>
-                <td class="specification-cell">{{ game.specification }}</td>
-                <td class="button-cell">
-                  <button class="btn btn-info me-2"
-                          @click="deleteBoardGameCopy(game.boardGameCopyId)"
+              <tr v-for="game in filteredGames" :key="game.name">
+                <td>
+                  <router-link
+                      :to="{ name: 'ownerBoardGameDetail', params: { gamename: game.name } }"
                   >
-                    Delete
-                  </button>
+                    {{ game.name }}
+                  </router-link>
+                </td>
+                <td>{{ game.minPlayers }}</td>
+                <td>{{ game.maxPlayers }}</td>
+              </tr>
+              <tr v-if="filteredGames.length === 0">
+                <td colspan="3" class="text-center text-muted py-4">
+                  No board games match your search.
                 </td>
               </tr>
               </tbody>
             </table>
-            <small v-if="myBoardGameCopies.length > 0" class="d-flex justify-content-center">
-              Notice: deleting the board game copy will delete all borrow requests related to it
-            </small>
-          </div>
 
+          </div>
         </div>
       </div>
     </div>
@@ -175,134 +164,63 @@ async function deleteBoardGameCopy(id) {
 </template>
 
 <style scoped>
+.page { margin-top: 96px; }
 
-.nav-link {
-  cursor: pointer;
-  margin-bottom: 5px;
-  padding: 10px;
-  text-align: center;
-  color: white !important;
-}
-.bg-secondary {
-  background-color: grey !important;
-}
-.bg-success {
-  background-color: green !important;
+/* card/theme */
+.card {
+  border: 1px solid #293043;
+  border-radius: 1rem;
+  background-color: #0f1217;
+  color: #e9edf5;
 }
 
-/* Input, Textarea, and Select Styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {  /* Added select here */
-  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
-  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
-  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
-}
-
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {  /* Added select here */
-  border-color: #80bdff; /* Bootstrap's default focus border color */
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
-}
-
-/* Label Styles */
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #495057; /* Bootstrap's default text color for labels */
-}
-
-/* Button Styles */
-button.btn {
-  margin-top: 1rem; /* Add some top margin for the button */
-}
-
-.table td a {
-  color: #0d6efd;
-  text-decoration: none;
-}
-
-.table td a:hover {
-  text-decoration: underline;
-  color: darkblue;
-}
-
-.table td {
-  padding-right: 5px;
-  padding-left: 5px;
-}
-
-.specification-cell {
-  word-wrap: break-word;
-  white-space: normal;
-  max-width: 200px;
-  overflow-wrap: break-word;
-}
-
-/* === Clean and aligned table layout === */
-.table {
-  table-layout: fixed;
-  width: 100%;
-  border-collapse: collapse;
-}
-
-/* Header and cell alignment */
-.table th,
-.table td {
+/* table */
+.table { table-layout: fixed; width: 100%; }
+.table th, .table td {
   vertical-align: middle;
-  text-align: left;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   padding: 12px;
-  border-bottom: 1px solid #dee2e6;
+}
+.table th:nth-child(1), .table td:nth-child(1) { width: 50%; }
+.table th:nth-child(2), .table td:nth-child(2),
+.table th:nth-child(3), .table td:nth-child(3) { width: 25%; }
+.table td a { color: #8fb4ff; text-decoration: none; }
+.table td a:hover { text-decoration: underline; }
+
+/* toast */
+.fade-enter-active, .fade-leave-active { transition: opacity .18s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.toast-wrap {
+  position: fixed;
+  top: 86px; /* clears your fixed nav */
+  left: 0; right: 0;
+  display: flex; justify-content: center;
+  z-index: 1100;
+  padding: 0 16px;
 }
 
-/* Optional row hover effect */
-.table tbody tr:hover {
-  background-color: #f8f9fa;
-  cursor: pointer;
+.toast-card {
+  width: min(740px, 100%);
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: #10151d;
+  box-shadow: 0 12px 36px rgba(0,0,0,.35);
 }
+.toast-card.success { border-color: rgba(63, 201, 136, .35); box-shadow: 0 12px 36px rgba(63,201,136,.18); }
+.toast-card.error   { border-color: rgba(255, 105, 97, .35); box-shadow: 0 12px 36px rgba(255,105,97,.18); }
+.toast-card.info    { border-color: rgba(143, 180, 255, .35); box-shadow: 0 12px 36px rgba(143,180,255,.18); }
 
-/* Clean router-links inside the table */
-.table td a {
-  color: #0d6efd;
-  display: inline-block;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
+.toast-head {
+  display:flex; align-items:center; justify-content:space-between;
+  font-weight: 800;
 }
-
-.table td a:hover {
-  text-decoration: underline;
-  color: darkblue;
+.toast-x {
+  background: transparent; border: 0; color: #cfd7e6; cursor: pointer; font-size: 16px;
 }
-
-/* Column widths for Game Name, Min Players, Max Players */
-.table th:nth-child(1),
-.table td:nth-child(1) {
-  width: 50%;
-}
-
-.table th:nth-child(2),
-.table td:nth-child(2) {
-  width: 25%;
-}
-
-.table th:nth-child(3),
-.table td:nth-child(3) {
-  width: 25%;
-}
-
-
+.toast-x:hover { color: #fff; }
+.toast-msg { margin: 6px 0 2px; color: #dbe3f7; }
 </style>

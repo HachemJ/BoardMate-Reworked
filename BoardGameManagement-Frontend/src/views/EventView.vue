@@ -1,766 +1,695 @@
-<template>
-  <div>
-    <!-- Top Navigation Bar -->
-    <DefaultNavbar />
-
-    <div class="container-fluid mt-4">
-      <div class="row">
-        <div class="col-lg-3 col-md-4 mb-3">
-              <ul class="nav flex-column nav-pills">
-                <li v-for="(tab, index) in tabs" :key="index" class="nav-item">
-                  <a
-                    href="#"
-                    class="nav-link"
-                    :class="{'active bg-success': selectedTab === tab, 'bg-secondary': selectedTab !== tab}"
-                    @click.prevent="selectedTab = tab"
-                  >
-                    {{ tab }}
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-        <!-- Right Content Area -->
-        <div class="col-md-9">
-            <div class="card p-4 shadow-sm fade-in">
-                <div v-if="selectedTab === 'Create an Event'">
-                            <h4>Complete the Form Below to Create a New Event</h4>
-                            <form @submit.prevent="createEvent">
-                              <div class="row">
-                                <!-- Left column -->
-                                <div class="col-md-6">
-                                  <div class="mb-3">
-                                    <label for="eventName" class="form-label">Event Name</label>
-                                    <input type="text" class="form-control" id="eventName" v-model="eventData.eventName" required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="maxSpot" class="form-label">Maximum Spots</label>
-                                    <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot" required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="date" class="form-label">Date</label>
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="date"
-                                        v-model="eventData.date"
-                                        :min="minDate"
-                                        required
-                                        @keydown.prevent
-                                    />
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" v-model="eventData.description" required></textarea>
-                                  </div>
-                                </div>
-
-                                <!-- Right column -->
-                                <div class="col-md-6">
-                                  <div class="mb-3">
-                                    <label for="boardGame" class="form-label">Select Board Game</label>
-                                    <select class="form-control" v-model="eventData.boardGameId" required>
-                                      <option disabled value="">Choose a board game</option>
-                                      <option
-                                          v-for="game in boardGames"
-                                          :key="game.gameID"
-                                          :value="game.gameID"
-                                      >
-                                        {{ game.name }}
-                                      </option>
-                                    </select>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="startTime" class="form-label">Start Time</label>
-                                    <input type="time" class="form-control" id="startTime" v-model="eventData.startTime" required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="endTime" class="form-label">End Time</label>
-                                    <input
-                                        type="time"
-                                        class="form-control"
-                                        id="endTime"
-                                        v-model="eventData.endTime"
-                                        :min="formattedStartTime"
-                                        required
-                                    />
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="location" class="form-label">Location</label>
-                                    <input type="text" class="form-control" id="location" v-model="eventData.location" required>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <button type="submit" class="btn btn-info">Create Event</button>
-                            </form>
-                          </div>
-                <div v-else-if="selectedTab === 'Update/Delete My Events'">
-                            <h4>Update/Delete an Existing Event</h4>
-                            <form @submit.prevent="updateEvent">
-                              <div class="row">
-                                <!-- Left Column -->
-                                <div class="col-md-6">
-                                  <!-- Dropdown Menu for Selecting an Event -->
-                                  <div class="mb-3">
-                                    <label for="eventName" class="form-label">Select Event to be Updated/Deleted</label>
-                                    <select class="form-control" id="selectedEvent" v-model="selectedEventId">
-                                      <option v-for="event in myEvents" :value="event.eventID" :key="event.eventID">{{ event.name }}</option>
-                                    </select>
-                                  </div>
-
-                                  <div class="mb-3">
-                                    <label for="eventName" class="form-label">Event Name</label>
-                                    <input type="text" class="form-control" id="eventName" v-model="eventData.eventName"
-                                           :placeholder="events.find(event => event.eventID === selectedEventId)?.name || 'Event Name'"
-                                           required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="maxSpot" class="form-label">Maximum Spots</label>
-                                    <input type="number" class="form-control" id="maxSpot" v-model="eventData.maxSpot"
-                                           :placeholder="events.find(event => event.eventID === selectedEventId)?.maxSpot || 'Maximum Spots'"
-                                           required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="date" class="form-label">Date</label>
-                                    <input
-                                        type="date"
-                                        class="form-control"
-                                        id="date"
-                                        v-model="eventData.date"
-                                        :min="minDate"
-                                        required
-                                        @keydown.prevent
-                                    />
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control" id="description" v-model="eventData.description"
-                                              :placeholder="events.find(event => event.eventID === selectedEventId)?.description || 'Description'"
-                                              required></textarea>
-                                  </div>
-                                  <div class="d-flex justify-content-between">
-                                    <button
-                                        type="submit"
-                                        class="btn btn-info me-2"
-                                        :disabled="!selectedEventId"
-                                    >
-                                      Update Event
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-danger"
-                                        :disabled="!selectedEventId"
-                                        @click="deleteEvent"
-                                    >
-                                      Delete Event
-                                    </button>
-                                  </div>
-                                </div>
-
-                                <!-- Right Column -->
-                                <div class="col-md-6">
-                                  <div class="mb-3">
-                                    <label for="startTime" class="form-label">Start Time</label>
-                                    <input type="time" class="form-control" id="startTime" v-model="eventData.startTime" required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="endTime" class="form-label">End Time</label>
-                                    <input
-                                        type="time"
-                                        class="form-control"
-                                        id="endTime"
-                                        v-model="eventData.endTime"
-                                        :min="formattedStartTime"
-                                        required
-                                    />
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="location" class="form-label">Location</label>
-                                    <input type="text" class="form-control" id="location" v-model="eventData.location"
-                                           :placeholder="events.find(event => event.eventID === selectedEventId)?.location || 'Location'"
-                                           required>
-                                  </div>
-                                  <div class="mb-3">
-                                    <label for="boardGameUpdate" class="form-label">Select Board Game</label>
-                                    <select class="form-control" id="boardGameUpdate" v-model="eventData.boardGameId" required>
-                                      <option disabled value="">Choose a board game</option>
-                                      <option v-for="game in boardGames" :key="game.gameID" :value="game.gameID">
-                                        {{ game.name }}
-                                      </option>
-                                    </select>
-                                  </div>
-                                </div>
-                              </div>
-                            </form>
-
-                          </div>
-
-                          <div v-else-if="selectedTab === 'Browse Available Events'">
-                            <h4>Select an Event from the Table Below</h4>
-                            <small> Notice: Click on the event name for further details</small>
-                            <table class="table">
-                              <thead>
-                                <tr>
-                                  <th>Event Name</th>
-                                  <th>Date</th>
-                                  <th>Location</th>
-                                  <th>Registration Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                <tr v-for="event in events" :key="event.eventID" @click="selectEvent(event.eventID)" :class="{ 'table-active': selectedEventId === event.eventID }">
-                                  <td>
-                                    <router-link :to="{ name: 'eventDetail', params: { eventname: event.name }}">
-                                      {{ event.name }}
-                                    </router-link>
-                                  </td>
-                                  <td>{{ event.eventDate }}</td>
-                                  <td>{{ event.location }}</td>
-                                    <td>
-                                    <span v-if="registrationStatus[event.eventID] === undefined">Loading...</span>
-                                    <span v-else>{{ registrationStatus[event.eventID] }}</span>
-                                    </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                            <button
-                              class="btn btn-info me-2"
-                              @click="registerForEvent"
-                              :disabled="!selectedEventId"
-                            >
-                              Register
-                            </button>
-
-                            <button
-                              class="btn btn-danger"
-                              @click="cancelRegistration"
-                              :disabled="!selectedEventId"
-                            >
-                              Cancel Registration
-                            </button>
-                          </div>
-            </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
+<!-- src/views/Events.vue -->
 <script setup>
-import { ref, reactive } from 'vue'
-import {useAuthStore} from "@/stores/authStore.js";
-import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
+import { ref, reactive, computed, watch } from "vue";
 import axios from "axios";
-import { watch } from 'vue';
-import { computed } from 'vue';
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
+import { useAuthStore } from "@/stores/authStore";
 
-const axiosClient = axios.create({
-  baseURL: "http://localhost:8080"
+const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const auth = useAuthStore();
+
+/* ------------------------------------------------
+   UI state: tabs, toasts
+------------------------------------------------- */
+const tabs = computed(() => {
+  // owners see all 3 tabs; players only see Browse
+  return auth.user?.isAOwner
+      ? ["Browse", "Create", "Manage"]
+      : ["Browse"];
 });
+const selectedTab = ref("Browse");
 
-
-const today = new Date();
-const formatDate = (date) => date.toISOString().split("T")[0];
-
-const minDate = formatDate(today); // today in YYYY-MM-DD format
-const eventDate = ref(minDate); // default to today or leave empty if preferred
-
-const authStore = useAuthStore();
-const tabs = ['Create an Event', 'Update/Delete My Events', 'Browse Available Events']
-const selectedTab = ref(tabs[2]); //default view is to browse available events
-
-const eventData = reactive({
-  eventName: '',
-  description: '',
-  maxSpot: '',
-  date: '',
-  startTime: '',
-  endTime: '',
-  location: '',
-  ownerId: null,
-  boardGameId: null
+const toast = reactive({
+  show: false,
+  type: "success", // success | danger | warning | info
+  text: "",
 });
-
-const formattedStartTime = computed(() => {
-  const time = eventData.startTime;
-  return time && /^\d{2}:\d{2}$/.test(time) ? time : '00:00';
-});
-
-watch(() => eventData.startTime, () => {
-  if (eventData.endTime && eventData.endTime < eventData.startTime) {
-    eventData.endTime = '';
-  }
-});
-
-const events = ref([])  // This will hold the array of events fetched from the database
-const myEvents = ref([])
-const selectedEventId = ref("")
-const boardGames = ref([]) // Will hold available board games
-const selectedBoardGame = ref(null)
-const registrationStatus = ref({}) // To hold registration status for each event
-
-//auto-fill with the values from the selected event.
-watch(selectedEventId, (newId) => {
-  if (newId) {
-    selectEvent(newId);
-  }
-});
-
-function resetEventData() {
-  eventData.eventName = '';
-  eventData.description = '';
-  eventData.maxSpot = '';
-  eventData.date = '';
-  eventData.startTime = '';
-  eventData.endTime = '';
-  eventData.location = '';
-  eventData.boardGameId = null;
+function showToast(type, text, ms = 3000) {
+  toast.type = type;
+  toast.text = text;
+  toast.show = true;
+  window.clearTimeout(showToast.timer);
+  showToast.timer = window.setTimeout(() => (toast.show = false), ms);
 }
 
-watch(selectedTab, (newTab) => {
-  if (newTab === 'Create an Event') {
-    resetEventData();
-  }
+/* ------------------------------------------------
+   Data models
+------------------------------------------------- */
+const events = ref([]);
+const myEvents = ref([]);
+const boardGames = ref([]);
+
+const selectedEventId = ref("");
+
+const eventForm = reactive({
+  // shared between Create / Manage forms (we always reset when switching)
+  name: "",
+  description: "",
+  maxSpot: "",
+  date: "",
+  startTime: "",
+  endTime: "",
+  location: "",
+  boardGameId: "",
 });
 
-// Fetch all events
+function resetForm() {
+  eventForm.name = "";
+  eventForm.description = "";
+  eventForm.maxSpot = "";
+  eventForm.date = "";
+  eventForm.startTime = "";
+  eventForm.endTime = "";
+  eventForm.location = "";
+  eventForm.boardGameId = "";
+}
+
+const todayISO = new Date().toISOString().slice(0, 10);
+const minDate = todayISO;
+
+const startTimeOrDefault = computed(() =>
+    /^\d{2}:\d{2}$/.test(eventForm.startTime) ? eventForm.startTime : "00:00"
+);
+
+watch(
+    () => eventForm.startTime,
+    () => {
+      if (eventForm.endTime && eventForm.endTime < eventForm.startTime) {
+        eventForm.endTime = "";
+      }
+    }
+);
+
+/* ------------------------------------------------
+   Registration chips (per event)
+------------------------------------------------- */
+const regByEventId = ref({}); // id -> "Registered" | "Not Registered" | "Error"
+
+/* ------------------------------------------------
+   Fetchers
+------------------------------------------------- */
 async function fetchEvents() {
   try {
-    const response = await axiosClient.get("/events");
-    events.value = response.data;
-    
-    for (const event of events.value) {
-      //console.log("Event owner ID:", event.ownerName);
-      await getRegistrationStatus(event.eventID);
-    }
-  } catch (error) {
-    console.error("Error fetching events:", error);
-    alert('Failed to fetch events. Please try again.');
+    const { data } = await axiosClient.get("/events");
+    events.value = data ?? [];
+    // pre-compute registration chip for each row
+    for (const ev of events.value) await computeRegChip(ev.eventID);
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Failed to fetch events.");
   }
 }
-
 async function fetchMyEvents() {
+  if (!auth.user) return;
+  if (!auth.user.isAOwner) {
+    myEvents.value = [];
+    return;
+  }
   try {
-    const response = await axiosClient.get("/events/owner/" + authStore.user.id);
-    myEvents.value = response.data;
-  } catch (error) {
-    console.error("Error fetching my events:", error);
+    const { data } = await axiosClient.get(`/events/owner/${auth.user.id}`);
+    myEvents.value = data ?? [];
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Failed to fetch your events.");
   }
 }
-
-// Fetch available board games
 async function fetchBoardGames() {
   try {
-    const response = await axiosClient.get("/boardgames");
-    boardGames.value = response.data;
-  } catch (error) {
-    console.error("Error fetching board games:", error);
-    alert('Failed to fetch board games. Please try again.');
+    const { data } = await axiosClient.get("/boardgames");
+    boardGames.value = data ?? [];
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Failed to fetch board games.");
   }
 }
 
-
-// Initialize data when component is mounted
-async function initializeData() {
-  await Promise.all([
-    fetchEvents(),
-    fetchBoardGames(),
-    fetchMyEvents(),
-  ]);
+async function computeRegChip(eventId) {
+  try {
+    const { data } = await axiosClient.get(
+        `/registrations/${auth.user.id}/${eventId}`
+    );
+    regByEventId.value[eventId] = data ? "Registered" : "Not Registered";
+  } catch (e) {
+    if (e?.response?.status === 404) {
+      regByEventId.value[eventId] = "Not Registered";
+    } else {
+      regByEventId.value[eventId] = "Error";
+    }
+  }
 }
 
-// Call initializeData when component is mounted
-initializeData();
+async function init() {
+  await Promise.all([fetchEvents(), fetchBoardGames(), fetchMyEvents()]);
+}
+init();
 
-// Create new event
+/* ------------------------------------------------
+   Helpers
+------------------------------------------------- */
+function selectRow(id) {
+  selectedEventId.value = id;
+
+  // Hydrate form when switching to Manage
+  const ev =
+      events.value.find((e) => e.eventID === id) ||
+      myEvents.value.find((e) => e.eventID === id);
+  if (ev) {
+    eventForm.name = ev.name;
+    eventForm.description = ev.description;
+    eventForm.maxSpot = ev.maxSpot;
+    eventForm.date = ev.eventDate;
+    eventForm.startTime = (ev.startTime || "").slice(0, 5);
+    eventForm.endTime = (ev.endTime || "").slice(0, 5);
+    eventForm.location = ev.location;
+    eventForm.boardGameId = ev.boardGameId || "";
+  }
+}
+
+watch(selectedTab, (t) => {
+  resetForm();
+  if (t === "Manage") selectedEventId.value = "";
+});
+
+/* ------------------------------------------------
+   Actions: Create / Update / Delete
+------------------------------------------------- */
 async function createEvent() {
+  if (!auth.user?.isAOwner) return showToast("warning", "Owners only.");
   try {
-    if (!eventData.boardGameId) {
-      alert('Please select a board game');
-      return;
-    }
-
-    const eventDto = {
-      name: eventData.eventName,
-      description: eventData.description,
-      maxSpot: eventData.maxSpot.toString(),
-      eventDate: eventData.date,
-      startTime: `${eventData.startTime}:00`,
-      endTime: `${eventData.endTime}:00`,
-      location: eventData.location,
-      ownerId: Number(authStore.user.id), 
-      boardGameId: eventData.boardGameId
+    const dto = {
+      name: eventForm.name,
+      description: eventForm.description,
+      maxSpot: String(eventForm.maxSpot),
+      eventDate: eventForm.date,
+      startTime: `${eventForm.startTime}:00`,
+      endTime: `${eventForm.endTime}:00`,
+      location: eventForm.location,
+      ownerId: Number(auth.user.id),
+      boardGameId: Number(eventForm.boardGameId),
     };
-  
-    console.log("Creating event, owenr ID is: ", eventDto.ownerId);
-
-    await axiosClient.post("/events", eventDto);
-    alert('Event Created Successfully!');
-
-    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
+    await axiosClient.post("/events", dto);
+    showToast("success", "Event created.");
+    resetForm();
     await fetchEvents();
     await fetchMyEvents();
-  } catch (error) {
-    console.error("Error creating event:", error);
-    console.log("Full error:", error.response?.data);
-    alert('Failed to create event. Please try again.');
+    selectedTab.value = "Browse";
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Failed to create event.");
   }
 }
 
-
-// Update existing event
 async function updateEvent() {
-  if (!selectedEventId.value) {
-    alert('Please select an event to update.');
-    return;
-  }
+  if (!auth.user?.isAOwner) return showToast("warning", "Owners only.");
+  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
 
   try {
-    const eventDto = {
-      name: eventData.eventName,
-      description: eventData.description,
-      maxSpot: eventData.maxSpot,
-      eventDate: eventData.date,
-      startTime: eventData.startTime,
-      endTime: eventData.endTime,
-      location: eventData.location,
-      ownerId: authStore.user.id,
-      boardGameId: eventData.boardGameId
+    const dto = {
+      name: eventForm.name,
+      description: eventForm.description,
+      maxSpot: String(eventForm.maxSpot),
+      eventDate: eventForm.date,
+      startTime: `${eventForm.startTime}:00`,
+      endTime: `${eventForm.endTime}:00`,
+      location: eventForm.location,
+      ownerId: Number(auth.user.id),
+      boardGameId: Number(eventForm.boardGameId),
     };
-
-    await axiosClient.put(`/events/${selectedEventId.value}`, eventDto);
-    alert('Event Updated Successfully!');
-    
-    // Reset form
-    Object.keys(eventData).forEach(key => eventData[key] = key === 'maxSpot' ? null : '');
-    selectedEventId.value = "";
-    
-    // Refresh events list
+    await axiosClient.put(`/events/${selectedEventId.value}`, dto);
+    showToast("success", "Event updated.");
     await fetchEvents();
-  } catch (error) {
-    console.error("Error updating event:", error);
-    alert('Failed to update event. Please try again.');
+    await fetchMyEvents();
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Failed to update event.");
   }
 }
 
-const deleteEvent = async () => {
-  if (!selectedEventId.value) {
-    alert("Please select an event to delete.");
-    return;
-  }
-
-  if (!confirm("Are you sure you want to delete this event?")) {
-    return;
-  }
+async function deleteEvent() {
+  if (!auth.user?.isAOwner) return showToast("warning", "Owners only.");
+  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
 
   try {
-    console.log("Attempting to delete event:", selectedEventId.value);
-    const response = await axiosClient.delete(`/events/${selectedEventId.value}`);
-
-    if (response.status === 200 || response.status === 204) {
-      alert("Event deleted successfully!");
-      selectedEventId.value = "";
-      await fetchEvents();
-
-      // Clear the form
-      Object.keys(eventData).forEach(
-        key => (eventData[key] = key === "maxSpot" ? null : "")
-      );
-      selectedBoardGame.value = null;
-    } else {
-      alert("Unexpected response. Please check the console.");
-      console.log("Response:", response);
-    }
-  } catch (err) {
-    console.error("Delete error", err);
-    alert("Failed to delete event. Please try again.");
-  }
-};
-
-
-
-function selectEvent(id) {
-  selectedEventId.value = id;
-  // Find the selected event and populate the form
-  const event = events.value.find(e => e.eventID === id);
-  if (event) {
-    eventData.eventName = event.name;
-    eventData.description = event.description;
-    eventData.maxSpot = event.maxSpot;
-    eventData.date = event.eventDate;
-    eventData.startTime = event.startTime;
-    eventData.endTime = event.endTime;
-    eventData.location = event.location;
-    eventData.ownerId = event.ownerId;
-    eventData.boardGameId = event.boardGameId;
-
+    await axiosClient.delete(`/events/${selectedEventId.value}`);
+    showToast("success", "Event deleted.");
+    selectedEventId.value = "";
+    resetForm();
+    await fetchEvents();
+    await fetchMyEvents();
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Failed to delete event.");
   }
 }
 
-//original functions by Niz
+/* ------------------------------------------------
+   Actions: Register / Cancel
+------------------------------------------------- */
 async function registerForEvent() {
-  if (!selectedEventId.value) {
-    alert('Please select an event to register.')
-    return;
-  }
+  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
+  if (regByEventId.value[selectedEventId.value] === "Registered")
+    return showToast("info", "Already registered.");
 
-  //if already registered, do nothing
-  if (registrationStatus.value[selectedEventId.value] === "Registered") {
-    alert("You are already registered for this event.");
-    return;
-  }
-
-  console.log('Registered for Event ID:', selectedEventId.value)
-
-  const registration = {
-    playerID: Number(authStore.user.id),
-    eventID: selectedEventId.value,
-  }
-    try {
-        await axiosClient.post("/registrations", registration);
-        alert("Registration successful!");
-    } catch (e) {
-        console.error(e);
-    }
-  for (const event of events.value) {
-    await getRegistrationStatus(event.eventID);
+  try {
+    const payload = {
+      playerID: Number(auth.user.id),
+      eventID: Number(selectedEventId.value),
+    };
+    await axiosClient.post("/registrations", payload);
+    showToast("success", "Registration successful.");
+    await computeRegChip(selectedEventId.value);
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Registration failed.");
   }
 }
 
 async function cancelRegistration() {
-  if (!selectedEventId.value) {
-    alert("Please select an event to cancel.");
-    return;
-  }
-
-  //if not registered, do nothing
-  if (registrationStatus.value[selectedEventId.value] === "Not Registered") {
-    alert("You are not registered for this event.");
-    return;
-  }
+  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
+  if (regByEventId.value[selectedEventId.value] !== "Registered")
+    return showToast("info", "You’re not registered.");
 
   try {
-    await axiosClient.delete("/registrations/" + authStore.user.id + "/" + selectedEventId.value);
-    alert("Registration cancelled!");
-  } catch (error) {
-    console.error(error);
-    const errors = error.response.data.errors; // Extract the errors array
-  }
-
-  console.log("Cancelled registration for Event ID:", selectedEventId.value);
-    for (const event of events.value) {
-    await getRegistrationStatus(event.eventID);
-  }
-
-}
-
-async function getRegistrationStatus(id) {
-  try {
-    const response = await axiosClient.get(`/registrations/${authStore.user.id}/${id}`);
-    if (response.data === null) {
-      registrationStatus.value[id] = "Not Registered";
-    } else {
-      registrationStatus.value[id] = "Registered";
-    }
-  } catch (error) {
-    if (error.response?.status === 404) {
-      registrationStatus.value[id] = "Not Registered";
-    } else {
-      registrationStatus.value[id] = "Error";
-    }
+    await axiosClient.delete(
+        `/registrations/${auth.user.id}/${selectedEventId.value}`
+    );
+    showToast("success", "Registration cancelled.");
+    await computeRegChip(selectedEventId.value);
+  } catch (e) {
+    console.error(e);
+    showToast("danger", "Could not cancel registration.");
   }
 }
-
-
 </script>
 
+<template>
+  <section class="events-hero">
+    <NavLandingSigned />
+
+    <!-- Background layers -->
+    <div class="layer bg-base"></div>
+    <div class="layer bg-gradient"></div>
+    <div class="layer bg-noise"></div>
+    <div class="layer bg-vignette"></div>
+
+    <div class="content">
+      <!-- Toast -->
+      <transition name="fade">
+        <div v-if="toast.show" class="toast" :data-variant="toast.type">
+          {{ toast.text }}
+        </div>
+      </transition>
+
+      <!-- Head -->
+      <header class="page-head">
+        <h1>Events</h1>
+        <p class="muted">
+          Discover public sessions, register or cancel, and (if you’re an owner)
+          create and manage your own.
+        </p>
+      </header>
+
+      <!-- Tabs -->
+      <nav class="tabs">
+        <button
+            v-for="t in tabs"
+            :key="t"
+            class="tab"
+            :class="{ 'tab--active': selectedTab === t }"
+            @click="selectedTab = t"
+        >
+          {{ t }}
+        </button>
+      </nav>
+
+      <!-- Browse -->
+      <section v-if="selectedTab === 'Browse'" class="panel">
+        <div class="panel-head">
+          <h3>Browse Available Events</h3>
+        </div>
+
+        <div class="table-wrap">
+          <table class="pretty">
+            <thead>
+            <tr>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Location</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr
+                v-for="ev in events"
+                :key="ev.eventID"
+                :class="{ selected: ev.eventID === selectedEventId }"
+                @click="selectRow(ev.eventID)"
+            >
+              <td class="truncate">
+                <router-link
+                    class="link"
+                    :to="{ name: 'eventDetail', params: { eventname: ev.name } }"
+                    @click.stop
+                >{{ ev.name }}</router-link
+                >
+              </td>
+              <td>{{ ev.eventDate }}</td>
+              <td>{{ (ev.startTime || '').slice(0,5) }}–{{ (ev.endTime || '').slice(0,5) }}</td>
+              <td class="truncate">{{ ev.location }}</td>
+              <td>
+                  <span
+                      class="chip"
+                      :data-variant="regByEventId[ev.eventID] === 'Registered' ? 'success' : (regByEventId[ev.eventID] === 'Error' ? 'danger' : 'default')"
+                  >
+                    {{ regByEventId[ev.eventID] || '…' }}
+                  </span>
+              </td>
+            </tr>
+            <tr v-if="!events.length">
+              <td colspan="5" class="empty">No events yet.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions">
+          <button
+              class="btn btn-primary"
+              :disabled="!selectedEventId"
+              @click="registerForEvent"
+          >
+            Register
+          </button>
+          <button
+              class="btn btn-ghost"
+              :disabled="!selectedEventId"
+              @click="cancelRegistration"
+          >
+            Cancel Registration
+          </button>
+        </div>
+      </section>
+
+      <!-- Create (owner) -->
+      <section v-if="selectedTab === 'Create'" class="panel">
+        <div class="panel-head">
+          <h3>Create a New Event</h3>
+        </div>
+
+        <div class="grid-2">
+          <label class="field">
+            <span class="label">Event name</span>
+            <input v-model="eventForm.name" class="input" type="text" />
+          </label>
+
+          <label class="field">
+            <span class="label">Board game</span>
+            <select v-model="eventForm.boardGameId" class="input">
+              <option disabled value="">Select a game</option>
+              <option
+                  v-for="g in boardGames"
+                  :key="g.gameID"
+                  :value="g.gameID"
+              >
+                {{ g.name }}
+              </option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="label">Max spots</span>
+            <input v-model="eventForm.maxSpot" class="input" type="number" />
+          </label>
+
+          <label class="field">
+            <span class="label">Date</span>
+            <input
+                v-model="eventForm.date"
+                class="input"
+                type="date"
+                :min="minDate"
+                @keydown.prevent
+            />
+          </label>
+
+          <label class="field">
+            <span class="label">Start time</span>
+            <input v-model="eventForm.startTime" class="input" type="time" />
+          </label>
+
+          <label class="field">
+            <span class="label">End time</span>
+            <input
+                v-model="eventForm.endTime"
+                class="input"
+                type="time"
+                :min="startTimeOrDefault"
+            />
+          </label>
+
+          <label class="field col-span-2">
+            <span class="label">Location</span>
+            <input v-model="eventForm.location" class="input" type="text" />
+          </label>
+
+          <label class="field col-span-2">
+            <span class="label">Description</span>
+            <textarea v-model="eventForm.description" class="input textarea" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" @click="createEvent">Create</button>
+          <button class="btn btn-ghost" @click="resetForm">Reset</button>
+        </div>
+
+        <p v-if="!auth.user?.isAOwner" class="hint">
+          Only owners can create events.
+        </p>
+      </section>
+
+      <!-- Manage (owner) -->
+      <section v-if="selectedTab === 'Manage'" class="panel">
+        <div class="panel-head">
+          <h3>Update / Delete My Events</h3>
+        </div>
+
+        <div class="pick">
+          <label class="field">
+            <span class="label">Select one of your events</span>
+            <select
+                class="input"
+                v-model="selectedEventId"
+                @change="selectRow(selectedEventId)"
+            >
+              <option disabled value="">Choose…</option>
+              <option
+                  v-for="e in myEvents"
+                  :key="e.eventID"
+                  :value="e.eventID"
+              >
+                {{ e.name }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <div class="grid-2">
+          <label class="field">
+            <span class="label">Event name</span>
+            <input v-model="eventForm.name" class="input" type="text" />
+          </label>
+
+          <label class="field">
+            <span class="label">Board game</span>
+            <select v-model="eventForm.boardGameId" class="input">
+              <option disabled value="">Select a game</option>
+              <option
+                  v-for="g in boardGames"
+                  :key="g.gameID"
+                  :value="g.gameID"
+              >
+                {{ g.name }}
+              </option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span class="label">Max spots</span>
+            <input v-model="eventForm.maxSpot" class="input" type="number" />
+          </label>
+
+          <label class="field">
+            <span class="label">Date</span>
+            <input
+                v-model="eventForm.date"
+                class="input"
+                type="date"
+                :min="minDate"
+                @keydown.prevent
+            />
+          </label>
+
+          <label class="field">
+            <span class="label">Start time</span>
+            <input v-model="eventForm.startTime" class="input" type="time" />
+          </label>
+
+          <label class="field">
+            <span class="label">End time</span>
+            <input
+                v-model="eventForm.endTime"
+                class="input"
+                type="time"
+                :min="startTimeOrDefault"
+            />
+          </label>
+
+          <label class="field col-span-2">
+            <span class="label">Location</span>
+            <input v-model="eventForm.location" class="input" type="text" />
+          </label>
+
+          <label class="field col-span-2">
+            <span class="label">Description</span>
+            <textarea v-model="eventForm.description" class="input textarea" />
+          </label>
+        </div>
+
+        <div class="actions">
+          <button
+              class="btn btn-primary"
+              :disabled="!selectedEventId"
+              @click="updateEvent"
+          >
+            Update
+          </button>
+          <button
+              class="btn btn-ghost danger"
+              :disabled="!selectedEventId"
+              @click="deleteEvent"
+          >
+            Delete
+          </button>
+        </div>
+
+        <p v-if="!auth.user?.isAOwner" class="hint">
+          Only owners can manage events.
+        </p>
+      </section>
+    </div>
+  </section>
+</template>
+
 <style scoped>
-
-.card {
-  border: 1px solid #dee2e6;
-  border-radius: 1rem;
-  background-color: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease-in-out;
+/* ===== Canvas (uniform style) ===== */
+.events-hero { position: relative; min-height: 100vh; background:#14171d; }
+.layer { position:absolute; inset:0; }
+.bg-base{ background:#14171d; }
+.bg-gradient{
+  background:
+      radial-gradient(1100px 750px at 18% 18%, rgba(245,247,250,.28) 0%, rgba(245,247,250,.10) 36%, rgba(245,247,250,0) 65%),
+      linear-gradient(180deg, #14171d 0%, #1b2029 100%);
+  animation: float 16s ease-in-out infinite alternate;
 }
-
-.nav-link {
-  cursor: pointer;
-  margin-bottom: 5px;
-  padding: 10px;
-  text-align: center;
-  color: white !important;
+@keyframes float{ 0%{transform:translateY(0) translateX(0) scale(1)} 100%{transform:translateY(-10px) translateX(6px) scale(1.01)}}
+.bg-noise{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+  background-size:120px 120px; mix-blend-mode:overlay;
 }
-.bg-secondary {
-  background-color: grey !important;
+.bg-vignette{ background: radial-gradient(85% 70% at 50% 60%, transparent 0%, rgba(0,0,0,.35) 70%, rgba(0,0,0,.7) 100%); }
+
+.content{ position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:96px 20px 72px; color:#e9edf5; }
+
+/* ===== Toast ===== */
+.toast{
+  position: sticky; top: 16px; margin-bottom: 14px;
+  border-radius: 12px; padding: 12px 14px; font-weight: 800; letter-spacing: .2px;
+  background:#17202b; border:1px solid #273345; box-shadow: 0 8px 20px rgba(0,0,0,.25);
 }
-.bg-success {
-  background-color: green !important;
+.toast[data-variant="success"]{ background:#132317; border-color:#24472d; color:#dcffe6; }
+.toast[data-variant="danger"]{ background:#2a1517; border-color:#5a2a2f; color:#ffdbe1; }
+.toast[data-variant="warning"]{ background:#2a2314; border-color:#5a4b2a; color:#fff1cc; }
+.fade-enter-active,.fade-leave-active{ transition: opacity .2s ease }
+.fade-enter-from,.fade-leave-to{ opacity:0 }
+
+/* ===== Head & tabs ===== */
+.page-head h1{ margin:0 0 6px; font-size:30px; font-weight:900; }
+.muted{ color:#aeb5c3; }
+
+.tabs{ display:flex; gap:10px; margin:18px 0 12px; flex-wrap:wrap; }
+.tab{
+  padding:.6rem .95rem; border-radius:999px; font-weight:900; font-size:13px; letter-spacing:.2px;
+  background:#151821; border:1px solid #222a39; color:#dbe1ed; cursor:pointer;
+  transition:transform .15s ease, background .2s ease, border-color .2s ease;
 }
+.tab--active{ background:#1f2533; border-color:#2d3647; color:#fff; transform:translateY(-1px); }
 
-/* Input, Textarea, and Select Styles */
-/* General input styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {
-  width: 100%;
-  padding: 0.5rem 0.75rem;
-  font-size: 1rem;
-  color: #495057;
-  background-color: #fff;
-  border: 1.5px solid #ced4da;
-  border-radius: 0.5rem;
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+/* ===== Panels ===== */
+.panel{
+  background:#0f1217; border:1px solid #1f2533; border-radius:16px;
+  padding:16px 16px 14px; box-shadow:0 10px 30px rgba(0,0,0,.35);
 }
+.panel + .panel{ margin-top:14px; }
+.panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.panel-head h3{ margin:0; font-size:20px; font-weight:900; }
 
-/* Glow on focus */
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {
-  border-color: #28a745;
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25); /* Green glow */
+/* ===== Table ===== */
+.table-wrap{ overflow:auto; border-radius:12px; border:1px solid #1f2533; }
+.pretty{ width:100%; border-collapse:separate; border-spacing:0; }
+.pretty thead th{
+  text-align:left; font-weight:900; font-size:12px; letter-spacing:.3px; color:#c2cad6;
+  background:#121720; position:sticky; top:0; z-index:1; padding:10px 12px;
+  border-bottom:1px solid #1f2533;
 }
+.pretty tbody td{ padding:12px; border-bottom:1px solid #1a2130; color:#e7ebf3; }
+.pretty tr:hover{ background:#10151d; }
+.pretty tr.selected{ outline:2px solid #2b3854; background:#121a26; }
+.pretty .truncate{ max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
-/* Custom dropdown arrow */
-select {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20fill%3D'%23333'%20height%3D'24'%20viewBox%3D'0%200%2024%2024'%20width%3D'24'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M7%2010l5%205%205-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.75rem center;
-  background-size: 1rem;
-  padding-right: 2rem; /* Make space for the arrow */
+.link{ color:#9fc1ff; text-decoration:none; }
+.link:hover{ text-decoration:underline; }
+
+/* Chips */
+.chip{
+  display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800;
+  background:#1a2130; border:1px solid #2a3242; color:#e9edf5;
 }
+.chip[data-variant="success"]{ background:#142319; border-color:#225232; color:#dbffe6; }
+.chip[data-variant="danger"]{ background:#2b1618; border-color:#5a2a2f; color:#ffd6db; }
+.empty{ text-align:center; color:#9aa2b2; }
 
-/* Remove inner arrows in time input (Chrome) */
-input[type="time"]::-webkit-inner-spin-button,
-input[type="time"]::-webkit-calendar-picker-indicator,
-select::-ms-expand {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
+/* ===== Forms ===== */
+.grid-2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.col-span-2{ grid-column:span 2; }
+.field{ display:flex; flex-direction:column; gap:6px; }
+.label{ font-size:12px; font-weight:800; color:#c8cfdb; }
+.input{
+  background:#0c0f13; color:#e7ebf3; border:1px solid #202636; border-radius:12px;
+  padding:.75rem .9rem; outline:none; transition:border-color .2s, box-shadow .2s, background .2s;
 }
+.input:focus{ border-color:#3a4256; box-shadow:0 0 0 3px rgba(70,100,255,.12); background:#0d1116; }
+.textarea{ min-height:110px; resize:vertical; }
 
-/* Label spacing */
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #343a40;
+/* pick line */
+.pick{ margin-bottom:12px; }
+
+/* Buttons */
+.actions{ display:flex; gap:10px; margin-top:12px; }
+.btn{
+  padding:.75rem 1rem; border-radius:12px; font-weight:900; letter-spacing:.25px; border:1px solid transparent;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
 }
+.btn-primary{ background:#fff; color:#0b0d10; border:1px solid rgba(0,0,0,.08); box-shadow:0 6px 16px rgba(0,0,0,.14); }
+.btn-primary:hover{ transform:translateY(-2px); filter:brightness(1.03); }
+.btn-ghost{ background:#171b22; color:#e9edf5; border:1px solid #2a3242; }
+.btn-ghost:hover{ transform:translateY(-2px); filter:brightness(1.02); }
+.btn-ghost.danger{ color:#ffd6db; border-color:#5a2a2f; background:#2b1618; }
 
-/* Button spacing */
-button.btn {
-  margin-top: 0.5rem;
-  min-width: 120px;
-  font-weight: 500;
+.hint{ margin-top:10px; color:#aeb5c3; font-size:13px; }
+
+@media (max-width: 900px){
+  .grid-2{ grid-template-columns:1fr; }
 }
-
-
-/* Align all table cells properly */
-.table th,
-.table td {
-  vertical-align: middle;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  padding: 12px;
-}
-
-/* Column widths */
-.table th:nth-child(1),
-.table td:nth-child(1) {
-  width: 35%;
-}
-
-.table th:nth-child(2),
-.table td:nth-child(2) {
-  width: 20%;
-}
-
-.table th:nth-child(3),
-.table td:nth-child(3) {
-  width: 25%;
-}
-
-.table th:nth-child(4),
-.table td:nth-child(4) {
-  width: 20%;
-}
-
-/* Make links inside table behave properly */
-.table td a {
-  color: #0d6efd;
-  display: inline-block;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-decoration: none;
-}
-
-.table td a:hover {
-  text-decoration: underline;
-  color: darkblue;
-}
-
-
-.table {
-  table-layout: fixed;
-  width: 100%;
-}
-
-.container-fluid {
-  width: 100%;
-  padding-left: 24px;
-  padding-right: 24px;
-  margin: 0;
-}
-
-.form-control {
-  max-width: 100%;
-}
-
-h4, h2 {
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #343a40;
-}
-
-small {
-  display: block;
-  margin-bottom: 10px;
-  color: #6c757d;
-}
-
-.nav-pills .nav-link {
-  border-radius: 0.5rem;
-  border: 1px solid #dee2e6;
-  transition: background-color 0.3s ease;
-}
-
-.table thead th {
-  position: sticky;
-  top: 0;
-  background-color: white;
-  z-index: 1;
-}
-
-.col-lg-3,
-.col-md-4 {
-  padding-left: 0 !important;
-}
-
-
 </style>
