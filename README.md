@@ -67,7 +67,7 @@ npm run dev
 
 - Deliverable 3 (Apr 6) :	Initial frontend with Vue 2
 
-**This fork modernized (Fall 2025)	Full UI/UX redesign, improved API linking, and new features**
+**This fork modernized (Fall 2025)** : Full UI/UX redesign, improved API linking, and new features
 
 ## Future Ideas
 
