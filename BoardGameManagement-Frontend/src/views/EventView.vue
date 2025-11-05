@@ -1,695 +1,730 @@
-<!-- src/views/Events.vue -->
+<!-- src/views/EventView.vue -->
+<template>
+  <div>
+    <NavLandingSigned />
+
+    <main class="page">
+      <header class="page-header">
+        <div class="head-row">
+          <div>
+            <h1>Events</h1>
+            <p>Discover public sessions, register or cancel, and (if you’re an owner) create and manage your own.</p>
+          </div>
+          <button class="btn cta" @click="tab = 'Create'">＋ New Event</button>
+        </div>
+
+        <div class="tabs">
+          <button v-for="t in TABS" :key="t" class="tab" :class="{ active: tab === t }" @click="tab = t">
+            {{ t }}
+          </button>
+        </div>
+      </header>
+
+      <!-- ========== BROWSE ========== -->
+      <section v-if="tab === 'Browse'" class="card">
+        <div class="toolbar">
+          <input v-model="search" class="input" placeholder="Search by name, location, date, owner..." />
+          <div class="filters">
+            <button
+                v-for="f in FILTERS"
+                :key="f"
+                class="chip"
+                :class="{ active: browseFilter === f }"
+                @click="browseFilter = f"
+            >
+              {{ f }}
+            </button>
+          </div>
+          <div class="actions">
+            <button class="btn primary" :disabled="!selectedBrowseId" @click="registerForSelected">
+              Register
+            </button>
+            <button class="btn danger" :disabled="!selectedBrowseId" @click="cancelSelected">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <div v-if="action.visible" class="inline-banner" :class="action.kind">{{ action.msg }}</div>
+        <small class="hint">Click once to select, double-click to open, or use the “Open” button.</small>
+
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+            <tr>
+              <th>Event</th>
+              <th class="num">Date</th>
+              <th class="num">Time</th>
+              <th>Location</th>
+              <th>Owner</th>
+              <th>State</th>
+              <th>Registration</th>
+              <th class="ta-center">Open</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr
+                v-for="ev in filteredEvents"
+                :key="ev.eventID"
+                :class="{ selected: selectedBrowseId === ev.eventID }"
+                @click="selectBrowse(ev.eventID)"
+                @dblclick="openDetail(ev)"
+                :title="'Double-click to open ' + ev.name"
+            >
+              <td class="name-cell">
+                <span class="name">{{ ev.name }}</span>
+              </td>
+              <td class="num">{{ ev.eventDate }}</td>
+              <td class="num">{{ prettyTime(ev) }}</td>
+              <td>{{ ev.location }}</td>
+              <td>{{ ev.ownerName ?? '—' }}</td>
+              <td>
+                <span class="state" :class="eventStateClass(ev)">{{ eventState(ev) }}</span>
+              </td>
+              <td>
+                <span v-if="regStatus[ev.eventID] === undefined">…</span>
+                <span v-else>{{ regStatus[ev.eventID] }}</span>
+              </td>
+              <td class="ta-center">
+                <button class="btn ghost" @click.stop="openDetail(ev)">Open</button>
+              </td>
+            </tr>
+            <tr v-if="filteredEvents.length === 0">
+              <td colspan="8" class="empty">No events found.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========== CREATE ========== -->
+      <section v-else-if="tab === 'Create'" class="card">
+        <h3>Create a New Event</h3>
+        <form class="grid" @submit.prevent="createEvent">
+          <div class="col">
+            <label class="label">Event name</label>
+            <input class="input" v-model.trim="createForm.name" required />
+
+            <label class="label">Max spots</label>
+            <input class="input" type="number" min="1" v-model.number="createForm.maxSpot" required />
+
+            <label class="label">Start time</label>
+            <input class="input" type="time" v-model="createForm.startTime" required @keydown.prevent />
+
+            <label class="label">Location</label>
+            <input class="input" v-model.trim="createForm.location" required />
+          </div>
+
+          <div class="col">
+            <label class="label">Board game</label>
+            <select class="input" v-model="createForm.boardGameId" required>
+              <option disabled value="">Choose a board game</option>
+              <option v-for="g in boardGames" :key="g.gameID" :value="g.gameID">{{ g.name }}</option>
+            </select>
+
+            <label class="label">Date</label>
+            <input class="input" type="date" :min="minDate" v-model="createForm.date" required @keydown.prevent />
+
+            <label class="label">End time</label>
+            <input
+                class="input"
+                type="time"
+                v-model="createForm.endTime"
+                :min="createForm.startTime || undefined"
+                required
+                @keydown.prevent
+            />
+
+            <label class="label">Description</label>
+            <textarea
+                class="input"
+                rows="3"
+                v-model.trim="createForm.description"
+                :class="{ invalid: createTouched && !createForm.description }"
+            ></textarea>
+            <small v-if="createTouched && !createForm.description" class="err">Description is required.</small>
+          </div>
+
+          <div class="col col-2">
+            <button type="submit" class="btn primary" :disabled="!isCreateValid">Create</button>
+            <button type="button" class="btn" @click="resetCreate">Reset</button>
+          </div>
+        </form>
+
+        <div class="toasts">
+          <div v-for="t in toasts" :key="t.id" class="toast" :class="t.kind">{{ t.msg }}</div>
+        </div>
+      </section>
+
+      <!-- ========== MANAGE ========== -->
+      <section v-else class="card">
+        <h3>Manage My Events</h3>
+
+        <div class="grid">
+          <div class="col">
+            <label class="label">Select event</label>
+            <select class="input" v-model="manage.selectedId">
+              <option disabled value="">— select —</option>
+              <option v-for="ev in myEvents" :key="ev.eventID" :value="ev.eventID">
+                {{ ev.name }} — {{ ev.eventDate }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid" v-if="lock.visible">
+          <div class="col col-2">
+            <div class="inline-banner danger">
+              <template v-if="lock.reason === 'ongoing'">
+                Delete locked: this event is currently in progress ({{ lock.prettyWindow }}).
+              </template>
+              <template v-else-if="lock.reason === 'registrations'">
+                Delete locked: players are registered for this event.
+              </template>
+              <template v-else>Delete locked.</template>
+            </div>
+          </div>
+        </div>
+
+        <form class="grid" @submit.prevent="updateEvent" v-if="selectedManageEvent">
+          <div class="col">
+            <label class="label">Event name</label>
+            <input class="input" v-model.trim="manage.form.name" required />
+
+            <label class="label">Max spots</label>
+            <input class="input" type="number" min="1" v-model.number="manage.form.maxSpot" required />
+
+            <label class="label">Start time</label>
+            <input class="input" type="time" v-model="manage.form.startTime" required @keydown.prevent />
+
+            <label class="label">Location</label>
+            <input class="input" v-model.trim="manage.form.location" required />
+          </div>
+
+          <div class="col">
+            <label class="label">Board game</label>
+            <select class="input" v-model="manage.form.boardGameId" required>
+              <option disabled value="">Choose a board game</option>
+              <option v-for="g in boardGames" :key="g.gameID" :value="g.gameID">{{ g.name }}</option>
+            </select>
+
+            <label class="label">Date</label>
+            <input class="input" type="date" :min="minDate" v-model="manage.form.date" required @keydown.prevent />
+
+            <label class="label">End time</label>
+            <input
+                class="input"
+                type="time"
+                v-model="manage.form.endTime"
+                :min="manage.form.startTime || undefined"
+                required
+                @keydown.prevent
+            />
+
+            <label class="label">Description</label>
+            <textarea class="input" rows="3" v-model.trim="manage.form.description"></textarea>
+          </div>
+
+          <div class="col col-2">
+            <button type="submit" class="btn primary">Update</button>
+            <button type="button" class="btn danger" :disabled="!manage.selectedId || lock.visible" @click="deleteEvent">
+              Delete
+            </button>
+          </div>
+        </form>
+
+        <div v-else class="empty">Select one of your events to manage.</div>
+
+        <div class="toasts">
+          <div v-for="t in toasts" :key="t.id" class="toast" :class="t.kind">{{ t.msg }}</div>
+        </div>
+      </section>
+    </main>
+  </div>
+</template>
+
 <script setup>
-import { ref, reactive, computed, watch } from "vue";
-import axios from "axios";
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
-import { useAuthStore } from "@/stores/authStore";
+import axios from "axios";
+import { ref, reactive, computed, watch, onMounted, onBeforeUnmount } from "vue";
+import { useAuthStore } from "@/stores/authStore.js";
+import { useRouter } from "vue-router";
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const api = axios.create({ baseURL: "http://localhost:8080" });
+const router = useRouter();
+
 const auth = useAuthStore();
+const userId = computed(() => Number(auth.user?.id));
 
-/* ------------------------------------------------
-   UI state: tabs, toasts
-------------------------------------------------- */
-const tabs = computed(() => {
-  // owners see all 3 tabs; players only see Browse
-  return auth.user?.isAOwner
-      ? ["Browse", "Create", "Manage"]
-      : ["Browse"];
-});
-const selectedTab = ref("Browse");
+const TABS = ["Browse", "Create", "Manage"];
+const FILTERS = ["All", "Upcoming", "Ongoing", "Past"];
+const tab = ref("Browse");
+const browseFilter = ref("All");
 
-const toast = reactive({
-  show: false,
-  type: "success", // success | danger | warning | info
-  text: "",
-});
-function showToast(type, text, ms = 3000) {
-  toast.type = type;
-  toast.text = text;
-  toast.show = true;
-  window.clearTimeout(showToast.timer);
-  showToast.timer = window.setTimeout(() => (toast.show = false), ms);
-}
-
-/* ------------------------------------------------
-   Data models
-------------------------------------------------- */
 const events = ref([]);
 const myEvents = ref([]);
 const boardGames = ref([]);
+const regStatus = reactive({});
 
-const selectedEventId = ref("");
+const search = ref("");
+const selectedBrowseId = ref(null);
 
-const eventForm = reactive({
-  // shared between Create / Manage forms (we always reset when switching)
+const action = reactive({ visible: false, kind: "success", msg: "" });
+let actionTimer;
+function showAction(kind, msg, ms = 2200) {
+  action.visible = true;
+  action.kind = kind;
+  action.msg = msg;
+  clearTimeout(actionTimer);
+  actionTimer = setTimeout(() => (action.visible = false), ms);
+}
+
+const today = new Date();
+const minDate = today.toISOString().slice(0, 10);
+const createForm = reactive({
   name: "",
   description: "",
-  maxSpot: "",
-  date: "",
+  maxSpot: 1,
+  date: minDate,
   startTime: "",
   endTime: "",
   location: "",
   boardGameId: "",
 });
-
-function resetForm() {
-  eventForm.name = "";
-  eventForm.description = "";
-  eventForm.maxSpot = "";
-  eventForm.date = "";
-  eventForm.startTime = "";
-  eventForm.endTime = "";
-  eventForm.location = "";
-  eventForm.boardGameId = "";
+const createTouched = ref(false);
+const isCreateValid = computed(() => {
+  return (
+      !!createForm.name &&
+      !!createForm.boardGameId &&
+      !!createForm.date &&
+      !!createForm.startTime &&
+      !!createForm.endTime &&
+      !!createForm.location &&
+      !!createForm.description
+  );
+});
+function resetCreate() {
+  createTouched.value = false;
+  Object.assign(createForm, {
+    name: "",
+    description: "",
+    maxSpot: 1,
+    date: minDate,
+    startTime: "",
+    endTime: "",
+    location: "",
+    boardGameId: "",
+  });
 }
 
-const todayISO = new Date().toISOString().slice(0, 10);
-const minDate = todayISO;
+const manage = reactive({
+  selectedId: "",
+  form: {
+    name: "",
+    description: "",
+    maxSpot: 1,
+    date: minDate,
+    startTime: "",
+    endTime: "",
+    location: "",
+    boardGameId: "",
+  },
+});
 
-const startTimeOrDefault = computed(() =>
-    /^\d{2}:\d{2}$/.test(eventForm.startTime) ? eventForm.startTime : "00:00"
+const now = ref(Date.now());
+let tickHandle = null;
+const lock = reactive({ reason: null, visible: false, prettyWindow: "" });
+
+function parseLocalDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return null;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, 0);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+function fmtTime(hhmm) {
+  if (!hhmm) return "";
+  const [hh, mm] = hhmm.split(":").map(Number);
+  const t = new Date();
+  t.setHours(hh || 0, mm || 0, 0, 0);
+  return t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
+function eventState(ev) {
+  const start = parseLocalDateTime(ev.eventDate, (ev.startTime || "").slice(0, 5));
+  const end = parseLocalDateTime(ev.eventDate, (ev.endTime || "").slice(0, 5));
+  const t = now.value;
+  if (!start || !end) return "Upcoming";
+  if (t < start.getTime()) return "Upcoming";
+  if (t >= start.getTime() && t < end.getTime()) return "Ongoing";
+  return "Finished";
+}
+function eventStateClass(ev) {
+  const s = eventState(ev);
+  return s === "Ongoing" ? "ongoing" : s === "Finished" ? "finished" : "upcoming";
+}
+function prettyTime(ev) {
+  const s = (ev.startTime || "").slice(0, 5);
+  const e = (ev.endTime || "").slice(0, 5);
+  if (!s && !e) return "—";
+  return `${s || "??:??"}–${e || "??:??"}`;
+}
+
+const toasts = ref([]);
+function pushToast(kind, msg, ms = 2600) {
+  const id = Math.random().toString(36).slice(2);
+  toasts.value.push({ id, kind, msg });
+  setTimeout(() => (toasts.value = toasts.value.filter((t) => t.id !== id)), ms);
+}
+
+const selectedManageEvent = computed(() =>
+    events.value.find((e) => Number(e.eventID) === Number(manage.selectedId))
+);
+
+const manageWindow = computed(() => {
+  const ev = selectedManageEvent.value;
+  if (!ev) return { start: null, end: null };
+  const start = parseLocalDateTime(manage.form.date || ev.eventDate, (manage.form.startTime || "").slice(0, 5));
+  const end = parseLocalDateTime(manage.form.date || ev.eventDate, (manage.form.endTime || "").slice(0, 5));
+  return { start, end };
+});
+const isOngoing = computed(() => {
+  const { start, end } = manageWindow.value;
+  if (!start || !end) return false;
+  const t = now.value;
+  return start.getTime() <= t && t < end.getTime();
+});
+
+const filteredEvents = computed(() => {
+  const q = search.value.trim().toLowerCase();
+  let arr = events.value.slice();
+  if (browseFilter.value !== "All") {
+    arr = arr.filter((e) => {
+      const s = eventState(e);
+      if (browseFilter.value === "Past") return s === "Finished";
+      if (browseFilter.value === "Ongoing") return s === "Ongoing";
+      if (browseFilter.value === "Upcoming") return s === "Upcoming";
+      return true;
+    });
+  }
+  if (!q) return arr;
+  return arr.filter((e) => {
+    const blob = [e.name, e.location, e.ownerName, e.eventDate].filter(Boolean).join(" ").toLowerCase();
+    return blob.includes(q);
+  });
+});
+
+watch(
+    () => [manage.selectedId, manage.form.date, manage.form.startTime, manage.form.endTime, now.value],
+    () => {
+      if (manage.selectedId && isOngoing.value) {
+        lock.reason = "ongoing";
+        lock.prettyWindow = `${fmtTime((manage.form.startTime || "").slice(0, 5))} – ${fmtTime(
+            (manage.form.endTime || "").slice(0, 5)
+        )}`;
+        lock.visible = true;
+      } else if (lock.reason === "ongoing") {
+        lock.reason = null;
+        lock.visible = false;
+        lock.prettyWindow = "";
+      }
+    },
+    { immediate: true }
 );
 
 watch(
-    () => eventForm.startTime,
-    () => {
-      if (eventForm.endTime && eventForm.endTime < eventForm.startTime) {
-        eventForm.endTime = "";
+    () => manage.selectedId,
+    (id) => {
+      if (lock.reason === "registrations") {
+        lock.reason = null;
+        lock.visible = false;
+        lock.prettyWindow = "";
       }
+      const ev = events.value.find((e) => Number(e.eventID) === Number(id));
+      if (!ev) return;
+      manage.form.name = ev.name ?? "";
+      manage.form.description = ev.description ?? "";
+      manage.form.maxSpot = Number(ev.maxSpot ?? 1);
+      manage.form.date = ev.eventDate ?? minDate;
+      manage.form.startTime = (ev.startTime ?? "").slice(0, 5);
+      manage.form.endTime = (ev.endTime ?? "").slice(0, 5);
+      manage.form.location = ev.location ?? "";
+      manage.form.boardGameId = ev.boardGameId ?? "";
     }
 );
 
-/* ------------------------------------------------
-   Registration chips (per event)
-------------------------------------------------- */
-const regByEventId = ref({}); // id -> "Registered" | "Not Registered" | "Error"
+onMounted(async () => {
+  await Promise.all([fetchEvents(), fetchMyEvents(), fetchBoardGames()]);
+  tickHandle = setInterval(() => (now.value = Date.now()), 30000);
+});
+onBeforeUnmount(() => {
+  if (tickHandle) clearInterval(tickHandle);
+  clearTimeout(actionTimer);
+});
 
-/* ------------------------------------------------
-   Fetchers
-------------------------------------------------- */
 async function fetchEvents() {
   try {
-    const { data } = await axiosClient.get("/events");
+    const { data } = await api.get("/events");
     events.value = data ?? [];
-    // pre-compute registration chip for each row
-    for (const ev of events.value) await computeRegChip(ev.eventID);
-  } catch (e) {
-    console.error(e);
-    showToast("danger", "Failed to fetch events.");
+    await Promise.all(events.value.map((e) => refreshReg(e.eventID)));
+    maybeClearRegistrationLock();
+  } catch {
+    pushToast("error", "Failed to load events");
   }
 }
 async function fetchMyEvents() {
-  if (!auth.user) return;
-  if (!auth.user.isAOwner) {
-    myEvents.value = [];
-    return;
-  }
+  if (!userId.value) return;
   try {
-    const { data } = await axiosClient.get(`/events/owner/${auth.user.id}`);
+    const { data } = await api.get(`/events/owner/${userId.value}`);
     myEvents.value = data ?? [];
-  } catch (e) {
-    console.error(e);
-    showToast("danger", "Failed to fetch your events.");
+  } catch {
+    pushToast("error", "Failed to load your events");
   }
 }
 async function fetchBoardGames() {
   try {
-    const { data } = await axiosClient.get("/boardgames");
+    const { data } = await api.get("/boardgames");
     boardGames.value = data ?? [];
+  } catch {
+    pushToast("error", "Failed to load board games");
+  }
+}
+async function refreshReg(eventId) {
+  try {
+    const { data } = await api.get(`/registrations/${userId.value}/${eventId}`);
+    regStatus[eventId] = data === null ? "Not Registered" : "Registered";
   } catch (e) {
-    console.error(e);
-    showToast("danger", "Failed to fetch board games.");
+    if (e?.response?.status === 404) regStatus[eventId] = "Not Registered";
+    else regStatus[eventId] = "Error";
   }
 }
 
-async function computeRegChip(eventId) {
+function selectBrowse(id) {
+  selectedBrowseId.value = id;
+}
+function openDetail(ev) {
+  router.push({ name: "eventDetail", params: { eventname: ev.name } });
+}
+async function registerForSelected() {
+  const id = selectedBrowseId.value;
+  if (!id) return;
+  if (regStatus[id] === "Registered") {
+    showAction("info", "You’re already registered.");
+    return;
+  }
+  const ev = events.value.find((e) => e.eventID === id);
+  const st = eventState(ev);
+  if (st !== "Upcoming") {
+    showAction("error", `Registration not allowed: event is ${st.toLowerCase()}.`);
+    return;
+  }
   try {
-    const { data } = await axiosClient.get(
-        `/registrations/${auth.user.id}/${eventId}`
-    );
-    regByEventId.value[eventId] = data ? "Registered" : "Not Registered";
+    await api.post("/registrations", { playerID: userId.value, eventID: id });
+    showAction("success", "Successfully registered.");
+    await refreshReg(id);
+  } catch {
+    showAction("error", "Registration failed.");
+  }
+}
+async function cancelSelected() {
+  const id = selectedBrowseId.value;
+  if (!id) return;
+  if (regStatus[id] === "Not Registered") {
+    showAction("info", "You’re not registered for this event.");
+    return;
+  }
+  try {
+    await api.delete(`/registrations/${userId.value}/${id}`);
+    showAction("success", "Registration cancelled.");
+    await refreshReg(id);
   } catch (e) {
-    if (e?.response?.status === 404) {
-      regByEventId.value[eventId] = "Not Registered";
+    const msg = e?.response?.data?.message?.toLowerCase?.() || "";
+    if (msg.includes("active") || msg.includes("ongoing") || msg.includes("started")) {
+      showAction("error", "You can’t cancel because the event is active.");
     } else {
-      regByEventId.value[eventId] = "Error";
+      showAction("error", "Cancel failed.");
     }
   }
 }
 
-async function init() {
-  await Promise.all([fetchEvents(), fetchBoardGames(), fetchMyEvents()]);
-}
-init();
-
-/* ------------------------------------------------
-   Helpers
-------------------------------------------------- */
-function selectRow(id) {
-  selectedEventId.value = id;
-
-  // Hydrate form when switching to Manage
-  const ev =
-      events.value.find((e) => e.eventID === id) ||
-      myEvents.value.find((e) => e.eventID === id);
-  if (ev) {
-    eventForm.name = ev.name;
-    eventForm.description = ev.description;
-    eventForm.maxSpot = ev.maxSpot;
-    eventForm.date = ev.eventDate;
-    eventForm.startTime = (ev.startTime || "").slice(0, 5);
-    eventForm.endTime = (ev.endTime || "").slice(0, 5);
-    eventForm.location = ev.location;
-    eventForm.boardGameId = ev.boardGameId || "";
-  }
-}
-
-watch(selectedTab, (t) => {
-  resetForm();
-  if (t === "Manage") selectedEventId.value = "";
-});
-
-/* ------------------------------------------------
-   Actions: Create / Update / Delete
-------------------------------------------------- */
 async function createEvent() {
-  if (!auth.user?.isAOwner) return showToast("warning", "Owners only.");
+  createTouched.value = true;
+  if (!isCreateValid.value) {
+    pushToast("error", "Please fill all required fields (description is required).");
+    return;
+  }
   try {
-    const dto = {
-      name: eventForm.name,
-      description: eventForm.description,
-      maxSpot: String(eventForm.maxSpot),
-      eventDate: eventForm.date,
-      startTime: `${eventForm.startTime}:00`,
-      endTime: `${eventForm.endTime}:00`,
-      location: eventForm.location,
-      ownerId: Number(auth.user.id),
-      boardGameId: Number(eventForm.boardGameId),
-    };
-    await axiosClient.post("/events", dto);
-    showToast("success", "Event created.");
-    resetForm();
-    await fetchEvents();
-    await fetchMyEvents();
-    selectedTab.value = "Browse";
+    await api.post("/events", {
+      name: createForm.name,
+      description: createForm.description,
+      maxSpot: String(createForm.maxSpot),
+      eventDate: createForm.date,
+      startTime: `${createForm.startTime}:00`,
+      endTime: `${createForm.endTime}:00`,
+      location: createForm.location,
+      ownerId: userId.value,
+      boardGameId: createForm.boardGameId,
+    });
+    pushToast("success", "Event created");
+    resetCreate();
+    await Promise.all([fetchEvents(), fetchMyEvents()]);
+    tab.value = "Manage";
   } catch (e) {
-    console.error(e);
-    showToast("danger", "Failed to create event.");
+    const msg = e?.response?.data?.message || "Failed to create event";
+    pushToast("error", msg);
   }
 }
 
+function maybeClearRegistrationLock() {
+  if (lock.reason !== "registrations") return;
+  lock.reason = null;
+  lock.visible = false;
+  lock.prettyWindow = "";
+}
 async function updateEvent() {
-  if (!auth.user?.isAOwner) return showToast("warning", "Owners only.");
-  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
-
+  if (!manage.selectedId) return;
   try {
-    const dto = {
-      name: eventForm.name,
-      description: eventForm.description,
-      maxSpot: String(eventForm.maxSpot),
-      eventDate: eventForm.date,
-      startTime: `${eventForm.startTime}:00`,
-      endTime: `${eventForm.endTime}:00`,
-      location: eventForm.location,
-      ownerId: Number(auth.user.id),
-      boardGameId: Number(eventForm.boardGameId),
-    };
-    await axiosClient.put(`/events/${selectedEventId.value}`, dto);
-    showToast("success", "Event updated.");
-    await fetchEvents();
-    await fetchMyEvents();
+    await api.put(`/events/${manage.selectedId}`, {
+      name: manage.form.name,
+      description: manage.form.description,
+      maxSpot: manage.form.maxSpot,
+      eventDate: manage.form.date,
+      startTime: manage.form.startTime,
+      endTime: manage.form.endTime,
+      location: manage.form.location,
+      ownerId: userId.value,
+      boardGameId: manage.form.boardGameId,
+    });
+    pushToast("success", "Event updated");
+    await Promise.all([fetchEvents(), fetchMyEvents()]);
+    maybeClearRegistrationLock();
   } catch (e) {
-    console.error(e);
-    showToast("danger", "Failed to update event.");
+    const msg = e?.response?.data?.message || "Failed to update event";
+    pushToast("error", msg);
   }
 }
-
 async function deleteEvent() {
-  if (!auth.user?.isAOwner) return showToast("warning", "Owners only.");
-  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
-
+  if (!manage.selectedId) return;
   try {
-    await axiosClient.delete(`/events/${selectedEventId.value}`);
-    showToast("success", "Event deleted.");
-    selectedEventId.value = "";
-    resetForm();
-    await fetchEvents();
-    await fetchMyEvents();
+    await api.delete(`/events/${manage.selectedId}`);
+    pushToast("success", "Event deleted");
+    lock.reason = null;
+    lock.visible = false;
+    lock.prettyWindow = "";
+    manage.selectedId = "";
+    await Promise.all([fetchEvents(), fetchMyEvents()]);
   } catch (e) {
-    console.error(e);
-    showToast("danger", "Failed to delete event.");
-  }
-}
-
-/* ------------------------------------------------
-   Actions: Register / Cancel
-------------------------------------------------- */
-async function registerForEvent() {
-  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
-  if (regByEventId.value[selectedEventId.value] === "Registered")
-    return showToast("info", "Already registered.");
-
-  try {
-    const payload = {
-      playerID: Number(auth.user.id),
-      eventID: Number(selectedEventId.value),
-    };
-    await axiosClient.post("/registrations", payload);
-    showToast("success", "Registration successful.");
-    await computeRegChip(selectedEventId.value);
-  } catch (e) {
-    console.error(e);
-    showToast("danger", "Registration failed.");
-  }
-}
-
-async function cancelRegistration() {
-  if (!selectedEventId.value) return showToast("info", "Pick an event first.");
-  if (regByEventId.value[selectedEventId.value] !== "Registered")
-    return showToast("info", "You’re not registered.");
-
-  try {
-    await axiosClient.delete(
-        `/registrations/${auth.user.id}/${selectedEventId.value}`
-    );
-    showToast("success", "Registration cancelled.");
-    await computeRegChip(selectedEventId.value);
-  } catch (e) {
-    console.error(e);
-    showToast("danger", "Could not cancel registration.");
+    const status = e?.response?.status;
+    if (status === 409) {
+      const msg = (e?.response?.data?.message || "").toLowerCase();
+      lock.reason = msg.includes("start") || msg.includes("ongoing") ? "ongoing" : "registrations";
+      if (lock.reason === "ongoing") {
+        lock.prettyWindow = `${fmtTime((manage.form.startTime || "").slice(0, 5))} – ${fmtTime(
+            (manage.form.endTime || "").slice(0, 5)
+        )}`;
+      }
+      lock.visible = true;
+      pushToast(
+          "error",
+          lock.reason === "ongoing" ? "Cannot delete while the event is ongoing." : "Cannot delete: players are registered."
+      );
+      return;
+    }
+    pushToast("error", "Delete failed");
   }
 }
 </script>
 
-<template>
-  <section class="events-hero">
-    <NavLandingSigned />
-
-    <!-- Background layers -->
-    <div class="layer bg-base"></div>
-    <div class="layer bg-gradient"></div>
-    <div class="layer bg-noise"></div>
-    <div class="layer bg-vignette"></div>
-
-    <div class="content">
-      <!-- Toast -->
-      <transition name="fade">
-        <div v-if="toast.show" class="toast" :data-variant="toast.type">
-          {{ toast.text }}
-        </div>
-      </transition>
-
-      <!-- Head -->
-      <header class="page-head">
-        <h1>Events</h1>
-        <p class="muted">
-          Discover public sessions, register or cancel, and (if you’re an owner)
-          create and manage your own.
-        </p>
-      </header>
-
-      <!-- Tabs -->
-      <nav class="tabs">
-        <button
-            v-for="t in tabs"
-            :key="t"
-            class="tab"
-            :class="{ 'tab--active': selectedTab === t }"
-            @click="selectedTab = t"
-        >
-          {{ t }}
-        </button>
-      </nav>
-
-      <!-- Browse -->
-      <section v-if="selectedTab === 'Browse'" class="panel">
-        <div class="panel-head">
-          <h3>Browse Available Events</h3>
-        </div>
-
-        <div class="table-wrap">
-          <table class="pretty">
-            <thead>
-            <tr>
-              <th>Event</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Location</th>
-              <th>Status</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr
-                v-for="ev in events"
-                :key="ev.eventID"
-                :class="{ selected: ev.eventID === selectedEventId }"
-                @click="selectRow(ev.eventID)"
-            >
-              <td class="truncate">
-                <router-link
-                    class="link"
-                    :to="{ name: 'eventDetail', params: { eventname: ev.name } }"
-                    @click.stop
-                >{{ ev.name }}</router-link
-                >
-              </td>
-              <td>{{ ev.eventDate }}</td>
-              <td>{{ (ev.startTime || '').slice(0,5) }}–{{ (ev.endTime || '').slice(0,5) }}</td>
-              <td class="truncate">{{ ev.location }}</td>
-              <td>
-                  <span
-                      class="chip"
-                      :data-variant="regByEventId[ev.eventID] === 'Registered' ? 'success' : (regByEventId[ev.eventID] === 'Error' ? 'danger' : 'default')"
-                  >
-                    {{ regByEventId[ev.eventID] || '…' }}
-                  </span>
-              </td>
-            </tr>
-            <tr v-if="!events.length">
-              <td colspan="5" class="empty">No events yet.</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="actions">
-          <button
-              class="btn btn-primary"
-              :disabled="!selectedEventId"
-              @click="registerForEvent"
-          >
-            Register
-          </button>
-          <button
-              class="btn btn-ghost"
-              :disabled="!selectedEventId"
-              @click="cancelRegistration"
-          >
-            Cancel Registration
-          </button>
-        </div>
-      </section>
-
-      <!-- Create (owner) -->
-      <section v-if="selectedTab === 'Create'" class="panel">
-        <div class="panel-head">
-          <h3>Create a New Event</h3>
-        </div>
-
-        <div class="grid-2">
-          <label class="field">
-            <span class="label">Event name</span>
-            <input v-model="eventForm.name" class="input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="label">Board game</span>
-            <select v-model="eventForm.boardGameId" class="input">
-              <option disabled value="">Select a game</option>
-              <option
-                  v-for="g in boardGames"
-                  :key="g.gameID"
-                  :value="g.gameID"
-              >
-                {{ g.name }}
-              </option>
-            </select>
-          </label>
-
-          <label class="field">
-            <span class="label">Max spots</span>
-            <input v-model="eventForm.maxSpot" class="input" type="number" />
-          </label>
-
-          <label class="field">
-            <span class="label">Date</span>
-            <input
-                v-model="eventForm.date"
-                class="input"
-                type="date"
-                :min="minDate"
-                @keydown.prevent
-            />
-          </label>
-
-          <label class="field">
-            <span class="label">Start time</span>
-            <input v-model="eventForm.startTime" class="input" type="time" />
-          </label>
-
-          <label class="field">
-            <span class="label">End time</span>
-            <input
-                v-model="eventForm.endTime"
-                class="input"
-                type="time"
-                :min="startTimeOrDefault"
-            />
-          </label>
-
-          <label class="field col-span-2">
-            <span class="label">Location</span>
-            <input v-model="eventForm.location" class="input" type="text" />
-          </label>
-
-          <label class="field col-span-2">
-            <span class="label">Description</span>
-            <textarea v-model="eventForm.description" class="input textarea" />
-          </label>
-        </div>
-
-        <div class="actions">
-          <button class="btn btn-primary" @click="createEvent">Create</button>
-          <button class="btn btn-ghost" @click="resetForm">Reset</button>
-        </div>
-
-        <p v-if="!auth.user?.isAOwner" class="hint">
-          Only owners can create events.
-        </p>
-      </section>
-
-      <!-- Manage (owner) -->
-      <section v-if="selectedTab === 'Manage'" class="panel">
-        <div class="panel-head">
-          <h3>Update / Delete My Events</h3>
-        </div>
-
-        <div class="pick">
-          <label class="field">
-            <span class="label">Select one of your events</span>
-            <select
-                class="input"
-                v-model="selectedEventId"
-                @change="selectRow(selectedEventId)"
-            >
-              <option disabled value="">Choose…</option>
-              <option
-                  v-for="e in myEvents"
-                  :key="e.eventID"
-                  :value="e.eventID"
-              >
-                {{ e.name }}
-              </option>
-            </select>
-          </label>
-        </div>
-
-        <div class="grid-2">
-          <label class="field">
-            <span class="label">Event name</span>
-            <input v-model="eventForm.name" class="input" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="label">Board game</span>
-            <select v-model="eventForm.boardGameId" class="input">
-              <option disabled value="">Select a game</option>
-              <option
-                  v-for="g in boardGames"
-                  :key="g.gameID"
-                  :value="g.gameID"
-              >
-                {{ g.name }}
-              </option>
-            </select>
-          </label>
-
-          <label class="field">
-            <span class="label">Max spots</span>
-            <input v-model="eventForm.maxSpot" class="input" type="number" />
-          </label>
-
-          <label class="field">
-            <span class="label">Date</span>
-            <input
-                v-model="eventForm.date"
-                class="input"
-                type="date"
-                :min="minDate"
-                @keydown.prevent
-            />
-          </label>
-
-          <label class="field">
-            <span class="label">Start time</span>
-            <input v-model="eventForm.startTime" class="input" type="time" />
-          </label>
-
-          <label class="field">
-            <span class="label">End time</span>
-            <input
-                v-model="eventForm.endTime"
-                class="input"
-                type="time"
-                :min="startTimeOrDefault"
-            />
-          </label>
-
-          <label class="field col-span-2">
-            <span class="label">Location</span>
-            <input v-model="eventForm.location" class="input" type="text" />
-          </label>
-
-          <label class="field col-span-2">
-            <span class="label">Description</span>
-            <textarea v-model="eventForm.description" class="input textarea" />
-          </label>
-        </div>
-
-        <div class="actions">
-          <button
-              class="btn btn-primary"
-              :disabled="!selectedEventId"
-              @click="updateEvent"
-          >
-            Update
-          </button>
-          <button
-              class="btn btn-ghost danger"
-              :disabled="!selectedEventId"
-              @click="deleteEvent"
-          >
-            Delete
-          </button>
-        </div>
-
-        <p v-if="!auth.user?.isAOwner" class="hint">
-          Only owners can manage events.
-        </p>
-      </section>
-    </div>
-  </section>
-</template>
-
 <style scoped>
-/* ===== Canvas (uniform style) ===== */
-.events-hero { position: relative; min-height: 100vh; background:#14171d; }
-.layer { position:absolute; inset:0; }
-.bg-base{ background:#14171d; }
-.bg-gradient{
-  background:
-      radial-gradient(1100px 750px at 18% 18%, rgba(245,247,250,.28) 0%, rgba(245,247,250,.10) 36%, rgba(245,247,250,0) 65%),
-      linear-gradient(180deg, #14171d 0%, #1b2029 100%);
-  animation: float 16s ease-in-out infinite alternate;
+/* layout */
+.page { margin-top: 96px; padding: 24px; }
+.page-header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.page-header h1 { font-size: 32px; margin: 0; color: #e8ecf7; font-weight: 800; }
+.page-header p { opacity: .75; margin: 0; color: #c3cad9; }
+
+/* big CTA */
+.btn.cta { background: #4478ff; color: #fff; border: 1px solid #4478ff; font-weight: 800; padding: 12px 18px; border-radius: 12px; }
+.btn.cta:hover { filter: brightness(1.05); }
+
+/* tabs */
+.tabs { display: flex; gap: 8px; }
+.tab { padding: 8px 16px; border-radius: 10px; background: #fff; color: #0f1217; border: 1px solid #ffffff;
+  font-weight: 700; transition: all .2s ease; box-shadow: 0 2px 6px rgba(255,255,255,0.15); }
+.tab:not(.active) { background: transparent; color: #d8deed; border-color: #2f384a; font-weight: 600; box-shadow: none; }
+.tab:not(.active):hover { background: #f4f6fa; color: #0f1217; border-color: #f4f6fa; }
+
+/* cards */
+.card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }
+
+/* grid */
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.col-2 { grid-column: span 2; display: flex; gap: 10px; }
+
+/* inputs */
+.label { font-size: 13px; font-weight: 600; opacity: .85; color: #e2e6f2; }
+.input, textarea.input, select.input { width: 100%; background: #151a22; color: #f0f4ff; border: 1px solid #384054; border-radius: 10px;
+  padding: 10px 12px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.input:focus, textarea.input:focus, select.input:focus { border-color: #72aaff; box-shadow: 0 0 0 2px rgba(114,170,255,0.25); }
+.input.invalid { border-color: #c94949; box-shadow: 0 0 0 2px rgba(201,73,73,0.25); }
+.input::-webkit-calendar-picker-indicator { filter: invert(1); }
+
+/* toolbar */
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+.toolbar .input { flex: 1 1 420px; }
+.filters { display: flex; gap: 6px; }
+.chip { padding: 8px 12px; border-radius: 999px; border: 1px solid #2f384a; background: transparent; color: #d8deed; font-weight: 700; }
+.chip.active { background: #fff; color: #0f1217; border-color: #fff; }
+.actions { display: flex; gap: 8px; }
+
+/* inline banner */
+.inline-banner { margin-bottom: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid #2b3343; background: #0f1217; font-weight: 700; }
+.inline-banner.success { border-color: #3e7350; background: #112218; color: #b7ffd1; }
+.inline-banner.error { border-color: #8a2a2a; background: #1a1010; color: #ffd6d6; }
+.inline-banner.info { border-color: #3b5b9e; background: #0f1625; color: #d7e5ff; }
+
+/* buttons */
+.btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; }
+.btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
+.btn.primary:hover { background: #f3f3f3; }
+.btn.danger { background: #d44d4d; border-color: #d44d4d; color: #fff; }
+.btn.danger:hover { background: #c04343; }
+.btn.ghost { background: transparent; border: 1px solid #2f384a; color: #dfe5f4; }
+.btn.ghost:hover { background: #182132; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* table */
+.table-wrap { border: 1px solid #1f2533; border-radius: 12px; overflow: hidden; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td {
+  padding: 12px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #dfe5f4;
+  vertical-align: middle; /* vertical centering fix */
+  font-variant-numeric: tabular-nums; /* numeric alignment fix */
 }
-@keyframes float{ 0%{transform:translateY(0) translateX(0) scale(1)} 100%{transform:translateY(-10px) translateX(6px) scale(1.01)}}
-.bg-noise{
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
-  background-size:120px 120px; mix-blend-mode:overlay;
-}
-.bg-vignette{ background: radial-gradient(85% 70% at 50% 60%, transparent 0%, rgba(0,0,0,.35) 70%, rgba(0,0,0,.7) 100%); }
+.table thead { background: #161b24; }
+.table tbody tr { border-top: 1px solid #1f2634; cursor: pointer; transition: background .15s ease; height: 48px; } /* uniform row height */
+.table tbody tr:hover { background: #1a2030; }
+.table tbody tr.selected { background: #212836; }
+.name-cell .name { font-weight: 700; color: #e6ecff; }
+.ta-center { text-align: center; }
+.num { font-variant-numeric: tabular-nums; }
 
-.content{ position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:96px 20px 72px; color:#e9edf5; }
+/* badges */
+.state { padding: 4px 10px; border-radius: 999px; font-weight: 800; border: 1px solid transparent; }
+.state.upcoming { color: #cde6ff; border-color: #2e4a74; background: #0d1726; }
+.state.ongoing  { color: #c8ffd5; border-color: #2c5b38; background: #0f2015; }
+.state.finished { color: #ffd6d6; border-color: #5b2c2c; background: #1f1111; }
 
-/* ===== Toast ===== */
-.toast{
-  position: sticky; top: 16px; margin-bottom: 14px;
-  border-radius: 12px; padding: 12px 14px; font-weight: 800; letter-spacing: .2px;
-  background:#17202b; border:1px solid #273345; box-shadow: 0 8px 20px rgba(0,0,0,.25);
-}
-.toast[data-variant="success"]{ background:#132317; border-color:#24472d; color:#dcffe6; }
-.toast[data-variant="danger"]{ background:#2a1517; border-color:#5a2a2f; color:#ffdbe1; }
-.toast[data-variant="warning"]{ background:#2a2314; border-color:#5a4b2a; color:#fff1cc; }
-.fade-enter-active,.fade-leave-active{ transition: opacity .2s ease }
-.fade-enter-from,.fade-leave-to{ opacity:0 }
+/* misc */
+.hint { display: block; margin: 4px 0 8px; opacity: .7; color: #b5bfd5; }
+.err { color: #ffd6d6; margin-top: -6px; }
 
-/* ===== Head & tabs ===== */
-.page-head h1{ margin:0 0 6px; font-size:30px; font-weight:900; }
-.muted{ color:#aeb5c3; }
-
-.tabs{ display:flex; gap:10px; margin:18px 0 12px; flex-wrap:wrap; }
-.tab{
-  padding:.6rem .95rem; border-radius:999px; font-weight:900; font-size:13px; letter-spacing:.2px;
-  background:#151821; border:1px solid #222a39; color:#dbe1ed; cursor:pointer;
-  transition:transform .15s ease, background .2s ease, border-color .2s ease;
-}
-.tab--active{ background:#1f2533; border-color:#2d3647; color:#fff; transform:translateY(-1px); }
-
-/* ===== Panels ===== */
-.panel{
-  background:#0f1217; border:1px solid #1f2533; border-radius:16px;
-  padding:16px 16px 14px; box-shadow:0 10px 30px rgba(0,0,0,.35);
-}
-.panel + .panel{ margin-top:14px; }
-.panel-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-.panel-head h3{ margin:0; font-size:20px; font-weight:900; }
-
-/* ===== Table ===== */
-.table-wrap{ overflow:auto; border-radius:12px; border:1px solid #1f2533; }
-.pretty{ width:100%; border-collapse:separate; border-spacing:0; }
-.pretty thead th{
-  text-align:left; font-weight:900; font-size:12px; letter-spacing:.3px; color:#c2cad6;
-  background:#121720; position:sticky; top:0; z-index:1; padding:10px 12px;
-  border-bottom:1px solid #1f2533;
-}
-.pretty tbody td{ padding:12px; border-bottom:1px solid #1a2130; color:#e7ebf3; }
-.pretty tr:hover{ background:#10151d; }
-.pretty tr.selected{ outline:2px solid #2b3854; background:#121a26; }
-.pretty .truncate{ max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-
-.link{ color:#9fc1ff; text-decoration:none; }
-.link:hover{ text-decoration:underline; }
-
-/* Chips */
-.chip{
-  display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; font-weight:800;
-  background:#1a2130; border:1px solid #2a3242; color:#e9edf5;
-}
-.chip[data-variant="success"]{ background:#142319; border-color:#225232; color:#dbffe6; }
-.chip[data-variant="danger"]{ background:#2b1618; border-color:#5a2a2f; color:#ffd6db; }
-.empty{ text-align:center; color:#9aa2b2; }
-
-/* ===== Forms ===== */
-.grid-2{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
-.col-span-2{ grid-column:span 2; }
-.field{ display:flex; flex-direction:column; gap:6px; }
-.label{ font-size:12px; font-weight:800; color:#c8cfdb; }
-.input{
-  background:#0c0f13; color:#e7ebf3; border:1px solid #202636; border-radius:12px;
-  padding:.75rem .9rem; outline:none; transition:border-color .2s, box-shadow .2s, background .2s;
-}
-.input:focus{ border-color:#3a4256; box-shadow:0 0 0 3px rgba(70,100,255,.12); background:#0d1116; }
-.textarea{ min-height:110px; resize:vertical; }
-
-/* pick line */
-.pick{ margin-bottom:12px; }
-
-/* Buttons */
-.actions{ display:flex; gap:10px; margin-top:12px; }
-.btn{
-  padding:.75rem 1rem; border-radius:12px; font-weight:900; letter-spacing:.25px; border:1px solid transparent;
-  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
-}
-.btn-primary{ background:#fff; color:#0b0d10; border:1px solid rgba(0,0,0,.08); box-shadow:0 6px 16px rgba(0,0,0,.14); }
-.btn-primary:hover{ transform:translateY(-2px); filter:brightness(1.03); }
-.btn-ghost{ background:#171b22; color:#e9edf5; border:1px solid #2a3242; }
-.btn-ghost:hover{ transform:translateY(-2px); filter:brightness(1.02); }
-.btn-ghost.danger{ color:#ffd6db; border-color:#5a2a2f; background:#2b1618; }
-
-.hint{ margin-top:10px; color:#aeb5c3; font-size:13px; }
-
-@media (max-width: 900px){
-  .grid-2{ grid-template-columns:1fr; }
-}
+/* toasts */
+.toasts { position: fixed; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+.toast { padding: 10px 14px; border-radius: 10px; border: 1px solid #2b3343; background: #0f1217; color: #e9edf5; font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
+.toast.success { border-color: #3e7350; background: #112218; color: #b7ffd1; }
+.toast.error   { border-color: #8a2a2a; background: #1a1010; color: #ffd6d6; }
+.toast.info    { border-color: #3b5b9e; background: #0f1625; color: #d7e5ff; }
 </style>
