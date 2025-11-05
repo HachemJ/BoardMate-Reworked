@@ -6,7 +6,6 @@ This fork represents my personal continuation of the project — redesigned fron
 # Team Origin — McGill Project Group 16
 | Name | Major | Fun Fact
 | --- | --- | --- |
-
 | Kathelina | Computer Engineering | I don’t know..I’m boring…I play(ed) piano? 🎹
 | Tingyi | Computer Engineering | I fence épée ⚔️
 | Nizar | Software Engineering | I play Guitar 🎸
@@ -15,36 +14,46 @@ This fork represents my personal continuation of the project — redesigned fron
 | Jad | Software Engineering | I love playing competitive games 🎮
 | HongYi | Computer Engineering | lefty ✋
 
-<br /> # Scope and Purpose of the Project <br />
+<br /> 
+
+
+# Scope and Purpose of the Project 
+<br />
 
 ## Project Overview
-
-BoardMate connects board game enthusiasts — helping them lend, borrow, and play games while organizing events and building communities.
+The Board Game Management Application is designed to help board game enthusiasts connect, share their games, and organize gaming events. The platform allows users to lend, borrow, and play board games while fostering a gaming community.
 
 ## Core Goals:
 
-Empower players to browse, borrow, and review games.
+- Empower players to browse, borrow, and review games.
 
-Enable owners to manage collections and track lending.
+- Enable owners to manage collections and track lending.
 
-Provide a platform for event scheduling and participation.
+- Provide a platform for event scheduling and participation.
 
-Create a social, fun space around board gaming.
+- Create a social, fun space around board gaming.
 
 ## Modernized Features
-Category	Description
-### 🎨 UI/UX	Completely reworked with responsive design, clean dark theme, improved structure and accessibility.
-### ⚡ Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).
-### 🔔 Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).
-### 🕒 Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.
-### 🔐 Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).
-### 🧠 Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.
-Tech Stack
 
-**Frontend**: Vue 3, Pinia, Vite, Axios, Bootstrap
-**Backend**: Java Spring Boot, Spring Data JPA, PostgreSQL
-**Build Tools**: npm (frontend), Gradle (backend)
-**Database**: PostgreSQL (via JPA entities)
+### 🎨 UI/UX	
+Completely reworked with responsive design, clean dark theme, improved structure and accessibility.
+### ⚡ 
+Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).
+### 🔔 
+Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).
+### 🕒 
+Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.
+### 🔐 
+Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).
+### 🧠 
+Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.
+
+## Tech Stack
+
+### 🖥️ Frontend: Vue 3, Pinia, Vite, Axios, Bootstrap
+### 🌐 Backend: Java Spring Boot, Spring Data JPA, PostgreSQL
+### 🛠️ Build Tools: npm (frontend), Gradle (backend)
+### 🗄️ Database: PostgreSQL (via JPA entities)
 
 ### Running the Application
 
