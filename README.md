@@ -67,7 +67,7 @@ npm run dev
 
 - Deliverable 3 (Apr 6) :	Initial frontend with Vue 2
 
-**Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features**
+**This fork modernized (Fall 2025)	Full UI/UX redesign, improved API linking, and new features**
 
 ## Future Ideas
 
@@ -79,7 +79,7 @@ npm run dev
 
 ### 📊 Analytics dashboard for owners
 
-## 📜 Credits
+## Credits
 
-Original development by McGill ECSE Project Group 16.
+📜 Original development by McGill ECSE Project Group 16.
 Modernized and maintained by Jad El Hachem (2025).
