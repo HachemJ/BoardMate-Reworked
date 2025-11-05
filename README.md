@@ -41,7 +41,7 @@ The Board Game Management Application is designed to help board game enthusiasts
 ### 🖥️ Frontend: Vue 3, Pinia, Vite, Axios, Bootstrap
 ### 🌐 Backend: Java Spring Boot, Spring Data JPA, PostgreSQL
 ### 🛠️ Build Tools: npm (frontend), Gradle (backend)
-### 🗄️ Database: PostgreSQL (via JPA entities)
+### 🗄️  Database: PostgreSQL (via JPA entities)
 
 ## Running the Application
 
