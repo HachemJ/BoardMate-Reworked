@@ -1,280 +1,241 @@
+<!-- src/views/EventDetailView.vue -->
+<template>
+  <div>
+    <NavLandingSigned />
+
+    <main class="page">
+      <section class="card detail" v-if="loaded && !loadError">
+        <header class="detail-head">
+          <div class="title">
+            <h1>{{ details.name }}</h1>
+            <p class="muted">Board Game: <span class="accent">{{ details.boardGameName || '—' }}</span></p>
+          </div>
+
+          <div class="state-badges">
+            <span v-if="state" class="badge" :class="state.toLowerCase()">{{ state }}</span>
+            <span v-if="isFull" class="badge full">Full</span>
+          </div>
+        </header>
+
+        <div class="grid">
+          <div class="col">
+            <div class="kv"><span class="k">Date</span><span class="v">{{ details.eventDate || '—' }}</span></div>
+            <div class="kv"><span class="k">Start</span><span class="v">{{ prettyTime(details.startTime) || '—' }}</span></div>
+            <div class="kv"><span class="k">End</span><span class="v">{{ prettyTime(details.endTime) || '—' }}</span></div>
+            <div class="kv"><span class="k">Location</span><span class="v">{{ details.location || '—' }}</span></div>
+            <div class="kv">
+              <span class="k">Spots</span>
+              <span class="v">
+                <template v-if="details.maxSpot">
+                  {{ Number(count ?? 0) }}/{{ details.maxSpot }}
+                </template>
+                <template v-else>—</template>
+              </span>
+            </div>
+          </div>
+
+          <div class="col">
+            <div class="kv"><span class="k">Owner</span><span class="v">{{ details.ownerName || '—' }}</span></div>
+            <div class="kv desc">
+              <span class="k">Description</span>
+              <span class="v block">{{ details.description || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" :disabled="disableRegister" @click="registerForEvent">Register</button>
+          <button class="btn danger" :disabled="disableCancel" @click="cancelRegistration">Cancel Registration</button>
+          <button class="btn ghost" @click="goBack">Go Back</button>
+        </div>
+      </section>
+
+      <section v-else-if="loadError" class="card empty">
+        Could not load this event.
+        <div class="mt-10"><button class="btn ghost" @click="goBack">Back to Events</button></div>
+      </section>
+
+      <div class="toasts">
+        <div v-for="t in toasts" :key="t.id" class="toast" :class="t.kind">{{ t.msg }}</div>
+      </div>
+    </main>
+  </div>
+</template>
+
 <script setup>
-
-import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {onMounted, ref} from "vue";
-import {useRoute, useRouter} from "vue-router";
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
-import {useAuthStore} from "@/stores/authStore.js";
-
-const authStore = useAuthStore();
-
-const axiosClient = axios.create({
-  baseURL: "http://localhost:8080"
-});
+import { useRoute, useRouter } from "vue-router";
+import { ref, computed, onMounted } from "vue";
+import { useAuthStore } from "@/stores/authStore";
 
 const route = useRoute();
 const router = useRouter();
+const auth = useAuthStore();
+const api = axios.create({ baseURL: "http://localhost:8080" });
 
-const eventName = route.params.eventname;
-const eventDetails = ref({
-  eventName: '',
-  description: '',
-  maxSpot: '',
-  eventDate: '',
-  startTime: '',
-  endTime: '',
-  location: '',
-  ownerName: '',
-  boardGameName: '',
+const loaded = ref(false);
+const loadError = ref(false);
+const details = ref({
+  eventID: null,
+  name: "",
+  description: "",
+  maxSpot: "",
+  eventDate: "",
+  startTime: "",
+  endTime: "",
+  location: "",
+  ownerName: "",
+  boardGameName: "",
+});
+const regStatus = ref("Not Registered");
+const count = ref(null);
+
+function prettyTime(t) {
+  if (!t) return "";
+  const hhmm = t.length >= 5 ? t.slice(0, 5) : t;
+  const [h, m] = hhmm.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h || 0, m || 0, 0, 0);
+  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+function toLocalDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return null;
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.slice(0, 5).split(":").map(Number);
+  const dt = new Date(y, (mo || 1) - 1, d || 1, hh || 0, mm || 0, 0);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+const startDT = computed(() => toLocalDateTime(details.value.eventDate, details.value.startTime));
+const endDT   = computed(() => toLocalDateTime(details.value.eventDate, details.value.endTime));
+const state = computed(() => {
+  const now = Date.now();
+  if (!startDT.value || !endDT.value) return null;
+  if (now < startDT.value.getTime()) return "Upcoming";
+  if (now >= startDT.value.getTime() && now < endDT.value.getTime()) return "Ongoing";
+  return "Finished";
+});
+const isFull = computed(() => {
+  const max = Number(details.value.maxSpot ?? 0);
+  return max > 0 && (Number(count.value ?? 0) >= max);
 });
 
-var eventID = null; // Initialize eventID variable
-var registrationStatus = "Loading..."; // Initialize registrationStatus variable
+const disableRegister = computed(() =>
+    !details.value.eventID || regStatus.value === "Registered" || state.value !== "Upcoming" || isFull.value
+);
+const disableCancel = computed(() => !details.value.eventID || regStatus.value !== "Registered");
 
-/**
- * Fetches an event ID given an event's name. Assumes event names are unique.
- * @param eventName - The name of the event to search for.
- * @return {Promise<number|null>} - The ID of the event if found, otherwise null.
- * @throws {Error} - Throws an error if the API request fails.
- */
-async function fetchEventID() {
+const toasts = ref([]);
+function toast(kind, msg, ms = 2500) {
+  const id = Math.random().toString(36).slice(2);
+  toasts.value.push({ id, kind, msg });
+  setTimeout(() => (toasts.value = toasts.value.filter(t => t.id !== id)), ms);
+}
+
+async function fetchEventById(id) {
+  const { data } = await api.get(`/events/${id}`);
+  return data;
+}
+async function fetchRegStatus(id) {
   try {
-    const response = await axiosClient.get("/events");
-    const event = response.data.find(event => event.name === eventName);
-    if (event) {
-      console.log("Event ID:", event.eventID); // Log the event ID
-      return event.eventID;
-    }
-    return null; // Return null if game ID is not found
-  } catch (error) {
-    console.error("Error fetching event ID:", error);
+    const { data } = await api.get(`/registrations/${auth.user.id}/${id}`);
+    regStatus.value = data === null ? "Not Registered" : "Registered";
+  } catch (e) {
+    if (e?.response?.status === 404) regStatus.value = "Not Registered";
+    else regStatus.value = "Error";
   }
+}
+async function fetchCount(id) {
+  const tryPaths = [
+    `/registrations/count/${id}`,
+    `/registrations/event/${id}/count`,
+    `/registrations/event/${id}`,
+  ];
+  for (const p of tryPaths) {
+    try {
+      const { data } = await api.get(p);
+      count.value = Array.isArray(data) ? data.length : Number(data ?? 0);
+      return;
+    } catch { /* try next */ }
+  }
+  count.value = 0;
 }
 
 onMounted(async () => {
   try {
-    const eventId = await fetchEventID();
-    eventID = eventId;
-    const response = await axiosClient.get("/events/" + eventId);
-    eventDetails.value = response.data;
-    console.log("Event Details:", eventDetails.value); // Log the event details
-  } catch (error) {
-    console.error(error);
+    const id = Number(route.params.id);
+    if (!id) throw new Error("Bad id");
+    const ev = await fetchEventById(id);
+    details.value = ev || {};
+    await Promise.all([fetchRegStatus(id), fetchCount(id)]);
+    loaded.value = true;
+  } catch {
+    loadError.value = true;
   }
-})
+});
 
-async function goBack() {
-  await router.push("/pages/event/");
-}
-
-/**
- * Function to get the registration status for a user for an event.
- * @param id - The ID of the event to check registration status for.
- */
- async function getRegistrationStatus(id) {
-  try {
-    const response = await axiosClient.get(`/registrations/${authStore.user.id}/${id}`);
-    if (response.data === null) {
-      registrationStatus = "Not Registered";
-    } else {
-      registrationStatus = "Registered";
-    }
-  } catch (error) {
-    if (error.response?.status === 404) {
-      registrationStatus = "Not Registered";
-    } else {
-      registrationStatus = "Error";
-    }
-  }
-}
-
-
-//original functions by Niz
-/**
- * Function to register for an event.
- */
 async function registerForEvent() {
-  await getRegistrationStatus(eventID);
-
-  if (registrationStatus.value === "Registered") {
-    alert("You are already registered for this event.");
-    return;
-  }
-
-  const registration = {
-    playerID: Number(authStore.user.id),
-    eventID: eventID,
-  }
-    try {
-        const response = await axiosClient.post("/registrations", registration);
-
-        if (response && response.status === 201) {
-            alert("Registration successful!");
-            console.log("Registration successful:", response.data);
-        } else {
-            alert("Failed to register. Please try again.");
-            console.error("Unexpected response:", response);
-        }
-    } catch (e) {
-        console.error(e);
-        alert("You are already registered for this event.");
-    }
-
-}
-
-async function cancelRegistration() {
-  await getRegistrationStatus(eventID);
-
-  if (registrationStatus === "Not Registered") {
-    alert("You are not registered for this event.");
-    return;
-  }
-
+  if (!details.value.eventID || disableRegister.value) return;
   try {
-    const response = await axiosClient.delete("/registrations/" + authStore.user.id + "/" + eventID);
-
-    if (response && response.status === 204) {
-      alert("Registration cancelled!");
-      console.log("Registration cancelled successfully:", response.data);
-    } else {
-      alert("Failed to cancel registration. Please try again.");
-      console.error("Unexpected response:", response);
-    }
+    await api.post("/registrations", { playerID: Number(auth.user.id), eventID: Number(details.value.eventID) });
+    toast("success", "Registration successful");
+    await Promise.all([fetchRegStatus(details.value.eventID), fetchCount(details.value.eventID)]);
   } catch (e) {
-    console.error(e);
-    alert("Failed to cancel registration. Please try again.");
-  }
-
-  console.log("Cancelled registration for Event ID:", selectedEventId.value);
-
-  // update registration status for each event
-  for (const event of events.value) {
-    await getRegistrationStatus(event.eventID);
+    toast("error", e?.response?.data?.message || "Registration failed");
   }
 }
-
+async function cancelRegistration() {
+  if (!details.value.eventID || disableCancel.value) return;
+  try {
+    await api.delete(`/registrations/${auth.user.id}/${details.value.eventID}`);
+    toast("success", "Registration cancelled");
+    await Promise.all([fetchRegStatus(details.value.eventID), fetchCount(details.value.eventID)]);
+  } catch (e) {
+    toast("error", e?.response?.data?.message || "Cancel failed");
+  }
+}
+function goBack() { router.push({ name: "event" }); }
 </script>
 
-<template>
-  <div>
-    <!-- Top Navigation Bar -->
-    <DefaultNavbar />
-
-    <div class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-md-10">
-
-          <!-- Event Card -->
-          <div class="card p-5 mb-4 shadow rounded-4">
-            <div class="row align-items-start justify-content-between">
-
-              <!-- Left: Event Name & Board Game -->
-              <div class="col-md-6 text-start">
-                <h1 class="fw-bold display-4" style="font-size: 3rem;">{{ eventName }}</h1>
-
-                <p class="mt-3 text-muted" style="font-size: 1.1rem;">
-                  <strong>Board Game:</strong>
-                  {{ eventDetails.boardGameName }}
-                </p>
-              </div>
-
-              <!-- Right: Event Info & Description -->
-              <div class="col-md-6 text-start">
-                <div class="row">
-                  <!-- Date & Time -->
-                  <div class="col-md-6">
-                    <p><strong>Date:</strong> {{ eventDetails.eventDate }}</p>
-                    <p><strong>Start Time:</strong> {{ eventDetails.startTime }}</p>
-                    <p><strong>End Time:</strong> {{ eventDetails.endTime }}</p>
-                    <p><strong>Location:</strong> {{ eventDetails.location }}</p>
-                    <p><strong>Max Spots:</strong> {{ eventDetails.maxSpot }}</p>
-                  </div>
-
-                  <!-- Description -->
-                  <div class="col-md-6">
-                    <p><strong>Description:</strong><br />
-                      {{ eventDetails.description }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          
-          <button
-              class="btn btn-info me-2"
-              @click="registerForEvent"
-            >
-              Register
-            </button>
-
-            <button
-              class="btn btn-danger"
-              @click="cancelRegistration"
-            >
-              Cancel Registration
-            </button>
-
-          <!-- Back Button -->
-          <div class="text-center mt-3">
-            <button class="btn btn-primary" @click="goBack">Go Back</button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <style scoped>
+.page { margin-top: 96px; padding: 24px; }
+.card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }
+.detail { max-width: 1080px; margin: 0 auto; }
 
-/* Input, Textarea, and Select Styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {  /* Added select here */
-  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
-  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
-  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
-}
+.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+.detail-head h1 { margin: 0; font-size: 32px; font-weight: 800; color: #e8ecf7; }
+.muted { opacity: .8; margin: 6px 0 0; }
+.accent { color: #9fc1ff; }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {  /* Added select here */
-  border-color: #80bdff; /* Bootstrap's default focus border color */
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
-}
+.state-badges { display: flex; gap: 8px; }
+.badge { padding: 6px 12px; border-radius: 999px; font-weight: 800; border: 1px solid transparent; }
+.badge.upcoming { color: #cde6ff; border-color: #2e4a74; background: #0d1726; }
+.badge.ongoing  { color: #c8ffd5; border-color: #2c5b38; background: #0f2015; }
+.badge.finished { color: #ffd6d6; border-color: #5b2c2c; background: #1f1111; }
+.badge.full     { color: #ffe2b8; border-color: #6a4a23; background: #24180b; }
 
-/* Label Styles */
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #495057; /* Bootstrap's default text color for labels */
-}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+.col { display: flex; flex-direction: column; gap: 10px; }
+.kv { display: flex; justify-content: space-between; gap: 16px; padding: 10px 12px; border: 1px solid #1f2533; border-radius: 12px; background: #10151c; }
+.k { opacity: .8; }
+.v { font-weight: 700; color: #e6ecff; }
+.v.block { white-space: normal; line-height: 1.5; }
+.desc .k { align-self: flex-start; }
 
-/* Button Styles */
-button.btn {
-  margin-top: 1rem; /* Add some top margin for the button */
-}
+.actions { display: flex; gap: 10px; margin-top: 16px; }
+.btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; }
+.btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
+.btn.primary:disabled { opacity: .6; cursor: not-allowed; }
+.btn.danger { background: #d44d4d; border-color: #d44d4d; color: #fff; }
+.btn.danger:disabled { opacity: .6; cursor: not-allowed; }
+.btn.ghost { background: transparent; border: 1px solid #2f384a; color: #dfe5f4; }
+.btn.ghost:hover { background: #182132; }
 
-/* Board game name style in the table */
-.table td a {
-  font-size: 20px;
-  color: blue;
-  text-decoration: none;
-}
-
-.table td a:hover {
-  text-decoration: underline;
-  color: darkblue;
-}
-
+.toasts { position: fixed; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 8px; z-index: 1000; }
+.toast { padding: 10px 14px; border-radius: 10px; border: 1px solid #2b3343; background: #0f1217; color: #e9edf5; font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
+.toast.success { border-color: #3e7350; background: #112218; color: #b7ffd1; }
+.toast.error   { border-color: #8a2a2a; background: #1a1010; color: #ffd6d6; }
+.toast.info    { border-color: #3b5b9e; background: #0f1625; color: #d7e5ff; }
 </style>
