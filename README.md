@@ -14,12 +14,6 @@ This fork represents my personal continuation of the project — redesigned fron
 | Jad | Software Engineering | I love playing competitive games 🎮
 | HongYi | Computer Engineering | lefty ✋
 
-<br /> 
-
-
-# Scope and Purpose of the Project 
-<br />
-
 ## Project Overview
 The Board Game Management Application is designed to help board game enthusiasts connect, share their games, and organize gaming events. The platform allows users to lend, borrow, and play board games while fostering a gaming community.
 
@@ -67,20 +61,23 @@ npm run dev
 ➡️ Runs on http://localhost:3000
 
 ## Project Evolution
-**Deliverable 1**	Feb 19	Database design & entity persistence
-**Deliverable 2**	Mar 16	Service logic, DTOs, controllers
-**Deliverable 3**	Apr 6	Initial frontend with Vue 2
+### Deliverable 1 (Feb 19) : Database design & entity persistence
 
-**Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features
-Future Ideas**
+### Deliverable 2 (Mar 16) :	Service logic, DTOs, controllers
 
-**🎟️ Waitlists for full events**
+### Deliverable 3 (Apr 6) :	Initial frontend with Vue 2
 
-**💬 Direct owner-player chat**
+### Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features
 
-**🏆 Leaderboards for game activity**
+## Future Ideas
 
-**📊 Analytics dashboard for owners**
+### 🎟️ **Waitlists for full events*
+
+### 💬 **Direct owner-player chat**
+
+### 🏆 **Leaderboards for game activity**
+
+### 📊 **Analytics dashboard for owners**
 
 ## 📜 Credits
 
