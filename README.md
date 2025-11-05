@@ -35,18 +35,12 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ## Modernized Features
 
-### 🎨	
-**Completely reworked with responsive design, clean dark theme, improved structure and accessibility.**
-### ⚡ 
-**Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).**
-### 🔔 
-**Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).**
-### 🕒 
-**Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.**
-### 🔐 
-**Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).**
-### 🧠 
-**Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.**
+### 🎨	**Completely reworked with responsive design, clean dark theme, improved structure and accessibility.**
+### ⚡ **Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).**
+### 🔔 **Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).**
+### 🕒 **Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.**
+### 🔐 **Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).**
+### 🧠 **Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.**
 
 ## Tech Stack
 
@@ -82,13 +76,13 @@ npm run dev
 **Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features
 Future Ideas**
 
-## 🎟️ Waitlists for full events
+**🎟️ Waitlists for full events**
 
-## 💬 Direct owner-player chat
+**💬 Direct owner-player chat**
 
-## 🏆 Leaderboards for game activity
+**🏆 Leaderboards for game activity**
 
-## 📊 Analytics dashboard for owners
+**📊 Analytics dashboard for owners**
 
 ## 📜 Credits
 
