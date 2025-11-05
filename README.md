@@ -3,7 +3,7 @@
 A complete rework and modernization of the BoardGameManagement app originally built by McGill Project Group 16 (Winter 2025).
 This fork represents my personal continuation of the project — redesigned frontend, refined backend integration, and elevated the experience to production quality.
 
-# Team Origin — McGill Project Group 16
+# Team Origin — McGill ECSE 321 Project Group 16 (Winter 2025)
 | Name | Major | Fun Fact
 | --- | --- | --- |
 | Kathelina | Computer Engineering | I don’t know..I’m boring…I play(ed) piano? 🎹
@@ -17,7 +17,7 @@ This fork represents my personal continuation of the project — redesigned fron
 ## Project Overview
 The Board Game Management Application is designed to help board game enthusiasts connect, share their games, and organize gaming events. The platform allows users to lend, borrow, and play board games while fostering a gaming community.
 
-## Core Goals:
+## Core Goals
 
 - Empower players to browse, borrow, and review games.
 
