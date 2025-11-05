@@ -47,7 +47,7 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ### Backend:
 
-- cd BoardGameManagement-Frontend
+- cd BoardGameManagement-Backend
 - ./gradlew bootRun   # or gradlew bootRun on Windows
 
 ➡️ Runs on http://localhost:8080
