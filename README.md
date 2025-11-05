@@ -29,12 +29,12 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ## Modernized Features
 
-### 🎨	**Completely reworked with responsive design, clean dark theme, improved structure and accessibility.**
-### ⚡ **Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).**
-### 🔔 **Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).**
-### 🕒 **Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.**
-### 🔐 **Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).**
-### 🧠 **Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.**
+- 🎨 Completely reworked with responsive design, clean dark theme, improved structure and accessibility.
+- ⚡ Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).
+- 🔔 Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).
+- 🕒 Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.
+- 🔐 Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).
+- 🧠 Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.
 
 ## Tech Stack
 
@@ -61,25 +61,25 @@ npm run dev
 ➡️ Runs on http://localhost:3000
 
 ## Project Evolution
-### Deliverable 1 (Feb 19) : Database design & entity persistence
+- Deliverable 1 (Feb 19) : Database design & entity persistence
 
-### Deliverable 2 (Mar 16) :	Service logic, DTOs, controllers
+- Deliverable 2 (Mar 16) :	Service logic, DTOs, controllers
 
-### Deliverable 3 (Apr 6) :	Initial frontend with Vue 2
+- Deliverable 3 (Apr 6) :	Initial frontend with Vue 2
 
-### Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features
+**Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features**
 
 ## Future Ideas
 
-### 🎟️ **Waitlists for full events*
+### 🎟️ Waitlists for full events
 
-### 💬 **Direct owner-player chat**
+### 💬 Direct owner-player chat
 
-### 🏆 **Leaderboards for game activity**
+### 🏆 Leaderboards for game activity
 
-### 📊 **Analytics dashboard for owners**
+### 📊 Analytics dashboard for owners
 
 ## 📜 Credits
 
-**Original development by McGill ECSE Project Group 16.
-Modernized and maintained by Jad El Hachem (2025).**
+Original development by McGill ECSE Project Group 16.
+Modernized and maintained by Jad El Hachem (2025).
