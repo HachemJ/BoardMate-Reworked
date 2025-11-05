@@ -49,26 +49,24 @@ The Board Game Management Application is designed to help board game enthusiasts
 ### 🛠️ Build Tools: npm (frontend), Gradle (backend)
 ### 🗄️ Database: PostgreSQL (via JPA entities)
 
-### Running the Application
+## Running the Application
 
-## Backend:
+### Backend:
 
 cd backend
 ./gradlew bootRun   # or gradlew bootRun on Windows
 
-
 ➡️ Runs on http://localhost:8080
 
-## Frontend:
+### Frontend:
 
 cd frontend
 npm install
 npm run dev
 
-
 ➡️ Runs on http://localhost:3000
 
-### Project Evolution
+## Project Evolution
 **Deliverable 1**	Feb 19	Database design & entity persistence
 **Deliverable 2**	Mar 16	Service logic, DTOs, controllers
 **Deliverable 3**	Apr 6	Initial frontend with Vue 2
