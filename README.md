@@ -81,5 +81,5 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ## Credits
 
-📜 Original development by McGill ECSE Project Group 16.
+📜 Original development by McGill ECSE Project G16.
 Modernized and maintained by Jad El Hachem (2025).
