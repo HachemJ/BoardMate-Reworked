@@ -47,16 +47,16 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ### Backend:
 
-cd backend
-./gradlew bootRun   # or gradlew bootRun on Windows
+- cd BoardGameManagement-Frontend
+- ./gradlew bootRun   # or gradlew bootRun on Windows
 
 ➡️ Runs on http://localhost:8080
 
 ### Frontend:
 
-cd frontend
-npm install
-npm run dev
+- cd BoardGameManagement-Frontend
+- npm install
+- npm run dev
 
 ➡️ Runs on http://localhost:3000
 
@@ -67,7 +67,7 @@ npm run dev
 
 - Deliverable 3 (Apr 6) :	Initial frontend with Vue 2
 
-**This fork modernized (Fall 2025)** : Full UI/UX redesign, improved API linking, and new features
+**This modernized fork (Fall 2025)** : Full UI/UX redesign, improved API linking, and new features
 
 ## Future Ideas
 
