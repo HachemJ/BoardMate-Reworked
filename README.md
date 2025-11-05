@@ -35,18 +35,18 @@ The Board Game Management Application is designed to help board game enthusiasts
 
 ## Modernized Features
 
-### 🎨 UI/UX	
-Completely reworked with responsive design, clean dark theme, improved structure and accessibility.
+### 🎨	
+**Completely reworked with responsive design, clean dark theme, improved structure and accessibility.**
 ### ⚡ 
-Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).
+**Routing	Simplified navigation with clear routes (/boardgames, /events, /borrowrequests, /profile).**
 ### 🔔 
-Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).
+**Notifications	Inline success/error messages for better feedback (registration, invalid actions, locked deletions).**
 ### 🕒 
-Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.
+**Event Logic	Shows ongoing, upcoming, and finished events directly in the interface with smart filtering.**
 ### 🔐 
-Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).
+**Auth Integration	Login state via Pinia store with role-based conditional rendering (Owner/Player).**
 ### 🧠 
-Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.
+**Backend Sync	Axios-based API communication; fully compatible with Spring Boot backend.**
 
 ## Tech Stack
 
@@ -57,7 +57,7 @@ Backend Sync	Axios-based API communication; fully compatible with Spring Boot ba
 
 ### Running the Application
 
-Backend:
+## Backend:
 
 cd backend
 ./gradlew bootRun   # or gradlew bootRun on Windows
@@ -65,7 +65,7 @@ cd backend
 
 ➡️ Runs on http://localhost:8080
 
-Frontend:
+## Frontend:
 
 cd frontend
 npm install
@@ -74,23 +74,23 @@ npm run dev
 
 ➡️ Runs on http://localhost:3000
 
-Project Evolution
-Phase	Date	Description
-Deliverable 1	Feb 19	Database design & entity persistence
-Deliverable 2	Mar 16	Service logic, DTOs, controllers
-Deliverable 3	Apr 6	Initial frontend with Vue 2
-Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features
-Future Ideas
+### Project Evolution
+**Deliverable 1**	Feb 19	Database design & entity persistence
+**Deliverable 2**	Mar 16	Service logic, DTOs, controllers
+**Deliverable 3**	Apr 6	Initial frontend with Vue 2
 
-🎟️ Waitlists for full events
+**Modernization (this fork)	Fall 2025	Full UI/UX redesign, improved API linking, and new features
+Future Ideas**
 
-💬 Direct owner-player chat
+## 🎟️ Waitlists for full events
 
-🏆 Leaderboards for game activity
+## 💬 Direct owner-player chat
 
-📊 Analytics dashboard for owners
+## 🏆 Leaderboards for game activity
 
-Credits
+## 📊 Analytics dashboard for owners
 
-Original development by McGill ECSE Project Group 16.
-Modernized and maintained by Jad El Hachem (2025).
+## 📜 Credits
+
+**Original development by McGill ECSE Project Group 16.
+Modernized and maintained by Jad El Hachem (2025).**
