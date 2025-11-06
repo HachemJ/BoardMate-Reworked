@@ -487,11 +487,9 @@ function selectBrowse(id) {
 
 /** Navigate to details by natural key: name + date + start(HH:mm). */
 function openDetail(ev) {
-  const startHHMM = (ev.startTime || "").slice(0, 5);
-  router.push({
-    path: `/pages/event/${encodeURIComponent(ev.name)}`,
-    query: { date: ev.eventDate, start: startHHMM },
-  });
+  const id = Number(ev?.eventID);
+  if (!id || Number.isNaN(id)) return; // optional guard
+  router.push({ name: "eventDetail", params: { id } });
 }
 
 async function registerForSelected() {
