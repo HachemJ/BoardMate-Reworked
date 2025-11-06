@@ -3,10 +3,23 @@ import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
+import { useRouter } from "vue-router";
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
-
+/* --- Axios configured to avoid silent 403/CORS auth issues --- */
 const authStore = useAuthStore();
+const router = useRouter();
+
+const axiosClient = axios.create({
+  baseURL: "http://localhost:8080",
+  withCredentials: true, // cookie/CSRF sessions
+});
+axiosClient.interceptors.request.use((cfg) => {
+  const token = authStore.token || authStore.user?.token;
+  if (token) cfg.headers.Authorization = `Bearer ${token}`;
+  return cfg;
+});
+
+/* --- Tabs + data --- */
 const tabs = ["View All Board Games", "My Board Game Copies"];
 const selectedTab = ref(tabs[0]);
 
@@ -14,13 +27,18 @@ const searchQuery = ref("");
 const boardGames = ref([]);
 const myBoardGameCopies = ref([]);
 
+/* --- route guard helper so a missing route can't crash the page --- */
+const hasRoute = (name) => router.getRoutes().some((r) => r.name === name);
+
+/* --- filters --- */
 const filteredGames = computed(() =>
     boardGames.value.filter((g) =>
-        g.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+        (g.name || "").toLowerCase().includes(searchQuery.value.toLowerCase())
     )
 );
 
-async function fetchBoardGames() {
+/* --- load data --- */
+async function fetchBoardGamesAndCopies() {
   try {
     const [gamesRes, copiesRes] = await Promise.all([
       axiosClient.get("/boardgames"),
@@ -29,23 +47,30 @@ async function fetchBoardGames() {
     boardGames.value = gamesRes.data ?? [];
     myBoardGameCopies.value = copiesRes.data ?? [];
   } catch (error) {
-    console.error("Fetch board games/copies failed", error);
-    alert("Failed to fetch board games or your copies.");
+    const status = error?.response?.status;
+    const body = error?.response?.data;
+    console.error("Fetch failed", status, body);
+    // we still render the page; show empty state instead of crashing
+    boardGames.value = boardGames.value ?? [];
+    myBoardGameCopies.value = myBoardGameCopies.value ?? [];
   }
 }
 
-onMounted(fetchBoardGames);
+onMounted(fetchBoardGamesAndCopies);
 
+/* --- actions --- */
 async function deleteBoardGameCopy(id) {
   if (!confirm("Delete this board game copy? This will remove related borrow requests.")) return;
   try {
     await axiosClient.delete(`/boardgamecopies/${id}`);
-    alert("Board game copy deleted!");
-    await fetchBoardGames();
+    await fetchBoardGamesAndCopies();
+    alert("Board game copy deleted.");
   } catch (error) {
-    console.error(error);
-    const errors = error.response?.data?.errors;
-    alert(errors ? errors.join("\n") : "Delete failed.");
+    const msg =
+        error?.response?.data?.errors?.join("\n") ||
+        error?.response?.data?.message ||
+        "Delete failed.";
+    alert(msg);
   }
 }
 </script>
@@ -78,14 +103,14 @@ async function deleteBoardGameCopy(id) {
           <div v-if="selectedTab === 'View All Board Games'" class="card p-4 shadow-sm">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h2 class="mb-0">Search and Browse Board Games</h2>
-              <div class="d-flex gap-2">
-                <router-link :to="{ name: 'playerAddBoardGame' }">
+
+              <!-- Player page should NOT link to owner-only screens.
+                   If you later want an Add button for owners, guard it with hasRoute('addBoardGame'). -->
+              <template v-if="authStore.user?.isAOwner && hasRoute('addBoardGame')">
+                <router-link :to="{ name: 'addBoardGame' }">
                   <button class="btn btn-info">Add Board Game</button>
                 </router-link>
-                <router-link :to="{ name: 'ownerUpdateBoardGame' }">
-                  <button class="btn btn-info">Update Board Game</button>
-                </router-link>
-              </div>
+              </template>
             </div>
 
             <div class="mb-3">
@@ -93,32 +118,44 @@ async function deleteBoardGameCopy(id) {
                   v-model="searchQuery"
                   type="text"
                   class="form-control"
-                  placeholder="Search..."
+                  placeholder="Search by name or description..."
                   aria-label="Search board games"
               />
             </div>
 
             <div>
-              <small>Click a board game name to view more details</small>
-              <table class="table">
+              <small>Click a name to view details</small>
+              <table class="table mt-2">
                 <thead>
                 <tr>
                   <th>Game Name</th>
-                  <th>Min Players</th>
-                  <th>Max Players</th>
+                  <th>Min</th>
+                  <th>Max</th>
+                  <th>Description</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr v-for="game in filteredGames" :key="game.name">
                   <td>
-                    <router-link
-                        :to="{ name: 'playerBoardGameDetail', params: { gamename: game.name } }"
-                    >
+                    <template v-if="hasRoute('playerBoardGameDetail')">
+                      <router-link
+                          :to="{ name: 'playerBoardGameDetail', params: { gamename: game.name } }"
+                      >
+                        {{ game.name }}
+                      </router-link>
+                    </template>
+                    <template v-else>
                       {{ game.name }}
-                    </router-link>
+                    </template>
                   </td>
                   <td>{{ game.minPlayers }}</td>
                   <td>{{ game.maxPlayers }}</td>
+                  <td class="desc">{{ game.description }}</td>
+                </tr>
+                <tr v-if="filteredGames.length === 0">
+                  <td colspan="4" class="text-center text-muted py-4">
+                    No board games match your search.
+                  </td>
                 </tr>
                 </tbody>
               </table>
@@ -129,14 +166,11 @@ async function deleteBoardGameCopy(id) {
           <div v-else class="card p-4 shadow-sm">
             <div class="d-flex justify-content-between align-items-center">
               <h2 class="mb-0">My Collection</h2>
-              <div class="d-flex gap-2">
+              <template v-if="authStore.user?.isAOwner && hasRoute('addBoardGameCopy')">
                 <router-link :to="{ name: 'addBoardGameCopy' }">
                   <button class="btn btn-info">Add Board Game Copy</button>
                 </router-link>
-                <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
-                  <button class="btn btn-info">Update Board Game Copy</button>
-                </router-link>
-              </div>
+              </template>
             </div>
 
             <table class="table table-responsive-ms mt-3">
@@ -156,6 +190,9 @@ async function deleteBoardGameCopy(id) {
                     Delete
                   </button>
                 </td>
+              </tr>
+              <tr v-if="myBoardGameCopies.length === 0">
+                <td colspan="3" class="text-center text-muted py-4">No copies yet.</td>
               </tr>
               </tbody>
             </table>
@@ -177,10 +214,12 @@ async function deleteBoardGameCopy(id) {
 .card { border: 1px solid #293043; border-radius: 1rem; background-color: #0f1217; color: #e9edf5; }
 .table { table-layout: fixed; width: 100%; }
 .table th, .table td { vertical-align: middle; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 12px; }
-.table th:nth-child(1), .table td:nth-child(1) { width: 50%; }
-.table th:nth-child(2), .table td:nth-child(2),
-.table th:nth-child(3), .table td:nth-child(3) { width: 25%; }
+.table th:nth-child(1), .table td:nth-child(1) { width: 30%; }
+.table th:nth-child(2), .table td:nth-child(2) { width: 10%; }
+.table th:nth-child(3), .table td:nth-child(3) { width: 10%; }
+.table th:nth-child(4), .table td:nth-child(4) { width: 50%; }
 .table td a { color: #8fb4ff; text-decoration: none; }
 .table td a:hover { text-decoration: underline; }
 .specification-cell { white-space: normal; max-width: 320px; }
+.desc { white-space: normal; }
 </style>

@@ -10,7 +10,6 @@
             <h1>Events</h1>
             <p>Discover public sessions, register or cancel, and (if you’re an owner) create and manage your own.</p>
           </div>
-          <button class="btn cta" @click="tab = 'Create'">＋ New Event</button>
         </div>
 
         <div class="tabs">
@@ -264,7 +263,7 @@ const FILTERS = ["All", "Upcoming", "Ongoing", "Past"];
 
 // Default: UPCOMING
 const tab = ref("Browse");
-const browseFilter = ref("Upcoming");
+const browseFilter = ref("All");
 const showFilters = ref(false);
 const toggleFilters = () => (showFilters.value = !showFilters.value);
 

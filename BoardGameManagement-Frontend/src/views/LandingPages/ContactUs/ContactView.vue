@@ -1,9 +1,7 @@
 <!-- src/views/LandingPages/ContactUs/ContactView.vue -->
 <script setup>
 import { ref } from "vue";
-import NavLanding from "@/components/NavLandingSigned.vue";               // glossy public navbar
-import contactImg from "@/assets/contactus.jpg";
-import NavLandingSigned from "@/components/NavLandingSigned.vue";                    // your existing image
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
 
 const name = ref("");
 const email = ref("");
@@ -19,7 +17,6 @@ function validateEmail(v) {
 async function sendMessage() {
   banner.value = { type: "", text: "" };
 
-  // simple validation
   if (!name.value.trim() || !email.value.trim() || !message.value.trim()) {
     banner.value = { type: "error", text: "Please fill out all fields." };
     return;
@@ -35,7 +32,7 @@ async function sendMessage() {
     // await axios.post("/contact", { name: name.value, email: email.value, message: message.value });
 
     // simulate network
-    await new Promise(r => setTimeout(r, 650));
+    await new Promise((r) => setTimeout(r, 650));
 
     banner.value = { type: "success", text: "Thanks! Your message was sent. We’ll get back to you soon." };
     name.value = "";
@@ -53,60 +50,53 @@ async function sendMessage() {
 <template>
   <NavLandingSigned />
 
-  <section class="contact-hero">
-    <!-- background layers (same vibe as landing/auth/profile) -->
+  <section class="contact-wrap">
+    <!-- background layers to match theme -->
     <div class="layer bg-base"></div>
     <div class="layer bg-gradient"></div>
     <div class="layer bg-noise"></div>
     <div class="layer bg-vignette"></div>
 
-    <div class="content">
-      <div class="shell">
-        <!-- Left: Illustration -->
-        <aside class="art">
-          <img :src="contactImg" alt="Contact illustration" />
-        </aside>
+    <!-- centered content -->
+    <div class="center">
+      <main class="card">
+        <header class="card-head">
+          <h1>Contact us</h1>
+          <p class="sub">Questions, feedback, or issues — we’re here to help.</p>
+        </header>
 
-        <!-- Right: Card form -->
-        <main class="card">
-          <header class="card-head">
-            <h1>Contact us</h1>
-            <p class="sub">Questions, feedback, or issues — we’re here to help.</p>
-          </header>
+        <div v-if="banner.type" class="banner" :class="`banner--${banner.type}`">
+          {{ banner.text }}
+        </div>
 
-          <div v-if="banner.type" class="banner" :class="`banner--${banner.type}`">
-            {{ banner.text }}
-          </div>
+        <form @submit.prevent="sendMessage" class="form">
+          <label class="field">
+            <span class="label">Full name</span>
+            <input v-model="name" type="text" class="input" placeholder="Jane Doe" autocomplete="name" />
+          </label>
 
-          <form @submit.prevent="sendMessage" class="form">
-            <label class="field">
-              <span class="label">Full name</span>
-              <input v-model="name" type="text" class="input" placeholder="Jane Doe" autocomplete="name" />
-            </label>
+          <label class="field">
+            <span class="label">Email</span>
+            <input v-model="email" type="email" class="input" placeholder="jane@boardmate.app" autocomplete="email" />
+          </label>
 
-            <label class="field">
-              <span class="label">Email</span>
-              <input v-model="email" type="email" class="input" placeholder="jane@boardmate.app" autocomplete="email" />
-            </label>
+          <label class="field">
+            <span class="label">Message</span>
+            <textarea v-model="message" class="textarea" rows="6" placeholder="Tell us how we can help…"></textarea>
+          </label>
 
-            <label class="field">
-              <span class="label">Message</span>
-              <textarea v-model="message" class="textarea" rows="6" placeholder="Tell us how we can help…"></textarea>
-            </label>
-
-            <button class="btn btn-primary" :disabled="sending">
-              {{ sending ? "Sending…" : "Send message" }}
-            </button>
-          </form>
-        </main>
-      </div>
+          <button class="btn btn-primary" :disabled="sending">
+            {{ sending ? "Sending…" : "Send message" }}
+          </button>
+        </form>
+      </main>
     </div>
   </section>
 </template>
 
 <style scoped>
-/* ===== Canvas (shared theme) ===== */
-.contact-hero { position: relative; min-height: 100vh; background:#14171d; }
+/* Canvas */
+.contact-wrap { position: relative; min-height: 100vh; background:#14171d; }
 .layer { position:absolute; inset:0; }
 .bg-base { background:#14171d; }
 .bg-gradient{
@@ -122,32 +112,23 @@ async function sendMessage() {
 }
 .bg-vignette{ background: radial-gradient(85% 70% at 50% 60%, transparent 0%, rgba(0,0,0,.35) 70%, rgba(0,0,0,.7) 100%); }
 
-/* ===== Layout ===== */
-.content{ position:relative; z-index:2; padding:110px 20px 60px; }
-.shell{
-  margin:0 auto; max-width:1100px; display:grid; gap:18px;
-  grid-template-columns: 1.05fr 1fr;
+/* Centering */
+.center{
+  position:relative; z-index:2;
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  padding:120px 16px 60px;
 }
-@media (max-width: 980px){
-  .shell{ grid-template-columns: 1fr; }
-}
-
-/* Illustration */
-.art{
-  background:#0f1217; border:1px solid #1f2533; border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.35); overflow:hidden; display:flex; align-items:center; justify-content:center;
-}
-.art img{ width:100%; height:100%; object-fit:cover; display:block; }
 
 /* Card */
 .card{
+  width:min(640px, 100%);
   background:#0f1217; color:#e9edf5;
   border:1px solid #1f2533; border-radius:16px;
   box-shadow:0 10px 30px rgba(0,0,0,.35);
   padding:18px 18px 16px;
 }
-.card-head h1{ margin:0 0 6px; font-size:24px; font-weight:900; letter-spacing:.2px; }
-.sub{ margin:0 0 10px; color:#b7c0cf; }
+.card-head h1{ margin:0 0 6px; font-size:26px; font-weight:900; letter-spacing:.2px; }
+.sub{ margin:0 0 12px; color:#b7c0cf; }
 
 /* Banner */
 .banner{
