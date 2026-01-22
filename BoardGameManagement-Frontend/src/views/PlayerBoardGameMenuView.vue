@@ -3,10 +3,12 @@ import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
 import { computed, onMounted, ref } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
+import { useRouter } from "vue-router";
 
 const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
 
 const authStore = useAuthStore();
+const router = useRouter();
 const tabs = ["View All Board Games", "My Board Game Copies"];
 const selectedTab = ref(tabs[0]);
 
@@ -30,6 +32,11 @@ async function fetchBoardGames() {
     myBoardGameCopies.value = copiesRes.data ?? [];
   } catch (error) {
     console.error("Fetch board games/copies failed", error);
+    if (error?.response?.status === 401) {
+      alert("Session expired. Please sign in again.");
+      router.push({ name: "signin" });
+      return;
+    }
     alert("Failed to fetch board games or your copies.");
   }
 }

@@ -17,6 +17,12 @@ import ProfileView from "../views/Profile.vue";
 
 // Unified Board Games page
 import PlayerBoardGameMenuView from "../views/PlayerBoardGameMenuView.vue";
+import BoardGameDetailView from "../views/BoardGameDetailView.vue";
+import AddBoardGameView from "../views/AddBoardGameView.vue";
+import UpdateBoardGameView from "../views/UpdateBoardGameView.vue";
+import AddBoardGameCopyView from "../views/AddBoardGameCopyView.vue";
+import UpdateBoardGameCopyView from "../views/UpdateBoardGameCopyView.vue";
+import AddBoardGameReviewView from "../views/AddBoardGameReviewView.vue";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,19 +41,26 @@ const router = createRouter({
 
         // Board Games
         { path: "/boardgames", name: "boardgames", component: PlayerBoardGameMenuView },
+        { path: "/pages/ownerboardgame", name: "ownerBoardGameMenu", redirect: "/boardgames" },
+        { path: "/pages/playerboardgame", name: "playerBoardGameMenu", redirect: "/boardgames" },
+        { path: "/pages/ownerboardgame/add", name: "ownerAddBoardGame", component: AddBoardGameView },
+        { path: "/pages/playerboardgame/add", name: "playerAddBoardGame", component: AddBoardGameView },
+        { path: "/pages/ownerboardgame/update", name: "ownerUpdateBoardGame", component: UpdateBoardGameView },
+        { path: "/pages/ownerboardgame/:gamename", name: "ownerBoardGameDetail", component: BoardGameDetailView },
+        { path: "/pages/playerboardgame/:gamename", name: "playerBoardGameDetail", component: BoardGameDetailView },
+        { path: "/pages/ownerboardgame/:gamename/review", name: "ownerAddReview", component: AddBoardGameReviewView },
+        { path: "/pages/playerboardgame/:gamename/review", name: "playerAddReview", component: AddBoardGameReviewView },
+        { path: "/pages/boardgamecopy/add", name: "addBoardGameCopy", component: AddBoardGameCopyView },
+        { path: "/pages/boardgamecopy/update", name: "ownerUpdateBoardGameCopy", component: UpdateBoardGameCopyView },
 
         // Misc
         { path: "/pages/landing-pages/basic", name: "signin", component: SignInBasicView, alias: ["/signin"], meta: { hidePublicNav: true } },
         { path: "/pages/faqs", name: "faqs", component: FAQsView, alias: ["/faqs"] },
         { path: "/pages/borrowrequests", name: "borrowRequestMenu", component: BorrowRequestMenuView },
-
-        // Legacy redirects
-        { path: "/pages/playerboardgame", redirect: "/boardgames" },
-        { path: "/pages/ownerboardgame", redirect: "/boardgames" },
-
         // Catch-all → home
         { path: "/:pathMatch(.*)*", redirect: "/" },
     ],
 });
 
 export default router;
+

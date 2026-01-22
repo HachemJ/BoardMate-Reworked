@@ -193,7 +193,7 @@ function goBack() {
     router.back();
     return;
   }
-  router.push({ name: "event" });
+  router.push({ name: "profile" });
 }
 </script>
 

@@ -33,6 +33,18 @@ let intervalId = null;
 const route = useRoute();
 const router = useRouter();
 
+function handleApiError(error, fallbackMessage) {
+  const status = error?.response?.status;
+  if (status === 401) {
+    alert("Session expired. Please sign in again.");
+    router.push({ name: "signin" });
+    return;
+  }
+  const errors = error?.response?.data?.errors;
+  const message = Array.isArray(errors) ? errors.join("\n") : fallbackMessage;
+  alert(message);
+}
+
 const activeTab = computed(() => {
   const raw = String(route.query.tab || "").toLowerCase();
   if (raw === "incoming" && authStore.user.isAOwner) return "incoming";
@@ -56,6 +68,7 @@ const fetchPlayerRequests = async () => {
     playerRequests.value = response.data;
   } catch (error) {
     console.error("Error fetching requests:", error);
+    handleApiError(error, "Failed to load your borrow requests.");
   }
 };
 
@@ -66,8 +79,7 @@ const fetchOwnerRequests = async () => {
     ownerRequests.value = response.data;
   } catch (error) {
     console.error("Error fetching requests:", error);
-    const errors = error.response.data.errors; // Extract the errors array
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
+    handleApiError(error, "Failed to load incoming borrow requests.");
   }
 
 };
@@ -107,9 +119,8 @@ async function acceptRequest(id, name) {
     ownerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    const errors = error.response.data.errors; // Extract the errors array
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error accepting request:", error);
+    handleApiError(error, "Failed to accept request.");
   }
 }
 
@@ -122,10 +133,8 @@ async function declineRequest(id, name) {
     ownerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-
-    const errors = error.response.data.errors; // Extract the errors array
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error declining request:", error);
+    handleApiError(error, "Failed to decline request.");
   }
 }
 
@@ -138,9 +147,8 @@ async function cancelBorrowRequest(id, gameName){
     ownerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    const errors = error.response.data.errors; // Extract the errors array
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error declining request:", error);
+    handleApiError(error, "Failed to confirm return.");
   }
 }
 
@@ -173,10 +181,8 @@ async function confirmRequest(id, gameName) {
     playerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    const errors = error.response?.data?.errors || [];
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error accepting request:", error);
-    console.error("Error declining request:", error);
+    handleApiError(error, "Failed to confirm receipt.");
   }
 }
 
@@ -189,9 +195,8 @@ async function cancelRequest(id, gameName) {
     playerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
-    const errors = error.response?.data?.errors || [];
-    alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error accepting request:", error);
+    handleApiError(error, "Failed to cancel request.");
   }
 }
 
