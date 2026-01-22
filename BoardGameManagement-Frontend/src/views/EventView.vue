@@ -112,57 +112,135 @@
 
       <!-- ========== CREATE ========== -->
       <section v-else-if="tab === 'Create'" class="card">
-        <h3>Create a New Event</h3>
-        <form class="grid" @submit.prevent="createEvent">
-          <div class="col">
-            <label class="label">Event name</label>
-            <input class="input" v-model.trim="createForm.name" required />
+        <div class="create-layout">
+          <div class="form-card">
+            <div class="form-head">
+              <div>
+                <h3>Create a New Event</h3>
+                <p class="subtle">Fill the basics and preview the final card live.</p>
+              </div>
+            </div>
 
-            <label class="label">Max spots</label>
-            <input class="input" type="number" min="1" v-model.number="createForm.maxSpot" required />
+            <form class="create-grid" @submit.prevent="createEvent">
+              <div class="form-section">
+                <div class="section-title">Basics</div>
+                <label class="label">Event name</label>
+                <input class="input" v-model.trim="createForm.name" required />
 
-            <label class="label">Start time</label>
-            <input class="input" type="time" v-model="createForm.startTime" required @keydown.prevent />
+                <label class="label">Board game</label>
+                <input
+                    class="input"
+                    v-model.trim="boardGameQuery"
+                    placeholder="Search board games..."
+                    aria-label="Search board games"
+                />
+                <div class="game-picker">
+                  <button
+                      v-for="g in filteredBoardGames"
+                      :key="g.gameID"
+                      type="button"
+                      class="game-option"
+                      :class="{ selected: Number(createForm.boardGameId) === Number(g.gameID) }"
+                      @click="createForm.boardGameId = g.gameID"
+                  >
+                    <div class="game-thumb">{{ (g.name || '?').slice(0, 1) }}</div>
+                    <div class="game-meta">
+                      <div class="game-name">{{ g.name }}</div>
+                      <div class="game-players">{{ g.minPlayers }}-{{ g.maxPlayers }} players</div>
+                    </div>
+                  </button>
+                  <div v-if="filteredBoardGames.length === 0" class="empty small">
+                    No board games match your search.
+                  </div>
+                </div>
+                <small v-if="createTouched && !createForm.boardGameId" class="err">Board game is required.</small>
+              </div>
 
-            <label class="label">Location</label>
-            <input class="input" v-model.trim="createForm.location" required />
+              <div class="form-section">
+                <div class="section-title">Schedule</div>
+                <label class="label">Date</label>
+                <input class="input" type="date" :min="minDate" v-model="createForm.date" required @keydown.prevent />
+
+                <div class="time-row">
+                  <div>
+                    <label class="label">Start time</label>
+                    <input class="input" type="time" v-model="createForm.startTime" required @keydown.prevent />
+                  </div>
+                  <div>
+                    <label class="label">End time</label>
+                    <input
+                        class="input"
+                        type="time"
+                        v-model="createForm.endTime"
+                        :min="createForm.startTime || undefined"
+                        required
+                        @keydown.prevent
+                    />
+                  </div>
+                </div>
+                <div class="duration-row">
+                  <span class="label small">Duration</span>
+                  <button v-for="d in DURATIONS" :key="d" type="button" class="chip" @click="applyDuration(d)">
+                    {{ d }}m
+                  </button>
+                </div>
+                <small v-if="createEndTimeError" class="err">{{ createEndTimeError }}</small>
+              </div>
+
+              <div class="form-section">
+                <div class="section-title">Details</div>
+                <label class="label">Max spots</label>
+                <div class="stepper">
+                  <button type="button" class="btn ghost" @click="adjustMaxSpot(-1)">-</button>
+                  <div class="stepper-value">{{ createForm.maxSpot }}</div>
+                  <button type="button" class="btn ghost" @click="adjustMaxSpot(1)">+</button>
+                </div>
+
+                <label class="label">Location</label>
+                <input class="input" v-model.trim="createForm.location" required />
+
+                <label class="label">Description</label>
+                <textarea
+                    class="input"
+                    rows="3"
+                    v-model.trim="createForm.description"
+                    :class="{ invalid: createTouched && !createForm.description }"
+                ></textarea>
+                <small v-if="createTouched && !createForm.description" class="err">Description is required.</small>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn primary" :disabled="!isCreateValid">Create</button>
+                <button type="button" class="btn" @click="resetCreate">Reset</button>
+              </div>
+            </form>
           </div>
 
-          <div class="col">
-            <label class="label">Board game</label>
-            <select class="input" v-model="createForm.boardGameId" required>
-              <option disabled value="">Choose a board game</option>
-              <option v-for="g in boardGames" :key="g.gameID" :value="g.gameID">{{ g.name }}</option>
-            </select>
-
-            <label class="label">Date</label>
-            <input class="input" type="date" :min="minDate" v-model="createForm.date" required @keydown.prevent />
-
-            <label class="label">End time</label>
-            <input
-                class="input"
-                type="time"
-                v-model="createForm.endTime"
-                :min="createForm.startTime || undefined"
-                required
-                @keydown.prevent
-            />
-
-            <label class="label">Description</label>
-            <textarea
-                class="input"
-                rows="3"
-                v-model.trim="createForm.description"
-                :class="{ invalid: createTouched && !createForm.description }"
-            ></textarea>
-            <small v-if="createTouched && !createForm.description" class="err">Description is required.</small>
-          </div>
-
-          <div class="col col-2">
-            <button type="submit" class="btn primary" :disabled="!isCreateValid">Create</button>
-            <button type="button" class="btn" @click="resetCreate">Reset</button>
-          </div>
-        </form>
+          <aside class="preview-card">
+            <div class="preview-head">
+              <h4>Live Preview</h4>
+              <p class="subtle">How it will look in Browse</p>
+            </div>
+            <div class="preview-body">
+              <div class="preview-cover">{{ (selectedBoardGame?.name || 'Game').slice(0, 1) }}</div>
+              <div class="preview-title">{{ createForm.name || "Event name" }}</div>
+              <div class="preview-sub">{{ selectedBoardGame?.name || "Board game" }}</div>
+              <div class="preview-badges">
+                <span class="pill">{{ createForm.date || "Date" }}</span>
+                <span class="pill">{{ createForm.startTime || "Start" }}-{{ createForm.endTime || "End" }}</span>
+                <span class="pill">{{ createForm.maxSpot }} spots</span>
+              </div>
+              <div class="preview-row">
+                <span class="label small">Location</span>
+                <div class="preview-text">{{ createForm.location || "Location" }}</div>
+              </div>
+              <div class="preview-row">
+                <span class="label small">Description</span>
+                <div class="preview-text">{{ createForm.description || "Add a short description..." }}</div>
+              </div>
+            </div>
+          </aside>
+        </div>
 
         <div class="toasts">
           <div v-for="t in toasts" :key="t.id" class="toast" :class="t.kind">{{ t.msg }}</div>
@@ -299,7 +377,43 @@ const createForm = reactive({
   location: "",
   boardGameId: "",
 });
+const boardGameQuery = ref("");
+const DURATIONS = [30, 60, 120];
 const createTouched = ref(false);
+const selectedBoardGame = computed(() =>
+    boardGames.value.find((g) => Number(g.gameID) === Number(createForm.boardGameId))
+);
+const filteredBoardGames = computed(() => {
+  const q = boardGameQuery.value.trim().toLowerCase();
+  if (!q) return boardGames.value;
+  return boardGames.value.filter((g) => (g.name || "").toLowerCase().includes(q));
+});
+function adjustMaxSpot(delta) {
+  const next = Math.max(1, Number(createForm.maxSpot || 1) + delta);
+  createForm.maxSpot = next;
+}
+function toMinutes(hhmm) {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(":").map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+}
+function applyDuration(minutes) {
+  const start = toMinutes(createForm.startTime);
+  if (start === null) return;
+  const total = Math.min(start + minutes, 23 * 60 + 59);
+  const hh = String(Math.floor(total / 60)).padStart(2, "0");
+  const mm = String(total % 60).padStart(2, "0");
+  createForm.endTime = `${hh}:${mm}`;
+}
+const createEndTimeError = computed(() => {
+  if (!createForm.startTime || !createForm.endTime) return "";
+  const start = toMinutes(createForm.startTime);
+  const end = toMinutes(createForm.endTime);
+  if (start === null || end === null) return "";
+  if (end <= start) return "End time must be after start time.";
+  return "";
+});
 const isCreateValid = computed(() => {
   return (
       !!createForm.name &&
@@ -308,7 +422,8 @@ const isCreateValid = computed(() => {
       !!createForm.startTime &&
       !!createForm.endTime &&
       !!createForm.location &&
-      !!createForm.description
+      !!createForm.description &&
+      !createEndTimeError.value
   );
 });
 function resetCreate() {
@@ -323,6 +438,7 @@ function resetCreate() {
     location: "",
     boardGameId: "",
   });
+  boardGameQuery.value = "";
 }
 
 const manage = reactive({
@@ -537,6 +653,10 @@ async function createEvent() {
     pushToast("error", "Please fill all required fields (description is required).");
     return;
   }
+  if (createEndTimeError.value) {
+    pushToast("error", createEndTimeError.value);
+    return;
+  }
   const dupe = events.value.find(
       (e) =>
           e.name.trim().toLowerCase() === createForm.name.trim().toLowerCase() &&
@@ -654,6 +774,41 @@ async function deleteEvent() {
 .col { display: flex; flex-direction: column; gap: 10px; }
 .col-2 { grid-column: span 2; display: flex; gap: 10px; }
 
+/* create layout */
+.create-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 18px; align-items: start; }
+.form-card { border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; }
+.form-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.create-grid { display: grid; gap: 14px; }
+.form-section { border: 1px solid #1f2533; border-radius: 12px; padding: 12px; background: #10141b; display: grid; gap: 10px; }
+.section-title { font-weight: 800; color: #e6ecff; }
+.time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.duration-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stepper { display: inline-flex; align-items: center; gap: 8px; }
+.stepper-value { min-width: 44px; text-align: center; font-weight: 800; color: #ffffff; }
+.form-actions { display: flex; gap: 10px; }
+
+.game-picker { display: grid; gap: 8px; max-height: 220px; overflow: auto; padding-right: 4px; }
+.game-option { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: center; text-align: left;
+  background: #0f1217; border: 1px solid #1f2533; border-radius: 10px; padding: 8px; color: #e9edf5; cursor: pointer; }
+.game-option.selected { border-color: #ffffff; box-shadow: 0 0 0 1px #ffffff inset; }
+.game-thumb { width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; background: #151a22; color: #e6ecff; font-weight: 900; }
+.game-meta { display: grid; gap: 2px; }
+.game-name { font-weight: 800; color: #ffffff; }
+.game-players { color: #c6cedf; font-size: 12px; }
+
+.preview-card { position: sticky; top: 110px; border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; }
+.preview-head { margin-bottom: 12px; }
+.preview-body { display: grid; gap: 10px; }
+.preview-cover { height: 140px; border-radius: 12px; display: grid; place-items: center; font-weight: 900; font-size: 28px;
+  background: linear-gradient(135deg, #151a22, #0f1217); color: #e6ecff; border: 1px solid #1f2533; }
+.preview-title { font-weight: 900; font-size: 20px; color: #ffffff; }
+.preview-sub { color: #b6becc; }
+.preview-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.pill { padding: 6px 10px; border-radius: 999px; border: 1px solid #2f384a; color: #dfe5f4; font-weight: 700; font-size: 12px; }
+.preview-row { display: grid; gap: 4px; }
+.preview-text { color: #c6cedf; font-size: 13px; }
+.empty.small { padding: 8px 0; font-size: 12px; }
+
 /* inputs */
 .label { font-size: 13px; font-weight: 600; opacity: .85; color: #e2e6f2; }
 .input, textarea.input, select.input { width: 100%; background: #151a22; color: #f0f4ff; border: 1px solid #384054; border-radius: 10px;
@@ -732,4 +887,10 @@ async function deleteEvent() {
 .toast.success { border-color: #3e7350; background: #112218; color: #b7ffd1; }
 .toast.error   { border-color: #8a2a2a; background: #1a1010; color: #ffd6d6; }
 .toast.info    { border-color: #3b5b9e; background: #0f1625; color: #d7e5ff; }
+
+@media (max-width: 980px) {
+  .create-layout { grid-template-columns: 1fr; }
+  .preview-card { position: static; }
+  .time-row { grid-template-columns: 1fr; }
+}
 </style>
