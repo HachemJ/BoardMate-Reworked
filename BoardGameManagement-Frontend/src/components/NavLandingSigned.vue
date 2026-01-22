@@ -94,8 +94,9 @@ function signOut() {
 <style scoped>
 /* Shell */
 .landing-nav{
-  position: fixed; top: 14px; left: 0; right: 0; z-index: 1000;
+  position: sticky; top: 0; left: 0; right: 0; z-index: 1000;
   display:flex; justify-content:center;
+  padding: 14px 0;
 }
 .nav-inner{
   width:min(1180px, calc(100% - 32px));

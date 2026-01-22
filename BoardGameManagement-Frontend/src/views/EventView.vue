@@ -116,14 +116,25 @@
           <div class="form-card">
             <div class="form-head">
               <div>
-                <h3>Create a New Event</h3>
-                <p class="subtle">Fill the basics and preview the final card live.</p>
+                <h3>Host an Event</h3>
+                <p class="subtle">Build it step-by-step and preview the final card live.</p>
               </div>
             </div>
 
             <form class="create-grid" @submit.prevent="createEvent">
-              <div class="form-section">
-                <div class="section-title">Basics</div>
+              <div
+                  class="form-section"
+                  :class="{
+                    shake: createTouched && !createForm.boardGameId,
+                    active: activeSection === 'basics',
+                    complete: isBasicsComplete
+                  }"
+                  @focusin="activeSection = 'basics'"
+              >
+                <div class="section-title">
+                  <div>What’s happening?</div>
+                  <div class="section-help">Pick the board game and name your event.</div>
+                </div>
                 <label class="label">Event name</label>
                 <input class="input" v-model.trim="createForm.name" required />
 
@@ -154,10 +165,24 @@
                   </div>
                 </div>
                 <small v-if="createTouched && !createForm.boardGameId" class="err">Board game is required.</small>
+                <small v-else-if="selectedBoardGame" class="hint subtle">
+                  Recommended for this game: {{ selectedBoardGame.minPlayers }}–{{ selectedBoardGame.maxPlayers }} players
+                </small>
               </div>
 
-              <div class="form-section">
-                <div class="section-title">Schedule</div>
+              <div
+                  class="form-section"
+                  :class="{
+                    shake: !!createEndTimeError,
+                    active: activeSection === 'schedule',
+                    complete: isScheduleComplete
+                  }"
+                  @focusin="activeSection = 'schedule'"
+              >
+                <div class="section-title">
+                  <div>Schedule</div>
+                  <div class="section-help">Set the date, time, and capacity.</div>
+                </div>
                 <label class="label">Date</label>
                 <input class="input" type="date" :min="minDate" v-model="createForm.date" required @keydown.prevent />
 
@@ -175,6 +200,7 @@
                         :min="createForm.startTime || undefined"
                         required
                         @keydown.prevent
+                        @input="unlockEndTime"
                     />
                   </div>
                 </div>
@@ -183,25 +209,51 @@
                   <button v-for="d in DURATIONS" :key="d" type="button" class="chip" @click="applyDuration(d)">
                     {{ d }}m
                   </button>
+                  <span v-if="endTimeLocked" class="lock-pill" title="End time locked to duration">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z" fill="currentColor"/>
+                    </svg>
+                    Locked
+                  </span>
                 </div>
-                <small v-if="createEndTimeError" class="err">{{ createEndTimeError }}</small>
-              </div>
-
-              <div class="form-section">
-                <div class="section-title">Details</div>
                 <label class="label">Max spots</label>
                 <div class="stepper">
                   <button type="button" class="btn ghost" @click="adjustMaxSpot(-1)">-</button>
                   <div class="stepper-value">{{ createForm.maxSpot }}</div>
                   <button type="button" class="btn ghost" @click="adjustMaxSpot(1)">+</button>
                 </div>
+                <small v-if="createEndTimeError" class="err">{{ createEndTimeError }}</small>
+              </div>
+
+              <div
+                  class="form-section"
+                  :class="{
+                    active: activeSection === 'details',
+                    complete: isDetailsComplete
+                  }"
+                  @focusin="activeSection = 'details'"
+              >
+                <div class="section-title">
+                  <div>Event Details</div>
+                  <div class="section-help">Add the location and description.</div>
+                </div>
 
                 <label class="label">Location</label>
-                <input class="input" v-model.trim="createForm.location" required />
+                <div class="input-icon">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2C8.686 2 6 4.686 6 8c0 4.418 6 12 6 12s6-7.582 6-12c0-3.314-2.686-6-6-6zm0 8.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/>
+                  </svg>
+                  <input
+                      class="input"
+                      v-model.trim="createForm.location"
+                      placeholder="McGill Library, Room 201"
+                      required
+                  />
+                </div>
 
                 <label class="label">Description</label>
                 <textarea
-                    class="input"
+                    class="input input-light"
                     rows="3"
                     v-model.trim="createForm.description"
                     :class="{ invalid: createTouched && !createForm.description }"
@@ -210,8 +262,16 @@
               </div>
 
               <div class="form-actions">
-                <button type="submit" class="btn primary" :disabled="!isCreateValid">Create</button>
+                <button
+                    type="submit"
+                    class="btn primary"
+                    :class="{ loading: creating }"
+                    :disabled="!isCreateValid || creating"
+                >
+                  {{ creating ? "Creating..." : "Create" }}
+                </button>
                 <button type="button" class="btn" @click="resetCreate">Reset</button>
+                <small v-if="!isCreateValid" class="hint subtle">Complete all required fields to create.</small>
               </div>
             </form>
           </div>
@@ -222,22 +282,54 @@
               <p class="subtle">How it will look in Browse</p>
             </div>
             <div class="preview-body">
-              <div class="preview-cover">{{ (selectedBoardGame?.name || 'Game').slice(0, 1) }}</div>
-              <div class="preview-title">{{ createForm.name || "Event name" }}</div>
-              <div class="preview-sub">{{ selectedBoardGame?.name || "Board game" }}</div>
-              <div class="preview-badges">
-                <span class="pill">{{ createForm.date || "Date" }}</span>
-                <span class="pill">{{ createForm.startTime || "Start" }}-{{ createForm.endTime || "End" }}</span>
-                <span class="pill">{{ createForm.maxSpot }} spots</span>
+              <div v-if="creating" class="preview-skeleton">
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-badge-row">
+                  <div class="skeleton-pill"></div>
+                  <div class="skeleton-pill"></div>
+                </div>
               </div>
-              <div class="preview-row">
-                <span class="label small">Location</span>
-                <div class="preview-text">{{ createForm.location || "Location" }}</div>
-              </div>
-              <div class="preview-row">
-                <span class="label small">Description</span>
-                <div class="preview-text">{{ createForm.description || "Add a short description..." }}</div>
-              </div>
+              <template v-else>
+                <div class="preview-cover">
+                  <div class="cover-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 3h10a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V5a2 2 0 0 1 2-2z" fill="currentColor"/>
+                    </svg>
+                  </div>
+                  <div class="cover-letter">{{ (selectedBoardGame?.name || "Game").slice(0, 1) }}</div>
+                </div>
+                <div class="preview-title preview-animate" :class="{ filled: !!createForm.name }">
+                  {{ createForm.name || "Event name" }}
+                </div>
+                <div class="preview-sub preview-animate" :class="{ filled: !!selectedBoardGame }">
+                  {{ selectedBoardGame?.name || "Board game" }}
+                </div>
+                <div class="preview-badges">
+                  <span class="pill preview-animate" :class="{ filled: !!createForm.date }">
+                    {{ createForm.date || "Date" }}
+                  </span>
+                  <span class="pill preview-animate" :class="{ filled: !!createForm.startTime && !!createForm.endTime }">
+                    {{ createForm.startTime || "Start" }}-{{ createForm.endTime || "End" }}
+                  </span>
+                  <span class="pill preview-animate" :class="{ filled: !!createForm.maxSpot }">
+                    0 / {{ createForm.maxSpot }} spots
+                  </span>
+                  <span class="pill preview-animate" :class="{ filled: !!createForm.location }">
+                    <svg class="pin" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 2C8.686 2 6 4.686 6 8c0 4.418 6 12 6 12s6-7.582 6-12c0-3.314-2.686-6-6-6zm0 8.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/>
+                    </svg>
+                    {{ createForm.location || "Location" }}
+                  </span>
+                </div>
+                <div class="preview-row">
+                  <span class="label small">Description</span>
+                  <div class="preview-text preview-animate" :class="{ filled: !!createForm.description }">
+                    {{ createForm.description || "Add a short description..." }}
+                  </div>
+                </div>
+              </template>
             </div>
           </aside>
         </div>
@@ -327,7 +419,7 @@
 <script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
-import { ref, reactive, computed, onMounted, onBeforeUnmount } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useRouter } from "vue-router";
 
@@ -380,6 +472,10 @@ const createForm = reactive({
 const boardGameQuery = ref("");
 const DURATIONS = [30, 60, 120];
 const createTouched = ref(false);
+const creating = ref(false);
+const endTimeLocked = ref(false);
+const durationMinutes = ref(null);
+const activeSection = ref("basics");
 const selectedBoardGame = computed(() =>
     boardGames.value.find((g) => Number(g.gameID) === Number(createForm.boardGameId))
 );
@@ -388,6 +484,15 @@ const filteredBoardGames = computed(() => {
   if (!q) return boardGames.value;
   return boardGames.value.filter((g) => (g.name || "").toLowerCase().includes(q));
 });
+const isBasicsComplete = computed(() =>
+    !!createForm.name && !!createForm.boardGameId
+);
+const isScheduleComplete = computed(() =>
+    !!createForm.date && !!createForm.startTime && !!createForm.endTime && !createEndTimeError.value
+);
+const isDetailsComplete = computed(() =>
+    !!createForm.location && !!createForm.description
+);
 function adjustMaxSpot(delta) {
   const next = Math.max(1, Number(createForm.maxSpot || 1) + delta);
   createForm.maxSpot = next;
@@ -405,6 +510,21 @@ function applyDuration(minutes) {
   const hh = String(Math.floor(total / 60)).padStart(2, "0");
   const mm = String(total % 60).padStart(2, "0");
   createForm.endTime = `${hh}:${mm}`;
+  endTimeLocked.value = true;
+  durationMinutes.value = minutes;
+}
+function unlockEndTime() {
+  if (!endTimeLocked.value) return;
+  endTimeLocked.value = false;
+  durationMinutes.value = null;
+}
+function setNextHourStart() {
+  const nowTime = new Date();
+  nowTime.setMinutes(0, 0, 0);
+  nowTime.setHours(nowTime.getHours() + 1);
+  const hh = String(nowTime.getHours()).padStart(2, "0");
+  const mm = String(nowTime.getMinutes()).padStart(2, "0");
+  createForm.startTime = `${hh}:${mm}`;
 }
 const createEndTimeError = computed(() => {
   if (!createForm.startTime || !createForm.endTime) return "";
@@ -439,6 +559,8 @@ function resetCreate() {
     boardGameId: "",
   });
   boardGameQuery.value = "";
+  endTimeLocked.value = false;
+  durationMinutes.value = null;
 }
 
 const manage = reactive({
@@ -667,6 +789,7 @@ async function createEvent() {
     pushToast("info", "An event with the same name, date, and start time already exists.");
     return;
   }
+  creating.value = true;
   try {
     await api.post("/events", {
       name: createForm.name,
@@ -691,6 +814,8 @@ async function createEvent() {
   } catch (e) {
     const msg = e?.response?.data?.message || "Failed to create event";
     pushToast("error", msg);
+  } finally {
+    creating.value = false;
   }
 }
 
@@ -745,6 +870,33 @@ async function deleteEvent() {
     lock.visible = true; lock.message = finalMsg; pushToast("error", finalMsg);
   }
 }
+
+watch(
+    () => createForm.boardGameId,
+    () => {
+      if (selectedBoardGame.value && (!createForm.maxSpot || createForm.maxSpot === 1)) {
+        createForm.maxSpot = Number(selectedBoardGame.value.maxPlayers || 1);
+      }
+    }
+);
+
+watch(
+    () => createForm.date,
+    (next, prev) => {
+      if (next && next !== prev && !createForm.startTime) {
+        setNextHourStart();
+      }
+    }
+);
+
+watch(
+    () => createForm.startTime,
+    (next) => {
+      if (endTimeLocked.value && durationMinutes.value && next) {
+        applyDuration(durationMinutes.value);
+      }
+    }
+);
 </script>
 
 <style scoped>
@@ -779,13 +931,20 @@ async function deleteEvent() {
 .form-card { border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; }
 .form-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .create-grid { display: grid; gap: 14px; }
-.form-section { border: 1px solid #1f2533; border-radius: 12px; padding: 12px; background: #10141b; display: grid; gap: 10px; }
-.section-title { font-weight: 800; color: #e6ecff; }
+.form-section { border: 1px solid #1f2533; border-radius: 12px; padding: 10px; background: #10141b; display: grid; gap: 10px; }
+.section-title { display: grid; gap: 4px; font-weight: 800; color: #e6ecff; }
+.section-help { font-weight: 600; font-size: 12px; color: #9aa4b6; }
 .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .duration-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .stepper { display: inline-flex; align-items: center; gap: 8px; }
 .stepper-value { min-width: 44px; text-align: center; font-weight: 800; color: #ffffff; }
 .form-actions { display: flex; gap: 10px; }
+.input-light { opacity: 0.75; transition: opacity .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.input-light:focus { opacity: 1; }
+.lock-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px;
+  border: 1px solid #2f384a; color: #dfe5f4; font-weight: 700; font-size: 12px; }
+.lock-pill svg { width: 12px; height: 12px; }
+.shake { animation: shake .2s ease-in-out 2; border-color: #8a2a2a; }
 
 .game-picker { display: grid; gap: 8px; max-height: 220px; overflow: auto; padding-right: 4px; }
 .game-option { display: grid; grid-template-columns: 40px 1fr; gap: 10px; align-items: center; text-align: left;
@@ -799,14 +958,24 @@ async function deleteEvent() {
 .preview-card { position: sticky; top: 110px; border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; }
 .preview-head { margin-bottom: 12px; }
 .preview-body { display: grid; gap: 10px; }
-.preview-cover { height: 140px; border-radius: 12px; display: grid; place-items: center; font-weight: 900; font-size: 28px;
-  background: linear-gradient(135deg, #151a22, #0f1217); color: #e6ecff; border: 1px solid #1f2533; }
+.preview-cover { height: 140px; border-radius: 12px; display: grid; place-items: center;
+  background: linear-gradient(135deg, #151a22, #0f1217); color: #e6ecff; border: 1px solid #1f2533; position: relative; }
+.cover-icon { position: absolute; top: 10px; left: 10px; opacity: .7; }
+.cover-icon svg { width: 18px; height: 18px; }
+.cover-letter { font-weight: 900; font-size: 28px; }
 .preview-title { font-weight: 900; font-size: 20px; color: #ffffff; }
 .preview-sub { color: #b6becc; }
-.preview-badges { display: flex; flex-wrap: wrap; gap: 6px; }
-.pill { padding: 6px 10px; border-radius: 999px; border: 1px solid #2f384a; color: #dfe5f4; font-weight: 700; font-size: 12px; }
+.preview-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.meta-left { display: grid; gap: 4px; }
+.meta-line { color: #dfe5f4; font-weight: 700; }
+.meta-spot { font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; }
 .preview-row { display: grid; gap: 4px; }
 .preview-text { color: #c6cedf; font-size: 13px; }
+.preview-skeleton { display: grid; gap: 10px; }
+.skeleton-line { height: 12px; border-radius: 999px; background: #1b2230; }
+.skeleton-line.short { width: 60%; }
+.skeleton-badge-row { display: flex; gap: 8px; }
+.skeleton-pill { height: 22px; width: 90px; border-radius: 999px; background: #1b2230; }
 .empty.small { padding: 8px 0; font-size: 12px; }
 
 /* inputs */
@@ -892,5 +1061,13 @@ async function deleteEvent() {
   .create-layout { grid-template-columns: 1fr; }
   .preview-card { position: static; }
   .time-row { grid-template-columns: 1fr; }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
 }
 </style>
