@@ -1,7 +1,7 @@
 <script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watchEffect } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useRouter } from "vue-router";
 
@@ -10,13 +10,21 @@ const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
 const authStore = useAuthStore();
 const router = useRouter();
 const tabs = ["View All Board Games", "My Board Game Copies"];
-const selectedTab = ref(tabs[0]);
+const visibleTabs = computed(() =>
+    authStore.user?.isAOwner ? tabs : [tabs[0]]
+);
+const selectedTab = ref(visibleTabs.value[0]);
 
 const searchQuery = ref("");
 const boardGames = ref([]);
 const myBoardGameCopies = ref([]);
 const playerFilters = ["Any", "2+", "4+", "6+"];
 const playerFilter = ref("Any");
+const cardMode = computed(() => {
+  const count = filteredGames.value.length;
+  if (count <= 4) return "large";
+  return "compact";
+});
 
 const filteredGames = computed(() =>
     boardGames.value.filter((g) => {
@@ -51,14 +59,26 @@ async function fetchBoardGames() {
 
 onMounted(fetchBoardGames);
 
+watchEffect(() => {
+  if (!visibleTabs.value.includes(selectedTab.value)) {
+    selectedTab.value = visibleTabs.value[0];
+  }
+});
+
 async function deleteBoardGameCopy(id) {
   if (!confirm("Delete this board game copy? This will remove related borrow requests.")) return;
   try {
-    await axiosClient.delete(`/boardgamecopies/${id}`);
+    await axiosClient.delete(`/boardgamecopies/${id}`, {
+      headers: { "X-Player-Id": authStore.user?.id },
+    });
     alert("Board game copy deleted!");
     await fetchBoardGames();
   } catch (error) {
     console.error(error);
+    if (error?.response?.status === 403) {
+      alert("Only owners can manage board game copies.");
+      return;
+    }
     const errors = error.response?.data?.errors;
     alert(errors ? errors.join("\n") : "Delete failed.");
   }
@@ -69,153 +89,158 @@ async function deleteBoardGameCopy(id) {
   <div>
     <NavLandingSigned />
 
-    <div class="container-fluid page">
-      <div class="row">
-        <!-- Left Sidebar: Tabs -->
-        <div class="col-md-3">
-          <ul class="nav flex-column nav-pills">
-            <li v-for="(tab, i) in tabs" :key="i" class="nav-item">
-              <a
-                  href="#"
-                  class="nav-link"
-                  :class="{ active: selectedTab === tab }"
-                  @click.prevent="selectedTab = tab"
-              >
-                {{ tab }}
-              </a>
-            </li>
-          </ul>
+    <main class="page">
+      <header class="page-header">
+        <div class="head-row">
+          <div>
+            <h1>Board Games</h1>
+            <p>Browse the catalog or manage the copies you own.</p>
+          </div>
+          <div class="actions" v-if="authStore.user?.isAOwner">
+            <router-link :to="{ name: 'playerAddBoardGame' }">
+              <button class="btn primary">Add Board Game</button>
+            </router-link>
+            <router-link :to="{ name: 'ownerUpdateBoardGame' }">
+              <button class="btn ghost">Update Board Game</button>
+            </router-link>
+          </div>
         </div>
 
-        <!-- Right Content Area -->
-        <div class="col-md-9">
-          <!-- View All -->
-          <div v-if="selectedTab === 'View All Board Games'" class="card p-4 shadow-sm">
-            <div class="catalog-head">
-              <div>
-                <h2 class="mb-1">Board Game Catalog</h2>
-                <p class="subtle">Browse all titles and open details for each game.</p>
-              </div>
-              <div class="d-flex gap-2">
-                <router-link :to="{ name: 'playerAddBoardGame' }">
-                  <button class="btn btn-info">Add Board Game</button>
-                </router-link>
-                <router-link :to="{ name: 'ownerUpdateBoardGame' }">
-                  <button class="btn btn-info">Update Board Game</button>
-                </router-link>
-              </div>
-            </div>
+        <div class="tabs">
+          <button
+              v-for="t in visibleTabs"
+              :key="t"
+              class="tab wide"
+              :class="{ active: selectedTab === t }"
+              @click="selectedTab = t"
+          >
+            {{ t === 'View All Board Games' ? 'Catalog' : 'My Copies' }}
+          </button>
+        </div>
+      </header>
 
-            <div class="catalog-controls">
-              <div class="search-wrap">
-                <input
-                    v-model="searchQuery"
-                    type="text"
-                    class="form-control search-input"
-                    placeholder="Search by name..."
-                    aria-label="Search board games"
-                />
+      <section class="card">
+        <div v-if="selectedTab === 'View All Board Games'">
+          <div class="section-head">
+            <div>
+              <h2>Board Game Catalog</h2>
+              <p class="subtle">Open a title to see details and available copies.</p>
+            </div>
+          </div>
+
+          <div class="catalog-controls">
+            <div class="search-wrap">
+              <input
+                  v-model="searchQuery"
+                  type="text"
+                  class="input"
+                  placeholder="Search by name..."
+                  aria-label="Search board games"
+              />
+            </div>
+            <div class="filter-chips">
+              <button
+                  v-for="f in playerFilters"
+                  :key="f"
+                  class="chip"
+                  :class="{ active: playerFilter === f }"
+                  @click="playerFilter = f"
+              >
+                {{ f }}
+              </button>
+            </div>
+          </div>
+
+          <div class="grid" :class="`grid-${cardMode}`">
+            <router-link
+                v-for="game in filteredGames"
+                :key="game.name"
+                :to="{ name: 'playerBoardGameDetail', params: { gamename: game.name } }"
+                class="game-card"
+                :class="`card-${cardMode}`"
+            >
+              <div class="cover placeholder">
+                <span>{{ (game.name || "?").slice(0, 1) }}</span>
               </div>
-              <div class="filter-chips">
+              <div class="card-body">
+                <h3 class="title">{{ game.name }}</h3>
+                <div class="meta-text">{{ game.minPlayers }}-{{ game.maxPlayers }} players</div>
+                <p v-if="game.description" class="desc">{{ game.description }}</p>
+              </div>
+            </router-link>
+            <div v-if="filteredGames.length === 0" class="empty">
+              No games match your search.
+            </div>
+          </div>
+        </div>
+
+        <div v-else>
+          <div class="section-head">
+            <div>
+              <h2>My Board Game Copies</h2>
+              <p class="subtle">Copies you own (inventory and availability).</p>
+            </div>
+            <div class="actions" v-if="authStore.user?.isAOwner">
+              <router-link :to="{ name: 'addBoardGameCopy' }">
+                <button class="btn primary">Add Copy</button>
+              </router-link>
+              <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
+                <button class="btn ghost">Update Copy</button>
+              </router-link>
+            </div>
+          </div>
+
+          <div class="grid copies">
+            <div v-for="copy in myBoardGameCopies" :key="copy.boardGameCopyId" class="copy-card">
+              <div class="copy-head">
+                <div>
+                  <h3 class="title">{{ copy.boardGameName }}</h3>
+                  <p class="spec">{{ copy.specification }}</p>
+                </div>
+                <span class="badge" :class="copy.isAvailable ? 'ok' : 'warn'">
+                  {{ copy.isAvailable ? "Available" : "Unavailable" }}
+                </span>
+              </div>
+              <div class="actions">
                 <button
-                    v-for="f in playerFilters"
-                    :key="f"
-                    class="chip"
-                    :class="{ active: playerFilter === f }"
-                    @click="playerFilter = f"
+                    v-if="authStore.user?.isAOwner"
+                    class="btn danger"
+                    @click="deleteBoardGameCopy(copy.boardGameCopyId)"
                 >
-                  {{ f }}
+                  Delete
                 </button>
               </div>
             </div>
 
-            <div class="grid">
-              <router-link
-                  v-for="game in filteredGames"
-                  :key="game.name"
-                  :to="{ name: 'playerBoardGameDetail', params: { gamename: game.name } }"
-                  class="game-card"
-              >
-                <div class="cover placeholder">
-                  <span>{{ (game.name || "?").slice(0, 1) }}</span>
-                </div>
-                <div class="card-body">
-                  <h3 class="title">{{ game.name }}</h3>
-                  <div class="meta">
-                    <span class="meta-pill">{{ game.minPlayers }} min</span>
-                    <span class="meta-pill">{{ game.maxPlayers }} max</span>
-                  </div>
-                </div>
-              </router-link>
-              <div v-if="filteredGames.length === 0" class="empty">
-                No games match your search.
-              </div>
+            <div v-if="myBoardGameCopies.length === 0" class="empty">
+              You don't own any copies yet.
             </div>
           </div>
 
-          <!-- My Copies -->
-          <div v-else class="card p-4 shadow-sm">
-            <div class="catalog-head">
-              <div>
-                <h2 class="mb-1">My Board Game Copies</h2>
-                <p class="subtle">Copies you own (inventory and availability).</p>
-              </div>
-              <div class="d-flex gap-2">
-                <router-link :to="{ name: 'addBoardGameCopy' }">
-                  <button class="btn btn-info">Add Copy</button>
-                </router-link>
-                <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
-                  <button class="btn btn-info">Update Copy</button>
-                </router-link>
-              </div>
-            </div>
-
-            <div class="grid copies">
-              <div v-for="copy in myBoardGameCopies" :key="copy.boardGameCopyId" class="copy-card">
-                <div class="copy-head">
-                  <div>
-                    <h3 class="title">{{ copy.boardGameName }}</h3>
-                    <p class="spec">{{ copy.specification }}</p>
-                  </div>
-                  <span class="badge" :class="copy.isAvailable ? 'ok' : 'warn'">
-                    {{ copy.isAvailable ? "Available" : "Unavailable" }}
-                  </span>
-                </div>
-                <div class="actions">
-                  <button class="btn btn-danger" @click="deleteBoardGameCopy(copy.boardGameCopyId)">
-                    Delete
-                  </button>
-                </div>
-              </div>
-
-              <div v-if="myBoardGameCopies.length === 0" class="empty">
-                You don't own any copies yet.
-              </div>
-            </div>
-
-            <small v-if="myBoardGameCopies.length > 0" class="d-flex justify-content-center subtle">
-              Notice: deleting a board game copy will delete all borrow requests related to it.
-            </small>
-          </div>
+          <small v-if="myBoardGameCopies.length > 0" class="subtle notice">
+            Notice: deleting a board game copy will delete all borrow requests related to it.
+          </small>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   </div>
 </template>
 
 <style scoped>
-.page { margin-top: 96px; }
-.nav-link { cursor: pointer; margin-bottom: 6px; padding: 10px; text-align: center; color: #fff; border: 1px solid #2b3343; }
-.nav-link.active { background: #198754; border-color: #198754; }
-.card { border: 1px solid #293043; border-radius: 1rem; background-color: #0f1217; color: #e9edf5; }
+.page { margin-top: 96px; padding: 24px; }
+.page-header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.page-header h1 { font-size: 32px; margin: 0; color: #e8ecf7; font-weight: 800; }
+.page-header p { opacity: .75; margin: 0; color: #c3cad9; }
 
-.catalog-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
+.tabs { display: flex; gap: 8px; margin-top: 8px; }
+.tab { padding: 8px 16px; border-radius: 10px; background: transparent; color: #d8deed; border: 1px solid #2f384a; font-weight: 600; }
+.tab.wide { padding: 12px 26px; min-width: 120px; text-align: center; }
+.tab.active { background: #fff; color: #0f1217; border-color: #ffffff; font-weight: 800; box-shadow: 0 2px 6px rgba(255,255,255,0.15); }
+.tab:not(.active):hover { background: #f4f6fa; color: #0f1217; border-color: #f4f6fa; }
+
+.card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .subtle { color: #aab3c3; margin: 0; }
 
 .catalog-controls {
@@ -227,26 +252,30 @@ async function deleteBoardGameCopy(id) {
   flex-wrap: wrap;
 }
 .search-wrap { flex: 1 1 320px; }
-.search-input { background: #10151d; color: #e9edf5; border: 1px solid #2b3343; }
-.search-input::placeholder { color: #98a4b8; }
+.input { width: 100%; background: #151a22; color: #f0f4ff; border: 1px solid #384054; border-radius: 10px;
+  padding: 10px 12px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.input:focus { border-color: #72aaff; box-shadow: 0 0 0 2px rgba(114,170,255,0.25); }
 
 .filter-chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .chip {
-  padding: 6px 12px;
+  padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid #2b3343;
+  border: 1px solid #2f384a;
   background: transparent;
-  color: #dfe5f4;
+  color: #d8deed;
   font-weight: 700;
 }
-.chip.active { background: #ffffff; color: #0f1217; border-color: #ffffff; }
+.chip.active { background: #fff; color: #0f1217; border-color: #fff; }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 14px;
+  justify-content: center;
 }
 .grid.copies { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.grid-large { grid-template-columns: repeat(3, minmax(0, 320px)); }
+.grid-medium { grid-template-columns: repeat(4, minmax(0, 260px)); }
+.grid-compact { grid-template-columns: repeat(5, minmax(0, 220px)); }
 
 .game-card {
   display: flex;
@@ -277,16 +306,28 @@ async function deleteBoardGameCopy(id) {
   color: #e6ecff;
 }
 .card-body { padding: 12px; }
-.title { margin: 0 0 8px; font-size: 16px; font-weight: 900; color: #e9edf5; }
-.meta { display: flex; gap: 8px; flex-wrap: wrap; }
-.meta-pill {
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid #2a3242;
-  color: #cbd5e6;
+.title { margin: 0 0 6px; font-size: 20px; font-weight: 900; color: #ffffff; }
+.meta-text { color: #f3f6ff; font-size: 13px; font-weight: 700; }
+.desc {
+  margin: 6px 0 0;
+  color: #b6becc;
   font-size: 12px;
-  font-weight: 700;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
+
+.card-large .cover { height: 190px; }
+.card-large .title { font-size: 22px; }
+.card-large .card-body { padding: 14px; }
+
+.card-medium .cover { height: 160px; }
+.card-medium .title { font-size: 20px; }
+
+.card-compact .cover { height: 120px; }
+.card-compact .title { font-size: 18px; }
 
 .copy-card {
   border-radius: 16px;
@@ -309,8 +350,31 @@ async function deleteBoardGameCopy(id) {
 .actions { display: flex; justify-content: flex-end; margin-top: 10px; }
 
 .empty { color: #9aa2b2; text-align: center; padding: 16px; grid-column: 1 / -1; }
+.notice { display: block; text-align: center; margin-top: 8px; }
+
+.btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; cursor: pointer; }
+.btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
+.btn.primary:hover { background: #f3f3f3; }
+.btn.ghost { background: transparent; border: 1px solid #2f384a; color: #dfe5f4; }
+.btn.ghost:hover { background: #182132; }
+.btn.danger { background: #d44d4d; border-color: #d44d4d; color: #fff; }
+.btn.danger:hover { background: #c04343; }
 
 @media (max-width: 900px) {
-  .catalog-head { flex-direction: column; align-items: flex-start; }
+  .head-row { flex-direction: column; align-items: flex-start; }
+  .section-head { flex-direction: column; align-items: flex-start; }
+  .grid-large { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-medium { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .grid-large { grid-template-columns: 1fr; }
+  .grid-medium { grid-template-columns: 1fr; }
+  .grid-compact { grid-template-columns: 1fr; }
 }
 </style>
+
+
+
+

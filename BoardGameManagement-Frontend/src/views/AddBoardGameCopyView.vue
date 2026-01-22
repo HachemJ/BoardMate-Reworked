@@ -55,7 +55,9 @@ async function createBoardGameCopy(boardGameName, specification) {
     boardGameId: gameId,
   }
 
-  await axiosClient.post("/boardgamecopies", newBoardGameCopy);
+  await axiosClient.post("/boardgamecopies", newBoardGameCopy, {
+    headers: { "X-Player-Id": authStore.user?.id },
+  });
 }
 
 async function submitBoardGameCopy() {
@@ -73,6 +75,10 @@ async function submitBoardGameCopy() {
     }
   } catch (e) {
     console.error(e);
+    if (e?.response?.status === 403) {
+      alert("Only owners can add board game copies.");
+      return;
+    }
     const errors = e?.response?.data?.errors;
     const message = Array.isArray(errors) ? errors.join("\n") : e?.message || "Failed to create board game copy.";
     alert(message);

@@ -33,7 +33,8 @@ async function updateBGC(specification) {
   const boardGameCopyId = boardGameCopyData.boardGameCopyId;
   await axiosClient.put("/boardgamecopies/" + boardGameCopyId, specification, {
     headers: {
-      'Content-Type': 'text/plain'
+      "Content-Type": "text/plain",
+      "X-Player-Id": authStore.user?.id,
     }
   });
 
@@ -59,6 +60,10 @@ async function updateBoardGame() {
     }
   } catch (e) {
     console.error(e);
+    if (e?.response?.status === 403) {
+      alert("Only owners can update board game copies.");
+      return;
+    }
     const errors = e?.response?.data?.errors;
     const message = Array.isArray(errors) ? errors.join("\n") : "Failed to update board game copy.";
     alert(message);

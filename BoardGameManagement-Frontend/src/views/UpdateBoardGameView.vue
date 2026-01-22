@@ -12,6 +12,7 @@ const axiosClient = axios.create({
 
 const boardGames = reactive([]);
 const router = useRouter();
+const authStore = useAuthStore();
 const boardGameData = reactive({
   name: "",
   newName: "", // Initialize newName
@@ -57,7 +58,9 @@ async function updateBG() {
   const gameId = await fetchBoardGameID(boardGameData.name);
 
   try {
-    await axiosClient.put("/boardgames/" + gameId, newBoardGame);
+    await axiosClient.put("/boardgames/" + gameId, newBoardGame, {
+      headers: { "X-Player-Id": authStore.user?.id },
+    });
 
     console.log('Updated Board Game:', boardGameData)
     alert('Board Game updated Successfully!')
@@ -74,8 +77,12 @@ async function updateBG() {
 
   } catch (e) {
     console.error(e);
-    const errors = e.response.data.errors; // Extract the errors array
-    alert(`Error received with status ${e.response.status} :\n${errors.join("\n")}`);
+    if (e?.response?.status === 403) {
+      alert("Only owners can update board games.");
+      return;
+    }
+    const errors = e.response?.data?.errors; // Extract the errors array
+    alert(errors ? errors.join("\n") : "Update failed.");
   }
 
 

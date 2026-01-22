@@ -3,8 +3,10 @@
 import { ref } from "vue";
 import axios from "axios";
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
+import { useAuthStore } from "@/stores/authStore";
 
 const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const authStore = useAuthStore();
 
 // simple in-app banner
 const banner = ref({ show: false, kind: "success", text: "" });
@@ -44,6 +46,8 @@ async function submit() {
       minPlayers: +minPlayers.value,
       maxPlayers: +maxPlayers.value,
       description: description.value.trim(),
+    }, {
+      headers: { "X-Player-Id": authStore.user?.id },
     });
 
     showBanner("success", "Board game created successfully.");
@@ -53,6 +57,10 @@ async function submit() {
     maxPlayers.value = null;
     description.value = "";
   } catch (err) {
+    if (err?.response?.status === 403) {
+      showBanner("error", "Only owners can create board games.");
+      return;
+    }
     const serverErrors =
         err?.response?.data?.errors && Array.isArray(err.response.data.errors)
             ? err.response.data.errors.join(" ")
@@ -105,7 +113,7 @@ async function submit() {
 
           <div class="actions">
             <button class="btn btn-info" :disabled="loading">
-              {{ loading ? 'Creating…' : 'Create Board Game' }}
+              {{ loading ? 'Creating...' : 'Create Board Game' }}
             </button>
           </div>
         </form>

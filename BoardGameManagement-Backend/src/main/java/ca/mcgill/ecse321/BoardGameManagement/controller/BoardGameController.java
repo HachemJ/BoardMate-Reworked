@@ -2,7 +2,10 @@ package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameResponseDto;
+import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
+import ca.mcgill.ecse321.BoardGameManagement.model.Player;
+import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import ca.mcgill.ecse321.BoardGameManagement.service.BoardGameService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,9 @@ public class BoardGameController {
   @Autowired
   private BoardGameService boardGameService;
 
+  @Autowired
+  private PlayerRepository playerRepository;
+
   /**
    * This method creates a new BoardGame object and returns a BoardGameResponseDto object.
    * @param boardGameDto the DTO that contains the information to create a new BoardGame object
@@ -26,7 +32,9 @@ public class BoardGameController {
    */
   @PostMapping("/boardgames")
   @ResponseStatus(HttpStatus.CREATED)
-  public BoardGameResponseDto createBoardGame(@RequestBody BoardGameCreationDto boardGameDto) {
+  public BoardGameResponseDto createBoardGame(@RequestHeader("X-Player-Id") int playerId,
+                                              @RequestBody BoardGameCreationDto boardGameDto) {
+    requireOwner(playerId);
     BoardGame boardGame = boardGameService.createBoardGame(boardGameDto);
     return new BoardGameResponseDto(boardGame);
   }
@@ -61,7 +69,10 @@ public class BoardGameController {
    * @return BoardGameResponseDto
    */
   @PutMapping("/boardgames/{gameId}")
-  public BoardGameResponseDto updateBoardGame(@PathVariable int gameId, @RequestBody BoardGameCreationDto boardGameDto) {
+  public BoardGameResponseDto updateBoardGame(@RequestHeader("X-Player-Id") int playerId,
+                                              @PathVariable int gameId,
+                                              @RequestBody BoardGameCreationDto boardGameDto) {
+    requireOwner(playerId);
     BoardGame updatedBoardGame = boardGameService.updateBoardGame(gameId, boardGameDto);
     return new BoardGameResponseDto(updatedBoardGame);
   }
@@ -72,7 +83,18 @@ public class BoardGameController {
    */
   @DeleteMapping("/boardgames/{gameId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteBoardGame(@PathVariable int gameId) {
+  public void deleteBoardGame(@RequestHeader("X-Player-Id") int playerId, @PathVariable int gameId) {
+    requireOwner(playerId);
     boardGameService.deleteBoardGame(gameId);
+  }
+
+  private void requireOwner(int playerId) {
+    Player player = playerRepository.findByPlayerID(playerId);
+    if (player == null) {
+      throw new GlobalException(HttpStatus.NOT_FOUND, "Player not found with ID: " + playerId);
+    }
+    if (!player.getIsAOwner()) {
+      throw new GlobalException(HttpStatus.FORBIDDEN, "Only owners can manage board games.");
+    }
   }
 }
