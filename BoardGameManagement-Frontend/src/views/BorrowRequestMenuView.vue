@@ -1,9 +1,10 @@
 
 <script setup>
-import {ref, onMounted, watchEffect, onUnmounted} from 'vue'
+import {ref, onMounted, watchEffect, onUnmounted, computed} from 'vue'
 import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
 import axios from "axios";
 import {useAuthStore} from "@/stores/authStore.js";
+import { useRoute, useRouter } from "vue-router";
 
 
 const authStore = useAuthStore();
@@ -12,8 +13,10 @@ const axiosClient = axios.create({
   baseURL: "http://localhost:8080"
 });
 
-const tabs = ['See My Borrow Requests', 'Manage Incoming Borrow Requests']
-const selectedTab = ref(tabs[0])
+const tabs = [
+  { key: "mine", label: "See My Borrow Requests", ownerOnly: false },
+  { key: "incoming", label: "Manage Incoming Borrow Requests", ownerOnly: true },
+];
 
 const ownerRequests = ref([]);
 const ownerRequestUpdated = ref(false); // keep track whether requests have been updated
@@ -27,6 +30,24 @@ const today = date.getFullYear() + '-'
     + (date.getMonth() + 1).toString().padStart(2, '0') + '-'
     + date.getDate().toString().padStart(2, '0');
 let intervalId = null;
+const route = useRoute();
+const router = useRouter();
+
+const activeTab = computed(() => {
+  const raw = String(route.query.tab || "").toLowerCase();
+  if (raw === "incoming" && authStore.user.isAOwner) return "incoming";
+  return "mine";
+});
+
+watchEffect(() => {
+  const current = String(route.query.tab || "").toLowerCase();
+  if (current !== activeTab.value) {
+    router.replace({
+      name: "borrowRequestMenu",
+      query: { ...route.query, tab: activeTab.value },
+    });
+  }
+});
 
 const fetchPlayerRequests = async () => {
   try {
@@ -137,11 +158,11 @@ function isRequestEndDate(endDate, status){
 
   console.log(today, today === endDate)
   //const today = "2025-01-03"; // for testing only, use line above in real code
-  return today === endDate & status === "InProgress"
+  return today === endDate && status === "InProgress"
 }
 
 function isRequestDone(status){
-  return status === "Done" | status === "Denied"
+  return status === "Done" || status === "Denied"
 }
 
 async function confirmRequest(id, gameName) {
@@ -152,6 +173,7 @@ async function confirmRequest(id, gameName) {
     playerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
+    const errors = error.response?.data?.errors || [];
     alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error accepting request:", error);
     console.error("Error declining request:", error);
@@ -164,9 +186,10 @@ async function cancelRequest(id, gameName) {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
     alert(`Premature Cancelling: confirms ${gameName} borrowing was cancelled and returned`);
     // Trigger a refresh after the request is accepted
-    requestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
+    playerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
 
   } catch (error) {
+    const errors = error.response?.data?.errors || [];
     alert(`Error with status ${error.response.status} :\n${errors.join("\n")}`);
     console.error("Error accepting request:", error);
   }
@@ -175,15 +198,15 @@ async function cancelRequest(id, gameName) {
 
 function canConfirmGotGame(status, startDate, endDate){
   console.log(today, status, status === "Accepted" , today >= startDate, today < endDate);
-  return status === "Accepted" & today >= startDate & today <= endDate
+  return status === "Accepted" && today >= startDate && today <= endDate
 }
 
 function canCancelRequest(status, startDate){
-  return (status === "Accepted" | status === "InProgress") & today >= startDate
+  return (status === "Accepted" || status === "InProgress") && today >= startDate
 }
 
 function isRequestInactive(status, startDate){
-  return status === "Done" | status === "Denied"
+  return status === "Done" || status === "Denied"
 }
 
 
@@ -213,23 +236,19 @@ function getStatusBadgeClass(status) {
         <!-- Left Sidebar: Tabs -->
         <div class="col-md-3">
           <ul class="nav flex-column nav-pills">
-              <a
-                  href="#"
+            <li
+                v-for="tab in tabs"
+                :key="tab.key"
+                class="nav-item"
+                v-if="!tab.ownerOnly || authStore.user.isAOwner"
+            >
+              <RouterLink
+                  :to="{ name: 'borrowRequestMenu', query: { ...route.query, tab: tab.key } }"
                   class="nav-link"
-                  :class="{ 'active bg-success': selectedTab === tabs[0], 'bg-secondary': selectedTab !== tabs[0] }"
-                  @click.prevent="selectedTab = tabs[0]"
+                  :class="{ 'active bg-success': activeTab === tab.key, 'bg-secondary': activeTab !== tab.key }"
               >
-                {{ tabs[0] }}
-              </a>
-            <li class="nav-item" v-if="authStore.user.isAOwner">
-              <a
-                  href="#"
-                  class="nav-link"
-                  :class="{ 'active bg-success': selectedTab === tabs[1], 'bg-secondary': selectedTab !== tabs[1] }"
-                  @click.prevent="selectedTab = tabs[1]"
-              >
-                {{ tabs[1] }}
-              </a>
+                {{ tab.label }}
+              </RouterLink>
             </li>
           </ul>
         </div>
@@ -238,7 +257,7 @@ function getStatusBadgeClass(status) {
         <!-- Right Content Area -->
         <div class="col-md-9">
 
-          <div v-if="selectedTab === tabs[0]">
+          <div v-if="activeTab === 'mine'">
             <div>
               <h1>See my borrow requests</h1>
               <br>
@@ -259,7 +278,7 @@ function getStatusBadgeClass(status) {
                   <td>{{ request.startOfLoan }}</td>
                   <td>{{ request.endOfLoan}}</td>
                   <td>
-                  <span class="badge" :class="getStatusBadgeClass(playerRequests.requestStatus)">
+                  <span class="badge" :class="getStatusBadgeClass(request.requestStatus)">
                       {{ request.requestStatus}}
                   </span>
                   </td>
@@ -287,7 +306,7 @@ function getStatusBadgeClass(status) {
             </div>
           </div>
 
-          <div v-else-if="selectedTab === tabs[1]">
+          <div v-else-if="activeTab === 'incoming'">
             <div>
               <h1>Manage my borrow requests</h1>
               <br>

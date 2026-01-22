@@ -147,19 +147,12 @@ async function fetchRegStatus(id) {
   }
 }
 async function fetchCount(id) {
-  const tryPaths = [
-    `/registrations/count/${id}`,
-    `/registrations/event/${id}/count`,
-    `/registrations/event/${id}`,
-  ];
-  for (const p of tryPaths) {
-    try {
-      const { data } = await api.get(p);
-      count.value = Array.isArray(data) ? data.length : Number(data ?? 0);
-      return;
-    } catch { /* try next */ }
+  try {
+    const { data } = await api.get(`/registrations/events/${id}`);
+    count.value = Array.isArray(data) ? data.length : 0;
+  } catch {
+    count.value = 0;
   }
-  count.value = 0;
 }
 
 onMounted(async () => {
@@ -195,7 +188,13 @@ async function cancelRegistration() {
     toast("error", e?.response?.data?.message || "Cancel failed");
   }
 }
-function goBack() { router.push({ name: "event" }); }
+function goBack() {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+  router.push({ name: "event" });
+}
 </script>
 
 <style scoped>
