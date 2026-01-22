@@ -28,6 +28,10 @@ async function submit() {
     showBanner("error", "Please fill all required fields.");
     return;
   }
+  if (!description.value || !description.value.trim()) {
+    showBanner("error", "Description is required.");
+    return;
+  }
   if (+maxPlayers.value < +minPlayers.value) {
     showBanner("error", "Maximum players must be greater than or equal to minimum players.");
     return;
@@ -39,7 +43,7 @@ async function submit() {
       name: name.value,
       minPlayers: +minPlayers.value,
       maxPlayers: +maxPlayers.value,
-      description: description.value || "",
+      description: description.value.trim(),
     });
 
     showBanner("success", "Board game created successfully.");
@@ -96,7 +100,7 @@ async function submit() {
 
           <label class="full">
             <span>Description</span>
-            <textarea v-model="description" maxlength="255" placeholder="Optional description..." />
+            <textarea v-model="description" maxlength="255" required placeholder="Describe the game..." />
           </label>
 
           <div class="actions">

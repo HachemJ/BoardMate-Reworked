@@ -357,6 +357,10 @@ function fmtTime(hhmm) {
   t.setHours(hh || 0, mm || 0, 0, 0);
   return t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
+function toTimeWithSeconds(hhmm) {
+  if (!hhmm) return hhmm;
+  return hhmm.length === 5 ? `${hhmm}:00` : hhmm;
+}
 function eventState(ev) {
   const start = parseLocalDateTime(ev.eventDate, (ev.startTime || "").slice(0, 5));
   const end = parseLocalDateTime(ev.eventDate, (ev.endTime || "").slice(0, 5));
@@ -440,24 +444,11 @@ async function refreshReg(eventId) {
 async function refreshCapacity(eventId, maxFromEvent) {
   const max = Number(maxFromEvent || 0);
   let current = 0;
-
   try {
-    const { data } = await api.get(`/registrations/count/${eventId}`);
-    current = Number(data || 0);
+    const { data } = await api.get(`/registrations/events/${eventId}`);
+    current = Array.isArray(data) ? data.length : 0;
   } catch {
-    let arr = [];
-    const tryPaths = [
-      `/registrations/event/${eventId}`,
-      `/registrations/by-event/${eventId}`,
-      `/registrations/events/${eventId}`,
-    ];
-    for (const p of tryPaths) {
-      try {
-        const { data } = await api.get(p);
-        if (Array.isArray(data)) { arr = data; break; }
-      } catch {}
-    }
-    current = Array.isArray(arr) ? arr.length : 0;
+    current = 0;
   }
   capacityMap[eventId] = { current, max, full: max > 0 ? current >= max : false };
 }
@@ -562,8 +553,8 @@ async function createEvent() {
       description: createForm.description,
       maxSpot: String(createForm.maxSpot),
       eventDate: createForm.date,
-      startTime: `${createForm.startTime}:00`,
-      endTime: `${createForm.endTime}:00`,
+      startTime: toTimeWithSeconds(createForm.startTime),
+      endTime: toTimeWithSeconds(createForm.endTime),
       location: createForm.location,
       ownerId: userId.value,
       boardGameId: createForm.boardGameId,
@@ -589,10 +580,10 @@ async function updateEvent() {
     await api.put(`/events/${manage.selectedId}`, {
       name: manage.form.name,
       description: manage.form.description,
-      maxSpot: manage.form.maxSpot,
+      maxSpot: String(manage.form.maxSpot),
       eventDate: manage.form.date,
-      startTime: manage.form.startTime,
-      endTime: manage.form.endTime,
+      startTime: toTimeWithSeconds(manage.form.startTime),
+      endTime: toTimeWithSeconds(manage.form.endTime),
       location: manage.form.location,
       ownerId: userId.value,
       boardGameId: manage.form.boardGameId,

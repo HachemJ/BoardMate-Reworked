@@ -8,6 +8,7 @@ import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.EventRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
+import ca.mcgill.ecse321.BoardGameManagement.repository.RegistrationRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -32,6 +36,10 @@ public class EventService {
   @Autowired
   @SuppressWarnings("unused")
   private BoardGameRepository boardGameRepository;
+
+  @Autowired
+  @SuppressWarnings("unused")
+  private RegistrationRepository registrationRepository;
 
   /**
    * Creates a new event and saves it to the database.
@@ -87,6 +95,16 @@ public class EventService {
       throw new GlobalException(HttpStatus.NOT_FOUND, "Event not found with ID: " + eventID);
     }
 
+    Player owner = playerRepository.findByPlayerID(eventDto.getOwnerId());
+    if (owner == null) {
+      throw new GlobalException(HttpStatus.NOT_FOUND, "Owner not found with ID: " + eventDto.getOwnerId());
+    }
+
+    BoardGame boardGame = boardGameRepository.findByGameID(eventDto.getBoardGameId());
+    if (boardGame == null) {
+      throw new GlobalException(HttpStatus.NOT_FOUND, "BoardGame not found with ID: " + eventDto.getBoardGameId());
+    }
+
     // Update event details with new values
     event.setName(eventDto.getName());
     event.setDescription(eventDto.getDescription());
@@ -95,6 +113,8 @@ public class EventService {
     event.setStartTime(eventDto.getStartTime());
     event.setEndTime(eventDto.getEndTime());
     event.setLocation(eventDto.getLocation());
+    event.setOwner(owner);
+    event.setBoardGame(boardGame);
 
     return eventRepository.save(event); // Save and return updated event
   }
@@ -133,8 +153,21 @@ public class EventService {
    */
   @Transactional
   public void deleteEvent(int eventID) {
-    if (!eventRepository.existsById(eventID)) {
+    Event event = eventRepository.findByEventID(eventID);
+    if (event == null) {
       throw new GlobalException(HttpStatus.NOT_FOUND, "Cannot delete: Event not found with ID: " + eventID);
+    }
+
+    if (!registrationRepository.findRegistrationByEvent(event).isEmpty()) {
+      throw new GlobalException(HttpStatus.CONFLICT, "Cannot delete: players are still registered.");
+    }
+
+    LocalDate eventDate = event.getEventDate().toLocalDate();
+    LocalTime startTime = event.getStartTime().toLocalTime();
+    LocalDateTime eventStart = LocalDateTime.of(eventDate, startTime);
+    LocalDateTime now = LocalDateTime.now();
+    if (!now.isBefore(eventStart)) {
+      throw new GlobalException(HttpStatus.CONFLICT, "Cannot delete while the event is ongoing.");
     }
 
     eventRepository.deleteById(eventID); // Remove event from the database

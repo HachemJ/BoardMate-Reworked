@@ -2,8 +2,6 @@ package ca.mcgill.ecse321.BoardGameManagement.dto;
 
 import java.time.LocalDate;
 
-import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
-import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import ca.mcgill.ecse321.BoardGameManagement.model.Review;
 
 public class ReviewResponseDto {
@@ -16,25 +14,22 @@ public class ReviewResponseDto {
 
     private LocalDate commentDate;
 
-    private Player author;
+    private String authorName;
 
-    private BoardGame boardGame;
+    private String boardGameName;
 
     //no need for validations since used by code only
 
     @SuppressWarnings("unused")
     public ReviewResponseDto() {}
-    public BoardGame getBoardGame() {
-        return boardGame;
-    }
 
     public ReviewResponseDto(Review review) {
         this.reviewID = review.getReviewID();
         this.rating = review.getRating();
         this.comment = review.getComment();
         this.commentDate = review.getCommentDate();
-        this.author = review.getAuthor();
-        this.boardGame = review.getBoardGame();
+        this.authorName = review.getAuthor().getName();
+        this.boardGameName = review.getBoardGame().getName();
     }
 
     public int getReviewID() {
@@ -53,9 +48,9 @@ public class ReviewResponseDto {
         return commentDate;
     }
 
-    public Player getAuthor() {
-        return author;
-    }
+    public String getAuthorName() { return authorName; }
+
+    public String getBoardGameName() { return boardGameName; }
 
 
     @Override
@@ -65,8 +60,8 @@ public class ReviewResponseDto {
                 ", rating=" + rating +
                 ", comment='" + comment + '\'' +
                 ", commentDate=" + commentDate +
-                ", author=" + author +
-                ", boardGame=" + boardGame +
+                ", authorName='" + authorName + '\'' +
+                ", boardGameName='" + boardGameName + '\'' +
                 '}';
     }
 }

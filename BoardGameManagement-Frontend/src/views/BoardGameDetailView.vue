@@ -223,7 +223,7 @@ async function confirmBorrow() {
                     </span>
                     </div>
                   </td>
-                  <td>{{ review.author.name }}</td>
+                  <td>{{ review.authorName }}</td>
                 </tr>
                 </tbody>
               </table>

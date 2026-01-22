@@ -45,6 +45,9 @@ async function fetchBoardGameID(boardGameName) {
 
 async function createBoardGameCopy(boardGameName, specification) {
   const gameId = await fetchBoardGameID(boardGameName);
+  if (!gameId) {
+    throw new Error("Selected board game not found.");
+  }
   const newBoardGameCopy = {
     specification: specification,
     isAvailable: true,
@@ -52,26 +55,28 @@ async function createBoardGameCopy(boardGameName, specification) {
     boardGameId: gameId,
   }
 
-  try {
-    await axiosClient.post("/boardgamecopies", newBoardGameCopy);
-  } catch (e) {
-    console.error(e);
-  }
-
-  if(useAuthStore().user.isAOwner){
-    await router.push("/pages/ownerboardgame");
-  }else {
-    await router.push("/pages/playerboardgame");
-  }
-
+  await axiosClient.post("/boardgamecopies", newBoardGameCopy);
 }
 
-function submitBoardGameCopy() {
+async function submitBoardGameCopy() {
   console.log('Created Board Game Copy:', boardGameCopyData)
-  createBoardGameCopy(boardGameCopyData.boardGameName, boardGameCopyData.specification);
-  alert('Board Game Copy Created Successfully!')
-  // Reset form after submission
-  Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = key === 'maxSpot' ? null : '')
+  try {
+    await createBoardGameCopy(boardGameCopyData.boardGameName, boardGameCopyData.specification);
+    alert('Board Game Copy Created Successfully!')
+    // Reset form after submission
+    Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = key === 'maxSpot' ? null : '')
+
+    if(useAuthStore().user.isAOwner){
+      await router.push("/pages/ownerboardgame");
+    }else {
+      await router.push("/pages/playerboardgame");
+    }
+  } catch (e) {
+    console.error(e);
+    const errors = e?.response?.data?.errors;
+    const message = Array.isArray(errors) ? errors.join("\n") : e?.message || "Failed to create board game copy.";
+    alert(message);
+  }
 }
 
 </script>

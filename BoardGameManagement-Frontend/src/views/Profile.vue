@@ -108,7 +108,7 @@ export default {
           email: data.email,
           status: data.isAOwner ? "owner" : "player",
           profilePicture: null,
-          id: data.id,
+          id: data.playerID,
         };
 
         this.originalIsAOwner = !!data.isAOwner;

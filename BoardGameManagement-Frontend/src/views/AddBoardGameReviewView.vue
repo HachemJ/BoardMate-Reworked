@@ -40,6 +40,9 @@ async function fetchBoardGameID(name) {
 
 async function createReview(comment, rating) {
     const gameId = await fetchBoardGameID(gameName);
+    if (!gameId) {
+      throw new Error("Selected board game not found.");
+    }
     const newReview = {
         comment: comment,
         rating: Number(rating),
@@ -48,18 +51,14 @@ async function createReview(comment, rating) {
         boardGameID: gameId,
     }
 
-    try {
-        await axiosClient.post("/reviews", newReview);
-    } catch (e) {
-        console.error(e);
-    }
-
+    await axiosClient.post("/reviews", newReview);
 }
 
 
-function submitReview() {
+async function submitReview() {
   console.log('Created Review:', reviewData);
-  createReview(reviewData.comment, reviewData.rating).then(() => {
+  try {
+    await createReview(reviewData.comment, reviewData.rating);
     alert('Review Created Successfully!');
     // Reset form after submission
     Object.keys(reviewData).forEach(key => reviewData[key] = key === 'maxSpot' ? null : '');
@@ -69,10 +68,12 @@ function submitReview() {
     } else {
       router.push(`/pages/playerboardgame/${gameName}`);
     }
-  }).catch(error => {
+  } catch (error) {
     console.error('Error creating review:', error);
-    alert('Failed to create review. Please try again.');
-  });
+    const errors = error?.response?.data?.errors;
+    const message = Array.isArray(errors) ? errors.join("\n") : error?.message || 'Failed to create review. Please try again.';
+    alert(message);
+  }
 }
 
 </script>

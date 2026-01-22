@@ -31,21 +31,11 @@ async function getBoardGameCopiesForId() {
 
 async function updateBGC(specification) {
   const boardGameCopyId = boardGameCopyData.boardGameCopyId;
-  try {
-    await axiosClient.put("/boardgamecopies/" + boardGameCopyId, specification, {
-      headers: {
-        'Content-Type': 'text/plain'
-      }
-    });
-
-    if(useAuthStore().user.isAOwner){
-      await router.push("/pages/ownerboardgame");
-    }else {
-      await router.push("/pages/playerboardgame");
+  await axiosClient.put("/boardgamecopies/" + boardGameCopyId, specification, {
+    headers: {
+      'Content-Type': 'text/plain'
     }
-  } catch (e) {
-    console.error(e);
-  }
+  });
 
   // Find the updated item and update it
   // const existingCopy = boardGameCopies.find(copy => copy.boardGameCopyId === boardGameCopyId);
@@ -54,12 +44,25 @@ async function updateBGC(specification) {
   // }
 }
 
-function updateBoardGame() {
-  updateBGC(boardGameCopyData.specification);
-  console.log('Updated Board Game:', boardGameCopyData)
-  alert('Board Game Updated Successfully!')
-  // Reset form after submission
-  Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = '')
+async function updateBoardGame() {
+  try {
+    await updateBGC(boardGameCopyData.specification);
+    console.log('Updated Board Game:', boardGameCopyData)
+    alert('Board Game Updated Successfully!')
+    // Reset form after submission
+    Object.keys(boardGameCopyData).forEach(key => boardGameCopyData[key] = '')
+
+    if(useAuthStore().user.isAOwner){
+      await router.push("/pages/ownerboardgame");
+    }else {
+      await router.push("/pages/playerboardgame");
+    }
+  } catch (e) {
+    console.error(e);
+    const errors = e?.response?.data?.errors;
+    const message = Array.isArray(errors) ? errors.join("\n") : "Failed to update board game copy.";
+    alert(message);
+  }
 }
 
 </script>
