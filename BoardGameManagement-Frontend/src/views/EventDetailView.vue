@@ -5,50 +5,16 @@
 
     <main class="page">
       <section class="card detail" v-if="loaded && !loadError">
-        <header class="detail-head">
-          <div class="title">
-            <h1>{{ details.name }}</h1>
-            <p class="muted">Board Game: <span class="accent">{{ details.boardGameName || '—' }}</span></p>
-          </div>
-
-          <div class="state-badges">
-            <span v-if="state" class="badge" :class="state.toLowerCase()">{{ state }}</span>
-            <span v-if="isFull" class="badge full">Full</span>
-          </div>
-        </header>
-
-        <div class="grid">
-          <div class="col">
-            <div class="kv"><span class="k">Date</span><span class="v">{{ details.eventDate || '—' }}</span></div>
-            <div class="kv"><span class="k">Start</span><span class="v">{{ prettyTime(details.startTime) || '—' }}</span></div>
-            <div class="kv"><span class="k">End</span><span class="v">{{ prettyTime(details.endTime) || '—' }}</span></div>
-            <div class="kv"><span class="k">Location</span><span class="v">{{ details.location || '—' }}</span></div>
-            <div class="kv">
-              <span class="k">Spots</span>
-              <span class="v">
-                <template v-if="details.maxSpot">
-                  {{ Number(count ?? 0) }}/{{ details.maxSpot }}
-                </template>
-                <template v-else>—</template>
-              </span>
-            </div>
-          </div>
-
-          <div class="col">
-            <div class="kv"><span class="k">Owner</span><span class="v">{{ details.ownerName || '—' }}</span></div>
-            <div class="kv desc">
-              <span class="k">Description</span>
-              <span class="v block">{{ details.description || '—' }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn primary" :disabled="disableRegister" @click="registerForEvent">Register</button>
-          <button class="btn danger" :disabled="disableCancel" @click="cancelRegistration">Cancel Registration</button>
-          <button class="btn ghost" @click="goBack">Go Back</button>
-        </div>
-      </section>
+  <EventCard :event="eventCardData">
+    <template #footer>
+      <div class="actions">
+        <button class="btn primary" :disabled="disableRegister" @click="registerForEvent">Register</button>
+        <button class="btn danger" :disabled="disableCancel" @click="cancelRegistration">Cancel Registration</button>
+        <button class="btn ghost" @click="goBack">Go Back</button>
+      </div>
+    </template>
+  </EventCard>
+</section>
 
       <section v-else-if="loadError" class="card empty">
         Could not load this event.
@@ -64,6 +30,7 @@
 
 <script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
+import EventCard from "@/components/EventCard.vue";
 import axios from "axios";
 import { useRoute, useRouter } from "vue-router";
 import { ref, computed, onMounted } from "vue";
@@ -91,14 +58,6 @@ const details = ref({
 const regStatus = ref("Not Registered");
 const count = ref(null);
 
-function prettyTime(t) {
-  if (!t) return "";
-  const hhmm = t.length >= 5 ? t.slice(0, 5) : t;
-  const [h, m] = hhmm.split(":").map(Number);
-  const d = new Date();
-  d.setHours(h || 0, m || 0, 0, 0);
-  return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
 function toLocalDateTime(dateStr, timeStr) {
   if (!dateStr || !timeStr) return null;
   const [y, mo, d] = dateStr.split("-").map(Number);
@@ -120,6 +79,18 @@ const isFull = computed(() => {
   const max = Number(details.value.maxSpot ?? 0);
   return max > 0 && (Number(count.value ?? 0) >= max);
 });
+const eventCardData = computed(() => ({
+  name: details.value.name,
+  boardGameName: details.value.boardGameName,
+  date: details.value.eventDate,
+  startTime: details.value.startTime,
+  endTime: details.value.endTime,
+  location: details.value.location,
+  description: details.value.description,
+  spotsCurrent: Number(count.value ?? 0),
+  spotsMax: Number(details.value.maxSpot ?? 0),
+  status: state.value,
+}));
 
 const disableRegister = computed(() =>
     !details.value.eventID || regStatus.value === "Registered" || state.value !== "Upcoming" || isFull.value
@@ -189,11 +160,12 @@ async function cancelRegistration() {
   }
 }
 function goBack() {
-  if (window.history.length > 1) {
+  const back = router.options.history.state.back;
+  if (typeof back === "string" && back.startsWith("/pages/event")) {
     router.back();
     return;
   }
-  router.push({ name: "profile" });
+  router.push({ name: "event" });
 }
 </script>
 
@@ -202,27 +174,7 @@ function goBack() {
 .card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }
 .detail { max-width: 1080px; margin: 0 auto; }
 
-.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
-.detail-head h1 { margin: 0; font-size: 32px; font-weight: 800; color: #e8ecf7; }
-.muted { opacity: .8; margin: 6px 0 0; }
-.accent { color: #9fc1ff; }
-
-.state-badges { display: flex; gap: 8px; }
-.badge { padding: 6px 12px; border-radius: 999px; font-weight: 800; border: 1px solid transparent; }
-.badge.upcoming { color: #cde6ff; border-color: #2e4a74; background: #0d1726; }
-.badge.ongoing  { color: #c8ffd5; border-color: #2c5b38; background: #0f2015; }
-.badge.finished { color: #ffd6d6; border-color: #5b2c2c; background: #1f1111; }
-.badge.full     { color: #ffe2b8; border-color: #6a4a23; background: #24180b; }
-
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
-.col { display: flex; flex-direction: column; gap: 10px; }
-.kv { display: flex; justify-content: space-between; gap: 16px; padding: 10px 12px; border: 1px solid #1f2533; border-radius: 12px; background: #10151c; }
-.k { opacity: .8; }
-.v { font-weight: 700; color: #e6ecff; }
-.v.block { white-space: normal; line-height: 1.5; }
-.desc .k { align-self: flex-start; }
-
-.actions { display: flex; gap: 10px; margin-top: 16px; }
+.actions { display: flex; gap: 10px; }
 .btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; }
 .btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
 .btn.primary:disabled { opacity: .6; cursor: not-allowed; }
@@ -238,3 +190,4 @@ function goBack() {
 .toast.error   { border-color: #8a2a2a; background: #1a1010; color: #ffd6d6; }
 .toast.info    { border-color: #3b5b9e; background: #0f1625; color: #d7e5ff; }
 </style>
+

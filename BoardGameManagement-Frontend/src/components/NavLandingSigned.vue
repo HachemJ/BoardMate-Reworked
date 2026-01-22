@@ -1,6 +1,6 @@
 <!-- src/components/NavLandingSigned.vue -->
 <template>
-  <header class="landing-nav">
+  <header class="landing-nav" :class="{ hidden: hiddenNav }">
     <div class="nav-inner">
       <!-- Brand -->
       <router-link to="/" class="brand">
@@ -60,12 +60,34 @@ const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
 const open = ref(false)
+const hiddenNav = ref(false)
+let lastScroll = 0
 
 const displayName = computed(() => auth.user?.username || auth.user?.name || 'User')
 
 const onKey = (e) => { if (e.key === 'Escape') open.value = false }
-onMounted(() => window.addEventListener('keydown', onKey))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+const onScroll = () => {
+  const current = window.scrollY || 0
+  const delta = current - lastScroll
+  if (current <= 10) {
+    hiddenNav.value = false
+  } else if (delta > 6) {
+    hiddenNav.value = true
+  } else if (delta < -6) {
+    hiddenNav.value = false
+  }
+  lastScroll = current
+}
+
+onMounted(() => {
+  lastScroll = window.scrollY || 0
+  window.addEventListener('keydown', onKey)
+  window.addEventListener('scroll', onScroll, { passive: true })
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKey)
+  window.removeEventListener('scroll', onScroll)
+})
 
 // Center of the bar
 const centerLinks = computed(() => [
@@ -94,9 +116,14 @@ function signOut() {
 <style scoped>
 /* Shell */
 .landing-nav{
-  position: sticky; top: 0; left: 0; right: 0; z-index: 1000;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
   display:flex; justify-content:center;
   padding: 14px 0;
+  transition: transform .25s ease, opacity .25s ease;
+}
+.landing-nav.hidden{
+  transform: translateY(-110%);
+  opacity: 0;
 }
 .nav-inner{
   width:min(1180px, calc(100% - 32px));

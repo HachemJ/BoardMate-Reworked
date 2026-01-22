@@ -276,61 +276,13 @@
             </form>
           </div>
 
-          <aside class="preview-card">
-            <div class="preview-head">
-              <h4>Live Preview</h4>
-              <p class="subtle">How it will look in Browse</p>
-            </div>
-            <div class="preview-body">
-              <div v-if="creating" class="preview-skeleton">
-                <div class="skeleton-line"></div>
-                <div class="skeleton-line short"></div>
-                <div class="skeleton-line"></div>
-                <div class="skeleton-badge-row">
-                  <div class="skeleton-pill"></div>
-                  <div class="skeleton-pill"></div>
-                </div>
-              </div>
-              <template v-else>
-                <div class="preview-cover">
-                  <div class="cover-icon">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M7 3h10a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2V5a2 2 0 0 1 2-2z" fill="currentColor"/>
-                    </svg>
-                  </div>
-                  <div class="cover-letter">{{ (selectedBoardGame?.name || "Game").slice(0, 1) }}</div>
-                </div>
-                <div class="preview-title preview-animate" :class="{ filled: !!createForm.name }">
-                  {{ createForm.name || "Event name" }}
-                </div>
-                <div class="preview-sub preview-animate" :class="{ filled: !!selectedBoardGame }">
-                  {{ selectedBoardGame?.name || "Board game" }}
-                </div>
-                <div class="preview-badges">
-                  <span class="pill preview-animate" :class="{ filled: !!createForm.date }">
-                    {{ createForm.date || "Date" }}
-                  </span>
-                  <span class="pill preview-animate" :class="{ filled: !!createForm.startTime && !!createForm.endTime }">
-                    {{ createForm.startTime || "Start" }}-{{ createForm.endTime || "End" }}
-                  </span>
-                  <span class="pill preview-animate" :class="{ filled: !!createForm.maxSpot }">
-                    0 / {{ createForm.maxSpot }} spots
-                  </span>
-                  <span class="pill preview-animate" :class="{ filled: !!createForm.location }">
-                    <svg class="pin" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M12 2C8.686 2 6 4.686 6 8c0 4.418 6 12 6 12s6-7.582 6-12c0-3.314-2.686-6-6-6zm0 8.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/>
-                    </svg>
-                    {{ createForm.location || "Location" }}
-                  </span>
-                </div>
-                <div class="preview-row">
-                  <span class="label small">Description</span>
-                  <div class="preview-text preview-animate" :class="{ filled: !!createForm.description }">
-                    {{ createForm.description || "Add a short description..." }}
-                  </div>
-                </div>
+          <aside>
+            <EventCard :event="previewEvent" preview>
+              <template #footer>
+                <span class="subtle">Hosted by you</span>
+                <span class="subtle">Preview only</span>
               </template>
-            </div>
+            </EventCard>
           </aside>
         </div>
 
@@ -418,6 +370,7 @@
 
 <script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
+import EventCard from "@/components/EventCard.vue";
 import axios from "axios";
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
@@ -493,6 +446,32 @@ const isScheduleComplete = computed(() =>
 const isDetailsComplete = computed(() =>
     !!createForm.location && !!createForm.description
 );
+const previewStatus = computed(() => {
+  const start = parseLocalDateTime(createForm.date, createForm.startTime || "");
+  const end = parseLocalDateTime(createForm.date, createForm.endTime || "");
+  if (!start || !end) return "";
+  const t = Date.now();
+  if (t < start.getTime()) return "Upcoming";
+  if (t >= start.getTime() && t < end.getTime()) return "Ongoing";
+  return "Finished";
+});
+const previewEvent = computed(() => ({
+  name: createForm.name,
+  boardGameName: selectedBoardGame.value?.name || "",
+  date: createForm.date,
+  startTime: createForm.startTime,
+  endTime: createForm.endTime,
+  location: createForm.location,
+  description: createForm.description,
+  spotsCurrent: 0,
+  spotsMax: Number(createForm.maxSpot || 0),
+  status: previewStatus.value,
+  imageUrl:
+      selectedBoardGame.value?.imageUrl ||
+      selectedBoardGame.value?.image ||
+      selectedBoardGame.value?.coverImageUrl ||
+      "",
+}));
 function adjustMaxSpot(delta) {
   const next = Math.max(1, Number(createForm.maxSpot || 1) + delta);
   createForm.maxSpot = next;
@@ -934,6 +913,8 @@ watch(
 .form-section { border: 1px solid #1f2533; border-radius: 12px; padding: 10px; background: #10141b; display: grid; gap: 10px; }
 .section-title { display: grid; gap: 4px; font-weight: 800; color: #e6ecff; }
 .section-help { font-weight: 600; font-size: 12px; color: #9aa4b6; }
+.form-section.active { border-color: #3a4a66; box-shadow: 0 0 0 1px rgba(114,170,255,0.12); }
+.form-section.complete { opacity: 0.9; }
 .time-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .duration-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .stepper { display: inline-flex; align-items: center; gap: 8px; }
@@ -941,6 +922,9 @@ watch(
 .form-actions { display: flex; gap: 10px; }
 .input-light { opacity: 0.75; transition: opacity .2s ease, border-color .2s ease, box-shadow .2s ease; }
 .input-light:focus { opacity: 1; }
+.input-icon { position: relative; }
+.input-icon .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #9aa4b6; pointer-events: none; }
+.input-icon .input { padding-left: 36px; }
 .lock-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px;
   border: 1px solid #2f384a; color: #dfe5f4; font-weight: 700; font-size: 12px; }
 .lock-pill svg { width: 12px; height: 12px; }
@@ -955,27 +939,6 @@ watch(
 .game-name { font-weight: 800; color: #ffffff; }
 .game-players { color: #c6cedf; font-size: 12px; }
 
-.preview-card { position: sticky; top: 110px; border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; }
-.preview-head { margin-bottom: 12px; }
-.preview-body { display: grid; gap: 10px; }
-.preview-cover { height: 140px; border-radius: 12px; display: grid; place-items: center;
-  background: linear-gradient(135deg, #151a22, #0f1217); color: #e6ecff; border: 1px solid #1f2533; position: relative; }
-.cover-icon { position: absolute; top: 10px; left: 10px; opacity: .7; }
-.cover-icon svg { width: 18px; height: 18px; }
-.cover-letter { font-weight: 900; font-size: 28px; }
-.preview-title { font-weight: 900; font-size: 20px; color: #ffffff; }
-.preview-sub { color: #b6becc; }
-.preview-meta { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.meta-left { display: grid; gap: 4px; }
-.meta-line { color: #dfe5f4; font-weight: 700; }
-.meta-spot { font-size: 22px; font-weight: 900; color: #ffffff; letter-spacing: 0.5px; }
-.preview-row { display: grid; gap: 4px; }
-.preview-text { color: #c6cedf; font-size: 13px; }
-.preview-skeleton { display: grid; gap: 10px; }
-.skeleton-line { height: 12px; border-radius: 999px; background: #1b2230; }
-.skeleton-line.short { width: 60%; }
-.skeleton-badge-row { display: flex; gap: 8px; }
-.skeleton-pill { height: 22px; width: 90px; border-radius: 999px; background: #1b2230; }
 .empty.small { padding: 8px 0; font-size: 12px; }
 
 /* inputs */
@@ -1010,6 +973,7 @@ watch(
 .btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; cursor: pointer; }
 .btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
 .btn.primary:hover { background: #f3f3f3; }
+.btn.primary.loading { opacity: 0.85; cursor: progress; }
 .btn.danger { background: #d44d4d; border-color: #d44d4d; color: #fff; }
 .btn.danger:hover { background: #c04343; }
 .btn.ghost { background: transparent; border: 1px solid #2f384a; color: #dfe5f4; }
@@ -1059,15 +1023,3 @@ watch(
 
 @media (max-width: 980px) {
   .create-layout { grid-template-columns: 1fr; }
-  .preview-card { position: static; }
-  .time-row { grid-template-columns: 1fr; }
-}
-
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-2px); }
-  100% { transform: translateX(0); }
-}
-</style>
