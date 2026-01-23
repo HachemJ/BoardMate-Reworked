@@ -291,80 +291,170 @@
         </div>
       </section>
 
-      <!-- ========== MANAGE ========== -->
+            <!-- ========== MANAGE ========== -->
       <section v-else class="card">
-        <h3>Manage My Events</h3>
+        <div class="manage-layout">
+          <div class="form-card">
+            <div class="form-head">
+              <div>
+                <h3>Manage My Events</h3>
+                <p class="subtle">Edit your events and preview changes live.</p>
+              </div>
+            </div>
 
-        <div class="grid">
-          <div class="col">
-            <label class="label">Select event</label>
-            <select class="input" v-model="manage.selectedId">
-              <option disabled value="">— select —</option>
-              <option v-for="ev in myEvents" :key="ev.eventID" :value="ev.eventID">
-                {{ ev.name }} — {{ ev.eventDate }}
-              </option>
-            </select>
+            <div v-if="lock.visible" class="inline-banner danger">{{ lock.message }}</div>
+
+            <form class="create-grid" @submit.prevent="updateEvent">
+              <div
+                  class="form-section"
+                  :class="{ active: manageActiveSection === 'select', complete: !!manage.selectedId }"
+                  @focusin="manageActiveSection = 'select'"
+              >
+                <div class="section-title">
+                  <div>Select Event</div>
+                  <div class="section-help">Choose one of your events to edit.</div>
+                </div>
+                <label class="label">Event</label>
+                <select class="input" v-model="manage.selectedId">
+                  <option disabled value="">— select —</option>
+                  <option v-for="ev in myEvents" :key="ev.eventID" :value="ev.eventID">
+                    {{ ev.name }} — {{ ev.eventDate }}
+                  </option>
+                </select>
+                <div v-if="selectedManageEvent" class="meta-row">
+                  <span class="meta-pill">{{ selectedManageEvent.eventDate }}</span>
+                  <span class="meta-pill">{{ prettyTime(selectedManageEvent) || "Time TBD" }}</span>
+                  <span class="meta-pill">{{ eventState(selectedManageEvent) }}</span>
+                </div>
+                <small v-else class="hint subtle">Pick an event to load its details.</small>
+              </div>
+
+              <div
+                  v-if="selectedManageEvent"
+                  class="form-section"
+                  :class="{ active: manageActiveSection === 'basics' }"
+                  @focusin="manageActiveSection = 'basics'"
+              >
+                <div class="section-title">
+                  <div>What’s changing?</div>
+                  <div class="section-help">Update the title and board game.</div>
+                </div>
+                <label class="label">Event name</label>
+                <input class="input" v-model.trim="manage.form.name" required />
+
+                <label class="label">Board game</label>
+                <select class="input" v-model="manage.form.boardGameId" required>
+                  <option disabled value="">Choose a board game</option>
+                  <option v-for="g in boardGames" :key="g.gameID" :value="g.gameID">{{ g.name }}</option>
+                </select>
+              </div>
+
+              <div
+                  v-if="selectedManageEvent"
+                  class="form-section"
+                  :class="{ active: manageActiveSection === 'schedule' }"
+                  @focusin="manageActiveSection = 'schedule'"
+              >
+                <div class="section-title">
+                  <div>Schedule</div>
+                  <div class="section-help">Adjust date, time, and capacity.</div>
+                </div>
+                <label class="label">Date</label>
+                <input class="input" type="date" :min="minDate" v-model="manage.form.date" required @keydown.prevent />
+
+                <div class="time-row">
+                  <div>
+                    <label class="label">Start time</label>
+                    <input class="input" type="time" v-model="manage.form.startTime" required @keydown.prevent />
+                  </div>
+                  <div>
+                    <label class="label">End time</label>
+                    <input
+                        class="input"
+                        type="time"
+                        v-model="manage.form.endTime"
+                        :min="manage.form.startTime || undefined"
+                        required
+                        @keydown.prevent
+                        @input="unlockManageEndTime"
+                    />
+                  </div>
+                </div>
+                <div class="duration-row">
+                  <span class="label small">Duration</span>
+                  <button v-for="d in DURATIONS" :key="'m' + d" type="button" class="chip" @click="applyManageDuration(d)">
+                    {{ d }}m
+                  </button>
+                  <span v-if="manageEndTimeLocked" class="lock-pill" title="End time locked to duration">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z" fill="currentColor"/>
+                    </svg>
+                    Locked
+                  </span>
+                </div>
+                <label class="label">Max spots</label>
+                <div class="stepper">
+                  <button type="button" class="btn ghost" @click="adjustManageMaxSpot(-1)">-</button>
+                  <div class="stepper-value">{{ manage.form.maxSpot }}</div>
+                  <button type="button" class="btn ghost" @click="adjustManageMaxSpot(1)">+</button>
+                </div>
+                <small v-if="manageEndTimeError" class="err">{{ manageEndTimeError }}</small>
+              </div>
+
+              <div
+                  v-if="selectedManageEvent"
+                  class="form-section"
+                  :class="{ active: manageActiveSection === 'details' }"
+                  @focusin="manageActiveSection = 'details'"
+              >
+                <div class="section-title">
+                  <div>Event Details</div>
+                  <div class="section-help">Update location and description.</div>
+                </div>
+                <label class="label">Location</label>
+                <div class="input-icon">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2C8.686 2 6 4.686 6 8c0 4.418 6 12 6 12s6-7.582 6-12c0-3.314-2.686-6-6-6zm0 8.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z" fill="currentColor"/>
+                  </svg>
+                  <input class="input" v-model.trim="manage.form.location" placeholder="McGill Library, Room 201" required />
+                </div>
+
+                <label class="label">Description</label>
+                <textarea class="input input-light" rows="3" v-model.trim="manage.form.description"></textarea>
+              </div>
+
+              <div v-if="selectedManageEvent" class="form-actions">
+                <button
+                    type="submit"
+                    class="btn primary"
+                    :class="{ loading: updating }"
+                    :disabled="!isManageValid || updating"
+                >
+                  {{ updating ? "Updating..." : "Update Event" }}
+                </button>
+                <button type="button" class="btn" @click="resetManageForm" :disabled="!selectedManageEvent">Reset changes</button>
+                <button type="button" class="btn danger" :disabled="!manage.selectedId" @click="deleteEvent">Delete</button>
+                <small v-if="!isManageValid" class="hint subtle">Complete required fields to update.</small>
+              </div>
+            </form>
+
+            <div v-if="!selectedManageEvent" class="empty">Select one of your events to manage.</div>
           </div>
+
+          <aside>
+            <EventCard :event="managePreviewEvent" preview>
+              <template #footer>
+                <span class="subtle">Hosted by you</span>
+                <span class="subtle">Preview only</span>
+              </template>
+            </EventCard>
+          </aside>
         </div>
-
-        <div class="grid" v-if="lock.visible">
-          <div class="col col-2">
-            <div class="inline-banner danger">{{ lock.message }}</div>
-          </div>
-        </div>
-
-        <form class="grid" @submit.prevent="updateEvent" v-if="selectedManageEvent">
-          <div class="col">
-            <label class="label">Event name</label>
-            <input class="input" v-model.trim="manage.form.name" required />
-
-            <label class="label">Max spots</label>
-            <input class="input" type="number" min="1" v-model.number="manage.form.maxSpot" required />
-
-            <label class="label">Start time</label>
-            <input class="input" type="time" v-model="manage.form.startTime" required @keydown.prevent />
-
-            <label class="label">Location</label>
-            <input class="input" v-model.trim="manage.form.location" required />
-          </div>
-
-          <div class="col">
-            <label class="label">Board game</label>
-            <select class="input" v-model="manage.form.boardGameId" required>
-              <option disabled value="">Choose a board game</option>
-              <option v-for="g in boardGames" :key="g.gameID" :value="g.gameID">{{ g.name }}</option>
-            </select>
-
-            <label class="label">Date</label>
-            <input class="input" type="date" :min="minDate" v-model="manage.form.date" required @keydown.prevent />
-
-            <label class="label">End time</label>
-            <input
-                class="input"
-                type="time"
-                v-model="manage.form.endTime"
-                :min="manage.form.startTime || undefined"
-                required
-                @keydown.prevent
-            />
-
-            <label class="label">Description</label>
-            <textarea class="input" rows="3" v-model.trim="manage.form.description"></textarea>
-          </div>
-
-          <div class="col col-2">
-            <button type="submit" class="btn primary">Update</button>
-            <button type="button" class="btn danger" :disabled="!manage.selectedId" @click="deleteEvent">Delete</button>
-          </div>
-        </form>
-
-        <div v-else class="empty">Select one of your events to manage.</div>
 
         <div class="toasts">
           <div v-for="t in toasts" :key="t.id" class="toast" :class="t.kind">{{ t.msg }}</div>
         </div>
-      </section>
-    </main>
+      </section></main>
   </div>
 </template>
 
@@ -387,8 +477,8 @@ const FILTERS = ["All", "Upcoming", "Ongoing", "Past"];
 
 // Default: UPCOMING
 const tab = ref("Browse");
-const browseFilter = ref("Upcoming");
-const showFilters = ref(false);
+const browseFilter = ref("All");
+const showFilters = ref(true);
 const toggleFilters = () => (showFilters.value = !showFilters.value);
 
 const events = ref([]);
@@ -555,6 +645,10 @@ const manage = reactive({
     boardGameId: "",
   },
 });
+const manageActiveSection = ref("select");
+const updating = ref(false);
+const manageEndTimeLocked = ref(false);
+const manageDurationMinutes = ref(null);
 
 const now = ref(Date.now());
 let tickHandle = null;
@@ -611,6 +705,7 @@ const selectedManageEvent = computed(() =>
 
 onMounted(async () => {
   await Promise.all([fetchEvents(), fetchMyEvents(), fetchBoardGames()]);
+  browseFilter.value = "All";
   tickHandle = setInterval(() => (now.value = Date.now()), 30000);
 });
 onBeforeUnmount(() => {
@@ -786,7 +881,7 @@ async function createEvent() {
     // switch to Browse and show success banner there
     tab.value = "Browse";
     showFilters.value = false;
-    browseFilter.value = "Upcoming";
+    browseFilter.value = "All";
     showAction("success", "Event created.");
     // reset form after navigating away
     resetCreate();
@@ -1023,3 +1118,7 @@ watch(
 
 @media (max-width: 980px) {
   .create-layout { grid-template-columns: 1fr; }
+}
+
+</style>
+
