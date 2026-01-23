@@ -1,37 +1,80 @@
-
 <script setup>
-import {ref, onMounted, watchEffect, onUnmounted, computed} from 'vue'
-import DefaultNavbar from '@/examples/navbars/NavbarDefault.vue'
+import { ref, reactive, onMounted, watchEffect, onUnmounted, computed } from "vue";
+import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import axios from "axios";
-import {useAuthStore} from "@/stores/authStore.js";
+import { useAuthStore } from "@/stores/authStore.js";
 import { useRoute, useRouter } from "vue-router";
 
-
 const authStore = useAuthStore();
-const axiosClient = axios.create({
-  // NOTE: it's baseURL, not baseUrl
-  baseURL: "http://localhost:8080"
-});
-
-const tabs = [
-  { key: "mine", label: "See My Borrow Requests", ownerOnly: false },
-  { key: "incoming", label: "Manage Incoming Borrow Requests", ownerOnly: true },
-];
-
-const ownerRequests = ref([]);
-const ownerRequestUpdated = ref(false); // keep track whether requests have been updated
-const ownerId = authStore.user.id;
-
-const playerId = authStore.user.id;
-const playerRequests = ref([]);  // This will hold the array of events fetched from the database
-const playerRequestUpdated = ref(false); // keep track whether requests have been updated
-const date = new Date();
-const today = date.getFullYear() + '-'
-    + (date.getMonth() + 1).toString().padStart(2, '0') + '-'
-    + date.getDate().toString().padStart(2, '0');
-let intervalId = null;
+const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
 const route = useRoute();
 const router = useRouter();
+
+const isOwner = computed(() => !!authStore.user?.isAOwner);
+const ownerId = computed(() => authStore.user?.id ?? null);
+const playerId = computed(() => authStore.user?.id ?? null);
+
+const tabs = [
+  { key: "browse", label: "Browse" },
+  { key: "mine", label: "My Requests" },
+  { key: "manage", label: "Manage", ownerOnly: true },
+];
+const visibleTabs = computed(() => tabs.filter((t) => !t.ownerOnly || isOwner.value));
+
+const activeTab = computed(() => {
+  const raw = String(route.query.tab || "").toLowerCase();
+  const found = visibleTabs.value.find((t) => t.key === raw);
+  return found ? found.key : (visibleTabs.value[0]?.key || "browse");
+});
+
+watchEffect(() => {
+  const current = String(route.query.tab || "").toLowerCase();
+  if (current !== activeTab.value) {
+    router.replace({ name: "borrowRequestMenu", query: { ...route.query, tab: activeTab.value } });
+  }
+});
+
+function goBack() {
+  if (window.history.length > 1) router.back();
+  else router.push({ name: "profile" });
+}
+
+const copies = ref([]);
+const ownerCopies = ref([]);
+const ownerRequests = ref([]);
+const playerRequests = ref([]);
+const selectedCopy = ref(null);
+const copyQuery = ref("");
+
+const loading = reactive({
+  copies: false,
+  ownerCopies: false,
+  ownerRequests: false,
+  playerRequests: false,
+});
+
+const borrowForm = reactive({ startOfLoan: "", endOfLoan: "" });
+const borrowTouched = ref(false);
+const borrowSubmitting = ref(false);
+
+const filteredCopies = computed(() => {
+  const q = copyQuery.value.trim().toLowerCase();
+  if (!q) return copies.value;
+  return copies.value.filter((c) => {
+    const hay = [c.boardGameName, c.playerName, c.specification].filter(Boolean).join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+});
+
+const borrowError = computed(() => {
+  if (!borrowTouched.value) return "";
+  if (!borrowForm.startOfLoan || !borrowForm.endOfLoan) return "Start and end dates are required.";
+  if (borrowForm.endOfLoan < borrowForm.startOfLoan) return "End date must be after start date.";
+  if (!selectedCopy.value) return "Select a copy to request.";
+  return "";
+});
+
+const isBorrowValid = computed(() => !borrowError.value && !!selectedCopy.value);
 
 function handleApiError(error, fallbackMessage) {
   const status = error?.response?.status;
@@ -45,446 +88,555 @@ function handleApiError(error, fallbackMessage) {
   alert(message);
 }
 
-const activeTab = computed(() => {
-  const raw = String(route.query.tab || "").toLowerCase();
-  if (raw === "incoming" && authStore.user.isAOwner) return "incoming";
-  return "mine";
-});
-
-watchEffect(() => {
-  const current = String(route.query.tab || "").toLowerCase();
-  if (current !== activeTab.value) {
-    router.replace({
-      name: "borrowRequestMenu",
-      query: { ...route.query, tab: activeTab.value },
-    });
-  }
-});
-
-const fetchPlayerRequests = async () => {
+async function fetchCopies() {
+  loading.copies = true;
   try {
-    const response = await axiosClient.get(`/players/${playerId}/borrowrequests`);
-    console.log(response.data);
-    playerRequests.value = response.data;
+    const { data } = await axiosClient.get("/boardgamecopies");
+    copies.value = data ?? [];
   } catch (error) {
-    console.error("Error fetching requests:", error);
+    handleApiError(error, "Failed to load available copies.");
+  } finally {
+    loading.copies = false;
+  }
+}
+
+async function fetchOwnerCopies() {
+  if (!ownerId.value) return;
+  loading.ownerCopies = true;
+  try {
+    const { data } = await axiosClient.get(`/boardgamecopies/byplayer/${ownerId.value}`);
+    ownerCopies.value = data ?? [];
+  } catch (error) {
+    handleApiError(error, "Failed to load your copies.");
+  } finally {
+    loading.ownerCopies = false;
+  }
+}
+
+async function fetchPlayerRequests() {
+  if (!playerId.value) return;
+  loading.playerRequests = true;
+  try {
+    const { data } = await axiosClient.get(`/players/${playerId.value}/borrowrequests`);
+    playerRequests.value = data ?? [];
+  } catch (error) {
     handleApiError(error, "Failed to load your borrow requests.");
+  } finally {
+    loading.playerRequests = false;
   }
-};
+}
 
-const fetchOwnerRequests = async () => {
+async function fetchOwnerRequests() {
+  if (!ownerId.value) return;
+  loading.ownerRequests = true;
   try {
-    const response = await axiosClient.get(`/borrowrequests?ownerId=${ownerId}`);
-    console.log(response.data);
-    ownerRequests.value = response.data;
+    const { data } = await axiosClient.get(`/borrowrequests?ownerId=${ownerId.value}`);
+    ownerRequests.value = data ?? [];
   } catch (error) {
-    console.error("Error fetching requests:", error);
     handleApiError(error, "Failed to load incoming borrow requests.");
+  } finally {
+    loading.ownerRequests = false;
   }
+}
 
-};
+let intervalId = null;
 
-
-// Fetch data when the component mounts
-onMounted(() => {
-  if (authStore.user.isAOwner) {
-    fetchOwnerRequests();
+onMounted(async () => {
+  await Promise.all([fetchCopies(), fetchPlayerRequests()]);
+  if (isOwner.value) {
+    await Promise.all([fetchOwnerRequests(), fetchOwnerCopies()]);
     intervalId = setInterval(fetchOwnerRequests, 10000);
   }
-  fetchPlayerRequests();
-});
-// Automatically refresh when `requestUpdated` changes
-watchEffect(() => {
-  if (ownerRequestUpdated.value) {
-    fetchOwnerRequests();
-    ownerRequestUpdated.value = false; // Reset the state after fetching
-  }
-  if (playerRequestUpdated.value) {
-    fetchPlayerRequests();
-    playerRequestUpdated.value = false; // Reset the state after fetching
-  }
 });
 
-// Cleanup interval when component is unmounted
 onUnmounted(() => {
   if (intervalId) clearInterval(intervalId);
 });
+
+function selectCopy(copy) {
+  selectedCopy.value = copy;
+  borrowTouched.value = false;
+}
+
+async function requestBorrow() {
+  borrowTouched.value = true;
+  if (!isBorrowValid.value) return;
+  borrowSubmitting.value = true;
+  try {
+    await axiosClient.post("/borrowrequests", {
+      startOfLoan: borrowForm.startOfLoan,
+      endOfLoan: borrowForm.endOfLoan,
+      borrowerID: playerId.value,
+      specificGameID: selectedCopy.value.boardGameCopyId,
+    });
+    alert("Borrow request sent.");
+    borrowForm.startOfLoan = "";
+    borrowForm.endOfLoan = "";
+    await Promise.all([fetchPlayerRequests(), fetchCopies()]);
+  } catch (error) {
+    handleApiError(error, "Failed to create borrow request.");
+  } finally {
+    borrowSubmitting.value = false;
+  }
+}
+
+function getStatusClass(status) {
+  const map = {
+    Pending: "status-pending",
+    Accepted: "status-accepted",
+    Denied: "status-denied",
+    Done: "status-done",
+    InProgress: "status-active",
+    Cancelled: "status-cancelled",
+  };
+  return map[status] || "status-default";
+}
+
+function canConfirmGotGame(status, startDate, endDate) {
+  const today = new Date();
+  const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+  return status === "Accepted" && todayStr >= startDate && todayStr <= endDate;
+}
+
+function canCancelRequest(status, startDate) {
+  const today = new Date();
+  const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+  return (status === "Accepted" || status === "InProgress") && todayStr >= startDate;
+}
+
+function canCancelPending(status) {
+  return status === "Pending";
+}
 
 async function acceptRequest(id, name) {
   try {
     await axiosClient.put(`/borrowrequests/${id}?action=accept`);
     alert(`Request from ${name} accepted successfully`);
-
-    // Trigger a refresh after the request is accepted
-    ownerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
-
+    await fetchOwnerRequests();
   } catch (error) {
-    console.error("Error accepting request:", error);
     handleApiError(error, "Failed to accept request.");
   }
 }
 
 async function declineRequest(id, name) {
-
   try {
     await axiosClient.put(`/borrowrequests/${id}?action=decline`);
     alert(`Request from ${name} denied successfully!`);
-    // Trigger a refresh after the request is accepted
-    ownerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
-
+    await fetchOwnerRequests();
   } catch (error) {
-    console.error("Error declining request:", error);
     handleApiError(error, "Failed to decline request.");
   }
-}
-
-
-async function cancelBorrowRequest(id, gameName){
-  try {
-    await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
-    alert(`Borrow time over: confirmed ${gameName} was returned`);
-    // Trigger a refresh after the request is accepted
-    ownerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
-
-  } catch (error) {
-    console.error("Error declining request:", error);
-    handleApiError(error, "Failed to confirm return.");
-  }
-}
-
-function shouldShowButton(status){
-  console.log(status);
-  console.log(status === `Pending`);
-  return status === `Pending`
-}
-
-function isRequestEndDate(endDate, status){
-  const date = new Date();
-  const today = date.getFullYear() + '-'
-      + (date.getMonth() + 1).toString().padStart(2, '0') + '-'
-      + date.getDate().toString().padStart(2, '0');
-
-  console.log(today, today === endDate)
-  //const today = "2025-01-03"; // for testing only, use line above in real code
-  return today === endDate && status === "InProgress"
-}
-
-function isRequestDone(status){
-  return status === "Done" || status === "Denied"
 }
 
 async function confirmRequest(id, gameName) {
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=confirm`);
     alert(`Borrow time started: confirmed ${gameName} was received`);
-    // Trigger a refresh after the request is accepted
-    playerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
-
+    await fetchPlayerRequests();
   } catch (error) {
-    console.error("Error accepting request:", error);
     handleApiError(error, "Failed to confirm receipt.");
   }
 }
 
-
 async function cancelRequest(id, gameName) {
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
-    alert(`Premature Cancelling: confirms ${gameName} borrowing was cancelled and returned`);
-    // Trigger a refresh after the request is accepted
-    playerRequestUpdated.value = true;  // This will trigger the `watchEffect` to re-fetch the data
-
+    alert(`Premature cancelling: confirms ${gameName} borrowing was cancelled and returned`);
+    await fetchPlayerRequests();
   } catch (error) {
-    console.error("Error accepting request:", error);
     handleApiError(error, "Failed to cancel request.");
   }
 }
 
-
-function canConfirmGotGame(status, startDate, endDate){
-  console.log(today, status, status === "Accepted" , today >= startDate, today < endDate);
-  return status === "Accepted" && today >= startDate && today <= endDate
+async function cancelPendingRequest(id) {
+  try {
+    await axiosClient.delete(`/borrowrequests/${id}`);
+    alert("Request cancelled.");
+    await fetchPlayerRequests();
+  } catch (error) {
+    handleApiError(error, "Failed to cancel request.");
+  }
 }
 
-function canCancelRequest(status, startDate){
-  return (status === "Accepted" || status === "InProgress") && today >= startDate
+async function cancelBorrowRequest(id, gameName) {
+  try {
+    await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
+    alert(`Borrow time over: confirmed ${gameName} was returned`);
+    await fetchOwnerRequests();
+  } catch (error) {
+    handleApiError(error, "Failed to confirm return.");
+  }
 }
-
-function isRequestInactive(status, startDate){
-  return status === "Done" || status === "Denied"
-}
-
-
-function getStatusBadgeClass(status) {
-  const classes = {
-    Pending: 'bg-warning',
-    Accepted: 'bg-success',
-    Denied: 'bg-danger',
-    Done: 'bg-info'
-  };
-  return classes[status] || 'bg-secondary';
-}
-
-
 </script>
-
-
 
 <template>
   <div>
-    <!-- Top Navigation Bar -->
     <DefaultNavbar />
 
-    <div class="container-fluid mt-4">
-      <div class="row">
-
-        <!-- Left Sidebar: Tabs -->
-        <div class="col-md-3">
-          <ul class="nav flex-column nav-pills">
-            <li
-                v-for="tab in tabs"
-                :key="tab.key"
-                class="nav-item"
-                v-if="!tab.ownerOnly || authStore.user.isAOwner"
-            >
-              <RouterLink
-                  :to="{ name: 'borrowRequestMenu', query: { ...route.query, tab: tab.key } }"
-                  class="nav-link"
-                  :class="{ 'active bg-success': activeTab === tab.key, 'bg-secondary': activeTab !== tab.key }"
-              >
-                {{ tab.label }}
-              </RouterLink>
-            </li>
-          </ul>
+    <main class="page">
+      <header class="page-header">
+        <div class="head-row">
+          <div class="title-wrap">
+            <button class="btn ghost back" type="button" @click="goBack">Go back</button>
+            <div>
+              <h1>Borrow</h1>
+              <p>Request a copy, track your requests, or manage incoming requests.</p>
+            </div>
+          </div>
         </div>
 
+        <div class="tabs">
+          <button
+            v-for="t in visibleTabs"
+            :key="t.key"
+            class="tab wide"
+            :class="{ active: activeTab === t.key }"
+            @click="router.push({ name: 'borrowRequestMenu', query: { ...route.query, tab: t.key } })"
+          >
+            {{ t.label }}
+          </button>
+        </div>
+      </header>
 
-        <!-- Right Content Area -->
-        <div class="col-md-9">
+      <section class="card">
+        <div v-if="activeTab === 'browse'" class="browse-layout">
+          <div>
+            <div class="section-head">
+              <div>
+                <h2>Browse copies to borrow</h2>
+                <p class="subtle">Select a copy to request a borrow period.</p>
+              </div>
+            </div>
 
-          <div v-if="activeTab === 'mine'">
-            <div>
-              <h1>See my borrow requests</h1>
-              <br>
-              <table class="table">
-                <thead>
-                <tr>
-                  <th>Game requested</th>
-                  <th>Start of loan</th>
-                  <th>End of loan</th>
-                  <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="(request, index) in playerRequests" :key="request.requestId"
-                    :style="{color: isRequestInactive(request.requestStatus, request.startOfLoan) ? 'lightGrey' : 'grey'}"
+            <div class="catalog-controls">
+              <div class="search-wrap">
+                <input
+                  v-model="copyQuery"
+                  type="text"
+                  class="input"
+                  placeholder="Search by game, owner, or spec..."
+                />
+              </div>
+            </div>
+
+            <div v-if="loading.copies" class="empty">Loading copies...</div>
+            <div v-else class="grid copies">
+              <button
+                v-for="copy in filteredCopies"
+                :key="copy.boardGameCopyId"
+                type="button"
+                class="copy-card"
+                :class="{ selected: selectedCopy?.boardGameCopyId === copy.boardGameCopyId }"
+                @click="selectCopy(copy)"
+              >
+                <div class="copy-cover">
+                  <span>{{ (copy.boardGameName || "?").slice(0, 1) }}</span>
+                </div>
+                <div class="copy-body">
+                  <h3 class="title">{{ copy.boardGameName }}</h3>
+                  <div class="meta-text">Owner: {{ copy.playerName }}</div>
+                  <div class="meta-text">{{ copy.specification }}</div>
+                  <span class="badge" :class="copy.isAvailable ? 'ok' : 'warn'">
+                    {{ copy.isAvailable ? "Available" : "Unavailable" }}
+                  </span>
+                </div>
+              </button>
+
+              <div v-if="filteredCopies.length === 0" class="empty">No copies found.</div>
+            </div>
+          </div>
+
+          <aside class="panel">
+            <div class="panel-card">
+              <h3>Request details</h3>
+              <p class="subtle">Select a copy to request a borrow.</p>
+
+              <div v-if="selectedCopy" class="panel-info">
+                <div class="panel-title">{{ selectedCopy.boardGameName }}</div>
+                <div class="panel-meta">Owner: {{ selectedCopy.playerName }}</div>
+                <div class="panel-meta">{{ selectedCopy.specification }}</div>
+                <div class="panel-meta">
+                  Status: <span :class="selectedCopy.isAvailable ? 'status-ok' : 'status-warn'">{{ selectedCopy.isAvailable ? "Available" : "Unavailable" }}</span>
+                </div>
+              </div>
+
+              <div class="form-block">
+                <label class="label">Start date</label>
+                <input class="input" type="date" v-model="borrowForm.startOfLoan" />
+
+                <label class="label">End date</label>
+                <input class="input" type="date" v-model="borrowForm.endOfLoan" />
+
+                <small v-if="borrowError" class="err">{{ borrowError }}</small>
+
+                <button
+                  class="btn primary"
+                  type="button"
+                  :disabled="!isBorrowValid || borrowSubmitting || !selectedCopy?.isAvailable"
+                  @click="requestBorrow"
                 >
+                  {{ borrowSubmitting ? "Submitting..." : "Request borrow" }}
+                </button>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        <div v-else-if="activeTab === 'mine'">
+          <div class="section-head">
+            <div>
+              <h2>My borrow requests</h2>
+              <p class="subtle">Track your requests and take actions when available.</p>
+            </div>
+          </div>
+
+          <div v-if="loading.playerRequests" class="empty">Loading requests...</div>
+          <div v-else class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Game</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="request in playerRequests" :key="request.requestId">
                   <td>{{ request.specificGameName }}</td>
                   <td>{{ request.startOfLoan }}</td>
-                  <td>{{ request.endOfLoan}}</td>
+                  <td>{{ request.endOfLoan }}</td>
                   <td>
-                  <span class="badge" :class="getStatusBadgeClass(request.requestStatus)">
-                      {{ request.requestStatus}}
-                  </span>
+                    <span class="status" :class="getStatusClass(request.requestStatus)">
+                      {{ request.requestStatus }}
+                    </span>
                   </td>
-                  <td>
-                    <button class="btn btn-info me-2"
-                            v-if="canConfirmGotGame(request.requestStatus, request.startOfLoan, request.endOfLoan)"
-                            style="bottom: 20px;"
-                            @click="confirmRequest(request.requestId, request.specificGameName)"
+                  <td class="actions-cell">
+                    <button
+                      v-if="canConfirmGotGame(request.requestStatus, request.startOfLoan, request.endOfLoan)"
+                      class="btn ghost"
+                      @click="confirmRequest(request.requestId, request.specificGameName)"
                     >
                       Confirm
                     </button>
-
-                    <button class="btn btn-info me-2"
-                            v-if="canCancelRequest(request.requestStatus, request.startOfLoan)"
-                            style="bottom: 20px;"
-                            @click="cancelRequest(request.requestId, request.specificGameName)"
+                    <button
+                      v-if="canCancelRequest(request.requestStatus, request.startOfLoan)"
+                      class="btn ghost"
+                      @click="cancelRequest(request.requestId, request.specificGameName)"
                     >
-                      Cancel
+                      End borrow
+                    </button>
+                    <button
+                      v-if="canCancelPending(request.requestStatus)"
+                      class="btn ghost"
+                      @click="cancelPendingRequest(request.requestId)"
+                    >
+                      Cancel request
                     </button>
                   </td>
-
                 </tr>
-                </tbody>
-              </table>
-            </div>
+                <tr v-if="playerRequests.length === 0">
+                  <td colspan="5" class="empty">No borrow requests yet.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-
-          <div v-else-if="activeTab === 'incoming'">
-            <div>
-              <h1>Manage my borrow requests</h1>
-              <br>
-              <table class="table">
-                <thead>
-                <tr>
-                  <th>Game requested</th>
-                  <th>Borrower name</th>
-                  <th>Start of loan</th>
-                  <th>End of loan</th>
-                  <th>Action</th>
-                </tr>
-                </thead>
-                <tbody >
-                <tr v-for="(request, index) in ownerRequests" :key="request.requestId"
-                    :style="{color: isRequestDone(request.requestStatus) ? 'lightGrey' : 'grey'}"
-                >
-                  <td>{{ request.specificGameName }}</td>
-                  <td>{{ request.borrowerName }}</td>
-                  <td>{{ request.startOfLoan }}</td>
-                  <td>{{ request.endOfLoan}}</td>
-                  <td v-if="shouldShowButton(request.requestStatus)">
-                    <button class="btn btn-info me-2"
-                            id="acceptRequestButton"
-                            @click="acceptRequest(request.requestId, request.borrowerName)"
-                    >
-                      Accept
-                    </button>
-
-                    <button class="btn btn-info me-2 "
-                            id="declineRequestButton"
-                            @click="declineRequest(request.requestId, request.borrowerName)"
-                    >
-                      Deny
-                    </button>
-                  </td>
-                  <td v-else>
-                  <span>
-                      request {{ request.requestStatus }}
-                    </span>
-                  </td>
-                  <td v-if="isRequestEndDate(request.endOfLoan, request.requestStatus)">
-                    <button class="btn btn-info me-2"
-                            @click="cancelBorrowRequest(request.requestId, request.specificGameName)"
-                            style="bottom: 20px;"
-                    >
-                      confirm game returned
-                    </button>
-                  </td>
-
-                </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
         </div>
-      </div>
-    </div>
+
+        <div v-else>
+          <div class="section-head">
+            <div>
+              <h2>Manage incoming requests</h2>
+              <p class="subtle">Review and respond to requests for your copies.</p>
+            </div>
+          </div>
+
+          <div class="manage-grid">
+            <div>
+              <h3 class="subhead">Incoming requests</h3>
+              <div v-if="loading.ownerRequests" class="empty">Loading incoming requests...</div>
+              <div v-else class="table-wrap">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Game</th>
+                      <th>Borrower</th>
+                      <th>Start</th>
+                      <th>End</th>
+                      <th>Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="request in ownerRequests" :key="request.requestId">
+                      <td>{{ request.specificGameName }}</td>
+                      <td>{{ request.borrowerName }}</td>
+                      <td>{{ request.startOfLoan }}</td>
+                      <td>{{ request.endOfLoan }}</td>
+                      <td>
+                        <span class="status" :class="getStatusClass(request.requestStatus)">
+                          {{ request.requestStatus }}
+                        </span>
+                      </td>
+                      <td class="actions-cell">
+                        <button
+                          v-if="request.requestStatus === 'Pending'"
+                          class="btn ghost"
+                          @click="acceptRequest(request.requestId, request.borrowerName)"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          v-if="request.requestStatus === 'Pending'"
+                          class="btn ghost"
+                          @click="declineRequest(request.requestId, request.borrowerName)"
+                        >
+                          Decline
+                        </button>
+                        <button
+                          v-if="request.requestStatus === 'InProgress'"
+                          class="btn ghost"
+                          @click="cancelBorrowRequest(request.requestId, request.specificGameName)"
+                        >
+                          Confirm return
+                        </button>
+                      </td>
+                    </tr>
+                    <tr v-if="ownerRequests.length === 0">
+                      <td colspan="6" class="empty">No incoming requests.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="subhead">My copies</h3>
+              <div v-if="loading.ownerCopies" class="empty">Loading your copies...</div>
+              <div v-else class="grid copies">
+                <div v-for="copy in ownerCopies" :key="copy.boardGameCopyId" class="copy-card">
+                  <div class="copy-cover">
+                    <span>{{ (copy.boardGameName || "?").slice(0, 1) }}</span>
+                  </div>
+                  <div class="copy-body">
+                    <h3 class="title">{{ copy.boardGameName }}</h3>
+                    <div class="meta-text">{{ copy.specification }}</div>
+                    <span class="badge" :class="copy.isAvailable ? 'ok' : 'warn'">
+                      {{ copy.isAvailable ? "Available" : "Unavailable" }}
+                    </span>
+                  </div>
+                </div>
+                <div v-if="ownerCopies.length === 0" class="empty">No copies yet.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
 </template>
 
-
-
-
-
 <style scoped>
-.nav-link {
-  cursor: pointer;
-  margin-bottom: 5px;
-  padding: 10px;
-  text-align: center;
-  color: white !important;
-}
-.bg-secondary {
-  background-color: grey !important;
-}
-.bg-success {
-  background-color: green !important;
-}
+.page { margin-top: 96px; padding: 24px; }
+.page-header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.title-wrap { display: flex; gap: 14px; align-items: center; }
+.page-header h1 { font-size: 32px; margin: 0; color: #e8ecf7; font-weight: 800; }
+.page-header p { opacity: .75; margin: 0; color: #c3cad9; }
 
-/* Input, Textarea, and Select Styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {  /* Added select here */
-  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
-  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
-  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
-}
+.tabs { display: flex; gap: 8px; margin-top: 8px; }
+.tab { padding: 8px 16px; border-radius: 10px; background: transparent; color: #d8deed; border: 1px solid #2f384a; font-weight: 600; }
+.tab.wide { padding: 12px 26px; min-width: 120px; text-align: center; }
+.tab.active { background: #fff; color: #0f1217; border-color: #ffffff; font-weight: 800; box-shadow: 0 2px 6px rgba(255,255,255,0.15); }
+.tab:not(.active):hover { background: #f4f6fa; color: #0f1217; border-color: #f4f6fa; }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {  /* Added select here */
-  border-color: #80bdff; /* Bootstrap's default focus border color */
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
-}
+.card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.subtle { color: #aab3c3; margin: 0; }
+.subhead { margin: 0 0 8px; font-weight: 800; }
 
-/* Label Styles */
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #495057; /* Bootstrap's default text color for labels */
-}
+.btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; cursor: pointer; }
+.btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
+.btn.primary:hover { background: #f3f3f3; }
+.btn.ghost { background: transparent; border: 1px solid #2f384a; color: #dfe5f4; }
+.btn.ghost:hover { background: #182132; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn.back { padding: 8px 12px; }
 
-/* Button Styles */
-button.btn {
-  margin-top: 1rem; /* Add some top margin for the button */
-}
+.input { width: 100%; background: #151a22; color: #f0f4ff; border: 1px solid #384054; border-radius: 10px;
+  padding: 10px 12px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.input:focus { border-color: #72aaff; box-shadow: 0 0 0 2px rgba(114,170,255,0.25); }
+.label { font-size: 13px; font-weight: 600; opacity: .85; color: #e2e6f2; }
 
-/* === Clean table layout and alignment === */
-.table {
-  table-layout: fixed;
-  width: 100%;
-  border-collapse: collapse;
-}
+.catalog-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0 18px; flex-wrap: wrap; }
+.search-wrap { flex: 1 1 320px; }
 
-/* Header + cell styles */
-.table th,
-.table td {
-  vertical-align: middle;
-  text-align: left;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.browse-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; }
+.panel { position: sticky; top: 96px; align-self: start; }
+.panel-card { border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; }
+.panel-info { margin: 10px 0; }
+.panel-title { font-weight: 900; font-size: 18px; color: #fff; }
+.panel-meta { color: #c3cad9; margin-top: 4px; }
+.form-block { display: grid; gap: 8px; margin-top: 10px; }
+
+.grid { display: grid; gap: 14px; }
+.grid.copies { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+.copy-card {
+  border-radius: 16px;
   padding: 12px;
-  border-bottom: 1px solid #dee2e6;
+  background: #0f1217;
+  border: 1px solid #1f2533;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  text-align: left;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.copy-card:hover { transform: translateY(-4px); border-color: #3a4256; box-shadow: 0 16px 32px rgba(0,0,0,.45); }
+.copy-card.selected { border-color: #ffffff; box-shadow: 0 0 0 1px #ffffff inset; }
+.copy-cover { height: 90px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, #151a22, #0f1217); border: 1px solid #1f2533; margin-bottom: 10px; }
+.copy-cover span { font-size: 28px; font-weight: 900; color: #e6ecff; }
+.copy-body { display: grid; gap: 4px; }
+.title { margin: 0; font-size: 18px; font-weight: 900; color: #ffffff; }
+.meta-text { color: #c6cedf; font-size: 12px; font-weight: 700; }
+
+.badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; border: 1px solid transparent; width: fit-content; }
+.badge.ok { background: #112218; color: #b7ffd1; border-color: #3e7350; }
+.badge.warn { background: #24180b; color: #ffe2b8; border-color: #6a4a23; }
+
+.status { padding: 4px 10px; border-radius: 999px; font-weight: 800; border: 1px solid transparent; }
+.status-pending { background: #0d1726; color: #cde6ff; border-color: #2e4a74; }
+.status-accepted { background: #112218; color: #b7ffd1; border-color: #3e7350; }
+.status-active { background: #0f2015; color: #c8ffd5; border-color: #2c5b38; }
+.status-denied { background: #1f1111; color: #ffd6d6; border-color: #5b2c2c; }
+.status-done { background: #0f1625; color: #d7e5ff; border-color: #3b5b9e; }
+.status-cancelled { background: #2a171b; color: #ffd6d6; border-color: #5b2c2c; }
+.status-default { background: #1c2230; color: #e2e6f2; border-color: #2f384a; }
+
+.err { color: #ffd6d6; }
+.empty { color: #9aa2b2; text-align: center; padding: 16px; }
+
+.table-wrap { border: 1px solid #1f2533; border-radius: 12px; overflow: hidden; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 12px; text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #dfe5f4; }
+.table thead { background: #161b24; }
+.table tbody tr { border-top: 1px solid #1f2634; }
+.actions-cell { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.status-ok { color: #b7ffd1; font-weight: 700; }
+.status-warn { color: #ffe2b8; font-weight: 700; }
+
+@media (max-width: 980px) {
+  .browse-layout { grid-template-columns: 1fr; }
+  .panel { position: static; }
+  .manage-grid { grid-template-columns: 1fr; }
 }
 
-/* Optional row hover effect */
-.table tbody tr:hover {
-  background-color: #f8f9fa;
-  cursor: pointer;
+@media (max-width: 640px) {
+  .head-row { flex-direction: column; align-items: flex-start; }
+  .title-wrap { flex-direction: column; align-items: flex-start; }
+  .tab.wide { min-width: 90px; padding: 10px 16px; }
 }
-
-/* Column widths for 4-column table (See My Borrow Requests) */
-.table th:nth-child(1),
-.table td:nth-child(1) {
-  width: 30%;
-}
-
-.table th:nth-child(2),
-.table td:nth-child(2) {
-  width: 20%;
-}
-
-.table th:nth-child(3),
-.table td:nth-child(3) {
-  width: 20%;
-}
-
-.table th:nth-child(4),
-.table td:nth-child(4) {
-  width: 15%;
-}
-
-/* Column widths for 6-column table (Manage Incoming Requests) */
-.table th:nth-child(5),
-.table td:nth-child(5) {
-  width: 10%;
-}
-
-.table th:nth-child(6),
-.table td:nth-child(6) {
-  width: 25%;
-}
-
-
 </style>
-
