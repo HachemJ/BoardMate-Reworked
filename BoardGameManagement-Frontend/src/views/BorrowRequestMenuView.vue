@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted, watchEffect, onUnmounted, computed } from "vue";
-import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useRoute, useRouter } from "vue-router";
@@ -28,16 +28,12 @@ const activeTab = computed(() => {
 });
 
 watchEffect(() => {
+  if (route.name !== "borrowRequestMenu") return;
   const current = String(route.query.tab || "").toLowerCase();
   if (current !== activeTab.value) {
     router.replace({ name: "borrowRequestMenu", query: { ...route.query, tab: activeTab.value } });
   }
 });
-
-function goBack() {
-  if (window.history.length > 1) router.back();
-  else router.push({ name: "profile" });
-}
 
 const copies = ref([]);
 const ownerCopies = ref([]);
@@ -271,13 +267,12 @@ async function cancelBorrowRequest(id, gameName) {
 
 <template>
   <div>
-    <DefaultNavbar />
+    <NavLandingSigned />
 
     <main class="page">
       <header class="page-header">
         <div class="head-row">
           <div class="title-wrap">
-            <button class="btn ghost back" type="button" @click="goBack">Go back</button>
             <div>
               <h1>Borrow</h1>
               <p>Request a copy, track your requests, or manage incoming requests.</p>
@@ -538,7 +533,10 @@ async function cancelBorrowRequest(id, gameName) {
 </template>
 
 <style scoped>
-.page { margin-top: 96px; padding: 24px; }
+:deep(.landing-nav) { z-index: 9999; pointer-events: auto; }
+:deep(.landing-nav * ) { pointer-events: auto; }
+.page { position: relative; z-index: 0; margin-top: 96px; padding: 24px; }
+.page-header, .card, .browse-layout, .manage-grid { position: relative; z-index: 0; }
 .page-header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 .head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .title-wrap { display: flex; gap: 14px; align-items: center; }
@@ -640,3 +638,5 @@ async function cancelBorrowRequest(id, gameName) {
   .tab.wide { min-width: 90px; padding: 10px 16px; }
 }
 </style>
+
+

@@ -112,14 +112,14 @@ function signOut() {
   router.push('/signin')
 }
 </script>
-
-<style scoped>
+<style scoped>
 /* Shell */
 .landing-nav{
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
   display:flex; justify-content:center;
   padding: 14px 0;
   transition: transform .25s ease, opacity .25s ease;
+  pointer-events: auto;
 }
 .landing-nav.hidden{
   transform: translateY(-110%);
@@ -136,21 +136,25 @@ function signOut() {
   backdrop-filter: blur(10px);
   padding: 10px 14px;
   box-shadow: 0 6px 18px rgba(0,0,0,.22);
+  position: relative;
+  z-index: 9999;
+  pointer-events: auto;
 }
 
 /* Brand */
-.brand{display:flex; align-items:center; gap:10px; text-decoration:none;}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; pointer-events:auto;}
 .brand-icon{ width:22px; height:22px; border-radius:6px;}
 .brand-name{ color:#ECEFF5; font-weight:800; letter-spacing:.2px; }
 
 /* Links */
-.links{display:flex; align-items:center; gap:12px;}
+.links{display:flex; align-items:center; gap:12px; pointer-events:auto;}
 .center{ justify-content:center; }
 .right{ justify-content:flex-end; }
 .link{
   color:#D9DEE8; text-decoration:none;
   padding:8px 12px; border-radius:12px; font-weight:800;
   transition: background .2s ease, color .2s ease, transform .2s ease;
+  pointer-events:auto;
 }
 .link:hover{ background: rgba(255,255,255,0.08); color:#fff; transform: translateY(-1px); }
 .link.active{
@@ -160,12 +164,13 @@ function signOut() {
 }
 
 /* User menu */
-.user{ position: relative; }
+.user{ position: relative; pointer-events:auto; }
 .user-btn{
   display:flex; align-items:center; gap:8px;
   background:#171a20; color:#e9edf5;
   border:1px solid rgba(255,255,255,.08);
   padding:8px 10px; border-radius:999px; font-weight:800;
+  pointer-events:auto;
 }
 .user-btn:hover{ filter: brightness(1.05); }
 .avatar-dot{ width:18px; height:18px; }
@@ -175,6 +180,7 @@ function signOut() {
   position:absolute; right:0; top:44px; min-width:180px;
   background:#0f1217; border:1px solid #1f2533; border-radius:14px;
   box-shadow: 0 10px 30px rgba(0,0,0,.35); padding:6px;
+  pointer-events:auto;
 }
 .menu-item{
   display:block; width:100%; text-align:left;
