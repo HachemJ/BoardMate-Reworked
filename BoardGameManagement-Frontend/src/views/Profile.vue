@@ -144,6 +144,9 @@ export default {
               endTime: ev.data.endTime,
               status: this.determineEventStatus(ev.data),
               maxSpot: ev.data.maxSpot,
+              location: ev.data.location,
+              boardGameName: ev.data.boardGameName,
+              ownerName: ev.data.ownerName,
             });
           } catch (err) {
             console.error("Event fetch failed", err);
@@ -157,12 +160,13 @@ export default {
     },
 
     determineEventStatus(event) {
-      const d = new Date(event.eventDate);
+      const start = this.parseDateTime(event.eventDate, event.startTime);
+      const end = this.parseDateTime(event.eventDate, event.endTime);
+      if (!start || !end) return "upcoming";
       const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      if (d < today) return "completed";
-      if (d.getTime() === today.getTime()) return "ongoing";
-      return "upcoming";
+      if (now < start) return "upcoming";
+      if (now >= start && now <= end) return "ongoing";
+      return "completed";
     },
 
     async fetchOwnedGames(userId) {
@@ -288,6 +292,29 @@ export default {
 
     formatDate(d) {
       return new Date(d).toLocaleDateString();
+    },
+
+    formatTimeRange(startTime, endTime) {
+      const start = this.formatTime(startTime);
+      const end = this.formatTime(endTime);
+      if (!start && !end) return "Time TBD";
+      return `${start || "??:??"} – ${end || "??:??"}`;
+    },
+
+    formatTime(time) {
+      if (!time) return "";
+      const [hh, mm] = String(time).split(":").map(Number);
+      const t = new Date();
+      t.setHours(hh || 0, mm || 0, 0, 0);
+      return t.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    },
+
+    parseDateTime(dateStr, timeStr) {
+      if (!dateStr || !timeStr) return null;
+      const [y, m, d] = String(dateStr).split("-").map(Number);
+      const [hh, mm] = String(timeStr).split(":").map(Number);
+      const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, 0);
+      return isNaN(dt.getTime()) ? null : dt;
     },
   },
 };
@@ -451,23 +478,38 @@ export default {
         </div>
 
         <div v-if="userEvents.length === 0" class="empty">
-          You don't have any events yet.
+          <div>No events yet.</div>
+          <router-link class="btn btn-ghost mt-2" :to="{ name: 'event', query: { tab: 'browse' } }">
+            Browse events
+          </router-link>
         </div>
 
-        <div class="cards cards--half">
-          <article v-for="e in userEvents" :key="e.id" class="card">
-            <div class="card-body">
-              <h4 class="card-title">{{ e.name }}</h4>
-              <p class="card-desc">{{ e.description }}</p>
-              <div class="meta">
-                <span class="muted">📅 {{ formatDate(e.date) }}</span>
-                <span class="muted">⏰ {{ e.startTime }} – {{ e.endTime }}</span>
-              </div>
-              <div class="card-foot">
-                <span :class="getEventStatusBadgeClass(e.status)">{{ e.status }}</span>
-              </div>
+        <div class="events-grid">
+          <router-link
+              v-for="e in userEvents"
+              :key="e.id"
+              class="event-card"
+              :to="{ name: 'eventDetail', params: { id: e.id } }"
+          >
+            <div class="event-card__top">
+              <h4 class="event-card__title" :title="e.name">{{ e.name || "Untitled event" }}</h4>
+              <span class="event-status" :class="getEventStatusBadgeClass(e.status)">{{ e.status }}</span>
             </div>
-          </article>
+            <div class="event-card__subtitle">
+              {{ e.boardGameName ? `Board game: ${e.boardGameName}` : "Board game: TBD" }}
+            </div>
+            <div class="event-card__meta">
+              <span class="chip">📅 {{ formatDate(e.date) }}</span>
+              <span class="chip">⏰ {{ formatTimeRange(e.startTime, e.endTime) }}</span>
+              <span class="chip">📍 {{ e.location || "Location TBD" }}</span>
+            </div>
+            <div class="event-card__foot">
+              <span class="hosted">
+                {{ userProfile.status === "owner" ? "Hosted by you" : `Hosted by ${e.ownerName || "Unknown"}` }}
+              </span>
+              <span class="event-card__link">View details →</span>
+            </div>
+          </router-link>
         </div>
       </div>
     </div>
@@ -609,9 +651,91 @@ export default {
 /* ===== Cards grid ===== */
 .cards { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:14px; }
 .cards--half { grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+/* ===== My Events cards ===== */
+.events-grid {
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:16px;
+  margin-top: 12px;
+}
+.event-card {
+  display:block;
+  background: rgba(15,18,23,0.9);
+  border:1px solid #1f2533;
+  border-radius:16px;
+  padding:16px;
+  text-decoration:none;
+  color:#e9edf5;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.event-card:hover {
+  transform: translateY(-4px);
+  border-color:#3a4256;
+  box-shadow: 0 16px 32px rgba(0,0,0,.45);
+}
+.event-card__top {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.event-card__title {
+  margin:0;
+  font-size:18px;
+  font-weight:900;
+  color:#ffffff;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.event-status {
+  padding:4px 10px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:12px;
+  border:1px solid transparent;
+  text-transform: capitalize;
+}
+.event-card__subtitle {
+  margin-top:6px;
+  color:#aab3c3;
+  font-weight:700;
+  font-size:12px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.event-card__meta {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:10px;
+}
+.chip {
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid #2f384a;
+  background:#141924;
+  color:#d8deed;
+  font-weight:700;
+  font-size:12px;
+}
+.event-card__foot {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top:12px;
+  color:#c3cad9;
+  font-size:12px;
+  font-weight:700;
+}
+.event-card__link { color:#dfe5f4; font-weight:800; }
+.hosted { opacity:.8; }
 @media (max-width: 900px) {
   .grid { grid-template-columns: 1fr; }
-  .cards, .cards--half { grid-template-columns: 1fr; }
+  .cards, .cards--half, .events-grid { grid-template-columns: 1fr; }
 }
 
 /* ===== Card ===== */
