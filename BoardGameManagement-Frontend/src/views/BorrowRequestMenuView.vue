@@ -52,6 +52,15 @@ const loading = reactive({
 const borrowForm = reactive({ startOfLoan: "", endOfLoan: "" });
 const borrowTouched = ref(false);
 const borrowSubmitting = ref(false);
+const borrowLength = ref("today");
+const borrowNotice = reactive({ type: "", message: "" });
+
+const LENGTH_OPTIONS = [
+  { key: "today", label: "Today (1 day)", days: 1 },
+  { key: "3days", label: "3 days", days: 3 },
+  { key: "1week", label: "1 week", days: 7 },
+  { key: "custom", label: "Custom", days: 0 },
+];
 
 const filteredCopies = computed(() => {
   const q = copyQuery.value.trim().toLowerCase();
@@ -72,16 +81,75 @@ const borrowError = computed(() => {
 
 const isBorrowValid = computed(() => !borrowError.value && !!selectedCopy.value);
 
+const borrowSummary = computed(() => {
+  if (!borrowForm.startOfLoan || !borrowForm.endOfLoan) return "";
+  const days = dayDiff(borrowForm.startOfLoan, borrowForm.endOfLoan) + 1;
+  return `Borrowing from ${prettyDate(borrowForm.startOfLoan)} → ${prettyDate(borrowForm.endOfLoan)} (${days} day${days === 1 ? "" : "s"})`;
+});
+
+function setNotice(type, message, timeout = 2600) {
+  borrowNotice.type = type;
+  borrowNotice.message = message;
+  if (timeout) {
+    setTimeout(() => {
+      borrowNotice.type = "";
+      borrowNotice.message = "";
+    }, timeout);
+  }
+}
+
+function todayString() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, "0");
+  const d = String(today.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function addDays(dateStr, days) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(y, (m || 1) - 1, d || 1);
+  dt.setDate(dt.getDate() + days);
+  const yy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
+function dayDiff(startStr, endStr) {
+  const [sy, sm, sd] = startStr.split("-").map(Number);
+  const [ey, em, ed] = endStr.split("-").map(Number);
+  const start = new Date(sy, (sm || 1) - 1, sd || 1);
+  const end = new Date(ey, (em || 1) - 1, ed || 1);
+  const diff = (end - start) / (1000 * 60 * 60 * 24);
+  return Math.max(0, Math.floor(diff));
+}
+
+function prettyDate(dateStr) {
+  if (!dateStr) return "";
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dt = new Date(y, (m || 1) - 1, d || 1);
+  return dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function applyBorrowLength() {
+  const option = LENGTH_OPTIONS.find((o) => o.key === borrowLength.value);
+  if (!option || option.key === "custom") return;
+  if (!borrowForm.startOfLoan) borrowForm.startOfLoan = todayString();
+  borrowForm.endOfLoan = addDays(borrowForm.startOfLoan, option.days - 1);
+}
+
 function handleApiError(error, fallbackMessage) {
   const status = error?.response?.status;
   if (status === 401) {
-    alert("Session expired. Please sign in again.");
+    setNotice("error", "Session expired. Please sign in again.", 0);
     router.push({ name: "signin" });
     return;
   }
   const errors = error?.response?.data?.errors;
   const message = Array.isArray(errors) ? errors.join("\n") : fallbackMessage;
-  alert(message);
+  setNotice("error", message, 0);
 }
 
 async function fetchCopies() {
@@ -152,6 +220,10 @@ onUnmounted(() => {
 function selectCopy(copy) {
   selectedCopy.value = copy;
   borrowTouched.value = false;
+  if (!borrowForm.startOfLoan) {
+    borrowForm.startOfLoan = todayString();
+  }
+  applyBorrowLength();
 }
 
 async function requestBorrow() {
@@ -165,9 +237,10 @@ async function requestBorrow() {
       borrowerID: playerId.value,
       specificGameID: selectedCopy.value.boardGameCopyId,
     });
-    alert("Borrow request sent.");
+    setNotice("success", "Borrow request sent.");
     borrowForm.startOfLoan = "";
     borrowForm.endOfLoan = "";
+    borrowLength.value = "today";
     await Promise.all([fetchPlayerRequests(), fetchCopies()]);
   } catch (error) {
     handleApiError(error, "Failed to create borrow request.");
@@ -207,7 +280,7 @@ function canCancelPending(status) {
 async function acceptRequest(id, name) {
   try {
     await axiosClient.put(`/borrowrequests/${id}?action=accept`);
-    alert(`Request from ${name} accepted successfully`);
+    setNotice("success", `Request from ${name} accepted successfully`);
     await fetchOwnerRequests();
   } catch (error) {
     handleApiError(error, "Failed to accept request.");
@@ -217,7 +290,7 @@ async function acceptRequest(id, name) {
 async function declineRequest(id, name) {
   try {
     await axiosClient.put(`/borrowrequests/${id}?action=decline`);
-    alert(`Request from ${name} denied successfully!`);
+    setNotice("success", `Request from ${name} denied successfully!`);
     await fetchOwnerRequests();
   } catch (error) {
     handleApiError(error, "Failed to decline request.");
@@ -227,7 +300,7 @@ async function declineRequest(id, name) {
 async function confirmRequest(id, gameName) {
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=confirm`);
-    alert(`Borrow time started: confirmed ${gameName} was received`);
+    setNotice("success", `Borrow time started: confirmed ${gameName} was received`);
     await fetchPlayerRequests();
   } catch (error) {
     handleApiError(error, "Failed to confirm receipt.");
@@ -237,7 +310,7 @@ async function confirmRequest(id, gameName) {
 async function cancelRequest(id, gameName) {
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
-    alert(`Premature cancelling: confirms ${gameName} borrowing was cancelled and returned`);
+    setNotice("info", `Cancelled early: ${gameName} borrowing was returned`);
     await fetchPlayerRequests();
   } catch (error) {
     handleApiError(error, "Failed to cancel request.");
@@ -247,7 +320,7 @@ async function cancelRequest(id, gameName) {
 async function cancelPendingRequest(id) {
   try {
     await axiosClient.delete(`/borrowrequests/${id}`);
-    alert("Request cancelled.");
+    setNotice("success", "Request cancelled.");
     await fetchPlayerRequests();
   } catch (error) {
     handleApiError(error, "Failed to cancel request.");
@@ -257,12 +330,18 @@ async function cancelPendingRequest(id) {
 async function cancelBorrowRequest(id, gameName) {
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
-    alert(`Borrow time over: confirmed ${gameName} was returned`);
+    setNotice("success", `Borrow time over: confirmed ${gameName} was returned`);
     await fetchOwnerRequests();
   } catch (error) {
     handleApiError(error, "Failed to confirm return.");
   }
 }
+
+watchEffect(() => {
+  if (borrowLength.value !== "custom" && borrowForm.startOfLoan) {
+    applyBorrowLength();
+  }
+});
 </script>
 
 <template>
@@ -294,6 +373,9 @@ async function cancelBorrowRequest(id, gameName) {
       </header>
 
       <section class="card">
+        <div v-if="borrowNotice.message" class="inline-banner" :class="borrowNotice.type">
+          {{ borrowNotice.message }}
+        </div>
         <div v-if="activeTab === 'browse'" class="browse-layout">
           <div>
             <div class="section-head">
@@ -359,8 +441,26 @@ async function cancelBorrowRequest(id, gameName) {
                 <label class="label">Start date</label>
                 <input class="input" type="date" v-model="borrowForm.startOfLoan" />
 
-                <label class="label">End date</label>
-                <input class="input" type="date" v-model="borrowForm.endOfLoan" />
+                <label class="label">Borrow length</label>
+                <div class="length-chips">
+                  <button
+                    v-for="opt in LENGTH_OPTIONS"
+                    :key="opt.key"
+                    type="button"
+                    class="chip"
+                    :class="{ active: borrowLength === opt.key }"
+                    @click="borrowLength = opt.key; applyBorrowLength()"
+                  >
+                    {{ opt.label }}
+                  </button>
+                </div>
+
+                <div v-if="borrowLength === 'custom'">
+                  <label class="label">End date</label>
+                  <input class="input" type="date" v-model="borrowForm.endOfLoan" />
+                </div>
+
+                <small v-if="borrowSummary" class="summary">{{ borrowSummary }}</small>
 
                 <small v-if="borrowError" class="err">{{ borrowError }}</small>
 
@@ -569,6 +669,16 @@ async function cancelBorrowRequest(id, gameName) {
 
 .catalog-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 0 18px; flex-wrap: wrap; }
 .search-wrap { flex: 1 1 320px; }
+
+.length-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { padding: 8px 12px; border-radius: 999px; border: 1px solid #2f384a; background: transparent; color: #d8deed; font-weight: 700; }
+.chip.active { background: #fff; color: #0f1217; border-color: #fff; }
+.summary { display: block; color: #9aa2b2; margin-top: 4px; }
+
+.inline-banner { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid #2b3343; background: #0f1217; font-weight: 700; }
+.inline-banner.success { border-color: #3e7350; background: #112218; color: #b7ffd1; }
+.inline-banner.error { border-color: #8a2a2a; background: #1a1010; color: #ffd6d6; }
+.inline-banner.info { border-color: #3b5b9e; background: #0f1625; color: #d7e5ff; }
 
 .browse-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; }
 .panel { position: sticky; top: 96px; align-self: start; }
