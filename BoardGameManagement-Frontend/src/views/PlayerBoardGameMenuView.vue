@@ -20,6 +20,12 @@ const boardGames = ref([]);
 const myBoardGameCopies = ref([]);
 const playerFilters = ["Any", "2+", "4+", "6+"];
 const playerFilter = ref("Any");
+const notice = ref(null);
+const openMenuId = ref(null);
+const showDeleteModal = ref(false);
+const pendingDeleteCopy = ref(null);
+const isDeleting = ref(false);
+const lockedCopyIds = ref(new Set());
 const cardMode = computed(() => {
   const count = filteredGames.value.length;
   if (count <= 4) return "large";
@@ -40,21 +46,56 @@ const filteredGames = computed(() =>
 
 async function fetchBoardGames() {
   try {
-    const [gamesRes, copiesRes] = await Promise.all([
+    const requests = [
       axiosClient.get("/boardgames"),
       axiosClient.get(`/boardgamecopies/byplayer/${authStore.user.id}`),
-    ]);
+    ];
+    if (authStore.user?.isAOwner) {
+      requests.push(
+        axiosClient.get(`/borrowrequests?ownerId=${authStore.user.id}`)
+      );
+    }
+
+    const responses = await Promise.all(requests);
+    const [gamesRes, copiesRes, ownerRequestsRes] = responses;
+
     boardGames.value = gamesRes.data ?? [];
     myBoardGameCopies.value = copiesRes.data ?? [];
+
+    if (authStore.user?.isAOwner) {
+      const locked = new Set();
+      const ownerRequests = ownerRequestsRes?.data ?? [];
+      ownerRequests.forEach((request) => {
+        if (
+          request?.requestStatus === "Accepted" ||
+          request?.requestStatus === "InProgress"
+        ) {
+          locked.add(request.specificGameCopyId);
+        }
+      });
+      lockedCopyIds.value = locked;
+    } else {
+      lockedCopyIds.value = new Set();
+    }
   } catch (error) {
     console.error("Fetch board games/copies failed", error);
     if (error?.response?.status === 401) {
-      alert("Session expired. Please sign in again.");
+      notice.value = {
+        type: "error",
+        message: "Session expired. Please sign in again.",
+      };
       router.push({ name: "signin" });
       return;
     }
-    alert("Failed to fetch board games or your copies.");
+    notice.value = {
+      type: "error",
+      message: "Failed to fetch board games or your copies.",
+    };
   }
+}
+
+function isCopyLocked(id) {
+  return lockedCopyIds.value.has(id);
 }
 
 onMounted(fetchBoardGames);
@@ -65,22 +106,56 @@ watchEffect(() => {
   }
 });
 
-async function deleteBoardGameCopy(id) {
-  if (!confirm("Delete this board game copy? This will remove related borrow requests.")) return;
+function requestDelete(copy) {
+  if (isCopyLocked(copy.boardGameCopyId)) {
+    notice.value = {
+      type: "error",
+      message: "This copy is currently borrowed and cannot be deleted.",
+    };
+    return;
+  }
+  openMenuId.value = null;
+  pendingDeleteCopy.value = copy;
+  showDeleteModal.value = true;
+}
+
+function closeDeleteModal() {
+  showDeleteModal.value = false;
+  pendingDeleteCopy.value = null;
+}
+
+async function confirmDeleteCopy() {
+  if (!pendingDeleteCopy.value || isDeleting.value) return;
+  isDeleting.value = true;
   try {
-    await axiosClient.delete(`/boardgamecopies/${id}`, {
-      headers: { "X-Player-Id": authStore.user?.id },
-    });
-    alert("Board game copy deleted!");
+    await axiosClient.delete(
+      `/boardgamecopies/${pendingDeleteCopy.value.boardGameCopyId}`,
+      {
+        headers: { "X-Player-Id": authStore.user?.id },
+      }
+    );
+    notice.value = {
+      type: "success",
+      message: "Board game copy deleted.",
+    };
     await fetchBoardGames();
   } catch (error) {
     console.error(error);
     if (error?.response?.status === 403) {
-      alert("Only owners can manage board game copies.");
+      notice.value = {
+        type: "error",
+        message: "Only owners can manage board game copies.",
+      };
       return;
     }
     const errors = error.response?.data?.errors;
-    alert(errors ? errors.join("\n") : "Delete failed.");
+    notice.value = {
+      type: "error",
+      message: errors ? errors.join("\n") : "Delete failed.",
+    };
+  } finally {
+    isDeleting.value = false;
+    closeDeleteModal();
   }
 }
 </script>
@@ -180,7 +255,7 @@ async function deleteBoardGameCopy(id) {
               <h2>My Board Game Copies</h2>
               <p class="subtle">Copies you own (inventory and availability).</p>
             </div>
-            <div class="actions" v-if="authStore.user?.isAOwner">
+            <div class="toolbar" v-if="authStore.user?.isAOwner">
               <router-link :to="{ name: 'addBoardGameCopy' }">
                 <button class="btn primary">Add Copy</button>
               </router-link>
@@ -190,36 +265,87 @@ async function deleteBoardGameCopy(id) {
             </div>
           </div>
 
-          <div class="grid copies">
-            <div v-for="copy in myBoardGameCopies" :key="copy.boardGameCopyId" class="copy-card">
-              <div class="copy-head">
+          <div v-if="notice" class="notice" :class="notice.type">
+            <span>{{ notice.message }}</span>
+            <button class="icon-btn" @click="notice = null">✕</button>
+          </div>
+
+          <div class="copies-grid">
+            <div
+              v-for="copy in myBoardGameCopies"
+              :key="copy.boardGameCopyId"
+              class="copy-card"
+            >
+              <div class="copy-top">
                 <div>
-                  <h3 class="title">{{ copy.boardGameName }}</h3>
-                  <p class="spec">{{ copy.specification }}</p>
+                  <h3 class="copy-title">{{ copy.boardGameName }}</h3>
+                  <p class="copy-spec">{{ copy.specification || "No copy notes yet." }}</p>
                 </div>
-                <span class="badge" :class="copy.isAvailable ? 'ok' : 'warn'">
-                  {{ copy.isAvailable ? "Available" : "Unavailable" }}
-                </span>
-              </div>
-              <div class="actions">
-                <button
+                <div class="copy-actions">
+                  <span class="badge" :class="copy.isAvailable ? 'ok' : 'warn'">
+                    {{ copy.isAvailable ? "Available" : "Unavailable" }}
+                  </span>
+                  <button
                     v-if="authStore.user?.isAOwner"
-                    class="btn danger"
-                    @click="deleteBoardGameCopy(copy.boardGameCopyId)"
-                >
-                  Delete
-                </button>
+                    class="icon-btn menu-btn"
+                    @click="openMenuId = openMenuId === copy.boardGameCopyId ? null : copy.boardGameCopyId"
+                    aria-label="Copy actions"
+                  >
+                    ⋯
+                  </button>
+                  <div
+                    v-if="openMenuId === copy.boardGameCopyId"
+                    class="menu"
+                  >
+                    <button
+                      class="menu-item"
+                      :disabled="isCopyLocked(copy.boardGameCopyId)"
+                      @click="requestDelete(copy)"
+                    >
+                      {{
+                        isCopyLocked(copy.boardGameCopyId)
+                          ? "Cannot delete while borrowed"
+                          : "Delete copy"
+                      }}
+                    </button>
+                    <p class="menu-hint">
+                      {{
+                        isCopyLocked(copy.boardGameCopyId)
+                          ? "Return the copy before deleting."
+                          : "Deletes related borrow requests."
+                      }}
+                    </p>
+                  </div>
+                </div>
               </div>
+              <p class="copy-hint">Visible to borrowers when available.</p>
             </div>
 
-            <div v-if="myBoardGameCopies.length === 0" class="empty">
-              You don't own any copies yet.
+            <div v-if="myBoardGameCopies.length === 0" class="empty-card">
+              <div class="empty-icon">🎲</div>
+              <h3>No copies yet</h3>
+              <p>Add your first board game copy to share it with borrowers.</p>
+              <router-link
+                v-if="authStore.user?.isAOwner"
+                :to="{ name: 'addBoardGameCopy' }"
+              >
+                <button class="btn primary">Add your first board game copy</button>
+              </router-link>
             </div>
           </div>
 
-          <small v-if="myBoardGameCopies.length > 0" class="subtle notice">
-            Notice: deleting a board game copy will delete all borrow requests related to it.
-          </small>
+          <div v-if="showDeleteModal" class="modal-backdrop">
+            <div class="modal-card" role="dialog" aria-modal="true">
+              <h3>Delete this copy?</h3>
+              <p>This will delete related borrow requests.</p>
+              <div class="modal-actions">
+                <button class="btn ghost" @click="closeDeleteModal">Cancel</button>
+                <button class="btn danger" :disabled="isDeleting" @click="confirmDeleteCopy">
+                  {{ isDeleting ? "Deleting..." : "Delete copy" }}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>
@@ -232,6 +358,7 @@ async function deleteBoardGameCopy(id) {
 .head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .page-header h1 { font-size: 32px; margin: 0; color: #e8ecf7; font-weight: 800; }
 .page-header p { opacity: .75; margin: 0; color: #c3cad9; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 
 .tabs { display: flex; gap: 8px; margin-top: 8px; }
 .tab { padding: 8px 16px; border-radius: 10px; background: transparent; color: #d8deed; border: 1px solid #2f384a; font-weight: 600; }
@@ -239,9 +366,16 @@ async function deleteBoardGameCopy(id) {
 .tab.active { background: #fff; color: #0f1217; border-color: #ffffff; font-weight: 800; box-shadow: 0 2px 6px rgba(255,255,255,0.15); }
 .tab:not(.active):hover { background: #f4f6fa; color: #0f1217; border-color: #f4f6fa; }
 
-.card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }
+.card {
+  border: 1px solid rgba(47, 56, 74, 0.45);
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(18,22,30,0.98), rgba(15,18,23,0.98));
+  color: #e9edf5;
+  padding: 20px;
+}
 .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
 .subtle { color: #aab3c3; margin: 0; }
+.toolbar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
 
 .catalog-controls {
   display: flex;
@@ -272,7 +406,11 @@ async function deleteBoardGameCopy(id) {
   gap: 14px;
   justify-content: center;
 }
-.grid.copies { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.copies-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
 .grid-large { grid-template-columns: repeat(3, minmax(0, 320px)); }
 .grid-medium { grid-template-columns: repeat(4, minmax(0, 260px)); }
 .grid-compact { grid-template-columns: repeat(5, minmax(0, 220px)); }
@@ -330,14 +468,24 @@ async function deleteBoardGameCopy(id) {
 .card-compact .title { font-size: 18px; }
 
 .copy-card {
-  border-radius: 16px;
-  padding: 14px;
-  background: #0f1217;
-  border: 1px solid #1f2533;
-  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  position: relative;
+  border-radius: 18px;
+  padding: 16px;
+  background: linear-gradient(160deg, rgba(24,30,41,0.9), rgba(15,18,23,0.98));
+  border: 1px solid rgba(89, 104, 133, 0.25);
+  box-shadow: 0 18px 30px rgba(0,0,0,.35);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
-.copy-head { display: flex; justify-content: space-between; gap: 12px; }
-.spec { color: #aab3c3; margin: 6px 0 0; font-size: 13px; }
+.copy-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(114,170,255,0.45);
+  box-shadow: 0 20px 34px rgba(0,0,0,.45);
+}
+.copy-top { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.copy-title { margin: 0; font-size: 20px; font-weight: 800; color: #f5f7ff; }
+.copy-spec { color: #aab3c3; margin: 6px 0 0; font-size: 13px; }
+.copy-hint { margin: 12px 0 0; font-size: 12px; color: #8590a6; }
+.copy-actions { display: flex; align-items: center; gap: 8px; position: relative; }
 .badge {
   padding: 4px 10px;
   border-radius: 999px;
@@ -346,11 +494,96 @@ async function deleteBoardGameCopy(id) {
   border: 1px solid transparent;
 }
 .badge.ok { background: #112218; color: #b7ffd1; border-color: #3e7350; }
-.badge.warn { background: #24180b; color: #ffe2b8; border-color: #6a4a23; }
-.actions { display: flex; justify-content: flex-end; margin-top: 10px; }
+.badge.warn { background: #1b1f27; color: #b7bdc9; border-color: #3a4256; }
+.menu-btn { font-size: 18px; }
+.menu {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  background: #121722;
+  border: 1px solid #2a3347;
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 160px;
+  box-shadow: 0 12px 24px rgba(0,0,0,.35);
+  z-index: 10;
+}
+.menu-item {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #f2f5ff;
+  text-align: left;
+  padding: 8px 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.menu-item:hover { background: #1a2232; }
+.menu-item:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.menu-item:disabled:hover { background: transparent; }
+.menu-hint { margin: 6px 6px 0; font-size: 11px; color: #9aa2b2; }
+
+.notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.notice.success { background: #111f17; border-color: #2f5f43; color: #c6f7d7; }
+.notice.error { background: #241618; border-color: #6c3a3f; color: #ffd0d4; }
 
 .empty { color: #9aa2b2; text-align: center; padding: 16px; grid-column: 1 / -1; }
-.notice { display: block; text-align: center; margin-top: 8px; }
+.empty-card {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 32px;
+  border-radius: 18px;
+  border: 1px dashed #2b3346;
+  background: rgba(15,18,23,0.6);
+}
+.empty-card h3 { margin: 12px 0 6px; color: #f5f7ff; }
+.empty-card p { margin: 0 0 16px; color: #9aa2b2; }
+.empty-icon { font-size: 28px; }
+
+.icon-btn {
+  background: transparent;
+  border: 1px solid #2f384a;
+  color: #dfe5f4;
+  border-radius: 10px;
+  padding: 4px 8px;
+  cursor: pointer;
+  line-height: 1;
+}
+.icon-btn:hover { background: #182132; }
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,7,12,0.7);
+  display: grid;
+  place-items: center;
+  z-index: 50;
+}
+.modal-card {
+  width: min(420px, 90vw);
+  background: #101520;
+  border: 1px solid #2f384a;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,.45);
+  color: #e9edf5;
+}
+.modal-card h3 { margin: 0 0 8px; }
+.modal-card p { margin: 0 0 16px; color: #aab3c3; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
 
 .btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; cursor: pointer; }
 .btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
