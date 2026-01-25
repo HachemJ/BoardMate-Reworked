@@ -1,175 +1,206 @@
 <script setup>
-
-import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
-import {useRoute} from "vue-router";
-import {reactive} from "vue";
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
+import { useRoute, useRouter } from "vue-router";
+import { reactive, computed } from "vue";
 import axios from "axios";
-import {useAuthStore} from "@/stores/authStore.js";
-import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/authStore.js";
 
 const router = useRouter();
-
-
-const axiosClient = axios.create({
-   baseURL: "http://localhost:8080"
- });
-
-const authStore = useAuthStore();
 const route = useRoute();
-const gameName = route.params.gamename;
+const authStore = useAuthStore();
 
+const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const gameName = computed(() => route.params.gamename || "");
+
+const notice = reactive({ type: "", message: "" });
 const reviewData = reactive({
   comment: "",
   rating: "",
-})
+});
+
+const charCount = computed(() => reviewData.comment.length);
+const isValid = computed(() => reviewData.comment.trim() && reviewData.rating);
+
+function setNotice(type, message, timeout = 2600) {
+  notice.type = type;
+  notice.message = message;
+  if (timeout) {
+    setTimeout(() => {
+      notice.type = "";
+      notice.message = "";
+    }, timeout);
+  }
+}
 
 async function fetchBoardGameID(name) {
-  console.log("Game name is:", name); // Log the game name
   try {
     const response = await axiosClient.get("/boardgames");
-    const game = response.data.find(game => game.name === name);
-    if (game) {
-      return game.gameID;
-    }
-    
-    return null; // Return null if game ID is not found
+    const game = response.data.find((g) => g.name === name);
+    return game ? game.gameID : null;
   } catch (error) {
-    console.error("Error fetching game ID:", error);
+    setNotice("error", "Failed to load board game.", 0);
+    return null;
   }
 }
 
 async function createReview(comment, rating) {
-    const gameId = await fetchBoardGameID(gameName);
-    if (!gameId) {
-      throw new Error("Selected board game not found.");
-    }
-    const newReview = {
-        comment: comment,
-        rating: Number(rating),
-        commentDate: new Date().toISOString().split('T')[0], // Produces '2025-03-31'
-        playerID: Number(authStore.user.id),
-        boardGameID: gameId,
-    }
-
-    await axiosClient.post("/reviews", newReview);
+  const gameId = await fetchBoardGameID(gameName.value);
+  if (!gameId) {
+    throw new Error("Selected board game not found.");
+  }
+  const newReview = {
+    comment: comment,
+    rating: Number(rating),
+    commentDate: new Date().toISOString().split("T")[0],
+    playerID: Number(authStore.user.id),
+    boardGameID: gameId,
+  };
+  await axiosClient.post("/reviews", newReview);
 }
-
 
 async function submitReview() {
-  console.log('Created Review:', reviewData);
   try {
     await createReview(reviewData.comment, reviewData.rating);
-    alert('Review Created Successfully!');
-    // Reset form after submission
-    Object.keys(reviewData).forEach(key => reviewData[key] = key === 'maxSpot' ? null : '');
-    // Redirect to the board game page
-    if (useAuthStore().user.isAOwner) {
-      router.push(`/pages/ownerboardgame/${gameName}`);
+    setNotice("success", "Review created successfully.");
+    reviewData.comment = "";
+    reviewData.rating = "";
+    if (authStore.user.isAOwner) {
+      router.push(`/pages/ownerboardgame/${gameName.value}`);
     } else {
-      router.push(`/pages/playerboardgame/${gameName}`);
+      router.push(`/pages/playerboardgame/${gameName.value}`);
     }
   } catch (error) {
-    console.error('Error creating review:', error);
     const errors = error?.response?.data?.errors;
-    const message = Array.isArray(errors) ? errors.join("\n") : error?.message || 'Failed to create review. Please try again.';
-    alert(message);
+    const message = Array.isArray(errors) ? errors.join("\n") : error?.message || "Failed to create review.";
+    setNotice("error", message, 0);
   }
 }
-
 </script>
 
 <template>
   <div>
-    <!-- Top Navigation Bar -->
-    <DefaultNavbar />
+    <NavLandingSigned />
 
-    <div class="container-fluid mt-4">
-      <div class="row">
-
-        <!-- Content Area -->
-        <div class="col-md-12">
-
-          <!-- Page Title -->
-          <h2 class="mb-3">Complete the Form Below to Add a Review for {{ gameName }}</h2>
-
-          <!-- Form -->
-          <form @submit.prevent="submitReview">
-
-            <div class="mb-3">
-              <label for="comment" class="form-label">Comment</label>
-              <textarea maxlength="255" class="form-control" id="comment" v-model="reviewData.comment" required></textarea>
-              <small :style="{color: reviewData.comment.length >= 255 ? 'red' : 'gray'}">
-                {{ reviewData.comment.length }} / 255 characters
-              </small>
+    <main class="page">
+      <header class="page-header">
+        <div class="head-row">
+          <div class="title-wrap">
+            <div>
+              <h1>Add a review</h1>
+              <p>Share your thoughts about {{ gameName }}.</p>
             </div>
+          </div>
+        </div>
+      </header>
 
-            <div class="mb-3">
-              <label for="rating" class="form-label">Rating</label>
-              <select id="rating" v-model="reviewData.rating" class="form-control" required>
-                <option value="" disabled selected>Select a rating</option>
+      <section class="card">
+        <div v-if="notice.message" class="inline-banner" :class="notice.type">
+          {{ notice.message }}
+        </div>
+
+        <form class="form-grid" @submit.prevent="submitReview">
+          <div class="form-section">
+            <h2>Review details</h2>
+            <p class="subtle">Write a short review and select a rating.</p>
+
+            <label class="label" for="comment">Comment</label>
+            <textarea
+              id="comment"
+              maxlength="255"
+              class="input textarea"
+              v-model="reviewData.comment"
+              placeholder="What did you enjoy about this game?"
+              required
+            ></textarea>
+            <small class="counter" :class="{ warn: charCount >= 255 }">{{ charCount }} / 255</small>
+
+            <label class="label" for="rating">Rating</label>
+            <div class="rating-row">
+              <select id="rating" v-model="reviewData.rating" class="input" required>
+                <option value="" disabled>Select a rating</option>
                 <option v-for="n in 5" :key="n" :value="n">{{ n }}</option>
               </select>
+              <div class="rating-preview">
+                <span v-for="n in 5" :key="n" class="star">
+                  <span v-if="n <= Number(reviewData.rating || 0)">?</span>
+                  <span v-else>?</span>
+                </span>
+              </div>
             </div>
 
-            <button type="submit" class="btn btn-info">Submit Review</button>
+            <div class="actions">
+              <button class="btn ghost" type="button" @click="router.back()">Cancel</button>
+              <button class="btn primary" type="submit" :disabled="!isValid">Submit review</button>
+            </div>
+          </div>
 
-          </form>
-
-        </div>
-      </div>
-    </div>
+          <aside class="preview-card">
+            <h3>Live preview</h3>
+            <div class="preview-body">
+              <div class="preview-title">{{ gameName }}</div>
+              <div class="preview-stars">
+                <span v-for="n in 5" :key="n" class="star">
+                  <span v-if="n <= Number(reviewData.rating || 0)">?</span>
+                  <span v-else>?</span>
+                </span>
+              </div>
+              <p class="preview-comment">
+                {{ reviewData.comment || "Your review will appear here." }}
+              </p>
+            </div>
+          </aside>
+        </form>
+      </section>
+    </main>
   </div>
 </template>
 
 <style scoped>
+.page { position: relative; z-index: 0; margin-top: 96px; padding: 24px; }
+.page-header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.title-wrap { display: flex; gap: 14px; align-items: center; }
+.page-header h1 { font-size: 32px; margin: 0; color: #e8ecf7; font-weight: 800; }
+.page-header p { opacity: .75; margin: 0; color: #c3cad9; }
 
-.nav-link {
-  cursor: pointer;
-  margin-bottom: 5px;
-  padding: 10px;
-  text-align: center;
-  color: white !important;
-}
-.bg-secondary {
-  background-color: grey !important;
-}
-.bg-success {
-  background-color: green !important;
-}
+.card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }
+.form-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px; }
+.form-section { display: grid; gap: 12px; }
+.form-section h2 { margin: 0; font-size: 20px; }
+.subtle { color: #aab3c3; margin: 0; }
 
-/* Input, Textarea, and Select Styles */
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="time"],
-textarea,
-select {  /* Added select here */
-  border: 2px solid #ced4da; /* Bootstrap's default border color for inputs */
-  border-radius: 0.25rem; /* Bootstrap's default border-radius for inputs */
-  padding: 0.375rem 0.75rem; /* Bootstrap's default padding for inputs */
-}
+.input { width: 100%; background: #151a22; color: #f0f4ff; border: 1px solid #384054; border-radius: 10px; padding: 10px 12px; outline: none; transition: border-color .2s ease, box-shadow .2s ease; }
+.input:focus { border-color: #72aaff; box-shadow: 0 0 0 2px rgba(114,170,255,0.25); }
+.textarea { min-height: 140px; resize: vertical; }
+.label { font-size: 13px; font-weight: 600; opacity: .85; color: #e2e6f2; }
 
-input[type="text"]:focus,
-input[type="number"]:focus,
-input[type="date"]:focus,
-input[type="time"]:focus,
-textarea:focus,
-select:focus {  /* Added select here */
-  border-color: #80bdff; /* Bootstrap's default focus border color */
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Bootstrap's default focus shadow */
-}
+.counter { color: #9aa2b2; }
+.counter.warn { color: #ffd6d6; }
 
-/* Label Styles */
-label {
-  display: block;
-  margin-bottom: 0.5rem;
-  color: #495057; /* Bootstrap's default text color for labels */
-}
+.rating-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+.rating-preview { color: #f6d365; font-size: 18px; }
+.star { margin-right: 2px; }
 
-/* Button Styles */
-button.btn {
-  margin-top: 1rem; /* Add some top margin for the button */
-}
+.actions { display: flex; gap: 12px; margin-top: 8px; }
 
+.btn { padding: 10px 16px; border-radius: 10px; font-weight: 600; transition: all .2s ease; border: 1px solid transparent; cursor: pointer; }
+.btn.primary { background: #ffffff; color: #0f1217; border-color: #ffffff; }
+.btn.primary:hover { background: #f3f3f3; }
+.btn.ghost { background: transparent; border: 1px solid #2f384a; color: #dfe5f4; }
+.btn.ghost:hover { background: #182132; }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+.inline-banner { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid #2b3343; background: #0f1217; font-weight: 700; }
+.inline-banner.success { border-color: #3e7350; background: #112218; color: #b7ffd1; }
+.inline-banner.error { border-color: #8a2a2a; background: #1a1010; color: #ffd6d6; }
+
+.preview-card { border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; box-shadow: 0 10px 24px rgba(0,0,0,.35); }
+.preview-body { display: grid; gap: 10px; }
+.preview-title { font-weight: 900; font-size: 20px; }
+.preview-stars { color: #f6d365; font-size: 18px; }
+.preview-comment { color: #c3cad9; margin: 0; }
+
+@media (max-width: 980px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
 </style>

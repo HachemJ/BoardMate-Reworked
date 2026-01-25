@@ -41,6 +41,8 @@ const reviewRoute = computed(() => {
   return roleSegment === "playerboardgame" ? "playerAddReview" : "ownerAddReview";
 });
 
+const reviewCount = computed(() => reviews.value.length);
+
 const borrowError = computed(() => {
   if (!selectedCopy.value) return "Select a copy to request a borrow.";
   if (!borrowForm.startDate || !borrowForm.startTime) return "Start date and time are required.";
@@ -244,7 +246,7 @@ async function confirmBorrow() {
             :class="{ active: selectedTab === tab }"
             @click="selectedTab = tab"
           >
-            {{ tab }}
+            {{ tab }}<span v-if="tab === 'Reviews'" class="tab-count">{{ reviewCount }}</span>
           </button>
         </div>
       </header>
@@ -365,12 +367,15 @@ async function confirmBorrow() {
             <div v-for="review in reviews" :key="review.reviewId" class="review-card">
               <div class="review-stars">
                 <span v-for="n in 5" :key="n" class="star">
-                  <span v-if="n <= review.rating">?</span>
-                  <span v-else>?</span>
+                  <span v-if="n <= review.rating">★</span>
+                  <span v-else>☆</span>
                 </span>
               </div>
               <p class="review-comment">{{ review.comment }}</p>
-              <div class="review-author">{{ review.authorName }}</div>
+              <div class="review-meta">
+                <span class="review-author">{{ review.authorName }}</span>
+                <span class="review-date">{{ review.commentDate || "Date TBD" }}</span>
+              </div>
             </div>
             <div v-if="reviews.length === 0" class="empty">No reviews yet.</div>
           </div>
@@ -465,7 +470,10 @@ async function confirmBorrow() {
 .review-card { border-radius: 16px; border: 1px solid #1f2533; background: #0f1217; padding: 16px; box-shadow: 0 10px 24px rgba(0,0,0,.35); }
 .review-stars { color: #f6d365; font-size: 18px; margin-bottom: 8px; }
 .review-comment { color: #dfe5f4; margin: 0 0 8px; }
-.review-author { color: #9aa2b2; font-weight: 700; }
+.review-meta { display: flex; justify-content: space-between; gap: 12px; color: #9aa2b2; font-weight: 700; }
+.review-author { color: inherit; }
+.review-date { color: #9aa2b2; font-weight: 600; }
+.tab-count { margin-left: 6px; font-weight: 800; }
 
 .empty { color: #9aa2b2; text-align: center; padding: 16px; }
 
