@@ -1,5 +1,5 @@
 <script setup>
-import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
+import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore";
@@ -166,7 +166,7 @@ onMounted(getBoardGames);
 
 <template>
   <div>
-    <DefaultNavbar />
+    <NavLandingSigned />
 
     <main class="page">
       <header class="page-header">
@@ -174,11 +174,6 @@ onMounted(getBoardGames);
           <div>
             <h1>Update Board Game</h1>
             <p>Refresh your game details to keep the catalog accurate.</p>
-          </div>
-          <div class="header-actions">
-            <router-link to="/pages/ownerboardgame">
-              <button class="btn ghost">Back to Board Games</button>
-            </router-link>
           </div>
         </div>
         <span v-if="editingLabel" class="chip">{{ editingLabel }}</span>
@@ -323,7 +318,6 @@ onMounted(getBoardGames);
 .head-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .page-header h1 { font-size: 34px; margin: 0; color: #e8ecf7; font-weight: 800; }
 .page-header p { opacity: .75; margin: 0; color: #c3cad9; }
-.header-actions { display: flex; gap: 10px; }
 .chip {
   align-self: flex-start;
   background: #1a2232;

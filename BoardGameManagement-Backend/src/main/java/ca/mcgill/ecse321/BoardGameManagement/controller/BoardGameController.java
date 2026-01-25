@@ -4,7 +4,9 @@ import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameResponseDto;
 import ca.mcgill.ecse321.BoardGameManagement.exception.GlobalException;
 import ca.mcgill.ecse321.BoardGameManagement.model.BoardGame;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
+import ca.mcgill.ecse321.BoardGameManagement.repository.BoardGameCopyRepository;
 import ca.mcgill.ecse321.BoardGameManagement.repository.PlayerRepository;
 import ca.mcgill.ecse321.BoardGameManagement.service.BoardGameService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class BoardGameController {
 
   @Autowired
   private PlayerRepository playerRepository;
+
+  @Autowired
+  private BoardGameCopyRepository boardGameCopyRepository;
 
   /**
    * This method creates a new BoardGame object and returns a BoardGameResponseDto object.
@@ -72,7 +77,7 @@ public class BoardGameController {
   public BoardGameResponseDto updateBoardGame(@RequestHeader("X-Player-Id") int playerId,
                                               @PathVariable int gameId,
                                               @RequestBody BoardGameCreationDto boardGameDto) {
-    requireOwner(playerId);
+    requireOwnerAndOwnsBoardGame(playerId, gameId);
     BoardGame updatedBoardGame = boardGameService.updateBoardGame(gameId, boardGameDto);
     return new BoardGameResponseDto(updatedBoardGame);
   }
@@ -84,7 +89,7 @@ public class BoardGameController {
   @DeleteMapping("/boardgames/{gameId}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteBoardGame(@RequestHeader("X-Player-Id") int playerId, @PathVariable int gameId) {
-    requireOwner(playerId);
+    requireOwnerAndOwnsBoardGame(playerId, gameId);
     boardGameService.deleteBoardGame(gameId);
   }
 
@@ -95,6 +100,19 @@ public class BoardGameController {
     }
     if (!player.getIsAOwner()) {
       throw new GlobalException(HttpStatus.FORBIDDEN, "Only owners can manage board games.");
+    }
+  }
+
+  private void requireOwnerAndOwnsBoardGame(int playerId, int gameId) {
+    requireOwner(playerId);
+    Player player = playerRepository.findByPlayerID(playerId);
+    BoardGame boardGame = boardGameService.getBoardGameById(gameId);
+    List<BoardGameCopy> copies = boardGameCopyRepository.findByBoardGame(boardGame);
+    boolean ownsCopy = copies.stream()
+        .anyMatch(copy -> copy.getPlayer() != null && copy.getPlayer().getPlayerID() == player.getPlayerID());
+    if (!ownsCopy) {
+      throw new GlobalException(HttpStatus.FORBIDDEN,
+          "Only owners who own a copy of this board game can modify it.");
     }
   }
 }
