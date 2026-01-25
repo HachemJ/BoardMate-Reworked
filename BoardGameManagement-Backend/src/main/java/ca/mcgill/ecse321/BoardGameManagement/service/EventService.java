@@ -164,10 +164,13 @@ public class EventService {
 
     LocalDate eventDate = event.getEventDate().toLocalDate();
     LocalTime startTime = event.getStartTime().toLocalTime();
+    LocalTime endTime = event.getEndTime().toLocalTime();
     LocalDateTime eventStart = LocalDateTime.of(eventDate, startTime);
+    LocalDateTime eventEnd = LocalDateTime.of(eventDate, endTime);
     LocalDateTime now = LocalDateTime.now();
-    if (!now.isBefore(eventStart)) {
-      throw new GlobalException(HttpStatus.CONFLICT, "Cannot delete while the event is ongoing.");
+    if (!now.isBefore(eventStart) || !now.isBefore(eventEnd)) {
+      throw new GlobalException(HttpStatus.CONFLICT,
+          "Cannot delete an event that has started or finished.");
     }
 
     eventRepository.deleteById(eventID); // Remove event from the database

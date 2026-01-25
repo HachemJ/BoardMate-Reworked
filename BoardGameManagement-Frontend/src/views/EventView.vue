@@ -432,9 +432,17 @@
                   {{ updating ? "Updating..." : "Update Event" }}
                 </button>
                 <button type="button" class="btn" @click="resetManageForm" :disabled="!selectedManageEvent">Reset changes</button>
-                <button type="button" class="btn danger" :disabled="!manage.selectedId" @click="deleteEvent">Delete</button>
-                <small v-if="!isManageValid" class="hint subtle">Complete required fields to update.</small>
-              </div>
+                  <button
+                      type="button"
+                      class="btn danger"
+                      :disabled="!manage.selectedId || manageDeleteDisabled"
+                      @click="deleteEvent"
+                  >
+                    Delete
+                  </button>
+                  <small v-if="manageDeleteHint" class="hint subtle">{{ manageDeleteHint }}</small>
+                  <small v-else-if="!isManageValid" class="hint subtle">Complete required fields to update.</small>
+                </div>
             </form>
 
             <div v-if="!selectedManageEvent" class="empty">Select one of your events to manage.</div>
@@ -651,7 +659,16 @@ const manageDurationMinutes = ref(null);
 
 const now = ref(Date.now());
 let tickHandle = null;
-const lock = reactive({ visible: false, message: "" });
+  const lock = reactive({ visible: false, message: "" });
+  const manageDeleteDisabled = computed(() => {
+    if (!selectedManageEvent.value) return true;
+    return eventState(selectedManageEvent.value) !== "Upcoming";
+  });
+  const manageDeleteHint = computed(() =>
+      manageDeleteDisabled.value
+          ? "You can only delete events that haven't started yet."
+          : ""
+  );
 
 function parseLocalDateTime(dateStr, timeStr) {
   if (!dateStr || !timeStr) return null;
@@ -999,6 +1016,7 @@ watch(
 
 /* create layout */
 .create-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 18px; align-items: start; }
+.manage-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 18px; align-items: start; }
 .form-card { border: 1px solid #1f2533; border-radius: 14px; padding: 16px; background: #0f1217; }
 .form-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .create-grid { display: grid; gap: 14px; }
@@ -1115,6 +1133,7 @@ watch(
 
 @media (max-width: 980px) {
   .create-layout { grid-template-columns: 1fr; }
+  .manage-layout { grid-template-columns: 1fr; }
 }
 
 </style>
