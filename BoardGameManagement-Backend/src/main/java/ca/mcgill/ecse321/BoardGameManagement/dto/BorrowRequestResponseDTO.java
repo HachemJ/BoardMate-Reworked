@@ -7,17 +7,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class BorrowRequestResponseDTO {
     @Positive(message = "requestId must be a positive number")
     private int requestId;
     @NotNull(message = "Date must not be null")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate startOfLoan;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime startOfLoan;
     @NotNull(message = "loan end date must not be null")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate endOfLoan;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime endOfLoan;
     @Positive(message = "the borrower is must be > 0")
     private int borrowerId;
     @NotBlank(message = "Borrower must not be null")
@@ -37,8 +37,8 @@ public class BorrowRequestResponseDTO {
 
     public BorrowRequestResponseDTO(BorrowRequest borrowRequest) {
         this.requestId = borrowRequest.getRequestID();
-        this.startOfLoan = borrowRequest.getStartOfLoan().toLocalDate();
-        this.endOfLoan = borrowRequest.getEndOfLoan().toLocalDate();
+        this.startOfLoan = borrowRequest.getStartOfLoan();
+        this.endOfLoan = borrowRequest.getEndOfLoan();
         this.borrowerId = borrowRequest.getRequester().getPlayerID();
         this.borrowerName = borrowRequest.getRequester().getName();
         this.borrowerEmail = borrowRequest.getRequester().getEmail();
@@ -54,11 +54,11 @@ public class BorrowRequestResponseDTO {
 
     public int getRequestId() {return requestId;}
 
-    public LocalDate getEndOfLoan() {
+    public LocalDateTime getEndOfLoan() {
         return endOfLoan;
     }
 
-    public LocalDate getStartOfLoan() {
+    public LocalDateTime getStartOfLoan() {
         return startOfLoan;
     }
 

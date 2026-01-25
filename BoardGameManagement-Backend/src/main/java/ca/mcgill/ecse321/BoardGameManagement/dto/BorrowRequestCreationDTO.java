@@ -1,22 +1,20 @@
 package ca.mcgill.ecse321.BoardGameManagement.dto;
 
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-
-import java.sql.Date;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.time.LocalDateTime;
 
 @SuppressWarnings(value = "unused")
 public class BorrowRequestCreationDTO {
 
     @NotNull(message = "loan start date must not be null")
-    @FutureOrPresent(message = "date of start of loan cannot be in the past")
-    private Date startOfLoan;
+    @JsonDeserialize(using = LenientLocalDateTimeDeserializer.class)
+    private LocalDateTime startOfLoan;
     @NotNull(message = "loan end date must not be null")
-    @Future(message = "date of end of loan must be in the future")
-    private Date endOfLoan;
+    @JsonDeserialize(using = LenientLocalDateTimeDeserializer.class)
+    private LocalDateTime endOfLoan;
     @Positive(message =  "borrowerId must be a positive number")
     private int borrowerID;
     @Positive(message = "the gameId must be a positive number")
@@ -26,7 +24,7 @@ public class BorrowRequestCreationDTO {
     public BorrowRequestCreationDTO() {}
 
 
-    public BorrowRequestCreationDTO(Date startOfLoan, Date endOfLoan,int borrowerID, int specificGameID) {
+    public BorrowRequestCreationDTO(LocalDateTime startOfLoan, LocalDateTime endOfLoan, int borrowerID, int specificGameID) {
         this.startOfLoan = startOfLoan;
         this.endOfLoan = endOfLoan;
         this.borrowerID = borrowerID;
@@ -34,11 +32,11 @@ public class BorrowRequestCreationDTO {
 
     }
 
-    public Date getEndOfLoan() {
+    public LocalDateTime getEndOfLoan() {
         return endOfLoan;
     }
 
-    public Date getStartOfLoan() {
+    public LocalDateTime getStartOfLoan() {
         return startOfLoan;
     }
 

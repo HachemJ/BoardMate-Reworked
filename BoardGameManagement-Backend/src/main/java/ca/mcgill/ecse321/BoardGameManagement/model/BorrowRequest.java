@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 public class BorrowRequest {
@@ -14,8 +14,8 @@ public class BorrowRequest {
   @Id
   @GeneratedValue
   private int requestID;
-  private Date startOfLoan;
-  private Date endOfLoan;
+  private LocalDateTime startOfLoan;
+  private LocalDateTime endOfLoan;
   private RequestStatus requestStatus;
 
   @ManyToOne
@@ -26,7 +26,7 @@ public class BorrowRequest {
 
   public BorrowRequest() {}
 
-  public BorrowRequest(Date aStartOfLoan, Date aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy) {
+  public BorrowRequest(LocalDateTime aStartOfLoan, LocalDateTime aEndOfLoan, RequestStatus aRequestStatus, Player aRequester, BoardGameCopy aBoardGameCopy) {
     startOfLoan = aStartOfLoan;
     endOfLoan = aEndOfLoan;
     requestStatus = aRequestStatus;
@@ -38,12 +38,12 @@ public class BorrowRequest {
     }
   }
 
-  public boolean setStartOfLoan(Date aStartOfLoan) {
+  public boolean setStartOfLoan(LocalDateTime aStartOfLoan) {
     startOfLoan = aStartOfLoan;
     return true;
   }
 
-  public boolean setEndOfLoan(Date aEndOfLoan) {
+  public boolean setEndOfLoan(LocalDateTime aEndOfLoan) {
     endOfLoan = aEndOfLoan;
     return true;
   }
@@ -57,11 +57,11 @@ public class BorrowRequest {
     return requestID;
   }
 
-  public Date getStartOfLoan() {
+  public LocalDateTime getStartOfLoan() {
     return startOfLoan;
   }
 
-  public Date getEndOfLoan() {
+  public LocalDateTime getEndOfLoan() {
     return endOfLoan;
   }
 

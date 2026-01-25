@@ -49,17 +49,35 @@ const loading = reactive({
   playerRequests: false,
 });
 
-const borrowForm = reactive({ startOfLoan: "", endOfLoan: "" });
+const borrowForm = reactive({
+  startDate: "",
+  startTime: "",
+  endDate: "",
+  endTime: "",
+});
 const borrowTouched = ref(false);
 const borrowSubmitting = ref(false);
-const borrowLength = ref("today");
+const borrowLength = ref("24h");
 const borrowNotice = reactive({ type: "", message: "" });
 
+const startDateMin = computed(() => todayString());
+const startTimeMin = computed(() => {
+  if (!borrowForm.startDate) return "";
+  if (borrowForm.startDate !== todayString()) return "";
+  return timeString(roundToNext15Minutes(new Date()));
+});
+const endDateMin = computed(() => borrowForm.startDate || todayString());
+const endTimeMin = computed(() => {
+  if (!borrowForm.endDate || !borrowForm.startDate) return "";
+  if (borrowForm.endDate !== borrowForm.startDate) return "";
+  return borrowForm.startTime || "";
+});
+
 const LENGTH_OPTIONS = [
-  { key: "today", label: "Today", days: 1 },
-  { key: "3days", label: "3 days", days: 3 },
-  { key: "1week", label: "1 week", days: 7 },
-  { key: "custom", label: "Custom", days: 0 },
+  { key: "12h", label: "12h", hours: 12 },
+  { key: "24h", label: "24h", hours: 24 },
+  { key: "48h", label: "48h", hours: 48 },
+  { key: "custom", label: "Custom", hours: 0 },
 ];
 
 const filteredCopies = computed(() => {
@@ -73,8 +91,13 @@ const filteredCopies = computed(() => {
 
 const borrowError = computed(() => {
   if (!borrowTouched.value) return "";
-  if (!borrowForm.startOfLoan || !borrowForm.endOfLoan) return "Start and end dates are required.";
-  if (borrowForm.endOfLoan < borrowForm.startOfLoan) return "End date must be after start date.";
+  if (!borrowForm.startDate || !borrowForm.startTime) return "Start date and time are required.";
+  if (!borrowForm.endDate || !borrowForm.endTime) return "End date and time are required.";
+  if (borrowForm.endDate < borrowForm.startDate) return "End date must be after start date.";
+  if (borrowForm.endDate === borrowForm.startDate && borrowForm.endTime <= borrowForm.startTime) {
+    return "End time must be after start time.";
+  }
+  if (isStartInPast()) return "Start time must be in the future.";
   if (!selectedCopy.value) return "Select a copy to request.";
   return "";
 });
@@ -82,9 +105,13 @@ const borrowError = computed(() => {
 const isBorrowValid = computed(() => !borrowError.value && !!selectedCopy.value);
 
 const borrowSummary = computed(() => {
-  if (!borrowForm.startOfLoan || !borrowForm.endOfLoan) return "";
-  const days = dayDiff(borrowForm.startOfLoan, borrowForm.endOfLoan) + 1;
-  return `Borrowing from ${prettyDate(borrowForm.startOfLoan)} → ${prettyDate(borrowForm.endOfLoan)} (${days} day${days === 1 ? "" : "s"})`;
+  if (!borrowForm.startDate || !borrowForm.startTime || !borrowForm.endDate || !borrowForm.endTime) return "";
+  const start = new Date(`${borrowForm.startDate}T${borrowForm.startTime}:00`);
+  const end = new Date(`${borrowForm.endDate}T${borrowForm.endTime}:00`);
+  const diffMs = Math.max(0, end - start);
+  const diffHours = Math.max(1, Math.round(diffMs / (1000 * 60 * 60)));
+  const label = diffHours < 24 ? `${diffHours} hour${diffHours === 1 ? "" : "s"}` : `${dayDiff(borrowForm.startDate, borrowForm.endDate) + 1} day${dayDiff(borrowForm.startDate, borrowForm.endDate) + 1 === 1 ? "" : "s"}`;
+  return `Borrowing from ${prettyDateTime(borrowForm.startDate, borrowForm.startTime)} -> ${prettyDateTime(borrowForm.endDate, borrowForm.endTime)} (${label})`;
 });
 
 function setNotice(type, message, timeout = 2600) {
@@ -104,6 +131,20 @@ function todayString() {
   const m = String(today.getMonth() + 1).padStart(2, "0");
   const d = String(today.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+function timeString(date) {
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  return `${h}:${m}`;
+}
+
+function roundToNext15Minutes(date) {
+  const rounded = new Date(date);
+  const minutes = rounded.getMinutes();
+  const delta = (15 - (minutes % 15)) % 15;
+  rounded.setMinutes(minutes + delta, 0, 0);
+  return rounded;
 }
 
 function addDays(dateStr, days) {
@@ -133,11 +174,59 @@ function prettyDate(dateStr) {
   return dt.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
+function prettyDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return "";
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0);
+  return dt.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function addHoursToDateTime(dateStr, timeStr, hours) {
+  if (!dateStr || !timeStr) return { date: "", time: "" };
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0);
+  dt.setHours(dt.getHours() + hours);
+  const endDate = dt.getFullYear() + "-" + String(dt.getMonth() + 1).padStart(2, "0") + "-" + String(dt.getDate()).padStart(2, "0");
+  const endTime = String(dt.getHours()).padStart(2, "0") + ":" + String(dt.getMinutes()).padStart(2, "0");
+  return { date: endDate, time: endTime };
+}
+
+function combineDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return "";
+  return `${dateStr}T${timeStr}:00`;
+}
+
+function isStartInPast() {
+  if (!borrowForm.startDate || !borrowForm.startTime) return false;
+  const now = new Date();
+  const [y, m, d] = borrowForm.startDate.split("-").map(Number);
+  const [hh, mm] = borrowForm.startTime.split(":").map(Number);
+  const start = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0);
+  return start < now;
+}
+
+function isTimeBefore(a, b) {
+  if (!a || !b) return false;
+  return a < b;
+}
+
+function dateOnly(value) {
+  if (!value) return "";
+  return String(value).split("T")[0];
+}
+
 function applyBorrowLength() {
   const option = LENGTH_OPTIONS.find((o) => o.key === borrowLength.value);
   if (!option || option.key === "custom") return;
-  if (!borrowForm.startOfLoan) borrowForm.startOfLoan = todayString();
-  borrowForm.endOfLoan = addDays(borrowForm.startOfLoan, option.days - 1);
+  if (!borrowForm.startDate) borrowForm.startDate = todayString();
+  if (!borrowForm.startTime) {
+    borrowForm.startTime = timeString(roundToNext15Minutes(new Date()));
+  }
+  const end = addHoursToDateTime(borrowForm.startDate, borrowForm.startTime, option.hours);
+  borrowForm.endDate = end.date;
+  borrowForm.endTime = end.time;
 }
 
 function handleApiError(error, fallbackMessage) {
@@ -218,10 +307,17 @@ onUnmounted(() => {
 });
 
 function selectCopy(copy) {
+  if (selectedCopy.value?.boardGameCopyId === copy.boardGameCopyId) {
+    selectedCopy.value = null;
+    return;
+  }
   selectedCopy.value = copy;
   borrowTouched.value = false;
-  if (!borrowForm.startOfLoan) {
-    borrowForm.startOfLoan = todayString();
+  if (!borrowForm.startDate) {
+    borrowForm.startDate = todayString();
+  }
+  if (!borrowForm.startTime) {
+    borrowForm.startTime = timeString(roundToNext15Minutes(new Date()));
   }
   applyBorrowLength();
 }
@@ -232,15 +328,17 @@ async function requestBorrow() {
   borrowSubmitting.value = true;
   try {
     await axiosClient.post("/borrowrequests", {
-      startOfLoan: borrowForm.startOfLoan,
-      endOfLoan: borrowForm.endOfLoan,
+      startOfLoan: combineDateTime(borrowForm.startDate, borrowForm.startTime),
+      endOfLoan: combineDateTime(borrowForm.endDate, borrowForm.endTime),
       borrowerID: playerId.value,
       specificGameID: selectedCopy.value.boardGameCopyId,
     });
     setNotice("success", "Borrow request sent.");
-    borrowForm.startOfLoan = "";
-    borrowForm.endOfLoan = "";
-    borrowLength.value = "today";
+    borrowForm.startDate = "";
+    borrowForm.startTime = "";
+    borrowForm.endDate = "";
+    borrowForm.endTime = "";
+    borrowLength.value = "24h";
     await Promise.all([fetchPlayerRequests(), fetchCopies()]);
   } catch (error) {
     handleApiError(error, "Failed to create borrow request.");
@@ -264,13 +362,16 @@ function getStatusClass(status) {
 function canConfirmGotGame(status, startDate, endDate) {
   const today = new Date();
   const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
-  return status === "Accepted" && todayStr >= startDate && todayStr <= endDate;
+  const start = dateOnly(startDate);
+  const end = dateOnly(endDate);
+  return status === "Accepted" && todayStr >= start && todayStr <= end;
 }
 
 function canCancelRequest(status, startDate) {
   const today = new Date();
   const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
-  return (status === "Accepted" || status === "InProgress") && todayStr >= startDate;
+  const start = dateOnly(startDate);
+  return (status === "Accepted" || status === "InProgress") && todayStr >= start;
 }
 
 function canCancelPending(status) {
@@ -338,9 +439,30 @@ async function cancelBorrowRequest(id, gameName) {
 }
 
 watchEffect(() => {
-  if (borrowLength.value !== "custom" && borrowForm.startOfLoan) {
+  if (borrowLength.value !== "custom" && borrowForm.startDate) {
     applyBorrowLength();
   }
+});
+
+watchEffect(() => {
+  if (!borrowForm.startDate) return;
+  if (borrowForm.startDate === todayString() && isTimeBefore(borrowForm.startTime, startTimeMin.value)) {
+    borrowForm.startTime = startTimeMin.value;
+  }
+  if (borrowForm.endDate && borrowForm.endDate < borrowForm.startDate) {
+    borrowForm.endDate = borrowForm.startDate;
+  }
+  if (borrowForm.endDate === borrowForm.startDate && isTimeBefore(borrowForm.endTime, endTimeMin.value)) {
+    borrowForm.endTime = endTimeMin.value;
+  }
+});
+
+watchEffect(() => {
+  if (borrowLength.value !== "custom") return;
+  if (!borrowForm.startDate) borrowForm.startDate = todayString();
+  if (!borrowForm.startTime) borrowForm.startTime = timeString(roundToNext15Minutes(new Date()));
+  if (!borrowForm.endDate) borrowForm.endDate = borrowForm.startDate;
+  if (!borrowForm.endTime) borrowForm.endTime = borrowForm.startTime;
 });
 </script>
 
@@ -437,9 +559,12 @@ watchEffect(() => {
                 </div>
               </div>
 
-              <div class="form-block">
+              <div class="form-block" :class="{ disabled: !selectedCopy }">
                 <label class="label">Start date</label>
-                <input class="input" type="date" v-model="borrowForm.startOfLoan" />
+                <input class="input" type="date" v-model="borrowForm.startDate" :min="startDateMin" :disabled="!selectedCopy" />
+
+                <label class="label">Start time</label>
+                <input class="input" type="time" v-model="borrowForm.startTime" :min="startTimeMin" :disabled="!selectedCopy" />
 
                 <label class="label">Borrow length</label>
                 <div class="length-chips">
@@ -449,6 +574,7 @@ watchEffect(() => {
                     type="button"
                     class="chip"
                     :class="{ active: borrowLength === opt.key }"
+                    :disabled="!selectedCopy"
                     @click="borrowLength = opt.key; applyBorrowLength()"
                   >
                     {{ opt.label }}
@@ -457,7 +583,10 @@ watchEffect(() => {
 
                 <div v-if="borrowLength === 'custom'">
                   <label class="label">End date</label>
-                  <input class="input" type="date" v-model="borrowForm.endOfLoan" />
+                  <input class="input" type="date" v-model="borrowForm.endDate" :min="endDateMin" :disabled="!selectedCopy" />
+
+                  <label class="label">End time</label>
+                  <input class="input" type="time" v-model="borrowForm.endTime" :min="endTimeMin" :disabled="!selectedCopy" />
                 </div>
 
                 <small v-if="borrowSummary" class="summary">{{ borrowSummary }}</small>
@@ -524,7 +653,7 @@ watchEffect(() => {
                     </button>
                     <button
                       v-if="canCancelPending(request.requestStatus)"
-                      class="btn ghost"
+                      class="btn action-decline"
                       @click="cancelPendingRequest(request.requestId)"
                     >
                       Cancel request
@@ -577,14 +706,14 @@ watchEffect(() => {
                       <td class="actions-cell">
                         <button
                           v-if="request.requestStatus === 'Pending'"
-                          class="btn ghost"
+                          class="btn action-accept"
                           @click="acceptRequest(request.requestId, request.borrowerName)"
                         >
                           Accept
                         </button>
                         <button
                           v-if="request.requestStatus === 'Pending'"
-                          class="btn ghost"
+                          class="btn action-decline"
                           @click="declineRequest(request.requestId, request.borrowerName)"
                         >
                           Decline
@@ -659,6 +788,10 @@ watchEffect(() => {
 .btn.primary:hover { background: #f3f3f3; }
 .btn.ghost { background: transparent; border: 1px solid #2f384a; color: #dfe5f4; }
 .btn.ghost:hover { background: #182132; }
+.btn.action-accept { background: #112218; color: #b7ffd1; border: 1px solid #3e7350; box-shadow: 0 8px 18px rgba(18, 62, 36, 0.35); }
+.btn.action-accept:hover { background: #16301e; }
+.btn.action-decline { background: #2a171b; color: #ffd6d6; border: 1px solid #5b2c2c; box-shadow: 0 8px 18px rgba(68, 24, 24, 0.35); }
+.btn.action-decline:hover { background: #361a1f; }
 .btn:disabled { opacity: .6; cursor: not-allowed; }
 .btn.back { padding: 8px 12px; }
 
@@ -687,6 +820,10 @@ watchEffect(() => {
 .panel-title { font-weight: 900; font-size: 18px; color: #fff; }
 .panel-meta { color: #c3cad9; margin-top: 4px; }
 .form-block { display: grid; gap: 8px; margin-top: 10px; }
+.form-block.disabled { opacity: .55; }
+.form-block.disabled .input,
+.form-block.disabled .chip,
+.form-block.disabled .btn { cursor: not-allowed; }
 
 .grid { display: grid; gap: 14px; }
 .grid.copies { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
@@ -748,5 +885,8 @@ watchEffect(() => {
   .tab.wide { min-width: 90px; padding: 10px 16px; }
 }
 </style>
+
+
+
 
 
