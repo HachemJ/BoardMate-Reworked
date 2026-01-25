@@ -36,6 +36,7 @@ const router = createRouter({
 
         // Events
         { path: "/pages/event", name: "event", component: EventView },
+        { path: "/pages/event/calendar", name: "eventCalendar", component: EventView },
         // NOTE: use numeric ID, not name, to avoid ambiguity
         { path: "/pages/event/:id(\\d+)", name: "eventDetail", component: EventDetailView },
 

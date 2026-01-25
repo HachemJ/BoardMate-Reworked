@@ -13,7 +13,7 @@
         </div>
 
         <div class="tabs">
-          <button v-for="t in TABS" :key="t" class="tab wide" :class="{ active: tab === t }" @click="tab = t">
+          <button v-for="t in TABS" :key="t" class="tab wide" :class="{ active: tab === t }" @click="setTab(t)">
             {{ t }}
           </button>
         </div>
@@ -290,7 +290,32 @@
         </div>
       </section>
 
-            <!-- ========== MANAGE ========== -->
+      <!-- ========== CALENDAR ========== -->
+      <section v-else-if="tab === 'Calendar'" class="card">
+        <div class="calendar-toolbar">
+          <div class="filter-group">
+            <button
+              v-for="f in CALENDAR_FILTERS"
+              :key="`cal-${f}`"
+              class="chip"
+              :class="{ active: calendarFilter === f }"
+              @click="calendarFilter = f"
+            >
+              {{ f }}
+            </button>
+          </div>
+          <input
+            v-model="calendarQuery"
+            class="input"
+            placeholder="Search by name, game, owner, location..."
+          />
+        </div>
+        <div class="calendar-card">
+          <FullCalendar :options="calendarOptions" />
+        </div>
+      </section>
+
+      <!-- ========== MANAGE ========== -->
       <section v-else class="card">
         <div class="manage-layout">
           <div class="form-card">
@@ -468,25 +493,45 @@
 <script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import EventCard from "@/components/EventCard.vue";
+import FullCalendar from "@fullcalendar/vue3";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import "@fullcalendar/common/main.css";
+import "@fullcalendar/daygrid/main.css";
+import "@fullcalendar/timegrid/main.css";
 import axios from "axios";
-import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from "vue";
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, watchEffect } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const api = axios.create({ baseURL: "http://localhost:8080" });
-const router = useRouter();
+  const router = useRouter();
+  const route = useRoute();
 
 const auth = useAuthStore();
 const userId = computed(() => Number(auth.user?.id));
 
-const TABS = ["Browse", "Create", "Manage"];
+const TABS = ["Browse", "Create", "Manage", "Calendar"];
 const FILTERS = ["All", "Upcoming", "Ongoing", "Past"];
+const CALENDAR_FILTERS = ["All", "Upcoming", "Ongoing", "Finished"];
 
 // Default: UPCOMING
 const tab = ref("Browse");
+const calendarFilter = ref("All");
+const calendarQuery = ref("");
 const browseFilter = ref("All");
 const showFilters = ref(true);
 const toggleFilters = () => (showFilters.value = !showFilters.value);
+
+function setTab(next) {
+  tab.value = next;
+  if (next === "Calendar") {
+    router.push({ name: "eventCalendar" });
+  } else {
+    router.push({ name: "event", query: { tab: next.toLowerCase() } });
+  }
+}
 
 const events = ref([]);
 const myEvents = ref([]);
@@ -714,6 +759,72 @@ function prettyTime(ev) {
   return `${s || "??:??"}–${e || "??:??"}`;
 }
 
+function combineDateTime(dateStr, timeStr) {
+  if (!dateStr || !timeStr) return "";
+  const t = timeStr.length === 5 ? `${timeStr}:00` : timeStr;
+  return `${dateStr}T${t}`;
+}
+
+const calendarEvents = computed(() => {
+  const q = calendarQuery.value.trim().toLowerCase();
+  return events.value
+    .filter((ev) => {
+      const state = eventState(ev);
+      if (calendarFilter.value !== "All" && state !== calendarFilter.value) return false;
+      if (!q) return true;
+      const hay = [ev.name, ev.boardGameName, ev.ownerName, ev.location]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    })
+    .map((ev) => {
+      const state = eventState(ev);
+      return {
+        id: String(ev.eventID),
+        title: ev.name,
+        start: combineDateTime(ev.eventDate, (ev.startTime || "").slice(0, 5)),
+        end: combineDateTime(ev.eventDate, (ev.endTime || "").slice(0, 5)),
+        classNames: [`state-${state.toLowerCase()}`],
+        extendedProps: {
+          eventId: ev.eventID,
+          ownerName: ev.ownerName,
+          boardGameName: ev.boardGameName,
+          state,
+        },
+      };
+    });
+});
+
+const calendarOptions = computed(() => ({
+  plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
+  initialView: "dayGridMonth",
+  headerToolbar: false,
+  height: "auto",
+  dayMaxEventRows: true,
+  events: calendarEvents.value,
+  eventClick: (info) => {
+    const id = info.event.extendedProps?.eventId || info.event.id;
+    if (id) router.push(`/pages/event/${id}`);
+  },
+  eventDidMount: (info) => {
+    const props = info.event.extendedProps || {};
+    const timeRange = info.event.start && info.event.end
+      ? `${info.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}–${info.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+      : "Time TBD";
+    const capacity = capacityMap[props.eventId]
+      ? `${capacityMap[props.eventId].current} / ${capacityMap[props.eventId].max} spots`
+      : "";
+    const tip = [
+      props.boardGameName ? `Game: ${props.boardGameName}` : "",
+      props.ownerName ? `Owner: ${props.ownerName}` : "",
+      timeRange,
+      capacity,
+    ].filter(Boolean).join("\n");
+    info.el.setAttribute("title", tip);
+  },
+}));
+
 const toasts = ref([]);
 function pushToast(kind, msg, ms = 2600) {
   const id = Math.random().toString(36).slice(2);
@@ -776,6 +887,16 @@ const managePreviewEvent = computed(() => {
         selectedManageBoardGame.value?.coverImageUrl ||
         "",
   };
+});
+
+watchEffect(() => {
+  if (route.name === "eventCalendar") {
+    tab.value = "Calendar";
+    return;
+  }
+  const raw = String(route.query.tab || "").toLowerCase();
+  const found = TABS.find((t) => t.toLowerCase() === raw && t !== "Calendar");
+  if (found) tab.value = found;
 });
 
 onMounted(async () => {
@@ -1141,6 +1262,56 @@ watch(
 .toolbar .input { flex: 1 1 520px; }
 .filter-btn { display: inline-flex; align-items: center; gap: 8px; }
 .ficon { width: 16px; height: 16px; }
+
+/* calendar */
+.calendar-toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.calendar-toolbar .input { flex: 1 1 320px; }
+.calendar-card {
+  border: 1px solid #1f2533;
+  border-radius: 14px;
+  background: #0f1217;
+  padding: 12px;
+}
+:deep(.fc) {
+  color: #e9edf5;
+}
+:deep(.fc .fc-scrollgrid) {
+  border-color: #1f2533;
+}
+:deep(.fc .fc-daygrid-day-number),
+:deep(.fc .fc-col-header-cell-cushion) {
+  color: #cfd6e6;
+}
+:deep(.fc .fc-event) {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: #1b2232;
+  color: #e6ecff;
+  padding: 2px 6px;
+  font-weight: 700;
+}
+:deep(.fc .fc-event.state-ongoing) {
+  background: #0f2015;
+  border-color: #2c5b38;
+  color: #c8ffd5;
+}
+:deep(.fc .fc-event.state-finished) {
+  background: #1f1111;
+  border-color: #5b2c2c;
+  color: #ffd6d6;
+  opacity: 0.7;
+}
+:deep(.fc .fc-event.state-upcoming) {
+  background: #0d1726;
+  border-color: #2e4a74;
+  color: #cde6ff;
+}
 
 /* filter chips (shown beneath toolbar when toggled) */
 .filters.under-toolbar { display: flex; gap: 6px; margin: 6px 0 10px; }
