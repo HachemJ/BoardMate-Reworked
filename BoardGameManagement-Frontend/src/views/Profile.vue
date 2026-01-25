@@ -152,7 +152,15 @@ export default {
             console.error("Event fetch failed", err);
           }
         }
-        this.userEvents = events;
+        this.userEvents = events
+            .slice()
+            .sort((a, b) => {
+              const order = { upcoming: 0, ongoing: 1, completed: 2, cancelled: 3 };
+              const ao = order[a.status] ?? 9;
+              const bo = order[b.status] ?? 9;
+              if (ao !== bo) return ao - bo;
+              return new Date(a.date).getTime() - new Date(b.date).getTime();
+            });
       } catch (e) {
         console.error("Error fetching user events:", e);
         this.userEvents = [];
@@ -522,6 +530,7 @@ export default {
   position: relative;
   min-height: 100vh;
   background: #14171d;
+  overflow-x: hidden;
 }
 .layer { position: absolute; inset: 0; }
 .bg-base { background: #14171d; }
@@ -576,6 +585,7 @@ export default {
   position: relative; z-index: 2;
   max-width: 1100px; margin: 0 auto; padding: 96px 20px 60px;
   color: #e9edf5;
+  overflow-x: hidden;
 }
 
 /* ===== Header card ===== */
@@ -658,7 +668,9 @@ export default {
   grid-template-columns: repeat(2, minmax(0,1fr));
   gap:16px;
   margin-top: 12px;
+  min-width: 0;
 }
+.event-card { min-width: 0; }
 .event-card {
   display:block;
   background: rgba(15,18,23,0.9);
