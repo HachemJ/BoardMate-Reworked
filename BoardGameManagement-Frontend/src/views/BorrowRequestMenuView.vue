@@ -56,7 +56,7 @@ const borrowLength = ref("today");
 const borrowNotice = reactive({ type: "", message: "" });
 
 const LENGTH_OPTIONS = [
-  { key: "today", label: "Today (1 day)", days: 1 },
+  { key: "today", label: "Today", days: 1 },
   { key: "3days", label: "3 days", days: 3 },
   { key: "1week", label: "1 week", days: 7 },
   { key: "custom", label: "Custom", days: 0 },
