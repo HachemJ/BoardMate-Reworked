@@ -8,7 +8,7 @@
         <div class="head-row">
           <div>
             <h1>Events</h1>
-            <p>Discover public sessions, register or cancel, and (if you’re an owner) create and manage your own.</p>
+            <p>Discover public sessions, register or cancel, and create and manage your own.</p>
           </div>
         </div>
 
