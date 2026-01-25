@@ -744,6 +744,14 @@ function fillManageForm(ev) {
       getBoardGameIdByName(ev.boardGameName) || manage.form.boardGameId;
 }
 
+function resetManageForm() {
+  if (!selectedManageEvent.value) return;
+  fillManageForm(selectedManageEvent.value);
+  manageEndTimeLocked.value = false;
+  manageDurationMinutes.value = null;
+  manageActiveSection.value = "select";
+}
+
 const managePreviewEvent = computed(() => {
   const ev = selectedManageEvent.value;
   const spotsMax = Number(manage.form.maxSpot || ev?.maxSpot || 0);
