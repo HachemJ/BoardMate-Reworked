@@ -10,7 +10,6 @@
             <h1>Events</h1>
             <p>Discover public sessions, register or cancel, and (if you’re an owner) create and manage your own.</p>
           </div>
-          <button class="btn cta" @click="tab = 'Create'">＋ New Event</button>
         </div>
 
         <div class="tabs">
@@ -982,8 +981,6 @@ watch(
 .page-header p { opacity: .75; margin: 0; color: #c3cad9; }
 
 /* CTA */
-.btn.cta { background: #4478ff; color: #fff; border: 1px solid #4478ff; font-weight: 800; padding: 12px 18px; border-radius: 12px; }
-.btn.cta:hover { filter: brightness(1.05); }
 
 /* tabs (wider) */
 .tabs { display: flex; gap: 8px; margin-top: 8px; }
