@@ -656,6 +656,12 @@ const manageActiveSection = ref("select");
 const updating = ref(false);
 const manageEndTimeLocked = ref(false);
 const manageDurationMinutes = ref(null);
+const selectedManageBoardGame = computed(() => {
+  if (!manage.form.boardGameId) return null;
+  return boardGames.value.find(
+      (g) => Number(g.gameID) === Number(manage.form.boardGameId)
+  );
+});
 
 const now = ref(Date.now());
 let tickHandle = null;
@@ -718,6 +724,51 @@ function pushToast(kind, msg, ms = 2600) {
 const selectedManageEvent = computed(() =>
     events.value.find((e) => Number(e.eventID) === Number(manage.selectedId))
 );
+
+function getBoardGameIdByName(name) {
+  if (!name) return "";
+  const match = boardGames.value.find((g) => g.name === name);
+  return match ? match.gameID : "";
+}
+
+function fillManageForm(ev) {
+  if (!ev) return;
+  manage.form.name = ev.name || "";
+  manage.form.description = ev.description || "";
+  manage.form.maxSpot = Number(ev.maxSpot || 1);
+  manage.form.date = ev.eventDate || minDate;
+  manage.form.startTime = (ev.startTime || "").slice(0, 5);
+  manage.form.endTime = (ev.endTime || "").slice(0, 5);
+  manage.form.location = ev.location || "";
+  manage.form.boardGameId =
+      getBoardGameIdByName(ev.boardGameName) || manage.form.boardGameId;
+}
+
+const managePreviewEvent = computed(() => {
+  const ev = selectedManageEvent.value;
+  const spotsMax = Number(manage.form.maxSpot || ev?.maxSpot || 0);
+  const spotsCurrent =
+      (ev && capacityMap[ev.eventID]?.current) ?? 0;
+  const boardGameName =
+      selectedManageBoardGame.value?.name || ev?.boardGameName || "";
+  return {
+    name: manage.form.name || ev?.name || "",
+    boardGameName,
+    date: manage.form.date || ev?.eventDate || "",
+    startTime: manage.form.startTime || (ev?.startTime || "").slice(0, 5),
+    endTime: manage.form.endTime || (ev?.endTime || "").slice(0, 5),
+    location: manage.form.location || ev?.location || "",
+    description: manage.form.description || ev?.description || "",
+    spotsCurrent,
+    spotsMax,
+    status: ev ? eventState(ev) : "",
+    imageUrl:
+        selectedManageBoardGame.value?.imageUrl ||
+        selectedManageBoardGame.value?.image ||
+        selectedManageBoardGame.value?.coverImageUrl ||
+        "",
+  };
+});
 
 onMounted(async () => {
   await Promise.all([fetchEvents(), fetchMyEvents(), fetchBoardGames()]);
@@ -984,6 +1035,24 @@ watch(
     (next) => {
       if (endTimeLocked.value && durationMinutes.value && next) {
         applyDuration(durationMinutes.value);
+      }
+    }
+);
+
+watch(
+    () => selectedManageEvent.value,
+    (next) => {
+      if (next) fillManageForm(next);
+    }
+);
+
+watch(
+    () => boardGames.value,
+    () => {
+      if (selectedManageEvent.value && !manage.form.boardGameId) {
+        manage.form.boardGameId = getBoardGameIdByName(
+            selectedManageEvent.value.boardGameName
+        );
       }
     }
 );
