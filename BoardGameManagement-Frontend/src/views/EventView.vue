@@ -25,7 +25,12 @@
         <div class="toolbar">
           <input v-model="search" class="input" placeholder="Search by name, location, date, owner..." />
 
-          <button class="btn ghost filter-btn" @click="toggleFilters" :aria-expanded="showFilters">
+          <button
+            v-if="!isCalendarView"
+            class="btn ghost filter-btn"
+            @click="toggleFilters"
+            :aria-expanded="showFilters"
+          >
             <svg class="ficon" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm3 6h4v2h-4v-2z" fill="currentColor"/>
             </svg>
@@ -42,7 +47,7 @@
         </div>
 
         <!-- filter chips (collapsed by default) -->
-        <div v-if="showFilters" class="filters under-toolbar">
+        <div v-if="showFilters && !isCalendarView" class="filters under-toolbar">
           <button
               v-for="f in FILTERS"
               :key="f"
@@ -55,7 +60,7 @@
         </div>
 
         <div v-if="action.visible" class="inline-banner" :class="action.kind">{{ action.msg }}</div>
-        <small class="hint">Click once to select, double-click to view details, or use the “View details” button.</small>
+        <small v-if="!isCalendarView" class="hint">Click once to select, double-click to view details, or use the “View details” button.</small>
 
         <div v-if="!isCalendarView" class="table-wrap">
           <table class="table">
