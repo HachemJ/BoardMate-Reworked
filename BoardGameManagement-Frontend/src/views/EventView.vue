@@ -35,6 +35,9 @@
           <div class="actions">
             <button class="btn primary" :disabled="!selectedBrowseId" @click="registerForSelected">Register</button>
             <button class="btn danger" :disabled="!selectedBrowseId" @click="cancelSelected">Cancel</button>
+            <button class="btn ghost" @click="isCalendarView = !isCalendarView">
+              {{ isCalendarView ? "List view" : "Calendar view" }}
+            </button>
           </div>
         </div>
 
@@ -54,7 +57,7 @@
         <div v-if="action.visible" class="inline-banner" :class="action.kind">{{ action.msg }}</div>
         <small class="hint">Click once to select, double-click to view details, or use the “View details” button.</small>
 
-        <div class="table-wrap">
+        <div v-if="!isCalendarView" class="table-wrap">
           <table class="table">
             <thead>
             <tr>
@@ -106,6 +109,30 @@
             </tr>
             </tbody>
           </table>
+        </div>
+
+        <div v-else class="calendar-block">
+          <div class="calendar-toolbar">
+            <div class="filter-group">
+              <button
+                v-for="f in CALENDAR_FILTERS"
+                :key="`cal-${f}`"
+                class="chip"
+                :class="{ active: calendarFilter === f }"
+                @click="calendarFilter = f"
+              >
+                {{ f }}
+              </button>
+            </div>
+            <input
+              v-model="calendarQuery"
+              class="input"
+              placeholder="Search by name, game, owner, location..."
+            />
+          </div>
+          <div class="calendar-card">
+            <FullCalendar :options="calendarOptions" />
+          </div>
         </div>
       </section>
 
@@ -287,31 +314,6 @@
 
         <div class="toasts">
           <div v-for="t in toasts" :key="t.id" class="toast" :class="t.kind">{{ t.msg }}</div>
-        </div>
-      </section>
-
-      <!-- ========== CALENDAR ========== -->
-      <section v-else-if="tab === 'Calendar'" class="card">
-        <div class="calendar-toolbar">
-          <div class="filter-group">
-            <button
-              v-for="f in CALENDAR_FILTERS"
-              :key="`cal-${f}`"
-              class="chip"
-              :class="{ active: calendarFilter === f }"
-              @click="calendarFilter = f"
-            >
-              {{ f }}
-            </button>
-          </div>
-          <input
-            v-model="calendarQuery"
-            class="input"
-            placeholder="Search by name, game, owner, location..."
-          />
-        </div>
-        <div class="calendar-card">
-          <FullCalendar :options="calendarOptions" />
         </div>
       </section>
 
@@ -509,7 +511,7 @@ const api = axios.create({ baseURL: "http://localhost:8080" });
 const auth = useAuthStore();
 const userId = computed(() => Number(auth.user?.id));
 
-const TABS = ["Browse", "Create", "Manage", "Calendar"];
+const TABS = ["Browse", "Create", "Manage"];
 const FILTERS = ["All", "Upcoming", "Ongoing", "Past"];
 const CALENDAR_FILTERS = ["All", "Upcoming", "Ongoing", "Finished"];
 
@@ -517,17 +519,15 @@ const CALENDAR_FILTERS = ["All", "Upcoming", "Ongoing", "Finished"];
 const tab = ref("Browse");
 const calendarFilter = ref("All");
 const calendarQuery = ref("");
+const isCalendarView = ref(false);
 const browseFilter = ref("All");
 const showFilters = ref(true);
 const toggleFilters = () => (showFilters.value = !showFilters.value);
 
 function setTab(next) {
   tab.value = next;
-  if (next === "Calendar") {
-    router.push({ name: "eventCalendar" });
-  } else {
-    router.push({ name: "event", query: { tab: next.toLowerCase() } });
-  }
+  isCalendarView.value = false;
+  router.push({ name: "event", query: { tab: next.toLowerCase() } });
 }
 
 const events = ref([]);
@@ -888,12 +888,14 @@ const managePreviewEvent = computed(() => {
 
 watchEffect(() => {
   if (route.name === "eventCalendar") {
-    tab.value = "Calendar";
+    tab.value = "Browse";
+    isCalendarView.value = true;
     return;
   }
   const raw = String(route.query.tab || "").toLowerCase();
-  const found = TABS.find((t) => t.toLowerCase() === raw && t !== "Calendar");
+  const found = TABS.find((t) => t.toLowerCase() === raw);
   if (found) tab.value = found;
+  isCalendarView.value = false;
 });
 
 onMounted(async () => {
@@ -1308,6 +1310,9 @@ watch(
   background: #0d1726;
   border-color: #2e4a74;
   color: #cde6ff;
+}
+:deep(.fc .fc-day-today) {
+  background: transparent !important;
 }
 
 /* filter chips (shown beneath toolbar when toggled) */
