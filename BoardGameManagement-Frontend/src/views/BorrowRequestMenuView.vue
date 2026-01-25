@@ -868,7 +868,7 @@ watchEffect(() => {
 .table tbody tr { border-top: 1px solid #1f2634; }
 .actions-cell { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.manage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
 
 .status-ok { color: #b7ffd1; font-weight: 700; }
 .status-warn { color: #ffe2b8; font-weight: 700; }
