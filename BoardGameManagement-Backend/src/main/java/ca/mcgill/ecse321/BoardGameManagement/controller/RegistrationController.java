@@ -1,4 +1,4 @@
-﻿package ca.mcgill.ecse321.BoardGameManagement.controller;
+package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import java.util.List;
 import java.util.stream.Collectors;

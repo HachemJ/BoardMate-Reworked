@@ -1,4 +1,4 @@
-﻿package ca.mcgill.ecse321.BoardGameManagement.controller;
+package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.BorrowRequestCreationDTO;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BorrowRequestResponseDTO;
