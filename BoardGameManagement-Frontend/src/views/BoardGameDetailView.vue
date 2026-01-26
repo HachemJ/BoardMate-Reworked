@@ -1,11 +1,11 @@
-<script setup>
+﻿<script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import { ref, computed, onMounted, reactive, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore.js";
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
@@ -367,8 +367,8 @@ async function confirmBorrow() {
             <div v-for="review in reviews" :key="review.reviewId" class="review-card">
               <div class="review-stars">
                 <span v-for="n in 5" :key="n" class="star">
-                  <span v-if="n <= review.rating">★</span>
-                  <span v-else>☆</span>
+                  <span v-if="n <= review.rating">â˜…</span>
+                  <span v-else>â˜†</span>
                 </span>
               </div>
               <p class="review-comment">{{ review.comment }}</p>

@@ -1,11 +1,11 @@
-<!-- src/views/OwnerBoardGameMenuView.vue -->
+﻿<!-- src/views/OwnerBoardGameMenuView.vue -->
 <script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 
 const route = useRoute();
 const router = useRouter();
@@ -93,7 +93,7 @@ onMounted(fetchBoardGames);
         >
           <div class="toast-head">
             <strong>{{ toast.title }}</strong>
-            <button class="toast-x" @click="closeToast" aria-label="Close">✕</button>
+            <button class="toast-x" @click="closeToast" aria-label="Close">âœ•</button>
           </div>
           <p class="toast-msg">{{ toast.message }}</p>
         </div>

@@ -1,4 +1,4 @@
-<!-- src/views/EventDetailView.vue -->
+﻿<!-- src/views/EventDetailView.vue -->
 <template>
   <div>
     <NavLandingSigned />
@@ -39,7 +39,7 @@ import { useAuthStore } from "@/stores/authStore";
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
-const api = axios.create({ baseURL: "http://localhost:8080" });
+const api = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 
 const loaded = ref(false);
 const loadError = ref(false);

@@ -1,11 +1,11 @@
-<!-- src/views/AddBoardGameView.vue -->
+﻿<!-- src/views/AddBoardGameView.vue -->
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import { useAuthStore } from "@/stores/authStore";
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 const authStore = useAuthStore();
 
 // simple in-app banner

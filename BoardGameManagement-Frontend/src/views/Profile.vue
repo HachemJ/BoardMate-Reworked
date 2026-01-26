@@ -1,10 +1,10 @@
-<!-- src/views/Profile.vue -->
+﻿<!-- src/views/Profile.vue -->
 <script>
 import { useAuthStore } from "@/stores/authStore";
 import axios from "axios";
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 
 export default {
   name: "UserProfileView",
@@ -306,7 +306,7 @@ export default {
       const start = this.formatTime(startTime);
       const end = this.formatTime(endTime);
       if (!start && !end) return "Time TBD";
-      return `${start || "??:??"} – ${end || "??:??"}`;
+      return `${start || "??:??"} â€“ ${end || "??:??"}`;
     },
 
     formatTime(time) {
@@ -350,7 +350,7 @@ export default {
       }"
     >
       <span>{{ toast.message }}</span>
-      <button class="toast__close" @click="toast.show = false">×</button>
+      <button class="toast__close" @click="toast.show = false">Ã—</button>
     </div>
 
     <div class="content">
@@ -363,7 +363,7 @@ export default {
               alt="Profile Picture"
           />
           <div class="id">
-            <h2 class="name">{{ userProfile.name || "—" }}</h2>
+            <h2 class="name">{{ userProfile.name || "â€”" }}</h2>
             <p class="email">{{ userProfile.email }}</p>
             <span class="role-pill" :data-role="userProfile.status">
               {{ userProfile.status?.toUpperCase() }}
@@ -379,7 +379,7 @@ export default {
           <div v-else class="edit-actions">
             <button class="btn btn-primary" :disabled="saveDisabled" @click="saveProfile">
               <span v-if="!saving">Save</span>
-              <span v-else>Saving…</span>
+              <span v-else>Savingâ€¦</span>
             </button>
             <button class="btn btn-ghost" :disabled="saving" @click="cancelEditing">Cancel</button>
           </div>
@@ -432,7 +432,7 @@ export default {
         <div class="edit-actions">
           <button class="btn btn-primary" :disabled="saveDisabled" @click="saveProfile">
             <span v-if="!saving">Save</span>
-            <span v-else>Saving…</span>
+            <span v-else>Savingâ€¦</span>
           </button>
           <button class="btn btn-ghost" :disabled="saving" @click="cancelEditing">Cancel</button>
         </div>
@@ -507,15 +507,15 @@ export default {
               {{ e.boardGameName ? `Board game: ${e.boardGameName}` : "Board game: TBD" }}
             </div>
             <div class="event-card__meta">
-              <span class="chip">📅 {{ formatDate(e.date) }}</span>
-              <span class="chip">⏰ {{ formatTimeRange(e.startTime, e.endTime) }}</span>
-              <span class="chip">📍 {{ e.location || "Location TBD" }}</span>
+              <span class="chip">ðŸ“… {{ formatDate(e.date) }}</span>
+              <span class="chip">â° {{ formatTimeRange(e.startTime, e.endTime) }}</span>
+              <span class="chip">ðŸ“ {{ e.location || "Location TBD" }}</span>
             </div>
             <div class="event-card__foot">
               <span class="hosted">
                 {{ userProfile.status === "owner" ? "Hosted by you" : `Hosted by ${e.ownerName || "Unknown"}` }}
               </span>
-              <span class="event-card__link">View details →</span>
+              <span class="event-card__link">View details â†’</span>
             </div>
           </router-link>
         </div>

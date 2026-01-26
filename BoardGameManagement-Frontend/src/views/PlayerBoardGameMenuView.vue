@@ -1,11 +1,11 @@
-<script setup>
+﻿<script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
 import { computed, onMounted, ref, watchEffect } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useRouter } from "vue-router";
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -267,7 +267,7 @@ async function confirmDeleteCopy() {
 
           <div v-if="notice" class="notice" :class="notice.type">
             <span>{{ notice.message }}</span>
-            <button class="icon-btn" @click="notice = null">✕</button>
+            <button class="icon-btn" @click="notice = null">âœ•</button>
           </div>
 
           <div class="copies-grid">
@@ -291,7 +291,7 @@ async function confirmDeleteCopy() {
                     @click="openMenuId = openMenuId === copy.boardGameCopyId ? null : copy.boardGameCopyId"
                     aria-label="Copy actions"
                   >
-                    ⋯
+                    â‹¯
                   </button>
                   <div
                     v-if="openMenuId === copy.boardGameCopyId"
@@ -322,7 +322,7 @@ async function confirmDeleteCopy() {
             </div>
 
             <div v-if="myBoardGameCopies.length === 0" class="empty-card">
-              <div class="empty-icon">🎲</div>
+              <div class="empty-icon">ðŸŽ²</div>
               <h3>No copies yet</h3>
               <p>Add your first board game copy to share it with borrowers.</p>
               <router-link

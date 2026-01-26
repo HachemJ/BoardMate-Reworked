@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import { useRoute, useRouter } from "vue-router";
 import { reactive, computed } from "vue";
@@ -9,7 +9,7 @@ const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 const gameName = computed(() => route.params.gamename || "");
 
 const notice = reactive({ type: "", message: "" });

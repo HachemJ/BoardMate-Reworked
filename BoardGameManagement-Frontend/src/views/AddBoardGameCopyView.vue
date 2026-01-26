@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 
 import DefaultNavbar from "@/examples/navbars/NavbarDefault.vue";
 import {reactive, ref, onMounted} from "vue";
@@ -7,7 +7,7 @@ import {useAuthStore} from "@/stores/authStore.js";
 import {useRouter} from "vue-router";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080"
+  baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080"
 });
 
 const router = useRouter();

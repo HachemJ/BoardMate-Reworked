@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import axios from "axios";
@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "vue-router";
 
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080",
 });
 
 const boardGames = ref([]);
@@ -184,7 +184,7 @@ onMounted(getBoardGames);
           <form class="form" @submit.prevent="updateBG">
             <div v-if="notice" class="notice" :class="notice.type">
               <span>{{ notice.message }}</span>
-              <button class="icon-btn" @click="notice = null" type="button">✕</button>
+              <button class="icon-btn" @click="notice = null" type="button">âœ•</button>
             </div>
 
             <div class="form-section">

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, reactive, onMounted, watchEffect, onUnmounted, computed } from "vue";
 import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
@@ -6,7 +6,7 @@ import { useAuthStore } from "@/stores/authStore.js";
 import { useRoute, useRouter } from "vue-router";
 
 const authStore = useAuthStore();
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 const route = useRoute();
 const router = useRouter();
 

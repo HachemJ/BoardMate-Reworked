@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, onMounted, onUnmounted } from "vue";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore.js";
@@ -27,7 +27,7 @@ function showError(msg) {
 }
 
 /* axios */
-const axiosClient = axios.create({ baseURL: "http://localhost:8080" });
+const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 
 /* landing-style canvas + no scroll */
 const body = document.getElementsByTagName("body")[0];
@@ -44,7 +44,7 @@ onUnmounted(() => {
 async function handleAuth() {
   if (isSignUp.value) {
     if (password.value !== confirmPassword.value) {
-      showError("Passwords don’t match.");
+      showError("Passwords donâ€™t match.");
       return;
     }
     try {
@@ -66,7 +66,7 @@ async function handleAuth() {
       const status = error?.response?.status;
       const errs = error?.response?.data?.errors;
       if (Array.isArray(errs) && errs.length) {
-        showError(errs.join(" · "));
+        showError(errs.join(" Â· "));
       } else if (status === 401) {
         showError("Sign up succeeded but login failed (401). Check your credentials.");
       } else {
@@ -89,11 +89,11 @@ async function handleAuth() {
     const status = error?.response?.status;
     const errs = error?.response?.data?.errors;
     if (Array.isArray(errs) && errs.length) {
-      showError(errs.join(" · "));
+      showError(errs.join(" Â· "));
     } else if (status === 401) {
       showError("Login failed (401): incorrect email or password.");
     } else {
-      showError("Couldn’t sign you in. Please try again.");
+      showError("Couldnâ€™t sign you in. Please try again.");
     }
     console.error(error);
   }
@@ -183,7 +183,7 @@ async function handleAuth() {
           <div v-if="errorMsg" class="alert-banner" role="alert">
             <div class="alert-dot"></div>
             <span class="alert-text">{{ errorMsg }}</span>
-            <button class="alert-close" @click.prevent="errorMsg = null" aria-label="Dismiss">×</button>
+            <button class="alert-close" @click.prevent="errorMsg = null" aria-label="Dismiss">Ã—</button>
           </div>
 
           <button type="submit" class="btn btn-primary btn-raise">
@@ -192,7 +192,7 @@ async function handleAuth() {
 
           <div class="alt">
             <span class="muted">
-              {{ isSignUp ? "Already have an account?" : "Don’t have an account?" }}
+              {{ isSignUp ? "Already have an account?" : "Donâ€™t have an account?" }}
             </span>
             <a href="#" class="link" @click.prevent="isSignUp = !isSignUp">
               {{ isSignUp ? "Sign in" : "Create one" }}
