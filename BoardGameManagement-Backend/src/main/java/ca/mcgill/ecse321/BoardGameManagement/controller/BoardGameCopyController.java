@@ -1,4 +1,4 @@
-package ca.mcgill.ecse321.BoardGameManagement.controller;
+﻿package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCopyCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCopyResponseDto;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @RequestMapping("/boardgamecopies")
 @SuppressWarnings("unused")
 public class BoardGameCopyController {

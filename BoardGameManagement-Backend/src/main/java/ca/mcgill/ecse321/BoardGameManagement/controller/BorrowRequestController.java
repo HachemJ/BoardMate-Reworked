@@ -1,4 +1,4 @@
-package ca.mcgill.ecse321.BoardGameManagement.controller;
+﻿package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.BorrowRequestCreationDTO;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BorrowRequestResponseDTO;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @SuppressWarnings("unused")
 public class BorrowRequestController {
 

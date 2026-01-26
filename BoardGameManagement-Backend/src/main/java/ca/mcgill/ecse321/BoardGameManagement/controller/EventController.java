@@ -1,4 +1,4 @@
-package ca.mcgill.ecse321.BoardGameManagement.controller;
+﻿package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.EventCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.EventResponseDto;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @RequestMapping("/events")
 @SuppressWarnings("unused")
 public class EventController {

@@ -1,4 +1,4 @@
-package ca.mcgill.ecse321.BoardGameManagement.controller;
+﻿package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import java.util.ArrayList;
 
@@ -23,7 +23,7 @@ import ca.mcgill.ecse321.BoardGameManagement.service.ReviewService;
  * This class is the controller for the Review entity. It is responsible for handling requests related to Reviews.
  */
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @SuppressWarnings("unused")
 public class ReviewController {
 

@@ -1,4 +1,4 @@
-package ca.mcgill.ecse321.BoardGameManagement.controller;
+﻿package ca.mcgill.ecse321.BoardGameManagement.controller;
 
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameCreationDto;
 import ca.mcgill.ecse321.BoardGameManagement.dto.BoardGameResponseDto;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 @SuppressWarnings("unused")
 public class BoardGameController {
 
