@@ -198,7 +198,23 @@ function combineDateTime(dateStr, timeStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   const [hh, mm] = timeStr.split(":").map(Number);
   const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0);
-  return dt.toISOString();
+  return toLocalOffsetISOString(dt);
+}
+
+function toLocalOffsetISOString(date) {
+  const pad = (n) => String(n).padStart(2, "0");
+  const y = date.getFullYear();
+  const m = pad(date.getMonth() + 1);
+  const d = pad(date.getDate());
+  const hh = pad(date.getHours());
+  const mm = pad(date.getMinutes());
+  const ss = pad(date.getSeconds());
+  const tzMinutes = -date.getTimezoneOffset();
+  const sign = tzMinutes >= 0 ? "+" : "-";
+  const abs = Math.abs(tzMinutes);
+  const tzh = pad(Math.floor(abs / 60));
+  const tzm = pad(abs % 60);
+  return `${y}-${m}-${d}T${hh}:${mm}:${ss}${sign}${tzh}:${tzm}`;
 }
 
 function isStartInPast() {
@@ -315,6 +331,8 @@ function selectCopy(copy) {
     return;
   }
   selectedCopy.value = copy;
+  borrowNotice.type = "";
+  borrowNotice.message = "";
   borrowTouched.value = false;
   if (!borrowForm.startDate) {
     borrowForm.startDate = todayString();

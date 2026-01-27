@@ -917,11 +917,11 @@ async function fetchEvents() {
   try {
     const { data } = await api.get("/events");
     events.value = data ?? [];
+    await refreshAllRegs();
     await Promise.all(
-        events.value.map(async (e) => {
-          await refreshReg(e.eventID);
-          await refreshCapacity(e.eventID, Number(e.maxSpot || e.maxSpots || e.max));
-        })
+      events.value.map(async (e) => {
+        await refreshCapacity(e.eventID, Number(e.maxSpot || e.maxSpots || e.max));
+      })
     );
   } catch {
     pushToast("error", "Failed to load events");
@@ -944,13 +944,23 @@ async function fetchBoardGames() {
     pushToast("error", "Failed to load board games");
   }
 }
-async function refreshReg(eventId) {
+async function refreshAllRegs() {
+  if (!userId.value) {
+    events.value.forEach((e) => {
+      regStatus[e.eventID] = "Not Registered";
+    });
+    return;
+  }
   try {
-    const { data } = await api.get(`/registrations/${userId.value}/${eventId}`);
-    regStatus[eventId] = data === null ? "Not Registered" : "Registered";
-  } catch (e) {
-    if (e?.response?.status === 404) regStatus[eventId] = "Not Registered";
-    else regStatus[eventId] = "Error";
+    const { data } = await api.get(`/registrations/players/${userId.value}`);
+    const ids = new Set((data ?? []).map((r) => Number(r.eventID)));
+    events.value.forEach((e) => {
+      regStatus[e.eventID] = ids.has(Number(e.eventID)) ? "Registered" : "Not Registered";
+    });
+  } catch {
+    events.value.forEach((e) => {
+      regStatus[e.eventID] = "Not Registered";
+    });
   }
 }
 async function refreshCapacity(eventId, maxFromEvent) {
@@ -1014,7 +1024,7 @@ async function registerForSelected() {
   }
   try {
     await api.post("/registrations", { playerID: userId.value, eventID: id });
-    await Promise.all([refreshReg(id), refreshCapacity(id, ev.maxSpot)]);
+    await Promise.all([refreshAllRegs(), refreshCapacity(id, ev.maxSpot)]);
     showAction("success", "Successfully registered.");
   } catch {
     showAction("error", "Registration failed.");
@@ -1031,7 +1041,7 @@ async function cancelSelected() {
   }
   try {
     await api.delete(`/registrations/${userId.value}/${id}`);
-    await Promise.all([refreshReg(id), refreshCapacity(id, ev?.maxSpot)]);
+    await Promise.all([refreshAllRegs(), refreshCapacity(id, ev?.maxSpot)]);
     showAction("success", "Registration cancelled.");
   } catch (e) {
     const msg = (e?.response?.data?.message || "").toLowerCase?.() || "";
