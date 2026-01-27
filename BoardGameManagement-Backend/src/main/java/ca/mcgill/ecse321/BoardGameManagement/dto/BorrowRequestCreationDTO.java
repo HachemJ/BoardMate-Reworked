@@ -4,17 +4,17 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @SuppressWarnings(value = "unused")
 public class BorrowRequestCreationDTO {
 
     @NotNull(message = "loan start date must not be null")
-    @JsonDeserialize(using = LenientLocalDateTimeDeserializer.class)
-    private LocalDateTime startOfLoan;
+    @JsonDeserialize(using = LenientOffsetDateTimeDeserializer.class)
+    private OffsetDateTime startOfLoan;
     @NotNull(message = "loan end date must not be null")
-    @JsonDeserialize(using = LenientLocalDateTimeDeserializer.class)
-    private LocalDateTime endOfLoan;
+    @JsonDeserialize(using = LenientOffsetDateTimeDeserializer.class)
+    private OffsetDateTime endOfLoan;
     @Positive(message =  "borrowerId must be a positive number")
     private int borrowerID;
     @Positive(message = "the gameId must be a positive number")
@@ -24,7 +24,7 @@ public class BorrowRequestCreationDTO {
     public BorrowRequestCreationDTO() {}
 
 
-    public BorrowRequestCreationDTO(LocalDateTime startOfLoan, LocalDateTime endOfLoan, int borrowerID, int specificGameID) {
+    public BorrowRequestCreationDTO(OffsetDateTime startOfLoan, OffsetDateTime endOfLoan, int borrowerID, int specificGameID) {
         this.startOfLoan = startOfLoan;
         this.endOfLoan = endOfLoan;
         this.borrowerID = borrowerID;
@@ -32,11 +32,11 @@ public class BorrowRequestCreationDTO {
 
     }
 
-    public LocalDateTime getEndOfLoan() {
+    public OffsetDateTime getEndOfLoan() {
         return endOfLoan;
     }
 
-    public LocalDateTime getStartOfLoan() {
+    public OffsetDateTime getStartOfLoan() {
         return startOfLoan;
     }
 

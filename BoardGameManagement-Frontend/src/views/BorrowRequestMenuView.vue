@@ -195,7 +195,10 @@ function addHoursToDateTime(dateStr, timeStr, hours) {
 
 function combineDateTime(dateStr, timeStr) {
   if (!dateStr || !timeStr) return "";
-  return `${dateStr}T${timeStr}:00`;
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0);
+  return dt.toISOString();
 }
 
 function isStartInPast() {

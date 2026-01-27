@@ -13,7 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 
 @Service
@@ -72,21 +75,28 @@ public class BorrowRequestService {
                     String.format("The game %s does not exist", requestDTO.getSpecificGameID()));
         }
 
-        LocalDateTime start = requestDTO.getStartOfLoan();
-        LocalDateTime end = requestDTO.getEndOfLoan();
-
-        LocalDateTime now = LocalDateTime.now();
-        if (start.isBefore(now.minusMinutes(1))) {
-            throw new GlobalException(HttpStatus.BAD_REQUEST,
-                    String.format("Borrow start time %s cannot be in the past", start));
+        OffsetDateTime startOffset = requestDTO.getStartOfLoan();
+        OffsetDateTime endOffset = requestDTO.getEndOfLoan();
+        if (startOffset == null || endOffset == null) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "Start and end time are required");
         }
 
-        if (!end.isAfter(start)) {
+        Instant startInstant = startOffset.toInstant();
+        Instant endInstant = endOffset.toInstant();
+        Instant now = Instant.now();
+        if (startInstant.isBefore(now.minusSeconds(60))) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST,
+                    String.format("Borrow start time %s cannot be in the past", startOffset));
+        }
+
+        if (!endInstant.isAfter(startInstant)) {
             throw new GlobalException(HttpStatus.BAD_REQUEST,
                     String.format("Borrow end time %s cannot be earlier than start time %s",
-                            end, start));
+                            endOffset, startOffset));
 
         }
+        LocalDateTime start = LocalDateTime.ofInstant(startInstant, ZoneOffset.UTC);
+        LocalDateTime end = LocalDateTime.ofInstant(endInstant, ZoneOffset.UTC);
 
         //check that the game you want to borrow does not have a request with overlapping time
         Player owner = boardGameCopyRepository.findBySpecificGameID(requestDTO.getSpecificGameID()).getPlayer();
@@ -94,10 +104,12 @@ public class BorrowRequestService {
 
         for (BorrowRequest request : requests) {
             //there is an existing borrowRequest overlapping with the request time
+            Instant reqStart = request.getStartOfLoan().toInstant(ZoneOffset.UTC);
+            Instant reqEnd = request.getEndOfLoan().toInstant(ZoneOffset.UTC);
             if ((request.getRequestStatus().equals(BorrowRequest.RequestStatus.Accepted) ||
                     request.getRequestStatus().equals(BorrowRequest.RequestStatus.InProgress)) &&
-                    (!request.getStartOfLoan().isAfter(end)) &&
-                    (!start.isAfter(request.getEndOfLoan()))){
+                    (!reqStart.isAfter(endInstant)) &&
+                    (!startInstant.isAfter(reqEnd))){
                 throw new GlobalException(HttpStatus.CONFLICT, "A request exists that uses this time");
             }
         }

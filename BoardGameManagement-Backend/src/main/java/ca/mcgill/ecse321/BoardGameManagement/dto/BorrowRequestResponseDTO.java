@@ -7,17 +7,18 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 public class BorrowRequestResponseDTO {
     @Positive(message = "requestId must be a positive number")
     private int requestId;
     @NotNull(message = "Date must not be null")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime startOfLoan;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    private OffsetDateTime startOfLoan;
     @NotNull(message = "loan end date must not be null")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime endOfLoan;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ssXXX")
+    private OffsetDateTime endOfLoan;
     @Positive(message = "the borrower is must be > 0")
     private int borrowerId;
     @NotBlank(message = "Borrower must not be null")
@@ -37,8 +38,8 @@ public class BorrowRequestResponseDTO {
 
     public BorrowRequestResponseDTO(BorrowRequest borrowRequest) {
         this.requestId = borrowRequest.getRequestID();
-        this.startOfLoan = borrowRequest.getStartOfLoan();
-        this.endOfLoan = borrowRequest.getEndOfLoan();
+        this.startOfLoan = borrowRequest.getStartOfLoan().atOffset(ZoneOffset.UTC);
+        this.endOfLoan = borrowRequest.getEndOfLoan().atOffset(ZoneOffset.UTC);
         this.borrowerId = borrowRequest.getRequester().getPlayerID();
         this.borrowerName = borrowRequest.getRequester().getName();
         this.borrowerEmail = borrowRequest.getRequester().getEmail();
@@ -54,11 +55,11 @@ public class BorrowRequestResponseDTO {
 
     public int getRequestId() {return requestId;}
 
-    public LocalDateTime getEndOfLoan() {
+    public OffsetDateTime getEndOfLoan() {
         return endOfLoan;
     }
 
-    public LocalDateTime getStartOfLoan() {
+    public OffsetDateTime getStartOfLoan() {
         return startOfLoan;
     }
 
