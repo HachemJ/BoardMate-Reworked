@@ -4,9 +4,11 @@ import { ref, computed, onMounted, reactive, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore.js";
+import { showDemoNotice } from "@/utils/demoNotice";
 
 const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 const authStore = useAuthStore();
+const isGuest = computed(() => !!authStore.user?.isGuest);
 const route = useRoute();
 const router = useRouter();
 

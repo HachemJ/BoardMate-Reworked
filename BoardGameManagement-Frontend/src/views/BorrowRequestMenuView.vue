@@ -4,6 +4,7 @@ import NavLandingSigned from "@/components/NavLandingSigned.vue";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useRoute, useRouter } from "vue-router";
+import { showDemoNotice } from "@/utils/demoNotice";
 
 const authStore = useAuthStore();
 const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
@@ -11,6 +12,7 @@ const route = useRoute();
 const router = useRouter();
 
 const isOwner = computed(() => !!authStore.user?.isAOwner);
+const isGuest = computed(() => !!authStore.user?.isGuest);
 const ownerId = computed(() => authStore.user?.id ?? null);
 const playerId = computed(() => authStore.user?.id ?? null);
 
@@ -19,7 +21,10 @@ const tabs = [
   { key: "mine", label: "My Requests" },
   { key: "manage", label: "Manage", ownerOnly: true },
 ];
-const visibleTabs = computed(() => tabs.filter((t) => !t.ownerOnly || isOwner.value));
+const visibleTabs = computed(() => {
+  if (isGuest.value) return tabs.filter((t) => t.key === "browse");
+  return tabs.filter((t) => !t.ownerOnly || isOwner.value);
+});
 
 const activeTab = computed(() => {
   const raw = String(route.query.tab || "").toLowerCase();
@@ -344,6 +349,11 @@ function selectCopy(copy) {
 }
 
 async function requestBorrow() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    setNotice("error", "Sign in to request a borrow.", 0);
+    return;
+  }
   borrowTouched.value = true;
   if (!isBorrowValid.value) return;
   borrowSubmitting.value = true;
@@ -400,6 +410,10 @@ function canCancelPending(status) {
 }
 
 async function acceptRequest(id, name) {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   try {
     await axiosClient.put(`/borrowrequests/${id}?action=accept`);
     setNotice("success", `Request from ${name} accepted successfully`);
@@ -410,6 +424,10 @@ async function acceptRequest(id, name) {
 }
 
 async function declineRequest(id, name) {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   try {
     await axiosClient.put(`/borrowrequests/${id}?action=decline`);
     setNotice("success", `Request from ${name} denied successfully!`);
@@ -420,6 +438,10 @@ async function declineRequest(id, name) {
 }
 
 async function confirmRequest(id, gameName) {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=confirm`);
     setNotice("success", `Borrow time started: confirmed ${gameName} was received`);
@@ -430,6 +452,10 @@ async function confirmRequest(id, gameName) {
 }
 
 async function cancelRequest(id, gameName) {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
     setNotice("info", `Cancelled early: ${gameName} borrowing was returned`);
@@ -440,6 +466,10 @@ async function cancelRequest(id, gameName) {
 }
 
 async function cancelPendingRequest(id) {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   try {
     await axiosClient.delete(`/borrowrequests/${id}`);
     setNotice("success", "Request cancelled.");
@@ -450,6 +480,10 @@ async function cancelPendingRequest(id) {
 }
 
 async function cancelBorrowRequest(id, gameName) {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   try {
     await axiosClient.put(`/borrowrequests/${id}/boardGameCopy?confirmOrCancel=cancel`);
     setNotice("success", `Borrow time over: confirmed ${gameName} was returned`);
@@ -614,12 +648,12 @@ watchEffect(() => {
 
                 <small v-if="borrowError" class="err">{{ borrowError }}</small>
 
-                <button
-                  class="btn primary"
-                  type="button"
-                  :disabled="!isBorrowValid || borrowSubmitting || !selectedCopy?.isAvailable"
-                  @click="requestBorrow"
-                >
+                  <button
+                    class="btn primary"
+                    type="button"
+                    :disabled="!isBorrowValid || borrowSubmitting || !selectedCopy?.isAvailable || isGuest"
+                    @click="requestBorrow"
+                  >
                   {{ borrowSubmitting ? "Submitting..." : "Request borrow" }}
                 </button>
               </div>

@@ -35,7 +35,7 @@
       </nav>
 
       <!-- User menu -->
-      <div class="user">
+      <div class="user" v-if="!isGuest">
         <button class="user-btn" @click="open = !open">
           <span class="avatar-dot">👤</span>
           <span class="user-name">{{ displayName }}</span>
@@ -46,6 +46,9 @@
           <router-link class="menu-item" to="/profile" @click="open=false">Profile details</router-link>
           <button class="menu-item danger" @click="signOut">Sign out</button>
         </div>
+      </div>
+      <div class="user" v-else>
+        <span class="demo-pill">DEMO MODE</span>
       </div>
     </div>
   </header>
@@ -64,6 +67,7 @@ const hiddenNav = ref(false)
 let lastScroll = 0
 
 const displayName = computed(() => auth.user?.username || auth.user?.name || 'User')
+const isGuest = computed(() => auth.user?.isGuest)
 
 const onKey = (e) => { if (e.key === 'Escape') open.value = false }
 const onScroll = () => {
@@ -189,4 +193,26 @@ function signOut() {
 .menu-item:hover{ background:#151a22; }
 .menu-item.danger{ color:#ffd3d7; }
 .menu-item.danger:hover{ background:#24171a; }
+.demo-pill{
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color:#e9edf5;
+}
+.demo-pill{
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color:#e9edf5;
+}
+
 </style>
+

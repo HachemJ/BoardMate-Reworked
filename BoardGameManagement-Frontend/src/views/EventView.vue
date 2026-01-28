@@ -13,7 +13,14 @@
         </div>
 
         <div class="tabs">
-          <button v-for="t in TABS" :key="t" class="tab wide" :class="{ active: tab === t }" @click="setTab(t)">
+          <button
+            v-for="t in TABS"
+            :key="t"
+            class="tab wide"
+            :class="{ active: tab === t, disabled: isGuest && t !== 'Browse' }"
+            :disabled="isGuest && t !== 'Browse'"
+            @click="setTab(t)"
+          >
             {{ t }}
           </button>
         </div>
@@ -508,12 +515,14 @@ import axios from "axios";
 import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, watchEffect } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useRoute, useRouter } from "vue-router";
+import { showDemoNotice } from "@/utils/demoNotice";
 
 const api = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
   const router = useRouter();
   const route = useRoute();
 
 const auth = useAuthStore();
+const isGuest = computed(() => auth.user?.isGuest);
 const userId = computed(() => Number(auth.user?.id));
 
 const TABS = ["Browse", "Create", "Manage"];
@@ -530,6 +539,10 @@ const showFilters = ref(true);
 const toggleFilters = () => (showFilters.value = !showFilters.value);
 
 function setTab(next) {
+  if (isGuest.value && next !== "Browse") {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   tab.value = next;
   isCalendarView.value = false;
   router.push({ name: "event", query: { tab: next.toLowerCase() } });
@@ -1006,6 +1019,10 @@ function openDetail(ev) {
 }
 
 async function registerForSelected() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   const id = selectedBrowseId.value;
   if (!id) return;
   const ev = events.value.find((e) => e.eventID === id);
@@ -1032,6 +1049,10 @@ async function registerForSelected() {
 }
 
 async function cancelSelected() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   const id = selectedBrowseId.value;
   if (!id) return;
   const ev = events.value.find((e) => e.eventID === id);
@@ -1054,6 +1075,10 @@ async function cancelSelected() {
 }
 
 async function createEvent() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   createTouched.value = true;
   if (!isCreateValid.value) {
     pushToast("error", "Please fill all required fields (description is required).");
@@ -1104,6 +1129,10 @@ async function createEvent() {
 }
 
 async function updateEvent() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   if (!manage.selectedId) return;
   try {
     await api.put(`/events/${manage.selectedId}`, {
@@ -1126,6 +1155,10 @@ async function updateEvent() {
 }
 
 async function deleteEvent() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   if (!manage.selectedId) return;
   lock.visible = false; lock.message = "";
   try {
@@ -1217,6 +1250,7 @@ watch(
 .tab.wide { padding: 12px 26px; min-width: 120px; text-align: center; }
 .tab.active { background: #fff; color: #0f1217; border-color: #ffffff; font-weight: 800; box-shadow: 0 2px 6px rgba(255,255,255,0.15); }
 .tab:not(.active):hover { background: #f4f6fa; color: #0f1217; border-color: #f4f6fa; }
+.tab.disabled { opacity: 0.55; cursor: not-allowed; }
 
 /* cards */
 .card { border: 1px solid #293043; border-radius: 16px; background: #0f1217; color: #e9edf5; padding: 20px; }

@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/authStore.js";
 import { useRouter } from "vue-router";
 import Logo from "@/assets/img/favicon.png";
 import NavLanding from "@/components/NavLanding.vue";
+import { showDemoNotice } from "@/utils/demoNotice";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -98,6 +99,12 @@ async function handleAuth() {
     console.error(error);
   }
 }
+
+function handleGuest() {
+  authStore.enterGuest();
+  showDemoNotice("Demo mode: sign in to perform this action.");
+  router.push("/pages/event?tab=browse");
+}
 </script>
 
 <template>
@@ -183,12 +190,17 @@ async function handleAuth() {
           <div v-if="errorMsg" class="alert-banner" role="alert">
             <div class="alert-dot"></div>
             <span class="alert-text">{{ errorMsg }}</span>
-            <button class="alert-close" @click.prevent="errorMsg = null" aria-label="Dismiss">Ã—</button>
+            <button class="alert-close" @click.prevent="errorMsg = null" aria-label="Dismiss">x</button>
           </div>
 
           <button type="submit" class="btn btn-primary btn-raise">
             {{ isSignUp ? "Create account" : "Sign in" }}
           </button>
+
+          <button type="button" class="btn btn-secondary btn-ghost" @click="handleGuest">
+            Continue as Guest (Demo)
+          </button>
+          <div class="guest-sub">Explore the UI. Actions that change data require an account.</div>
 
           <div class="alt">
             <span class="muted">
@@ -310,6 +322,21 @@ async function handleAuth() {
   filter:brightness(1.03);
   border-color:rgba(0,0,0,.2);
   box-shadow: 0 10px 26px rgba(0,0,0,.2);
+}
+.btn-ghost{
+  background:transparent;
+  border:1px solid #2a313f;
+  color:#d8deea;
+}
+.btn-ghost:hover{
+  border-color:#3a4458;
+  box-shadow:none;
+}
+.guest-sub{
+  font-size:12px;
+  color:#9aa5b5;
+  text-align:center;
+  margin-top:-6px;
 }
 
 /* link row */
