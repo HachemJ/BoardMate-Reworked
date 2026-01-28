@@ -367,8 +367,8 @@ async function confirmBorrow() {
             <div v-for="review in reviews" :key="review.reviewId" class="review-card">
               <div class="review-stars">
                 <span v-for="n in 5" :key="n" class="star">
-                  <span v-if="n <= review.rating">â˜…</span>
-                  <span v-else>â˜†</span>
+                  <span v-if="n <= review.rating">★</span>
+                  <span v-else>☆</span>
                 </span>
               </div>
               <p class="review-comment">{{ review.comment }}</p>

@@ -44,7 +44,7 @@ onUnmounted(() => {
 async function handleAuth() {
   if (isSignUp.value) {
     if (password.value !== confirmPassword.value) {
-      showError("Passwords donâ€™t match.");
+      showError("Passwords don't match.");
       return;
     }
     try {
@@ -66,7 +66,7 @@ async function handleAuth() {
       const status = error?.response?.status;
       const errs = error?.response?.data?.errors;
       if (Array.isArray(errs) && errs.length) {
-        showError(errs.join(" Â· "));
+        showError(errs.join(" - "));
       } else if (status === 401) {
         showError("Sign up succeeded but login failed (401). Check your credentials.");
       } else {
@@ -89,11 +89,11 @@ async function handleAuth() {
     const status = error?.response?.status;
     const errs = error?.response?.data?.errors;
     if (Array.isArray(errs) && errs.length) {
-      showError(errs.join(" Â· "));
+      showError(errs.join(" - "));
     } else if (status === 401) {
       showError("Login failed (401): incorrect email or password.");
     } else {
-      showError("Couldnâ€™t sign you in. Please try again.");
+      showError("Couldn't sign you in. Please try again.");
     }
     console.error(error);
   }
@@ -192,7 +192,7 @@ async function handleAuth() {
 
           <div class="alt">
             <span class="muted">
-              {{ isSignUp ? "Already have an account?" : "Donâ€™t have an account?" }}
+              {{ isSignUp ? "Already have an account?" : "Don't have an account?" }}
             </span>
             <a href="#" class="link" @click.prevent="isSignUp = !isSignUp">
               {{ isSignUp ? "Sign in" : "Create one" }}

@@ -267,7 +267,7 @@ async function confirmDeleteCopy() {
 
           <div v-if="notice" class="notice" :class="notice.type">
             <span>{{ notice.message }}</span>
-            <button class="icon-btn" @click="notice = null">âœ•</button>
+            <button class="icon-btn" @click="notice = null">x</button>
           </div>
 
           <div class="copies-grid">
@@ -291,7 +291,7 @@ async function confirmDeleteCopy() {
                     @click="openMenuId = openMenuId === copy.boardGameCopyId ? null : copy.boardGameCopyId"
                     aria-label="Copy actions"
                   >
-                    â‹¯
+                    ...
                   </button>
                   <div
                     v-if="openMenuId === copy.boardGameCopyId"

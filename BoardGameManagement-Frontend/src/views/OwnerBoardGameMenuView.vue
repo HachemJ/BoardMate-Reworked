@@ -93,7 +93,7 @@ onMounted(fetchBoardGames);
         >
           <div class="toast-head">
             <strong>{{ toast.title }}</strong>
-            <button class="toast-x" @click="closeToast" aria-label="Close">âœ•</button>
+            <button class="toast-x" @click="closeToast" aria-label="Close">x</button>
           </div>
           <p class="toast-msg">{{ toast.message }}</p>
         </div>

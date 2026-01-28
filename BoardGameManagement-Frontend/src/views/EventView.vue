@@ -60,7 +60,7 @@
         </div>
 
         <div v-if="action.visible" class="inline-banner" :class="action.kind">{{ action.msg }}</div>
-        <small v-if="!isCalendarView" class="hint">Click once to select, double-click to view details, or use the â€œView detailsâ€ button.</small>
+        <small v-if="!isCalendarView" class="hint">Click once to select, double-click to view details, or use the "View details" button.</small>
 
         <div v-if="!isCalendarView" class="table-wrap">
           <table class="table">
@@ -96,14 +96,14 @@
               <td class="num">{{ ev.eventDate }}</td>
               <td class="num">{{ prettyTime(ev) }}</td>
               <td>{{ ev.location }}</td>
-              <td>{{ ev.ownerName ?? 'â€”' }}</td>
+              <td>{{ ev.ownerName ?? '-' }}</td>
               <td><span class="state" :class="eventStateClass(ev)">{{ eventState(ev) }}</span></td>
               <td>
                   <span v-if="capacityMap[ev.eventID]">
                     {{ capacityMap[ev.eventID].current }} / {{ capacityMap[ev.eventID].max }}
                     <span v-if="capacityMap[ev.eventID].full" class="badge badge-full" title="All spots taken">Full</span>
                   </span>
-                <span v-else>â€¦</span>
+                <span v-else>...</span>
               </td>
               <td class="ta-center">
                 <button type="button" class="btn details" @click.stop="openDetail(ev)">View details</button>
@@ -163,7 +163,7 @@
                   @focusin="activeSection = 'basics'"
               >
                 <div class="section-title">
-                  <div>Whatâ€™s happening?</div>
+                  <div>What's happening?</div>
                   <div class="section-help">Pick the board game and name your event.</div>
                 </div>
                 <label class="label">Event name</label>
@@ -197,7 +197,7 @@
                 </div>
                 <small v-if="createTouched && !createForm.boardGameId" class="err">Board game is required.</small>
                 <small v-else-if="selectedBoardGame" class="hint subtle">
-                  Recommended for this game: {{ selectedBoardGame.minPlayers }}â€“{{ selectedBoardGame.maxPlayers }} players
+                  Recommended for this game: {{ selectedBoardGame.minPlayers }}-{{ selectedBoardGame.maxPlayers }} players
                 </small>
               </div>
 
@@ -347,9 +347,9 @@
                 </div>
                 <label class="label">Event</label>
                 <select class="input" v-model="manage.selectedId">
-                  <option disabled value="">â€” select â€”</option>
+                  <option disabled value="">- select -</option>
                   <option v-for="ev in myEvents" :key="ev.eventID" :value="ev.eventID">
-                    {{ ev.name }} â€” {{ ev.eventDate }}
+                    {{ ev.name }} - {{ ev.eventDate }}
                   </option>
                 </select>
                 <div v-if="selectedManageEvent" class="meta-row">
@@ -367,7 +367,7 @@
                   @focusin="manageActiveSection = 'basics'"
               >
                 <div class="section-title">
-                  <div>Whatâ€™s changing?</div>
+                  <div>What's changing?</div>
                   <div class="section-help">Update the title and board game.</div>
                 </div>
                 <label class="label">Event name</label>
@@ -757,8 +757,8 @@ function eventStateClass(ev) {
 function prettyTime(ev) {
   const s = (ev.startTime || "").slice(0, 5);
   const e = (ev.endTime || "").slice(0, 5);
-  if (!s && !e) return "â€”";
-  return `${s || "??:??"}â€“${e || "??:??"}`;
+  if (!s && !e) return "-";
+  return `${s || "??:??"}-${e || "??:??"}`;
 }
 
 function combineDateTime(dateStr, timeStr) {
@@ -812,7 +812,7 @@ const calendarOptions = computed(() => ({
   eventDidMount: (info) => {
     const props = info.event.extendedProps || {};
     const timeRange = info.event.start && info.event.end
-      ? `${info.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}â€“${info.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
+      ? `${info.event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}-${info.event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
       : "Time TBD";
     const capacity = capacityMap[props.eventId]
       ? `${capacityMap[props.eventId].current} / ${capacityMap[props.eventId].max} spots`
@@ -1019,7 +1019,7 @@ async function registerForSelected() {
     return;
   }
   if (regStatus[id] === "Registered") {
-    showAction("info", "Youâ€™re already registered.");
+    showAction("info", "You're already registered.");
     return;
   }
   try {
@@ -1036,7 +1036,7 @@ async function cancelSelected() {
   if (!id) return;
   const ev = events.value.find((e) => e.eventID === id);
   if (regStatus[id] === "Not Registered") {
-    showAction("info", "Youâ€™re not registered for this event.");
+    showAction("info", "You're not registered for this event.");
     return;
   }
   try {
@@ -1046,7 +1046,7 @@ async function cancelSelected() {
   } catch (e) {
     const msg = (e?.response?.data?.message || "").toLowerCase?.() || "";
     if (msg.includes("active") || msg.includes("ongoing") || msg.includes("started")) {
-      showAction("error", "You canâ€™t cancel because the event is active.");
+      showAction("error", "You can't cancel because the event is active.");
     } else {
       showAction("error", "Cancel failed.");
     }

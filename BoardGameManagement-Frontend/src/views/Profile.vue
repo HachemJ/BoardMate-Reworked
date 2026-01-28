@@ -306,7 +306,7 @@ export default {
       const start = this.formatTime(startTime);
       const end = this.formatTime(endTime);
       if (!start && !end) return "Time TBD";
-      return `${start || "??:??"} â€“ ${end || "??:??"}`;
+      return `${start || "??:??"} - ${end || "??:??"}`;
     },
 
     formatTime(time) {
@@ -363,7 +363,7 @@ export default {
               alt="Profile Picture"
           />
           <div class="id">
-            <h2 class="name">{{ userProfile.name || "â€”" }}</h2>
+            <h2 class="name">{{ userProfile.name || "-" }}</h2>
             <p class="email">{{ userProfile.email }}</p>
             <span class="role-pill" :data-role="userProfile.status">
               {{ userProfile.status?.toUpperCase() }}
@@ -379,7 +379,7 @@ export default {
           <div v-else class="edit-actions">
             <button class="btn btn-primary" :disabled="saveDisabled" @click="saveProfile">
               <span v-if="!saving">Save</span>
-              <span v-else>Savingâ€¦</span>
+              <span v-else>Saving...</span>
             </button>
             <button class="btn btn-ghost" :disabled="saving" @click="cancelEditing">Cancel</button>
           </div>
@@ -432,7 +432,7 @@ export default {
         <div class="edit-actions">
           <button class="btn btn-primary" :disabled="saveDisabled" @click="saveProfile">
             <span v-if="!saving">Save</span>
-            <span v-else>Savingâ€¦</span>
+            <span v-else>Saving...</span>
           </button>
           <button class="btn btn-ghost" :disabled="saving" @click="cancelEditing">Cancel</button>
         </div>
@@ -508,14 +508,14 @@ export default {
             </div>
             <div class="event-card__meta">
               <span class="chip">ðŸ“… {{ formatDate(e.date) }}</span>
-              <span class="chip">â° {{ formatTimeRange(e.startTime, e.endTime) }}</span>
+              <span class="chip">Time {{ formatTimeRange(e.startTime, e.endTime) }}</span>
               <span class="chip">ðŸ“ {{ e.location || "Location TBD" }}</span>
             </div>
             <div class="event-card__foot">
               <span class="hosted">
                 {{ userProfile.status === "owner" ? "Hosted by you" : `Hosted by ${e.ownerName || "Unknown"}` }}
               </span>
-              <span class="event-card__link">View details â†’</span>
+              <span class="event-card__link">View details -></span>
             </div>
           </router-link>
         </div>

@@ -184,7 +184,7 @@ onMounted(getBoardGames);
           <form class="form" @submit.prevent="updateBG">
             <div v-if="notice" class="notice" :class="notice.type">
               <span>{{ notice.message }}</span>
-              <button class="icon-btn" @click="notice = null" type="button">âœ•</button>
+              <button class="icon-btn" @click="notice = null" type="button">x</button>
             </div>
 
             <div class="form-section">
