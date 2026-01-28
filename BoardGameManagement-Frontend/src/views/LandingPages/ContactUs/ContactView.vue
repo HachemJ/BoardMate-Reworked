@@ -37,7 +37,7 @@ async function sendMessage() {
     // simulate network
     await new Promise(r => setTimeout(r, 650));
 
-    banner.value = { type: "success", text: "Thanks! Your message was sent. We’ll get back to you soon." };
+    banner.value = { type: "success", text: "Thanks! Your message was sent. We'll get back to you soon." };
     name.value = "";
     email.value = "";
     message.value = "";
@@ -71,7 +71,7 @@ async function sendMessage() {
         <main class="card">
           <header class="card-head">
             <h1>Contact us</h1>
-            <p class="sub">Questions, feedback, or issues — we’re here to help.</p>
+            <p class="sub">Questions, feedback, or issues - we're here to help.</p>
           </header>
 
           <div v-if="banner.type" class="banner" :class="`banner--${banner.type}`">

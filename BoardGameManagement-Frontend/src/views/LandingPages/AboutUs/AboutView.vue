@@ -36,8 +36,8 @@ function initials(name) {
         <h1 class="title">BoardMate &nbsp;<span class="amp">&</span>&nbsp;Us</h1>
         <p class="lead">
           BoardMate is your go-to platform for organizing and managing board-game activities.
-          Whether you’re a game owner lending your favorite titles or a player looking to discover
-          new sessions, we’ve got you covered. We built this to bring the community closer—connect
+          Whether you're a game owner lending your favorite titles or a player looking to discover
+          new sessions, we've got you covered. We built this to bring the community closer - connect
           players, share collections, and create unforgettable game nights.
         </p>
       </header>

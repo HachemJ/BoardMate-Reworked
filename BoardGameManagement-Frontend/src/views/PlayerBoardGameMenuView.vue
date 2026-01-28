@@ -322,7 +322,7 @@ async function confirmDeleteCopy() {
             </div>
 
             <div v-if="myBoardGameCopies.length === 0" class="empty-card">
-              <div class="empty-icon">ðŸŽ²</div>
+              <div class="empty-icon">BG</div>
               <h3>No copies yet</h3>
               <p>Add your first board game copy to share it with borrowers.</p>
               <router-link

@@ -350,7 +350,7 @@ export default {
       }"
     >
       <span>{{ toast.message }}</span>
-      <button class="toast__close" @click="toast.show = false">Ã—</button>
+      <button class="toast__close" @click="toast.show = false">x</button>
     </div>
 
     <div class="content">
@@ -507,9 +507,9 @@ export default {
               {{ e.boardGameName ? `Board game: ${e.boardGameName}` : "Board game: TBD" }}
             </div>
             <div class="event-card__meta">
-              <span class="chip">ðŸ“… {{ formatDate(e.date) }}</span>
+              <span class="chip">Date: {{ formatDate(e.date) }}</span>
               <span class="chip">Time {{ formatTimeRange(e.startTime, e.endTime) }}</span>
-              <span class="chip">ðŸ“ {{ e.location || "Location TBD" }}</span>
+              <span class="chip">Location: {{ e.location || "Location TBD" }}</span>
             </div>
             <div class="event-card__foot">
               <span class="hosted">

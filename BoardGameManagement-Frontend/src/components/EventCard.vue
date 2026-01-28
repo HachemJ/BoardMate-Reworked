@@ -102,7 +102,7 @@ function fmtTime(hhmm) {
 
 const timeLabel = computed(() => {
   if (!startTime.value || !endTime.value) return "Time TBD";
-  return `${fmtTime(startTime.value)}–${fmtTime(endTime.value)}`;
+  return `${fmtTime(startTime.value)} - ${fmtTime(endTime.value)}`;
 });
 
 const locationLabel = computed(() => (location.value?.trim() ? location.value : "Location TBD"));

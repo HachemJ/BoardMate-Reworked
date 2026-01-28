@@ -183,7 +183,7 @@ async function handleAuth() {
           <div v-if="errorMsg" class="alert-banner" role="alert">
             <div class="alert-dot"></div>
             <span class="alert-text">{{ errorMsg }}</span>
-            <button class="alert-close" @click.prevent="errorMsg = null" aria-label="Dismiss">Ã—</button>
+            <button class="alert-close" @click.prevent="errorMsg = null" aria-label="Dismiss">x</button>
           </div>
 
           <button type="submit" class="btn btn-primary btn-raise">
