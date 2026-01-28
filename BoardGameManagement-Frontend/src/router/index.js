@@ -23,6 +23,7 @@ import UpdateBoardGameView from "../views/UpdateBoardGameView.vue";
 import AddBoardGameCopyView from "../views/AddBoardGameCopyView.vue";
 import UpdateBoardGameCopyView from "../views/UpdateBoardGameCopyView.vue";
 import AddBoardGameReviewView from "../views/AddBoardGameReviewView.vue";
+import { showDemoNotice } from "@/utils/demoNotice";
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -61,6 +62,64 @@ const router = createRouter({
         // Catch-all → home
         { path: "/:pathMatch(.*)*", redirect: "/" },
     ],
+});
+
+function isGuestMode() {
+    return localStorage.getItem("authMode") === "guest";
+}
+
+function demoRedirect(target) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return target;
+}
+
+router.beforeEach((to) => {
+    if (!isGuestMode()) return true;
+
+    const path = to.path || "";
+    const tab = String(to.query.tab || "").toLowerCase();
+
+    // Allow: public + browse-only routes
+    if (
+        path === "/" ||
+        path.startsWith("/about") ||
+        path.startsWith("/contact") ||
+        path.startsWith("/signin") ||
+        path.startsWith("/pages/landing-pages/basic")
+    ) {
+        return true;
+    }
+
+    if (path.startsWith("/pages/event")) {
+        if (tab === "create" || tab === "manage") {
+            return demoRedirect({ name: "event", query: { tab: "browse" } });
+        }
+        return true;
+    }
+
+    if (path.startsWith("/pages/borrowrequests")) {
+        if (tab && tab !== "browse") {
+            return demoRedirect({ name: "borrowRequestMenu", query: { tab: "browse" } });
+        }
+        return true;
+    }
+
+    if (path.startsWith("/boardgames") || path.startsWith("/pages/playerboardgame")) {
+        if (path.endsWith("/review") || path.endsWith("/add") || path.endsWith("/update")) {
+            return demoRedirect({ name: "boardgames" });
+        }
+        return true;
+    }
+
+    if (
+        path.startsWith("/profile") ||
+        path.startsWith("/pages/ownerboardgame") ||
+        path.startsWith("/pages/boardgamecopy")
+    ) {
+        return demoRedirect({ name: "event", query: { tab: "browse" } });
+    }
+
+    return true;
 });
 
 export default router;

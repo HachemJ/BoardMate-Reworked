@@ -4,9 +4,11 @@ import { ref, computed, onMounted, reactive, watchEffect } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { useAuthStore } from "@/stores/authStore.js";
+import { showDemoNotice } from "@/utils/demoNotice";
 
 const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 const authStore = useAuthStore();
+const isGuest = computed(() => !!authStore.user?.isGuest);
 const route = useRoute();
 const router = useRouter();
 
@@ -191,6 +193,11 @@ function selectCopy(copy) {
 }
 
 async function confirmBorrow() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    setNotice("error", "Sign in to request a borrow.", 0);
+    return;
+  }
   if (!isBorrowValid.value) {
     setNotice("error", borrowError.value || "Fill out the borrow details.", 0);
     return;
@@ -339,12 +346,12 @@ async function confirmBorrow() {
                 <small v-if="borrowSummary" class="summary">{{ borrowSummary }}</small>
                 <small v-if="borrowError" class="err">{{ borrowError }}</small>
 
-                <button
-                  class="btn primary"
-                  type="button"
-                  :disabled="!isBorrowValid || !selectedCopy?.isAvailable"
-                  @click="confirmBorrow"
-                >
+                  <button
+                    class="btn primary"
+                    type="button"
+                    :disabled="!isBorrowValid || !selectedCopy?.isAvailable || isGuest"
+                    @click="confirmBorrow"
+                  >
                   Request borrow
                 </button>
               </div>

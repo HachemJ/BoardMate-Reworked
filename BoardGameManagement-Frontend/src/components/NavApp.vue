@@ -16,29 +16,31 @@
 
       <!-- Right group: app navigation -->
       <nav class="nav-links">
-        <router-link to="/profile" class="nav-link">Profile</router-link>
+        <router-link v-if="!isGuest" to="/profile" class="nav-link">Profile</router-link>
 
         <!-- owner vs player menus -->
         <router-link
-            v-if="auth.user?.isAOwner"
+            v-if="!isGuest && auth.user?.isAOwner"
             to="/pages/ownerboardgame"
             class="nav-link"
         >Owner Games</router-link>
         <router-link
-            v-else
+            v-else-if="!isGuest"
             to="/pages/playerboardgame"
             class="nav-link"
         >Player Games</router-link>
+        <router-link v-else to="/boardgames" class="nav-link">Board Games</router-link>
 
         <router-link to="/pages/event" class="nav-link">Events</router-link>
         <router-link to="/pages/borrowrequests" class="nav-link">Borrow</router-link>
 
         <!-- user chip + sign out -->
-        <div class="user-chip" v-if="auth.user?.username">
+        <span v-if="isGuest" class="demo-pill">DEMO MODE</span>
+        <div class="user-chip" v-else-if="auth.user?.username">
           <span class="avatar">{{ initials }}</span>
           <span class="uname">{{ auth.user.username }}</span>
         </div>
-        <button class="btn btn-ghost" @click="signOut">Sign out</button>
+        <button v-else class="btn btn-ghost" @click="signOut">Sign out</button>
       </nav>
     </div>
   </header>
@@ -51,6 +53,7 @@ import { useAuthStore } from "@/stores/authStore";
 
 const router = useRouter();
 const auth = useAuthStore();
+const isGuest = computed(() => auth.user?.isGuest);
 
 const initials = computed(() => {
   const n = auth.user?.username || "";
@@ -133,6 +136,16 @@ function signOut() {
   background:#171b22; color:#e9edf5; border-color:#2a3242;
 }
 .btn-ghost:hover{ transform: translateY(-2px); filter: brightness(1.03); }
+.demo-pill{
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.6px;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.08);
+  color:#e9edf5;
+}
 @media (max-width: 900px){
   .nav-inner{ grid-template-columns: 1fr; row-gap:10px; }
   .nav-links{ flex-wrap:wrap; justify-content:flex-start; }

@@ -4,14 +4,16 @@ import axios from "axios";
 import { computed, onMounted, ref, watchEffect } from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { useRouter } from "vue-router";
+import { showDemoNotice } from "@/utils/demoNotice";
 
 const axiosClient = axios.create({ baseURL: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080" });
 
 const authStore = useAuthStore();
 const router = useRouter();
+const isGuest = computed(() => !!authStore.user?.isGuest);
 const tabs = ["View All Board Games", "My Board Game Copies"];
 const visibleTabs = computed(() =>
-    authStore.user?.isAOwner ? tabs : [tabs[0]]
+    authStore.user?.isAOwner && !isGuest.value ? tabs : [tabs[0]]
 );
 const selectedTab = ref(visibleTabs.value[0]);
 
@@ -46,11 +48,13 @@ const filteredGames = computed(() =>
 
 async function fetchBoardGames() {
   try {
-    const requests = [
-      axiosClient.get("/boardgames"),
-      axiosClient.get(`/boardgamecopies/byplayer/${authStore.user.id}`),
-    ];
-    if (authStore.user?.isAOwner) {
+    const requests = [axiosClient.get("/boardgames")];
+    if (!isGuest.value) {
+      requests.push(
+        axiosClient.get(`/boardgamecopies/byplayer/${authStore.user.id}`)
+      );
+    }
+    if (authStore.user?.isAOwner && !isGuest.value) {
       requests.push(
         axiosClient.get(`/borrowrequests?ownerId=${authStore.user.id}`)
       );
@@ -60,7 +64,7 @@ async function fetchBoardGames() {
     const [gamesRes, copiesRes, ownerRequestsRes] = responses;
 
     boardGames.value = gamesRes.data ?? [];
-    myBoardGameCopies.value = copiesRes.data ?? [];
+    myBoardGameCopies.value = copiesRes?.data ?? [];
 
     if (authStore.user?.isAOwner) {
       const locked = new Set();
@@ -107,6 +111,10 @@ watchEffect(() => {
 });
 
 function requestDelete(copy) {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   if (isCopyLocked(copy.boardGameCopyId)) {
     notice.value = {
       type: "error",
@@ -125,6 +133,10 @@ function closeDeleteModal() {
 }
 
 async function confirmDeleteCopy() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    return;
+  }
   if (!pendingDeleteCopy.value || isDeleting.value) return;
   isDeleting.value = true;
   try {
@@ -172,12 +184,22 @@ async function confirmDeleteCopy() {
             <p>Browse the catalog or manage the copies you own.</p>
           </div>
           <div class="actions" v-if="authStore.user?.isAOwner">
-            <router-link :to="{ name: 'playerAddBoardGame' }">
-              <button class="btn primary">Add Board Game</button>
-            </router-link>
-            <router-link :to="{ name: 'ownerUpdateBoardGame' }">
-              <button class="btn ghost">Update Board Game</button>
-            </router-link>
+            <template v-if="!isGuest">
+              <router-link :to="{ name: 'playerAddBoardGame' }">
+                <button class="btn primary">Add Board Game</button>
+              </router-link>
+              <router-link :to="{ name: 'ownerUpdateBoardGame' }">
+                <button class="btn ghost">Update Board Game</button>
+              </router-link>
+            </template>
+            <template v-else>
+              <button class="btn primary" type="button" @click="showDemoNotice('Demo mode: sign in to perform this action.')">
+                Add Board Game
+              </button>
+              <button class="btn ghost" type="button" @click="showDemoNotice('Demo mode: sign in to perform this action.')">
+                Update Board Game
+              </button>
+            </template>
           </div>
         </div>
 
@@ -256,12 +278,22 @@ async function confirmDeleteCopy() {
               <p class="subtle">Copies you own (inventory and availability).</p>
             </div>
             <div class="toolbar" v-if="authStore.user?.isAOwner">
-              <router-link :to="{ name: 'addBoardGameCopy' }">
-                <button class="btn primary">Add Copy</button>
-              </router-link>
-              <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
-                <button class="btn ghost">Update Copy</button>
-              </router-link>
+              <template v-if="!isGuest">
+                <router-link :to="{ name: 'addBoardGameCopy' }">
+                  <button class="btn primary">Add Copy</button>
+                </router-link>
+                <router-link :to="{ name: 'ownerUpdateBoardGameCopy' }">
+                  <button class="btn ghost">Update Copy</button>
+                </router-link>
+              </template>
+              <template v-else>
+                <button class="btn primary" type="button" @click="showDemoNotice('Demo mode: sign in to perform this action.')">
+                  Add Copy
+                </button>
+                <button class="btn ghost" type="button" @click="showDemoNotice('Demo mode: sign in to perform this action.')">
+                  Update Copy
+                </button>
+              </template>
             </div>
           </div>
 
@@ -325,12 +357,16 @@ async function confirmDeleteCopy() {
               <div class="empty-icon">BG</div>
               <h3>No copies yet</h3>
               <p>Add your first board game copy to share it with borrowers.</p>
-              <router-link
-                v-if="authStore.user?.isAOwner"
-                :to="{ name: 'addBoardGameCopy' }"
-              >
-                <button class="btn primary">Add your first board game copy</button>
-              </router-link>
+              <template v-if="authStore.user?.isAOwner && !isGuest">
+                <router-link :to="{ name: 'addBoardGameCopy' }">
+                  <button class="btn primary">Add your first board game copy</button>
+                </router-link>
+              </template>
+              <template v-else-if="authStore.user?.isAOwner && isGuest">
+                <button class="btn primary" type="button" @click="showDemoNotice('Demo mode: sign in to perform this action.')">
+                  Add your first board game copy
+                </button>
+              </template>
             </div>
           </div>
 
