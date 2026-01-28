@@ -252,7 +252,7 @@ async function confirmDeleteCopy() {
             <router-link
                 v-for="game in filteredGames"
                 :key="game.name"
-                :to="{ name: 'playerBoardGameDetail', params: { gamename: game.name } }"
+                :to="{ name: 'boardgameHub', params: { id: game.gameID ?? game.id ?? game.boardGameId } }"
                 class="game-card"
                 :class="`card-${cardMode}`"
             >

@@ -140,7 +140,7 @@ onMounted(fetchBoardGames);
               <tr v-for="game in filteredGames" :key="game.name">
                 <td>
                   <router-link
-                      :to="{ name: 'ownerBoardGameDetail', params: { gamename: game.name } }"
+                      :to="{ name: 'boardgameHub', params: { id: game.gameID ?? game.id ?? game.boardGameId } }"
                   >
                     {{ game.name }}
                   </router-link>

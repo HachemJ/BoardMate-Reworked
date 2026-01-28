@@ -18,6 +18,7 @@ import ProfileView from "../views/Profile.vue";
 // Unified Board Games page
 import PlayerBoardGameMenuView from "../views/PlayerBoardGameMenuView.vue";
 import BoardGameDetailView from "../views/BoardGameDetailView.vue";
+import BoardGameHubView from "../views/BoardGameHubView.vue";
 import AddBoardGameView from "../views/AddBoardGameView.vue";
 import UpdateBoardGameView from "../views/UpdateBoardGameView.vue";
 import AddBoardGameCopyView from "../views/AddBoardGameCopyView.vue";
@@ -43,6 +44,7 @@ const router = createRouter({
 
         // Board Games
         { path: "/boardgames", name: "boardgames", component: PlayerBoardGameMenuView },
+        { path: "/boardgames/:id(\\d+)", name: "boardgameHub", component: BoardGameHubView },
         { path: "/pages/ownerboardgame", name: "ownerBoardGameMenu", redirect: "/boardgames" },
         { path: "/pages/playerboardgame", name: "playerBoardGameMenu", redirect: "/boardgames" },
         { path: "/pages/ownerboardgame/add", name: "ownerAddBoardGame", component: AddBoardGameView },

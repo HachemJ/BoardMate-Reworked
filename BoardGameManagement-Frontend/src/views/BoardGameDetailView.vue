@@ -45,6 +45,16 @@ const reviewRoute = computed(() => {
 
 const reviewCount = computed(() => reviews.value.length);
 
+const tabFromQuery = computed(() => String(route.query.tab || "").toLowerCase());
+
+watchEffect(() => {
+  if (tabFromQuery.value === "reviews") {
+    selectedTab.value = tabs[1];
+  } else if (tabFromQuery.value === "copies") {
+    selectedTab.value = tabs[0];
+  }
+});
+
 const borrowError = computed(() => {
   if (!selectedCopy.value) return "Select a copy to request a borrow.";
   if (!borrowForm.startDate || !borrowForm.startTime) return "Start date and time are required.";
