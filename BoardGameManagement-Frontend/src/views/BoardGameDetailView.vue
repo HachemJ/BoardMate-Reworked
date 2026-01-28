@@ -193,6 +193,11 @@ function selectCopy(copy) {
 }
 
 async function confirmBorrow() {
+  if (isGuest.value) {
+    showDemoNotice("Demo mode: sign in to perform this action.");
+    setNotice("error", "Sign in to request a borrow.", 0);
+    return;
+  }
   if (!isBorrowValid.value) {
     setNotice("error", borrowError.value || "Fill out the borrow details.", 0);
     return;
@@ -341,12 +346,12 @@ async function confirmBorrow() {
                 <small v-if="borrowSummary" class="summary">{{ borrowSummary }}</small>
                 <small v-if="borrowError" class="err">{{ borrowError }}</small>
 
-                <button
-                  class="btn primary"
-                  type="button"
-                  :disabled="!isBorrowValid || !selectedCopy?.isAvailable"
-                  @click="confirmBorrow"
-                >
+                  <button
+                    class="btn primary"
+                    type="button"
+                    :disabled="!isBorrowValid || !selectedCopy?.isAvailable || isGuest"
+                    @click="confirmBorrow"
+                  >
                   Request borrow
                 </button>
               </div>
