@@ -35,6 +35,10 @@
             <span class="chip">Min {{ gameDetails.minPlayers }} players</span>
             <span class="chip">Max {{ gameDetails.maxPlayers }} players</span>
             <span class="chip">{{ ratingCount }} review{{ ratingCount === 1 ? "" : "s" }}</span>
+            <div class="meta-actions">
+              <button class="btn primary" type="button" @click="goToReviews">View reviews</button>
+              <button class="btn ghost" type="button" @click="goToCopies">View copies</button>
+            </div>
           </div>
         </div>
       </section>
@@ -55,12 +59,17 @@
         <div class="info-block">
           <h3>Copies</h3>
           <p v-if="copiesCount === 0">No copies available right now.</p>
-          <p v-else>{{ copiesCount }} copy{{ copiesCount === 1 ? "" : "ies" }} available.</p>
+          <p v-else>{{ copiesCount }} {{ copiesCount === 1 ? "copy" : "copies" }} available.</p>
         </div>
         <div class="info-block">
           <h3>Reviews</h3>
           <p v-if="ratingCount === 0">No reviews yet.</p>
-          <p v-else>Average rating {{ ratingDisplay }} across {{ ratingCount }} review{{ ratingCount === 1 ? "" : "s" }}.</p>
+          <p v-else>
+            <span class="rating-stars">
+              <span v-for="n in 5" :key="n" class="star" :class="{ filled: n <= Math.round(ratingAverage) }">★</span>
+            </span>
+            <span class="rating-text">{{ ratingDisplay }}/5 across {{ ratingCount }} review{{ ratingCount === 1 ? "" : "s" }}</span>
+          </p>
         </div>
       </section>
     </main>
@@ -245,6 +254,7 @@ onMounted(fetchHubData);
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .chip {
@@ -253,6 +263,31 @@ onMounted(fetchHubData);
   border: 1px solid rgba(47, 56, 74, 0.8);
   color: #d2d9e6;
   font-size: 13px;
+}
+
+.meta-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.rating-stars {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 8px;
+}
+
+.star {
+  color: #394154;
+  font-size: 14px;
+}
+
+.star.filled {
+  color: #f4c36b;
+}
+
+.rating-text {
+  color: #b8c0d1;
 }
 
 .loading-card,
@@ -336,6 +371,15 @@ onMounted(fetchHubData);
     width: 100%;
   }
   .header-actions .btn {
+    flex: 1;
+  }
+
+  .meta-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .meta-actions .btn {
     flex: 1;
   }
 }
