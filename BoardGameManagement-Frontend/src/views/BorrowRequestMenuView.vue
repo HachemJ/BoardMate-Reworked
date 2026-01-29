@@ -187,6 +187,19 @@ function prettyDateTime(dateStr, timeStr) {
   return dt.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+function formatDisplayDateTime(value) {
+  if (!value) return "";
+  const dt = new Date(value);
+  if (Number.isNaN(dt.getTime())) return value;
+  return dt.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 function addHoursToDateTime(dateStr, timeStr, hours) {
   if (!dateStr || !timeStr) return { date: "", time: "" };
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -696,8 +709,8 @@ watchEffect(() => {
               <tbody>
                 <tr v-for="request in playerRequests" :key="request.requestId">
                   <td>{{ request.specificGameName }}</td>
-                  <td>{{ request.startOfLoan }}</td>
-                  <td>{{ request.endOfLoan }}</td>
+                  <td>{{ formatDisplayDateTime(request.startOfLoan) }}</td>
+                  <td>{{ formatDisplayDateTime(request.endOfLoan) }}</td>
                   <td>
                     <span class="status" :class="getStatusClass(request.requestStatus)">
                       {{ request.requestStatus }}
@@ -764,8 +777,8 @@ watchEffect(() => {
                     <tr v-for="request in ownerRequests" :key="request.requestId">
                       <td>{{ request.specificGameName }}</td>
                       <td>{{ request.borrowerName }}</td>
-                      <td>{{ request.startOfLoan }}</td>
-                      <td>{{ request.endOfLoan }}</td>
+                      <td>{{ formatDisplayDateTime(request.startOfLoan) }}</td>
+                      <td>{{ formatDisplayDateTime(request.endOfLoan) }}</td>
                       <td>
                         <span class="status" :class="getStatusClass(request.requestStatus)">
                           {{ request.requestStatus }}
