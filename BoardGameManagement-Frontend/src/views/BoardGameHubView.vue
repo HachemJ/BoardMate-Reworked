@@ -11,10 +11,7 @@
             <p>Overview, reviews, and available copies.</p>
           </div>
         </div>
-        <div class="header-actions">
-          <button class="btn primary" type="button" @click="goToReviews">View reviews</button>
-          <button class="btn ghost" type="button" @click="goToCopies">View copies</button>
-        </div>
+        <div class="header-actions" />
       </header>
 
       <section class="hero-card" v-if="!loading && !error">
@@ -35,10 +32,6 @@
             <span class="chip">Min {{ gameDetails.minPlayers }} players</span>
             <span class="chip">Max {{ gameDetails.maxPlayers }} players</span>
             <span class="chip">{{ ratingCount }} review{{ ratingCount === 1 ? "" : "s" }}</span>
-            <div class="meta-actions">
-              <button class="btn primary" type="button" @click="goToReviews">View reviews</button>
-              <button class="btn ghost" type="button" @click="goToCopies">View copies</button>
-            </div>
           </div>
         </div>
       </section>
@@ -60,6 +53,7 @@
           <h3>Copies</h3>
           <p v-if="copiesCount === 0">No copies available right now.</p>
           <p v-else>{{ copiesCount }} {{ copiesCount === 1 ? "copy" : "copies" }} available.</p>
+          <button class="btn ghost inline-cta" type="button" @click="goToCopies">View copies</button>
         </div>
         <div class="info-block">
           <h3>Reviews</h3>
@@ -70,6 +64,7 @@
             </span>
             <span class="rating-text">{{ ratingDisplay }}/5 across {{ ratingCount }} review{{ ratingCount === 1 ? "" : "s" }}</span>
           </p>
+          <button class="btn primary inline-cta" type="button" @click="goToReviews">View reviews</button>
         </div>
       </section>
     </main>
@@ -265,12 +260,6 @@ onMounted(fetchHubData);
   font-size: 13px;
 }
 
-.meta-actions {
-  display: flex;
-  gap: 10px;
-  margin-left: auto;
-}
-
 .rating-stars {
   display: inline-flex;
   gap: 4px;
@@ -288,6 +277,10 @@ onMounted(fetchHubData);
 
 .rating-text {
   color: #b8c0d1;
+}
+
+.inline-cta {
+  margin-top: 10px;
 }
 
 .loading-card,
@@ -374,13 +367,8 @@ onMounted(fetchHubData);
     flex: 1;
   }
 
-  .meta-actions {
+  .inline-cta {
     width: 100%;
-    margin-left: 0;
-  }
-
-  .meta-actions .btn {
-    flex: 1;
   }
 }
 
