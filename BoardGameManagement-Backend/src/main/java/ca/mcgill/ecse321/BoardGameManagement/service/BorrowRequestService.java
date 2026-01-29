@@ -100,6 +100,9 @@ public class BorrowRequestService {
 
         //check that the game you want to borrow does not have a request with overlapping time
         Player owner = boardGameCopyRepository.findBySpecificGameID(requestDTO.getSpecificGameID()).getPlayer();
+        if (owner != null && owner.getPlayerID() == borrower.getPlayerID()) {
+            throw new GlobalException(HttpStatus.BAD_REQUEST, "You cannot borrow your own copy");
+        }
         ArrayList<BorrowRequest> requests = borrowRequestRepository.findBorrowRequestsByBoardGameCopy_Player(owner);
 
         for (BorrowRequest request : requests) {
