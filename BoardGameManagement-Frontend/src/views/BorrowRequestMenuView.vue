@@ -405,6 +405,18 @@ function canCancelRequest(status, startDate) {
   return (status === "Accepted" || status === "InProgress") && todayStr >= start;
 }
 
+function isBorrowExpired(endDate) {
+  if (!endDate) return false;
+  const end = new Date(endDate);
+  if (!Number.isNaN(end.getTime())) {
+    return end.getTime() < Date.now();
+  }
+  const today = new Date();
+  const todayStr = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+  const endDay = dateOnly(endDate);
+  return endDay && todayStr > endDay;
+}
+
 function canCancelPending(status) {
   return status === "Pending";
 }
@@ -702,9 +714,10 @@ watchEffect(() => {
                     <button
                       v-if="canCancelRequest(request.requestStatus, request.startOfLoan)"
                       class="btn ghost"
+                      :disabled="isBorrowExpired(request.endOfLoan)"
                       @click="cancelRequest(request.requestId, request.specificGameName)"
                     >
-                      End borrow
+                      {{ isBorrowExpired(request.endOfLoan) ? "Borrow ended" : "End borrow" }}
                     </button>
                     <button
                       v-if="canCancelPending(request.requestStatus)"
