@@ -18,6 +18,7 @@ public class Player {
   private String email;
   private String password;
   private boolean isAOwner;
+  private Boolean isAdmin;
 
   @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
   private List<Event> events = new ArrayList<>();
@@ -29,6 +30,7 @@ public class Player {
     email = aEmail;
     password = aPassword;
     isAOwner = aIsAOwner;
+    isAdmin = Boolean.FALSE;
   }
 
   public boolean setName(String aName) {
@@ -48,6 +50,11 @@ public class Player {
 
   public boolean setIsAOwner(boolean aIsAOwner) {
     isAOwner = aIsAOwner;
+    return true;
+  }
+
+  public boolean setIsAdmin(boolean aIsAdmin) {
+    isAdmin = aIsAdmin;
     return true;
   }
 
@@ -71,12 +78,17 @@ public class Player {
     return isAOwner;
   }
 
+  public boolean getIsAdmin() {
+    return Boolean.TRUE.equals(isAdmin);
+  }
+
   public String toString() {
     return super.toString() + "["+
         "playerID" + ":" + getPlayerID()+ "," +
         "name" + ":" + getName()+ "," +
         "email" + ":" + getEmail()+ "," +
         "password" + ":" + getPassword()+ "," +
-        "isAOwner" + ":" + getIsAOwner()+ "]";
+        "isAOwner" + ":" + getIsAOwner()+ "," +
+        "isAdmin" + ":" + getIsAdmin()+ "]";
   }
 }

@@ -1,6 +1,7 @@
 package ca.mcgill.ecse321.BoardGameManagement.repository;
 
 import ca.mcgill.ecse321.BoardGameManagement.model.BorrowRequest;
+import ca.mcgill.ecse321.BoardGameManagement.model.BoardGameCopy;
 import ca.mcgill.ecse321.BoardGameManagement.model.Player;
 import org.springframework.data.repository.CrudRepository;
 
@@ -14,4 +15,6 @@ public interface BorrowRequestRepository extends CrudRepository<BorrowRequest, I
   //to find all borrow requests for a specific game owner
   //NB: game owner must be present in the database; otherwise throws errors.
   public ArrayList<BorrowRequest> findBorrowRequestsByBoardGameCopy_Player(Player boardGameCopy_player);
+
+  public ArrayList<BorrowRequest> findBorrowRequestsByBoardGameCopy(BoardGameCopy boardGameCopy);
 }

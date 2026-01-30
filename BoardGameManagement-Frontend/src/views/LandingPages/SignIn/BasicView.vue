@@ -61,7 +61,7 @@ async function handleAuth() {
         email: email.value,
         password: password.value,
       });
-      authStore.login(user.playerID, user.name, user.email, user.isAOwner);
+      authStore.login(user.playerID, user.name, user.email, user.isAOwner, user.isAdmin);
       router.push("/profile");
     } catch (error) {
       const status = error?.response?.status;
@@ -84,7 +84,7 @@ async function handleAuth() {
       email: email.value,
       password: password.value,
     });
-    authStore.login(user.playerID, user.name, user.email, user.isAOwner);
+    authStore.login(user.playerID, user.name, user.email, user.isAOwner, user.isAdmin);
     router.push("/profile");
   } catch (error) {
     const status = error?.response?.status;

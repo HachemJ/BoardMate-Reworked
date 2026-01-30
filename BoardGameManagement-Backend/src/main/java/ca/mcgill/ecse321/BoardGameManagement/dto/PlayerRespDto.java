@@ -7,6 +7,7 @@ public class PlayerRespDto {
     private String name;
     private String email;
     private boolean isAOwner;
+    private boolean isAdmin;
     private int playerID;
 
     @SuppressWarnings("unused")
@@ -17,6 +18,7 @@ public class PlayerRespDto {
         this.name = p.getName();
         this.email = p.getEmail();
         this.isAOwner = p.getIsAOwner();
+        this.isAdmin = p.getIsAdmin();
         this.playerID = p.getPlayerID();
         //no need to return psw (security concern)
         //no need for PlayerID
@@ -24,6 +26,10 @@ public class PlayerRespDto {
 
 public boolean getIsAOwner() {
     return isAOwner;
+}
+
+public boolean getIsAdmin() {
+    return isAdmin;
 }
 
 public String getName() {

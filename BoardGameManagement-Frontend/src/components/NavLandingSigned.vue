@@ -43,6 +43,7 @@
         </button>
 
         <div v-if="open" class="menu" @click.self="open=false">
+          <router-link v-if="isAdmin" class="menu-item" to="/admin" @click="open=false">Admin dashboard</router-link>
           <router-link class="menu-item" to="/profile" @click="open=false">Profile details</router-link>
           <button class="menu-item danger" @click="signOut">Sign out</button>
         </div>
@@ -68,6 +69,7 @@ let lastScroll = 0
 
 const displayName = computed(() => auth.user?.username || auth.user?.name || 'User')
 const isGuest = computed(() => auth.user?.isGuest)
+const isAdmin = computed(() => auth.user?.isAdmin)
 
 const onKey = (e) => { if (e.key === 'Escape') open.value = false }
 const onScroll = () => {

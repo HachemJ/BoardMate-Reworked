@@ -14,6 +14,7 @@ export const useAuthStore = defineStore("auth", () => {
           username: "Guest",
           email: null,
           isAOwner: false,
+          isAdmin: false,
           isAuthenticated: false,
           isGuest: true,
         }
@@ -22,17 +23,19 @@ export const useAuthStore = defineStore("auth", () => {
           username: null,
           email: null,
           isAOwner: false,
+          isAdmin: false,
           isAuthenticated: false,
           isGuest: false,
         }
   );
 
-  function login(id, username, email, isAOwner) {
+  function login(id, username, email, isAOwner, isAdmin = false) {
     user.value = {
       id,
       username,
       email,
       isAOwner,
+      isAdmin,
       isAuthenticated: true,
       isGuest: false,
     };
@@ -46,6 +49,7 @@ export const useAuthStore = defineStore("auth", () => {
       username: "Guest",
       email: null,
       isAOwner: false,
+      isAdmin: false,
       isAuthenticated: false,
       isGuest: true,
     };
@@ -59,6 +63,7 @@ export const useAuthStore = defineStore("auth", () => {
       username: null,
       email: null,
       isAOwner: false,
+      isAdmin: false,
       isAuthenticated: false,
       isGuest: false,
     };

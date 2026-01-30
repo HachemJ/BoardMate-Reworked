@@ -24,6 +24,7 @@ import UpdateBoardGameView from "../views/UpdateBoardGameView.vue";
 import AddBoardGameCopyView from "../views/AddBoardGameCopyView.vue";
 import UpdateBoardGameCopyView from "../views/UpdateBoardGameCopyView.vue";
 import AddBoardGameReviewView from "../views/AddBoardGameReviewView.vue";
+import AdminDashboardView from "../views/AdminDashboardView.vue";
 import { showDemoNotice } from "@/utils/demoNotice";
 
 const router = createRouter({
@@ -61,6 +62,7 @@ const router = createRouter({
         { path: "/pages/landing-pages/basic", name: "signin", component: SignInBasicView, alias: ["/signin"], meta: { hidePublicNav: true } },
         { path: "/pages/faqs", name: "faqs", component: FAQsView, alias: ["/faqs"] },
         { path: "/pages/borrowrequests", name: "borrowRequestMenu", component: BorrowRequestMenuView },
+        { path: "/admin", name: "adminDashboard", component: AdminDashboardView, meta: { requiresAdmin: true } },
         // Catch-all → home
         { path: "/:pathMatch(.*)*", redirect: "/" },
     ],
@@ -122,6 +124,18 @@ router.beforeEach((to) => {
     }
 
     return true;
+});
+
+function isAdminUser() {
+    const stored = JSON.parse(localStorage.getItem("authUser") || "null");
+    return !!stored?.isAdmin;
+}
+
+router.beforeEach((to) => {
+    if (!to.meta?.requiresAdmin) return true;
+    if (isAdminUser()) return true;
+    showDemoNotice("Admin access required.");
+    return { name: "profile" };
 });
 
 export default router;
